@@ -1,17 +1,31 @@
 ---
+import Layout from '../layouts/Layout.astro';
+import '../styles/pages/home.css';
+import { sanityClient } from "sanity:client";
 
+const posts = await sanityClient.fetch(`*[_type == "post"]`);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Home - lua-project" namespace="home">
+	<div class="page-home">
+		<h1>Welcome to Astro with Barba.js</h1>
+		<p>This is the home page. Click "About" to see the transition.</p>
+		<div class="box box-home">HOME</div>
+		
+		<div class="sanity-data" style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+			<h2>Bài viết từ Sanity:</h2>
+			{posts.length > 0 ? (
+				<ul style="text-align: left; margin-top: 20px;">
+					{posts.map((post: any) => (
+						<li style="margin-bottom: 20px;">
+							<h3>{post.title}</h3>
+							{post.excerpt && <p style="opacity: 0.8; font-size: 0.9em;">{post.excerpt}</p>}
+						</li>
+					))}
+				</ul>
+			) : (
+				<p>Chưa có bài viết nào hoặc chưa lấy được dữ liệu.</p>
+			)}
+		</div>
+	</div>
+</Layout>

@@ -1,0 +1,23 @@
+.main-wrapper {
+	display: grid;
+	min-height: 100vh;
+}
+.main-wrapper > * {
+	grid-area: 1 / 1;
+}
+
+main {
+	padding: 2rem;
+	max-width: var(--layout-max-width, 1200px);
+	margin: 0 auto;
+	width: 100%;
+}
+
+.container {
+	width: 100%;
+	max-width: var(--layout-max-width, 1200px);
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 1rem;
+	padding-right: 1rem;
+}

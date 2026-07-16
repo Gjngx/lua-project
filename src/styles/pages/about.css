@@ -1,0 +1,19 @@
+/* CSS riêng cho trang About */
+.page-about h1 {
+	color: #3b82f6; /* Màu xanh dương */
+}
+.page-about p {
+	font-style: italic;
+}
+
+.box {
+	margin-top: 2rem;
+	padding: 2rem;
+	border-radius: 8px;
+	font-weight: bold;
+	text-align: center;
+	font-size: 2rem;
+}
+.box-about {
+	background: linear-gradient(45deg, #10b981, #3b82f6);
+}

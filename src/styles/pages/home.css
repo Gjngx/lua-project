@@ -1,0 +1,19 @@
+/* CSS riêng cho trang Home */
+.page-home h1 {
+	color: #10b981; /* Màu xanh ngọc */
+}
+.page-home p {
+	font-size: 1.1rem;
+}
+
+.box {
+	margin-top: 2rem;
+	padding: 2rem;
+	border-radius: 8px;
+	font-weight: bold;
+	text-align: center;
+	font-size: 2rem;
+}
+.box-home {
+	background: linear-gradient(45deg, #4f46e5, #ec4899);
+}
