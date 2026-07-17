@@ -1,19 +1,118 @@
 /* CSS riêng cho trang Home */
-.page-home h1 {
-	color: #10b981; /* Màu xanh ngọc */
-}
-.page-home p {
-	font-size: 1.1rem;
+.home-hero-wrap {
+	position: relative;
+	contain: paint;
+	height: 200vh;
 }
 
-.box {
-	margin-top: 2rem;
-	padding: 2rem;
-	border-radius: 8px;
-	font-weight: bold;
-	text-align: center;
-	font-size: 2rem;
+.home-hero {
+	margin-top: -100vh;
 }
-.box-home {
-	background: linear-gradient(45deg, #4f46e5, #ec4899);
+
+.home-hero-bg {
+	position: sticky;
+	top: 0;
+	width: 100%;
+	height: 100vh;
+	pointer-events: none;
+}
+
+.home-hero-bg-inner {
+	width: 100%;
+	height: 100%;
+}
+
+.home-hero-top {
+	height: 100vh;
+	align-content: end;
+}
+
+.home-hero-top.top-left {
+	grid-column: 2 / 10;
+	grid-row: 1 / 1;
+}
+
+.home-hero-top.top-right {
+	grid-column: 13 / -2;
+	grid-row: 1 / 1;
+}
+
+.home-hero-desc {
+	width: 12.2rem;
+	color: var(--cl-white);
+}
+
+.home-hero-logo {
+	margin-top: min(17rem, 17.3116089613vh);
+	margin-bottom: min(3.2rem, 3.2586558045vh);
+}
+
+.home-hero-logo-ic {
+	width: 65.1rem;
+	color: var(--cl-brand);
+}
+
+.home-hero-top-title {
+	width: 30rem;
+	color: var(--cl-white);
+}
+
+.home-hero-top-ic {
+	width: 3.2rem;
+	margin-bottom: 4rem;
+}
+
+.home-hero-top-sub {
+	margin-top: min(14rem, 14.2566191446vh);
+	margin-bottom: min(13rem, 13.2382892057vh);
+	color: var(--cl-white);
+}
+
+.home-hero-top-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 24.6rem;
+	color: var(--cl-content-soft-2);
+	margin-bottom: min(3.2rem, 3.2586558045vh);
+}
+
+.home-hero-bottom {
+	grid-column: 2 / -2;
+	grid-row: 2 / 2;
+	height: 100vh;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+}
+
+.home-hero-bottom-desc {
+	width: 55.8rem;
+	color: var(--cl-white);
+	margin-bottom: 4rem;
+}
+
+.home-hero-bottom-desc svg {
+	width: 3.2rem;
+	color: var(--cl-brand);
+}
+
+.home-hero-decor {
+	position: sticky;
+	bottom: 0;
+	z-index: 3;
+	mix-blend-mode: soft-light;
+	margin-top: -150vh;
+	pointer-events: none;
+}
+
+.home-hero-decor-inner {
+	width: 290.7rem;
+	color: var(--cl-brand);
+	transform: translate(-100%, 100%);
+}
+
+.home-hero-decor-svg {
+	overflow: visible;
+	transform: rotatez(150deg);
 }

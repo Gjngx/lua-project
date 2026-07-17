@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import SEO from '../components/SEO.astro';
+import LayoutGrid from '../components/LayoutGrid.astro';
 
 interface Props {
 	title: string;
@@ -18,16 +19,19 @@ const { title, namespace, description } = Astro.props;
 	<head>
 		<SEO title={title} description={description} />
 	</head>
-	<body data-barba="wrapper">
-		<Header />
-		
-		<div class="main-wrapper">
-			<main data-barba="container" data-barba-namespace={namespace}>
-				<slot />
+	<Header />
+	<body class="body">
+		<!-- <Header /> -->
+		<div class="body-inner">
+			<!-- <LayoutGrid /> -->
+			<main class="main" data-barba="wrapper">
+				<div class="main-inner" data-barba="container" data-barba-namespace={namespace}>
+					<slot />
+				</div>
 			</main>
 		</div>
 
-		<Footer />
+		<!-- <Footer /> -->
 
 		<script>
 			import '../core/main.js';

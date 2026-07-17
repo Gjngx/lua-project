@@ -2,17 +2,127 @@
 @import './fonts.css';
 @import './layout.css';
 
-*, *::before, *::after {
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
+.custom-scroll {
+	overflow-y: overlay;
+	scrollbar-gutter: stable;
 }
 
 html {
-	background: var(--color-bg);
-	color: var(--color-text);
+	scrollbar-width: none;
+	-ms-overflow-style: none;
 }
 
-body {
-	margin: 0;
+html::-webkit-scrollbar {
+	display: none;
+}
+
+.custom-scroll::-webkit-scrollbar,
+.custom-scroll::-webkit-scrollbar-track {
+	width: .6rem;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+	border: solid .2rem transparent;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+	box-shadow: inset 0 0 1rem 1rem #A5A5A5;
+	transition: all .4s;
+	border: solid .2rem transparent;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+	box-shadow: inset 0 0 1rem 1rem #A5A5A5;
+}
+
+.custom-scroll::-webkit-scrollbar-corner {
+	background-color: transparent;
+}
+
+img {
+	vertical-align: middle;
+	max-width: 100%;
+	display: inline-block;
+	border: 0;
+}
+
+.img-df {
+	max-width: none;
+	width: 100%;
+	height: auto;
+	user-select: none;
+	display: block;
+	outline: 0;
+}
+
+.img-df.img-fill {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.img-df.img-h {
+	height: 100%;
+	object-fit: cover;
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+	cursor: pointer;
+}
+
+.btn {
+	display: block;
+	width: fit-content;
+	position: relative;
+}
+
+.btn-inner {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	color: var(--cl-content-strong);
+	position: relative;
+	z-index: 2;
+}
+
+.btn-txt {
+	padding-inline: 1.7rem;
+}
+
+.btn-ic {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 4rem;
+	height: 4rem;
+	background-color: var(--cl-white);
+	border-radius: 99%;
+	transition: transform .6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-ic svg {
+	width: 2rem;
+}
+
+.btn-bg {
+	position: absolute;
+	inset: 0;
+	width: calc(100% - 3.8rem);
+	z-index: 1;
+	background-color: var(--cl-white);
+	border-radius: 10vmin;
+	pointer-events: none;
+	transition: width .6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) and (min-width: 991px) {
+	.btn:hover .btn-bg {
+		width: 100%;
+	}
+
+	.btn:hover .btn-ic {
+		transform: rotateZ(360deg);
+	}
 }

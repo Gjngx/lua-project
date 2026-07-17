@@ -1,23 +1,32 @@
 :root {
-	/* Colors */
-	--color-bg: #13151a;
-	--color-text: #ffffff;
-	--color-primary: #3b82f6;
-	--color-secondary: #10b981;
-	--color-border: #333333;
-	--color-header-bg: #f8f9fa;
-	--color-header-text: #333333;
-	
-	/* Spacing */
-	--spacing-sm: 0.5rem;
-	--spacing-md: 1rem;
-	--spacing-lg: 2rem;
-	--spacing-xl: 4rem;
-	
-	/* Typography */
-	--font-family-base: 'Outfit', sans-serif;
-	--font-size-base: 16px;
-	
-	/* Transitions */
-	--transition-speed: 0.3s;
+	--container--max-width: 1000vw;
+	--container--padding: 6.4rem;
+	--container--column-gap: 1.6rem;
+	--1px: max(1px, .1rem);
+	--container--one-column: calc((var(--container--width) - ((var(--container--column) - 1) * var(--container--column-gap)) - (var(--container--padding) * 2)) / var(--container--column));
+	--container--width: min(100vw, var(--container--max-width));
+	--container--column: 16;
+
+	/* Light Theme (Default) */
+	--cl-white: #FFFFFF;
+	--cl-black: #000000;
+	--cl-brand: #EDFF61;
+	--cl-content-strong: #282C07;
+	--cl-content-soft: rgba(40, 44, 7, 0.60);
+	--cl-content-soft-2: rgba(255, 255, 255, 0.60)
+
+}
+
+/* Dark Theme (Auto detect via System Settings) */
+/* @media (prefers-color-scheme: dark) {
+	:root {
+		--cl-content-strong: #FFF;
+		--cl-content-soft: rgba(255, 255, 255, 0.60);
+	}
+} */
+
+/* Dark Theme (Manual Toggle via JS) */
+:root[data-theme="dark"] {
+	--cl-content-strong: #FFF;
+	--cl-content-soft: rgba(255, 255, 255, 0.60);
 }

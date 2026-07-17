@@ -1,24 +1,53 @@
 .header {
-	background-color: #f8f9fa;
-	padding: 1rem 2rem;
-	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 	position: sticky;
 	top: 0;
 	z-index: 100;
+	margin-bottom: -7.2rem;
+  pointer-events: none;
 }
-
-.header nav {
+.header-inner {
+	padding-top: 2.4rem;
+}
+.header-center {
+	grid-column: 8 / 12;
 	display: flex;
-	gap: 1.5rem;
+	justify-content: center;
+	align-items: center;
+	padding: 0.4rem;
+	pointer-events: auto;
 }
 
-.header a {
-	text-decoration: none;
-	color: #333;
-	font-weight: 500;
-	transition: color 0.3s ease;
+.header-shape{
+	width: 11.4rem;
+	height: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-inline: 1.2rem;
+	margin-inline: -0.2rem;
+	border-radius: 10vmin;
+	background-color: var(--cl-white);
 }
 
-.header a:hover {
-	color: #3b82f6;
+.header-circle {
+	width: 4rem;
+	height: 4rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 99%;
+	background-color: var(--cl-white);
+}
+.header-shape-ic,
+.header-circle-ic{
+	color: var(--cl-content-strong);
+}
+.circle-left .header-circle-ic {
+	width: 2.4rem;
+	height: 2.4rem;
+}
+.header-shape-ic,
+.circle-right .header-circle-ic {
+	width: 2rem;
+	height: 2rem;
 }
