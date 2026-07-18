@@ -82,7 +82,9 @@ main,
 	grid-template-columns: minmax(0px, 1fr);
 }
 
-
+.container.grid.full-h{
+	height: 100%;
+}
 
 
 .debug-area {

@@ -2,7 +2,6 @@
 .home-hero-wrap {
 	position: relative;
 	contain: paint;
-	height: 200vh;
 }
 
 .home-hero {
@@ -80,10 +79,16 @@
 .home-hero-bottom {
 	grid-column: 2 / -2;
 	grid-row: 2 / 2;
+}
+
+.home-hero-bottom-inner {
+	position: sticky;
+	top: 0;
 	height: 100vh;
 	display: flex;
-	justify-content: flex-start;
-	align-items: center;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
 }
 
 .home-hero-bottom-desc {
@@ -101,18 +106,66 @@
 	position: sticky;
 	bottom: 0;
 	z-index: 3;
+	height: 100vh;
+	margin-top: -100vh;
 	mix-blend-mode: soft-light;
-	margin-top: -150vh;
 	pointer-events: none;
 }
 
 .home-hero-decor-inner {
 	width: 290.7rem;
 	color: var(--cl-brand);
-	transform: translate(-100%, 100%);
+	transform: translate(-96%, 76%);
 }
 
 .home-hero-decor-svg {
 	overflow: visible;
 	transform: rotatez(150deg);
+}
+
+.home-hero-empty {
+	height: 100vh;
+}
+
+.home-works-wrap {
+	margin-top: -100vh;
+}
+
+.home-works {
+	height: 100vh;
+	background-color: var(--cl-white);
+	position: relative;
+	z-index: 4;
+}
+
+.home-works-decor {
+	grid-column: 2 / -2;
+	grid-row: 1 / 1;
+}
+
+.home-works-svg {
+	margin-top: 4rem;
+	width: 100%;
+	color: var(--cl-brand);
+	transition: color 0.4s ease;
+}
+
+.home-works-main {
+	grid-column: 2 / -2;
+	grid-row: 1 / 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.home-works-main-title {
+	margin-bottom: 3.2rem;
+}
+
+.home-works-main-desc {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 27rem;
 }
