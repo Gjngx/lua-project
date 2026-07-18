@@ -101,6 +101,25 @@ export function initBarba() {
 				name: "gsap-transition",
 				sync: true,
 				
+				beforeLeave(data) {
+					// Cố định container cũ để không bị giật khi cuộn lên đầu trang (scrollTop ở beforeEnter)
+					let scrollPos = window.scrollY || document.documentElement.scrollTop;
+					if (window.innerWidth <= 767) {
+						const bodyInner = document.querySelector('.body-inner');
+						if (bodyInner && bodyInner.scrollTop > 0) {
+							scrollPos = bodyInner.scrollTop;
+						}
+					}
+
+					Object.assign(data.current.container.style, {
+						position: 'absolute',
+						top: `-${scrollPos}px`,
+						left: '0',
+						width: '100%',
+						zIndex: '1'
+					});
+				},
+				
 				once(data) {
 					// Chạy 1 lần duy nhất khi web vừa mới bật lên
 					globalChange.init(data);
