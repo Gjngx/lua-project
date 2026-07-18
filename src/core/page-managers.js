@@ -17,7 +17,14 @@ export class PageManager {
 
 		this._loadPromise = pageLoaders[this.namespace]().then((PageClass) => {
 			// Module trả về class, khởi tạo class đó
-			this._sections = Object.values(PageClass).map((SectionClass) => new SectionClass());
+			this._sections = Object.values(PageClass).flatMap((ExportedItem) => {
+				if (typeof ExportedItem === 'function') {
+					return [new ExportedItem()];
+				} else if (typeof ExportedItem === 'object' && ExportedItem !== null) {
+					return Object.values(ExportedItem).map(SectionClass => new SectionClass());
+				}
+				return [];
+			});
 			return this._sections;
 		}).catch(err => {
 			console.error(`[PageManager] Lỗi khi load module cho trang ${this.namespace}:`, err);

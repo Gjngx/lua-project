@@ -13,8 +13,8 @@
 	--cl-brand: #EDFF61;
 	--cl-content-strong: #282C07;
 	--cl-content-soft: rgba(40, 44, 7, 0.60);
-	--cl-content-soft-2: rgba(255, 255, 255, 0.60)
-
+	--cl-content-soft-2: rgba(255, 255, 255, 0.60);
+	--cl-brand-soft: rgba(242, 242, 240, 1);
 }
 
 /* Dark Theme (Auto detect via System Settings) */

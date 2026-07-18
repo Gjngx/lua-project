@@ -1,7 +1,7 @@
 import barba from '@barba/core';
-import { smoothScroll } from './lenis';
 import { PageManagerRegistry } from './page-managers';
 import { globalChange, pageTrans } from './global-scripts';
+import { scrollTop } from './scroll.js';
 
 /**
  * Hàm đồng bộ thẻ <head> khi chuyển trang bằng Barba.
@@ -117,7 +117,7 @@ export function initBarba() {
 				
 				async beforeEnter(data) {
 					// Cuộn lên đầu trang mượt mà hoặc ngay lập tức
-					smoothScroll.scrollToTop();
+					scrollTop();
 					
 					// Chạy hàm sync thẻ <head>
 					syncHead(data);

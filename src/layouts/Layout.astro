@@ -18,6 +18,11 @@ const { title, namespace, description } = Astro.props;
 <html lang="en">
 	<head>
 		<SEO title={title} description={description} />
+		<script is:inline>
+			if ('scrollRestoration' in history) {
+				history.scrollRestoration = 'manual';
+			}
+		</script>
 	</head>
 	<Header />
 	<body class="body">

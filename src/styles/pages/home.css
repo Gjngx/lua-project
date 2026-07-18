@@ -26,7 +26,19 @@
 	inset: 0;
 	width: 100%;
 	height: 100%;
-	background: linear-gradient(0deg, rgba(0, 0, 0, 0.24) 0%, rgba(0, 0, 0, 0.24) 100%);
+	background-color: #000;
+	opacity: 0.24;
+}
+
+.home-hero-bg-overlay-main {
+	position: absolute;
+	inset: 0;
+	z-index: 5;
+	width: 100%;
+	height: 100%;
+	background-color: #000;
+	opacity: 0;
+	pointer-events: none;
 }
 
 .home-hero-top {
@@ -123,12 +135,12 @@
 .home-hero-decor-inner {
 	width: 290.7rem;
 	color: var(--cl-brand);
-	transform: translate(-96%, 76%);
+	opacity: 0;
 }
 
 .home-hero-decor-svg {
 	overflow: visible;
-	transform: rotatez(150deg);
+	transform: rotatez(165deg);
 }
 
 .home-hero-empty {
