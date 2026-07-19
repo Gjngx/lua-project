@@ -14,11 +14,13 @@
 	width: 100%;
 	height: 100vh;
 	pointer-events: none;
+	will-change: transform;
 }
 
 .home-hero-bg-inner {
 	width: 100%;
 	height: 100%;
+	will-change: transform;
 }
 
 .home-hero-bg-overlay {
@@ -148,19 +150,36 @@
 }
 
 .home-works-wrap {
+	position: relative;
 	margin-top: -100vh;
+}
+
+.works-gl-canvas {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	pointer-events: none;
+	z-index: 10;
+}
+
+.gl-hidden {
+	opacity: 0 !important;
 }
 
 .home-works {
 	height: 100vh;
 	background-color: var(--cl-white);
-	position: relative;
+	position: sticky;
+	top: 0;
 	z-index: 4;
 }
 
 .home-works-decor {
 	grid-column: 2 / -2;
 	grid-row: 1 / 1;
+	pointer-events: none;
 }
 
 .home-works-svg {
@@ -168,6 +187,7 @@
 	width: 100%;
 	color: var(--cl-brand);
 	transition: color 0.4s ease;
+	pointer-events: auto;
 }
 
 .home-works-main {
@@ -177,10 +197,12 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	pointer-events: none;
 }
 
 .home-works-main-title {
 	margin-bottom: 3.2rem;
+	pointer-events: auto;
 }
 
 .home-works-main-desc {
@@ -188,4 +210,57 @@
 	align-items: center;
 	justify-content: space-between;
 	width: 27rem;
+	pointer-events: auto;
 }
+
+.home-works-list {
+	position: relative;
+	z-index: 5;
+	pointer-events: none;
+}
+
+.home-works-item-img {
+	border-radius: 3.2rem;
+	overflow: hidden;
+}
+
+.home-works-list-inner {
+	margin-top: 12.4rem;
+	display: flex;
+	flex-direction: column;
+}
+
+.home-works-list-empty {
+	height: 100vh;
+}
+
+.home-works-item {
+	margin-top: -12.4rem;
+	pointer-events: auto;
+}
+
+.home-works-item:nth-child(4n + 1) {
+	width: calc((var(--container--one-column) * 5) + (var(--container--column-gap) * 4));
+	margin-left: var(--container--padding);
+}
+
+.home-works-item:nth-child(4n + 2) {
+	width: calc((var(--container--one-column) * 7) + (var(--container--column-gap) * 6));
+	margin-left: calc(var(--container--padding) + (var(--container--one-column) * 9) + (var(--container--column-gap) * 9));
+}
+
+.home-works-item:nth-child(4n + 3) {
+	width: calc((var(--container--one-column) * 6) + (var(--container--column-gap) * 5));
+	margin-left: calc(var(--container--padding) + var(--container--one-column) + var(--container--column-gap));
+}
+
+.home-works-item:nth-child(4n) {
+	width: calc((var(--container--one-column) * 5) + (var(--container--column-gap) * 4));
+	margin-left: calc(var(--container--padding) + (var(--container--one-column) * 10) + (var(--container--column-gap) * 10));
+}
+
+/* .home-how-main {
+	grid-column: 2 / -2;
+	grid-row: 1 / 1;
+	height: 100vh;
+} */

@@ -1,6 +1,7 @@
 import { gsap } from './gsap';
 import { header } from './components/header';
 import { footer } from './components/footer';
+import { audioManager } from './components/audio';
 
 export class GlobalChange {
 	constructor() {
@@ -12,6 +13,8 @@ export class GlobalChange {
 		if (data && data.next) {
 			this.namespace = data.next.namespace;
 		}
+		
+		audioManager.init(); // Khởi tạo âm thanh
 		
 		header.init(data);
 		footer.init(data);

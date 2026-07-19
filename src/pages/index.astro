@@ -2,20 +2,35 @@
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/Button.astro';
 import '../styles/pages/home.css';
+import { Image } from 'astro:assets';
 import heroBg from '../assets/images/hero-bg.webp';
+import work1 from '../assets/images/work-1.png';
+import work2 from '../assets/images/work-2.png';
+import work3 from '../assets/images/work-3.png';
+import work4 from '../assets/images/work-4.png';
+import IconLogo from '../components/icons/IconLogo.astro';
+import IconSun from '../components/icons/IconSun.astro';
+import IconRiceFields from '../components/icons/IconRiceFields.astro';
+import IconSports1 from '../components/icons/IconSports1.astro';
+import IconSports2 from '../components/icons/IconSports2.astro';
+import IconSports3 from '../components/icons/IconSports3.astro';
+import IconCoffee from '../components/icons/IconCoffee.astro';
+import IconDesign1 from '../components/icons/IconDesign1.astro';
+import IconDesign2 from '../components/icons/IconDesign2.astro';
+import IconHeroDecor from '../components/icons/IconHeroDecor.astro';
+import IconWorksDecor from '../components/icons/IconWorksDecor.astro';
 ---
 
 <Layout title="Home" namespace="home">
 	<div class="home-hero-wrap">
 		<div class="home-hero-bg">
 			<div class="home-hero-bg-inner">
-				<img
+				<Image
 					class="img-df img-fill"
-					src={heroBg.src}
+					src={heroBg}
 					alt="Hero Background"
 					fetchpriority="high"
 					loading="eager"
-					decoding="async"
 				/>
 			</div>
 			<div class="home-hero-bg-overlay"></div>
@@ -28,25 +43,7 @@ import heroBg from '../assets/images/hero-bg.webp';
 					</div>
 					<div class="home-hero-logo">
 						<div class="home-hero-logo-ic">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="100%"
-								viewBox="0 0 651 319"
-								fill="none"
-							>
-								<path
-									d="M148.706 319V74.3782H194.97V319H148.706ZM0 319V74.3782H46.264V319H0ZM40.3385 213.813V172.906H154.631V213.813H40.3385Z"
-									fill="currentColor"></path>
-								<path d="M218.102 319V74.3782H264.365V319H218.102Z" fill="currentColor"></path>
-								<path
-									d="M287.497 319V74.3782H439.508V115.149H333.761V172.906H429.594V213.677H333.761V278.23H439.508V319H287.497Z"
-									fill="currentColor"></path>
-								<path
-									d="M555.818 319C538.451 319 522.755 315.45 508.728 308.349C494.701 301.249 483.457 290.484 474.997 276.054C466.759 261.624 462.64 243.529 462.64 221.77V74.3782H509.396V222.113C509.396 239.521 513.515 252.691 521.753 261.624C530.213 270.328 541.902 274.68 556.82 274.68C571.737 274.68 583.315 270.328 591.553 261.624C600.014 252.691 604.244 239.521 604.244 222.113V74.3782H651V221.77C651 243.529 646.658 261.624 637.975 276.054C629.514 290.484 618.048 301.249 603.576 308.349C589.104 315.45 573.184 319 555.818 319Z"
-									fill="currentColor"></path>
-								<path d="M218.102 19.8342L439.508 0V51.2383H218.102V19.8342Z" fill="currentColor"
-								></path>
-							</svg>
+							<IconLogo />
 						</div>
 					</div>
 				</div>
@@ -58,64 +55,7 @@ import heroBg from '../assets/images/hero-bg.webp';
 					</div>
 					<div class="home-hero-top-sub">
 						<div class="home-hero-top-ic">
-							<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 32 32" fill="none">
-								<path
-									d="M17.2676 2.00781L19.8132 4.5534C20.8134 5.55359 21.3753 6.91015 21.3753 8.32463C21.3753 9.73912 20.8134 11.0957 19.8132 12.0959L18.4932 13.4158L15.9476 10.8702C14.9475 9.87002 14.3855 8.51347 14.3855 7.09898C14.3855 5.68449 14.9475 4.32794 15.9476 3.32775L17.2676 2.00781Z"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-miterlimit="10"
-									stroke-linecap="round"
-									stroke-linejoin="round"></path>
-								<path
-									d="M21.0881 15.993L18.5426 13.4475L19.8153 12.1747C20.8155 11.1745 22.1721 10.6126 23.5866 10.6126C25.0011 10.6126 26.3576 11.1745 27.3578 12.1747L29.9034 14.7203L28.6778 15.9459C27.6776 16.9461 26.321 17.508 24.9065 17.508C23.492 17.508 22.1355 16.9461 21.1353 15.9459L21.0881 15.993Z"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-miterlimit="10"
-									stroke-linecap="round"
-									stroke-linejoin="round"></path>
-								<path
-									d="M12.1816 7.09045L14.7272 9.63604C15.7274 10.6362 16.2893 11.9928 16.2893 13.4073C16.2893 14.8218 15.7274 16.1783 14.7272 17.1785L13.4544 18.4513L10.9088 15.9057C9.90865 14.9055 9.34675 13.549 9.34675 12.1345C9.34675 10.72 9.90865 9.36344 10.9088 8.36325L12.1816 7.09045Z"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-miterlimit="10"
-									stroke-linecap="round"
-									stroke-linejoin="round"></path>
-								<path
-									d="M16.0102 21.0875L13.4646 18.5419L14.6997 17.3068C15.6999 16.3066 17.0565 15.7447 18.4709 15.7447C19.8854 15.7447 21.242 16.3066 22.2422 17.3068L24.8443 19.909L23.6564 21.0969C23.1588 21.6073 22.5639 22.0127 21.9069 22.2892C21.2499 22.5657 20.5441 22.7078 19.8313 22.7069C19.1185 22.706 18.4131 22.5622 17.7568 22.2841C17.1005 22.0059 16.5066 21.5991 16.0102 21.0875Z"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-miterlimit="10"
-									stroke-linecap="round"
-									stroke-linejoin="round"></path>
-								<path
-									d="M7.09961 12.1849L9.64519 14.7305C10.1404 15.2258 10.5333 15.8137 10.8013 16.4608C11.0693 17.1078 11.2073 17.8014 11.2073 18.5018C11.2073 19.2021 11.0693 19.8957 10.8013 20.5427C10.5333 21.1898 10.1404 21.7777 9.64519 22.273L8.3724 23.5458L5.87396 21.0473C4.87376 20.0471 4.31186 18.6906 4.31186 17.2761C4.31186 15.8616 4.87376 14.5051 5.87396 13.5049L7.14675 12.2321L7.09961 12.1849Z"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-miterlimit="10"
-									stroke-linecap="round"
-									stroke-linejoin="round"></path>
-								<path
-									d="M10.9101 26.1888L8.36455 23.6433L9.63735 22.3705C10.6375 21.3703 11.9941 20.8084 13.4086 20.8084C14.8231 20.8084 16.1796 21.3703 17.1798 22.3705L19.7725 24.9632L18.5469 26.1888C18.05 26.6984 17.4562 27.1033 16.8004 27.3798C16.1447 27.6562 15.4402 27.7987 14.7285 27.7987C14.0168 27.7987 13.3124 27.6562 12.6566 27.3798C12.0008 27.1033 11.407 26.6984 10.9101 26.1888Z"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-miterlimit="10"
-									stroke-linecap="round"
-									stroke-linejoin="round"></path>
-								<path
-									d="M30 2V4.24C30 5.65449 29.4381 7.01104 28.4379 8.01124C27.4377 9.01143 26.0812 9.57333 24.6667 9.57333H22.36V7.4C22.36 5.98551 22.9219 4.62896 23.9221 3.62876C24.9223 2.62857 26.2788 2.06667 27.6933 2.06667H30V2Z"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-miterlimit="10"
-									stroke-linecap="round"
-									stroke-linejoin="round"></path>
-								<path
-									d="M2 30L8.36 23.64"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-miterlimit="10"
-									stroke-linecap="round"
-									stroke-linejoin="round"></path>
-							</svg>
+							<IconSun />
 						</div>
 						<h2 class="heading fs-14 fw-500 trans-upper">
 							Digital designer <br /> Based in VietNam
@@ -130,172 +70,12 @@ import heroBg from '../assets/images/hero-bg.webp';
 					<div class="home-hero-bottom-inner">
 						<div class="home-hero-bottom-desc">
 							<p class="txt fs-40">
-								I find inspiration in the simple things: rice fields <svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="100%"
-									viewBox="0 0 32 32"
-									fill="none"
-								>
-									<g clip-path="url(#clip0_425_3376)">
-										<path
-											d="M17.2676 2.00781L19.8132 4.5534C20.8134 5.55359 21.3753 6.91015 21.3753 8.32463C21.3753 9.73912 20.8134 11.0957 19.8132 12.0959L18.4932 13.4158L15.9476 10.8702C14.9475 9.87002 14.3855 8.51347 14.3855 7.09898C14.3855 5.68449 14.9475 4.32794 15.9476 3.32775L17.2676 2.00781Z"
-											stroke="currentColor"
-											stroke-width="2.5"
-											stroke-miterlimit="10"
-											stroke-linecap="round"
-											stroke-linejoin="round"></path>
-										<path
-											d="M21.0881 15.9932L18.5426 13.4476L19.8153 12.1748C20.8155 11.1746 22.1721 10.6127 23.5866 10.6127C25.0011 10.6127 26.3576 11.1746 27.3578 12.1748L29.9034 14.7204L28.6778 15.946C27.6776 16.9462 26.321 17.5081 24.9065 17.5081C23.492 17.5081 22.1355 16.9462 21.1353 15.946L21.0881 15.9932Z"
-											stroke="currentColor"
-											stroke-width="2.5"
-											stroke-miterlimit="10"
-											stroke-linecap="round"
-											stroke-linejoin="round"></path>
-										<path
-											d="M12.1816 7.09058L14.7272 9.63616C15.7274 10.6364 16.2893 11.9929 16.2893 13.4074C16.2893 14.8219 15.7274 16.1784 14.7272 17.1786L13.4544 18.4514L10.9088 15.9058C9.90865 14.9056 9.34675 13.5491 9.34675 12.1346C9.34675 10.7201 9.90865 9.36356 10.9088 8.36337L12.1816 7.09058Z"
-											stroke="currentColor"
-											stroke-width="2.5"
-											stroke-miterlimit="10"
-											stroke-linecap="round"
-											stroke-linejoin="round"></path>
-										<path
-											d="M16.0102 21.0875L13.4646 18.5419L14.6997 17.3068C15.6999 16.3066 17.0565 15.7447 18.4709 15.7447C19.8854 15.7447 21.242 16.3066 22.2422 17.3068L24.8443 19.909L23.6564 21.0969C23.1588 21.6073 22.5639 22.0127 21.9069 22.2892C21.2499 22.5657 20.5441 22.7078 19.8313 22.7069C19.1185 22.706 18.4131 22.5622 17.7568 22.2841C17.1005 22.0059 16.5066 21.5991 16.0102 21.0875Z"
-											stroke="currentColor"
-											stroke-width="2.5"
-											stroke-miterlimit="10"
-											stroke-linecap="round"
-											stroke-linejoin="round"></path>
-										<path
-											d="M7.09961 12.1848L9.64519 14.7304C10.1404 15.2256 10.5333 15.8136 10.8013 16.4607C11.0693 17.1077 11.2073 17.8013 11.2073 18.5016C11.2073 19.202 11.0693 19.8955 10.8013 20.5426C10.5333 21.1897 10.1404 21.7776 9.64519 22.2729L8.3724 23.5457L5.87396 21.0472C4.87376 20.047 4.31186 18.6905 4.31186 17.276C4.31186 15.8615 4.87376 14.5049 5.87396 13.5047L7.14675 12.232L7.09961 12.1848Z"
-											stroke="currentColor"
-											stroke-width="2.5"
-											stroke-miterlimit="10"
-											stroke-linecap="round"
-											stroke-linejoin="round"></path>
-										<path
-											d="M10.9101 26.1888L8.36455 23.6433L9.63735 22.3705C10.6375 21.3703 11.9941 20.8084 13.4086 20.8084C14.8231 20.8084 16.1796 21.3703 17.1798 22.3705L19.7725 24.9632L18.5469 26.1888C18.05 26.6984 17.4562 27.1033 16.8004 27.3798C16.1447 27.6562 15.4402 27.7987 14.7285 27.7987C14.0168 27.7987 13.3124 27.6562 12.6566 27.3798C12.0008 27.1033 11.407 26.6984 10.9101 26.1888Z"
-											stroke="currentColor"
-											stroke-width="2.5"
-											stroke-miterlimit="10"
-											stroke-linecap="round"
-											stroke-linejoin="round"></path>
-										<path
-											d="M30 2V4.24C30 5.65449 29.4381 7.01104 28.4379 8.01124C27.4377 9.01143 26.0812 9.57333 24.6667 9.57333H22.36V7.4C22.36 5.98551 22.9219 4.62896 23.9221 3.62876C24.9223 2.62857 26.2788 2.06667 27.6933 2.06667H30V2Z"
-											stroke="currentColor"
-											stroke-width="2.5"
-											stroke-miterlimit="10"
-											stroke-linecap="round"
-											stroke-linejoin="round"></path>
-										<path
-											d="M2 29.9999L8.36 23.6399"
-											stroke="currentColor"
-											stroke-width="2.5"
-											stroke-miterlimit="10"
-											stroke-linecap="round"
-											stroke-linejoin="round"></path>
-									</g>
-									<defs>
-										<clipPath id="clip0_425_3376">
-											<rect width="32" height="32" fill="white"></rect>
-										</clipPath>
-									</defs>
-								</svg>, the energy of sports <svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="100%"
-									viewBox="0 0 32 32"
-									fill="none"
-								>
-									<path
-										fill-rule="evenodd"
-										clip-rule="evenodd"
-										d="M21.8697 3.67759C19.802 4.00012 17.7637 4.96241 16.5071 6.16877C14.0603 8.51776 14.0565 12.3044 16.4753 14.6264C18.8941 16.9485 22.8385 16.9449 25.2853 14.5959C26.542 13.3895 27.5444 11.4328 27.8803 9.44776C28.2201 7.43991 27.8363 5.72573 26.7916 4.7228C25.7468 3.71985 23.9612 3.35136 21.8697 3.67759ZM21.442 1.15072C23.9588 0.758161 26.7772 1.08858 28.6772 2.91259C30.5772 4.73662 30.9213 7.44219 30.5124 9.85831C30.0997 12.2972 28.8767 14.7686 27.1709 16.4061C24.0144 19.4364 19.0824 19.7358 15.6032 17.2738L11.5522 21.1627L11.8046 21.4052C12.5857 22.155 12.5857 23.3706 11.8046 24.1204L7.41411 28.3353C6.63305 29.0852 5.36673 29.0852 4.58568 28.3353L2.19516 26.0404C1.41411 25.2906 1.41412 24.075 2.19516 23.3252L6.58569 19.1103C7.36673 18.3604 8.63307 18.3604 9.41412 19.1103L9.66656 19.3526L13.7176 15.4637C11.153 12.1236 11.4649 7.38886 14.6215 4.35858C16.3271 2.72116 18.9016 1.54699 21.442 1.15072ZM7.99989 21.373L4.55219 24.6827L5.99991 26.0726L9.44761 22.7627L7.99989 21.373Z"
-										fill="currentColor"></path>
-								</svg>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="100%"
-									viewBox="0 0 32 32"
-									fill="none"
-								>
-									<g clip-path="url(#clip0_425_3402)">
-										<path
-											fill-rule="evenodd"
-											clip-rule="evenodd"
-											d="M22.6591 9.25864C21.5776 8.17718 19.7861 8.31394 18.8838 9.54435L12.3995 18.3866L13.5312 19.5183L22.3734 13.0339C23.6038 12.1316 23.7406 10.3402 22.6591 9.25864ZM15.2413 21.3551C15.5114 21.7802 15.6875 22.2472 15.7694 22.727L23.9822 20.8726C25.4185 20.5483 26.2325 19.0249 25.7039 17.6506C25.4215 16.9164 24.7992 16.3658 24.036 16.175L22.7451 15.8523L15.2413 21.3551ZM25.0005 13.8616C26.3279 11.9438 26.1761 9.25062 24.4216 7.49615C22.6672 5.74176 19.974 5.58988 18.0562 6.91727C17.595 5.53181 16.5369 4.41629 15.1619 3.88745C12.3689 2.81322 9.27301 4.46759 8.61389 7.38656L6.50939 16.7064C6.36043 16.8042 6.21677 16.9138 6.07986 17.0351C5.99435 17.1108 5.90572 17.1995 5.80255 17.3027L5.0341 18.0712C2.60062 20.5047 2.60061 24.4502 5.03408 26.8836C7.46764 29.3172 11.4131 29.3171 13.8466 26.8836L14.615 26.1152C14.7183 26.0121 14.8069 25.9234 14.8827 25.838C15.004 25.701 15.1136 25.5574 15.2113 25.4083L24.5312 23.3038C27.4501 22.6447 29.1046 19.5489 28.0303 16.7559C27.5015 15.3809 26.386 14.3227 25.0005 13.8616ZM9.19077 16.1483C9.67057 16.2303 10.1376 16.4064 10.5627 16.6765L16.0655 9.17264L15.7428 7.8818C15.552 7.11863 15.0014 6.49626 14.2671 6.21387C12.8929 5.68529 11.3695 6.49931 11.0452 7.93558L9.19077 16.1483ZM9.57594 19.088C9.43715 18.9492 9.40666 18.9195 9.38555 18.9008C8.91387 18.4829 8.20445 18.4829 7.73269 18.9008C7.71165 18.9194 7.68111 18.9492 7.54231 19.088L6.7966 19.8337C5.33655 21.2937 5.33652 23.6611 6.79657 25.1211C8.25671 26.5813 10.624 26.5812 12.0841 25.1211L12.8298 24.3754C12.9686 24.2366 12.9984 24.2061 13.017 24.1851C13.4349 23.7134 13.4349 23.004 13.017 22.5322C12.9984 22.5112 12.9686 22.4807 12.8298 22.3419L9.57594 19.088Z"
-											fill="currentColor"></path>
-									</g>
-									<defs>
-										<clipPath id="clip0_425_3402">
-											<rect width="32" height="32" fill="white"></rect>
-										</clipPath>
-									</defs>
-								</svg>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="100%"
-									viewBox="0 0 32 32"
-									fill="none"
-								>
-									<path
-										d="M16 9.5L9.5 14.0837M16 9.5L22.5 14.0837M16 9.5V4M9.5 14.0837L11.9825 21.5M9.5 14.0837L4.52875 12.4688M11.9825 21.5H20.0175M11.9825 21.5L8.9325 25.6987M20.0175 21.5L22.5 14.0837M20.0175 21.5L23.0675 25.6987M22.5 14.0837L27.4713 12.4688M16 4C9.37258 4 4 9.37258 4 16C4 22.6274 9.37258 28 16 28C22.6274 28 28 22.6274 28 16C28 9.37258 22.6274 4 16 4Z"
-										stroke="currentColor"
-										stroke-width="2.5"
-										stroke-miterlimit="10"
-										stroke-linecap="round"
-										stroke-linejoin="round"></path>
-								</svg>, a good cup of coffee <svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="100%"
-									viewBox="0 0 32 32"
-									fill="none"
-								>
-									<path
-										d="M10.4125 27C8.49859 26.1218 6.87697 24.7127 5.74027 22.9401C4.60357 21.1674 3.99957 19.1058 4 17V11H26M26 11V17C26.0004 19.1058 25.3964 21.1674 24.2597 22.9401C23.123 24.7127 21.5014 26.1218 19.5875 27M26 11H26.5C27.5609 11 28.5783 11.4214 29.3284 12.1716C30.0786 12.9217 30.5 13.9391 30.5 15V16C30.5 17.0609 30.0786 18.0783 29.3284 18.8284C28.5783 19.5786 27.5609 20 26.5 20H25.5775M4 27H26M10 3V6M15 3V6M20 3V6"
-										stroke="currentColor"
-										stroke-width="2.5"
-										stroke-miterlimit="10"
-										stroke-linecap="round"
-										stroke-linejoin="round"></path>
-								</svg>, and a deep passion for design <svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="100%"
-									viewBox="0 0 32 32"
-									fill="none"
-								>
-									<path
-										d="M2.66602 25.3334H29.3327M5.33268 9.33341C5.33268 8.62617 5.61363 7.94789 6.11373 7.4478C6.61383 6.9477 7.29211 6.66675 7.99935 6.66675H23.9993C24.7066 6.66675 25.3849 6.9477 25.885 7.4478C26.3851 7.94789 26.666 8.62617 26.666 9.33341V21.3334H5.33268V9.33341Z"
-										stroke="currentColor"
-										stroke-width="2.5"
-										stroke-miterlimit="10"
-										stroke-linecap="round"
-										stroke-linejoin="round"></path>
-								</svg>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="100%"
-									viewBox="0 0 32 32"
-									fill="none"
-								>
-									<path
-										d="M16 24.0001C16 23.2045 16.3161 22.4414 16.8787 21.8788C17.4413 21.3162 18.2044 21.0001 19 21.0001H24.7763C25.4558 21.0002 26.1152 20.7697 26.6465 20.3461C27.1779 19.9226 27.5498 19.3313 27.7013 18.6689C27.9077 17.7594 28.008 16.829 28 15.8964C27.9438 9.29387 22.48 3.93387 15.875 4.00012C12.7141 4.03305 9.69388 5.31185 7.47041 7.55873C5.24694 9.80561 3.99983 12.8391 4 16.0001C4 21.2264 7.34125 25.1801 12 26.8264C12.4523 26.9863 12.9364 27.0354 13.4116 26.9696C13.8868 26.9037 14.3393 26.7249 14.7312 26.4481C15.123 26.1712 15.4427 25.8044 15.6635 25.3785C15.8842 24.9526 15.9997 24.4799 16 24.0001Z"
-										stroke="currentColor"
-										stroke-width="2.5"
-										stroke-miterlimit="10"
-										stroke-linecap="round"
-										stroke-linejoin="round"></path>
-									<path
-										d="M16 11.5C17.1046 11.5 18 10.6046 18 9.5C18 8.39543 17.1046 7.5 16 7.5C14.8954 7.5 14 8.39543 14 9.5C14 10.6046 14.8954 11.5 16 11.5Z"
-										fill="currentColor"></path>
-									<path
-										d="M10.5 14.5C11.6046 14.5 12.5 13.6046 12.5 12.5C12.5 11.3954 11.6046 10.5 10.5 10.5C9.39543 10.5 8.5 11.3954 8.5 12.5C8.5 13.6046 9.39543 14.5 10.5 14.5Z"
-										fill="currentColor"></path>
-									<path
-										d="M10.5 21.5C11.6046 21.5 12.5 20.6046 12.5 19.5C12.5 18.3954 11.6046 17.5 10.5 17.5C9.39543 17.5 8.5 18.3954 8.5 19.5C8.5 20.6046 9.39543 21.5 10.5 21.5Z"
-										fill="currentColor"></path>
-									<path
-										d="M21.5 14.5C22.6046 14.5 23.5 13.6046 23.5 12.5C23.5 11.3954 22.6046 10.5 21.5 10.5C20.3954 10.5 19.5 11.3954 19.5 12.5C19.5 13.6046 20.3954 14.5 21.5 14.5Z"
-										fill="currentColor"></path>
-								</svg>
+								I find inspiration in the simple things: rice fields <IconRiceFields />, the energy
+								of sports <IconSports1 />
+								<IconSports2 />
+								<IconSports3 />, a good cup of coffee <IconCoffee />, and a deep passion for design <IconDesign1
+								/>
+								<IconDesign2 />
 							</p>
 						</div>
 						<Button href="/about" class="home-hero-btn">MORE ABOUT US</Button>
@@ -307,294 +87,19 @@ import heroBg from '../assets/images/hero-bg.webp';
 		<div class="home-hero-decor">
 			<div class="home-hero-decor-inner">
 				<div class="home-hero-decor-svg">
-					<svg width="100%" viewBox="0 0 2524 1710" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path
-							fill-rule="evenodd"
-							clip-rule="evenodd"
-							d="M2522.35 142.539C2522.45 142.398 2522.54 142.257 2522.64 142.117L2522.86 142.51C2522.95 142.678 2523.04 142.846 2523.13 143.014C2522.95 143.029 2522.77 143.044 2522.58 143.058L2522.17 143.091L2521.95 143.109C2522.09 142.919 2522.22 142.729 2522.35 142.539ZM2002.94 442.763C2060.44 360.371 2136.48 288.98 2229.24 235.425C2322 181.87 2421.85 151.713 2521.95 143.109C2464.45 225.5 2388.41 296.892 2295.65 350.446C2202.89 404.001 2103.04 434.16 2002.94 442.763ZM1875.53 832.623C1878.74 693.624 1922.85 557.52 2002.94 442.763C1871.18 454.086 1738.98 428.053 1621.9 368.85C1594.24 348.962 1565.08 331.535 1534.8 316.645C1453.03 259.251 1382.17 183.549 1328.93 91.3303C1311.73 61.5435 1296.96 31.0212 1284.52 -0.000239492C1214.2 78.764 1161.97 170.463 1129.59 268.491C1267.42 237.358 1410.64 255.598 1534.8 316.645C1562.65 336.197 1591.78 353.619 1621.9 368.85C1690.23 417.981 1749.48 482.074 1794.29 559.695C1844.14 646.03 1870.56 739.459 1875.53 832.623ZM1876.14 882.627C1876.62 865.995 1876.42 849.314 1875.53 832.623C1875.15 849.26 1875.35 865.938 1876.14 882.627ZM1731.82 1260.91C1821.33 1275.46 1913.72 1274.17 2004.52 1255.85C1992.43 1238.64 1981 1220.75 1970.28 1202.19C1911.94 1101.13 1881.35 991.668 1876.14 882.627C1872.22 1020.18 1821.98 1154.25 1731.82 1260.91ZM1370.17 1468.63C1438.8 1456.6 1506.52 1432.56 1570.36 1395.7C1633.35 1359.33 1687.42 1313.44 1731.82 1260.91C1619.25 1242.62 1511.23 1199.27 1416.66 1133.26C1407.38 1025.37 1374.86 917.758 1317.14 817.782C1259.42 717.807 1182.48 635.844 1093.7 573.861C1102.98 681.745 1135.49 789.356 1193.22 889.331C1250.94 989.307 1327.87 1071.27 1416.66 1133.26C1426.51 1247.66 1410.23 1362.38 1370.17 1468.63ZM519.013 1299.51C784.173 1276.72 1051.14 1405.2 1193.02 1650.94C1204.18 1670.26 1214.32 1689.89 1223.46 1709.76C1287.72 1638.47 1337.06 1556.44 1370.17 1468.63C1124.17 1511.76 866.536 1400.51 734.392 1171.63C597.568 934.643 637.233 644.211 812.594 452.527C708.467 430.733 599.588 430.554 493.183 453.928C514.447 480.792 534.03 509.527 551.67 540.081C693.55 785.824 671.33 1081.27 519.013 1299.51ZM519.013 1299.51C461.511 1381.9 385.472 1453.29 292.714 1506.84C202.168 1559.12 104.867 1589.1 7.16748 1598.5C5.59595 1598.65 1.50046 1599.03 5.03645e-05 1599.16C0.895133 1597.95 3.40966 1594.58 4.27858 1593.43C61.2839 1513.47 135.711 1444.13 226.306 1391.82C319.064 1338.27 418.91 1308.11 519.013 1299.51Z"
-							fill="currentColor"></path>
-						<path
-							fill-rule="evenodd"
-							clip-rule="evenodd"
-							d="M958.326 335.627C1013.18 303.959 1070.89 281.749 1129.59 268.491C1097.32 366.177 1084.77 470.145 1093.7 573.861C1008.71 514.529 912.853 473.511 812.594 452.527C853.843 407.439 902.591 367.806 958.326 335.627Z"
-							fill="currentColor"></path>
-					</svg>
+					<IconHeroDecor />
 				</div>
 			</div>
 		</div>
 		<div class="home-hero-bg-overlay-main"></div>
 	</div>
 	<div class="home-works-wrap">
+		<canvas id="works-gl-canvas" class="works-gl-canvas"></canvas>
 		<section class="home-works">
 			<div class="container grid full-h">
 				<div class="home-works-decor">
 					<div class="home-works-svg">
-						<svg
-							width="100%"
-							viewBox="0 0 1384 224"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
-							xmlns:xlink="http://www.w3.org/1999/xlink"
-						>
-							<path
-								d="M1197.19 219.852V3.70506H1273.15C1298.47 3.70506 1319.26 8.23385 1335.52 17.2914C1351.99 26.1432 1364.14 38.7002 1371.96 54.9627C1379.99 71.0193 1384 89.9579 1384 111.778C1384 133.393 1379.99 152.332 1371.96 168.594C1364.14 184.857 1351.99 197.517 1335.52 206.574C1319.26 215.426 1298.47 219.852 1273.15 219.852H1197.19ZM1240.42 182.798H1270.68C1288.18 182.798 1301.86 180.019 1311.75 174.461C1321.83 168.697 1329.04 160.566 1333.36 150.067C1337.68 139.363 1339.84 126.6 1339.84 111.778C1339.84 96.9569 1337.68 84.194 1333.36 73.4896C1329.04 62.7852 1321.83 54.6539 1311.75 49.0959C1301.86 43.332 1288.18 40.45 1270.68 40.45H1240.42V182.798Z"
-								fill="url(#pattern0_442_4408)"></path>
-							<path
-								d="M1036.91 219.852V3.70506H1179.88V38.5973H1080.14V93.2516H1170.61V126.909H1080.14V184.96H1179.88V219.852H1036.91Z"
-								fill="url(#pattern1_442_4408)"></path>
-							<path
-								d="M916.513 219.852V38.5973H853.522V3.70506H1022.43V38.5973H959.743V219.852H916.513Z"
-								fill="url(#pattern2_442_4408)"></path>
-							<path
-								d="M759.698 223.557C737.877 223.557 719.042 218.926 703.191 209.662C687.546 200.193 675.503 187.121 667.063 170.447C658.623 153.567 654.403 134.114 654.403 112.088C654.403 90.0611 658.623 70.6079 667.063 53.7279C675.503 36.8479 687.546 23.6732 703.191 14.2039C719.042 4.73464 737.877 0 759.698 0C786.047 0 807.662 6.58734 824.542 19.762C841.422 32.9366 851.817 51.4635 855.729 75.3426H808.176C805.706 63.8147 800.251 54.963 791.811 48.7874C783.577 42.4059 772.667 39.2152 759.08 39.2152C746.317 39.2152 735.407 42.2001 726.349 48.1698C717.292 53.9338 710.293 62.2709 705.352 73.1811C700.618 84.0914 698.25 97.0602 698.25 112.088C698.25 127.115 700.618 140.084 705.352 150.994C710.293 161.698 717.292 170.035 726.349 176.005C735.407 181.769 746.317 184.651 759.08 184.651C772.667 184.651 783.577 181.769 791.811 176.005C800.045 170.035 805.397 161.595 807.868 150.685H855.42C851.509 173.535 841.113 191.444 824.233 204.413C807.559 217.176 786.047 223.557 759.698 223.557Z"
-								fill="url(#pattern3_442_4408)"></path>
-							<path
-								d="M503.612 219.852V3.70506H646.578V38.5973H546.842V93.2516H637.314V126.909H546.842V184.96H646.578V219.852H503.612Z"
-								fill="url(#pattern4_442_4408)"></path>
-							<path
-								d="M348.764 219.852V3.70506H391.993V186.195H486.48V219.852H348.764Z"
-								fill="url(#pattern5_442_4408)"></path>
-							<path
-								d="M188.488 219.852V3.70506H331.453V38.5973H231.717V93.2516H322.19V126.909H231.717V184.96H331.453V219.852H188.488Z"
-								fill="url(#pattern6_442_4408)"></path>
-							<path
-								d="M88.0026 223.557C78.1216 223.557 68.2406 222.219 58.3596 219.543C48.4786 216.661 39.3181 212.236 30.8781 206.266C22.6439 200.09 15.7478 192.165 10.1898 182.49C4.63172 172.609 1.23512 160.772 0 146.98H39.524C41.3767 157.478 44.8762 165.61 50.0225 171.373C55.3747 176.932 61.5503 180.843 68.5494 183.107C75.5484 185.372 82.3416 186.504 88.9289 186.504C96.5455 186.504 103.236 185.269 109 182.798C114.969 180.328 119.601 176.932 122.895 172.609C126.394 168.286 128.144 163.448 128.144 158.096C128.144 152.126 126.497 146.774 123.204 142.039C119.91 137.305 112.602 133.908 101.28 131.849L66.3879 125.365C48.0669 121.866 33.863 114.661 23.7761 103.75C13.6893 92.6343 8.64587 79.5626 8.64587 64.5352C8.64587 50.9489 12.0425 39.421 18.8356 29.9518C25.6288 20.2766 34.7893 12.8659 46.3172 7.71952C57.845 2.57318 70.6079 0 84.606 0C99.2216 0 112.293 2.47025 123.821 7.41075C135.555 12.3512 145.024 20.0708 152.229 30.5693C159.64 40.862 164.066 54.2425 165.507 70.7109H125.365C123.924 61.4474 121.145 54.4484 117.028 49.7137C112.911 44.7732 108.073 41.3767 102.515 39.524C96.9572 37.6713 91.3992 36.7449 85.8411 36.7449C80.6948 36.7449 75.1367 37.5684 69.1669 39.2152C63.403 40.862 58.4625 43.6411 54.3455 47.5523C50.4342 51.4635 48.4786 56.9186 48.4786 63.9177C48.4786 69.6816 50.5372 74.8279 54.6542 79.3567C58.9772 83.8855 66.285 87.0762 76.5777 88.9289L108.691 94.7958C127.012 98.0894 141.525 104.574 152.229 114.249C162.933 123.718 168.286 137.922 168.286 156.861C168.286 167.565 165.918 177.034 161.184 185.269C156.655 193.503 150.479 200.502 142.657 206.266C135.04 211.824 126.497 216.147 117.028 219.235C107.559 222.117 97.8836 223.557 88.0026 223.557Z"
-								fill="url(#pattern7_442_4408)"></path>
-							<defs>
-								<pattern
-									id="pattern0_442_4408"
-									patternUnits="userSpaceOnUse"
-									patternTransform="matrix(21.6 0 0 15.624 0 102.479)"
-									preserveAspectRatio="none"
-									viewBox="0 0 36 26.04"
-									width="1"
-									height="1"
-								>
-									<use xlink:href="#pattern0_442_4408_inner" transform="translate(0 -26.04)"></use>
-									<g id="pattern0_442_4408_inner">
-										<g clip-path="url(#clip0_442_4408)">
-											<path
-												d="M36 7.86805e-07C26.0589 3.52265e-07 18 8.05888 18 18C27.9411 18 36 9.94113 36 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 7.86805e-07C9.94112 3.52265e-07 18 8.05888 18 18C8.05888 18 4.3454e-07 9.94113 0 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M36 13C26.0589 13 18 21.0589 18 31C27.9411 31 36 22.9411 36 13Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 13C9.94112 13 18 21.0589 18 31C8.05888 31 4.3454e-07 22.9411 0 13Z"
-												fill="currentColor"></path>
-										</g>
-									</g>
-								</pattern><pattern
-									id="pattern1_442_4408"
-									patternUnits="userSpaceOnUse"
-									patternTransform="matrix(21.6 0 0 15.624 0 102.479)"
-									preserveAspectRatio="none"
-									viewBox="0 0 36 26.04"
-									width="1"
-									height="1"
-								>
-									<use xlink:href="#pattern1_442_4408_inner" transform="translate(0 -26.04)"></use>
-									<g id="pattern1_442_4408_inner">
-										<g clip-path="url(#clip1_442_4408)">
-											<path
-												d="M36 7.86805e-07C26.0589 3.52265e-07 18 8.05888 18 18C27.9411 18 36 9.94113 36 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 7.86805e-07C9.94112 3.52265e-07 18 8.05888 18 18C8.05888 18 4.3454e-07 9.94113 0 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M36 13C26.0589 13 18 21.0589 18 31C27.9411 31 36 22.9411 36 13Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 13C9.94112 13 18 21.0589 18 31C8.05888 31 4.3454e-07 22.9411 0 13Z"
-												fill="currentColor"></path>
-										</g>
-									</g>
-								</pattern><pattern
-									id="pattern2_442_4408"
-									patternUnits="userSpaceOnUse"
-									patternTransform="matrix(21.6 0 0 15.624 0 102.479)"
-									preserveAspectRatio="none"
-									viewBox="0 0 36 26.04"
-									width="1"
-									height="1"
-								>
-									<use xlink:href="#pattern2_442_4408_inner" transform="translate(0 -26.04)"></use>
-									<g id="pattern2_442_4408_inner">
-										<g clip-path="url(#clip2_442_4408)">
-											<path
-												d="M36 7.86805e-07C26.0589 3.52265e-07 18 8.05888 18 18C27.9411 18 36 9.94113 36 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 7.86805e-07C9.94112 3.52265e-07 18 8.05888 18 18C8.05888 18 4.3454e-07 9.94113 0 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M36 13C26.0589 13 18 21.0589 18 31C27.9411 31 36 22.9411 36 13Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 13C9.94112 13 18 21.0589 18 31C8.05888 31 4.3454e-07 22.9411 0 13Z"
-												fill="currentColor"></path>
-										</g>
-									</g>
-								</pattern><pattern
-									id="pattern3_442_4408"
-									patternUnits="userSpaceOnUse"
-									patternTransform="matrix(21.6 0 0 15.624 0 102.479)"
-									preserveAspectRatio="none"
-									viewBox="0 0 36 26.04"
-									width="1"
-									height="1"
-								>
-									<use xlink:href="#pattern3_442_4408_inner" transform="translate(0 -26.04)"></use>
-									<g id="pattern3_442_4408_inner">
-										<g clip-path="url(#clip3_442_4408)">
-											<path
-												d="M36 7.86805e-07C26.0589 3.52265e-07 18 8.05888 18 18C27.9411 18 36 9.94113 36 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 7.86805e-07C9.94112 3.52265e-07 18 8.05888 18 18C8.05888 18 4.3454e-07 9.94113 0 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M36 13C26.0589 13 18 21.0589 18 31C27.9411 31 36 22.9411 36 13Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 13C9.94112 13 18 21.0589 18 31C8.05888 31 4.3454e-07 22.9411 0 13Z"
-												fill="currentColor"></path>
-										</g>
-									</g>
-								</pattern><pattern
-									id="pattern4_442_4408"
-									patternUnits="userSpaceOnUse"
-									patternTransform="matrix(21.6 0 0 15.624 0 102.479)"
-									preserveAspectRatio="none"
-									viewBox="0 0 36 26.04"
-									width="1"
-									height="1"
-								>
-									<use xlink:href="#pattern4_442_4408_inner" transform="translate(0 -26.04)"></use>
-									<g id="pattern4_442_4408_inner">
-										<g clip-path="url(#clip4_442_4408)">
-											<path
-												d="M36 7.86805e-07C26.0589 3.52265e-07 18 8.05888 18 18C27.9411 18 36 9.94113 36 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 7.86805e-07C9.94112 3.52265e-07 18 8.05888 18 18C8.05888 18 4.3454e-07 9.94113 0 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M36 13C26.0589 13 18 21.0589 18 31C27.9411 31 36 22.9411 36 13Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 13C9.94112 13 18 21.0589 18 31C8.05888 31 4.3454e-07 22.9411 0 13Z"
-												fill="currentColor"></path>
-										</g>
-									</g>
-								</pattern><pattern
-									id="pattern5_442_4408"
-									patternUnits="userSpaceOnUse"
-									patternTransform="matrix(21.6 0 0 15.624 0 102.479)"
-									preserveAspectRatio="none"
-									viewBox="0 0 36 26.04"
-									width="1"
-									height="1"
-								>
-									<use xlink:href="#pattern5_442_4408_inner" transform="translate(0 -26.04)"></use>
-									<g id="pattern5_442_4408_inner">
-										<g clip-path="url(#clip5_442_4408)">
-											<path
-												d="M36 7.86805e-07C26.0589 3.52265e-07 18 8.05888 18 18C27.9411 18 36 9.94113 36 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 7.86805e-07C9.94112 3.52265e-07 18 8.05888 18 18C8.05888 18 4.3454e-07 9.94113 0 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M36 13C26.0589 13 18 21.0589 18 31C27.9411 31 36 22.9411 36 13Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 13C9.94112 13 18 21.0589 18 31C8.05888 31 4.3454e-07 22.9411 0 13Z"
-												fill="currentColor"></path>
-										</g>
-									</g>
-								</pattern><pattern
-									id="pattern6_442_4408"
-									patternUnits="userSpaceOnUse"
-									patternTransform="matrix(21.6 0 0 15.624 0 102.479)"
-									preserveAspectRatio="none"
-									viewBox="0 0 36 26.04"
-									width="1"
-									height="1"
-								>
-									<use xlink:href="#pattern6_442_4408_inner" transform="translate(0 -26.04)"></use>
-									<g id="pattern6_442_4408_inner">
-										<g clip-path="url(#clip6_442_4408)">
-											<path
-												d="M36 7.86805e-07C26.0589 3.52265e-07 18 8.05888 18 18C27.9411 18 36 9.94113 36 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 7.86805e-07C9.94112 3.52265e-07 18 8.05888 18 18C8.05888 18 4.3454e-07 9.94113 0 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M36 13C26.0589 13 18 21.0589 18 31C27.9411 31 36 22.9411 36 13Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 13C9.94112 13 18 21.0589 18 31C8.05888 31 4.3454e-07 22.9411 0 13Z"
-												fill="currentColor"></path>
-										</g>
-									</g>
-								</pattern><pattern
-									id="pattern7_442_4408"
-									patternUnits="userSpaceOnUse"
-									patternTransform="matrix(21.6 0 0 15.624 0 102.479)"
-									preserveAspectRatio="none"
-									viewBox="0 0 36 26.04"
-									width="1"
-									height="1"
-								>
-									<use xlink:href="#pattern7_442_4408_inner" transform="translate(0 -26.04)"></use>
-									<g id="pattern7_442_4408_inner">
-										<g clip-path="url(#clip7_442_4408)">
-											<path
-												d="M36 7.86805e-07C26.0589 3.52265e-07 18 8.05888 18 18C27.9411 18 36 9.94113 36 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 7.86805e-07C9.94112 3.52265e-07 18 8.05888 18 18C8.05888 18 4.3454e-07 9.94113 0 7.86805e-07Z"
-												fill="currentColor"></path>
-											<path
-												d="M36 13C26.0589 13 18 21.0589 18 31C27.9411 31 36 22.9411 36 13Z"
-												fill="currentColor"></path>
-											<path
-												d="M0 13C9.94112 13 18 21.0589 18 31C8.05888 31 4.3454e-07 22.9411 0 13Z"
-												fill="currentColor"></path>
-										</g>
-									</g>
-								</pattern><clipPath id="clip0_442_4408">
-									<rect width="36" height="31" fill="white"></rect>
-								</clipPath>
-								<clipPath id="clip1_442_4408">
-									<rect width="36" height="31" fill="white"></rect>
-								</clipPath>
-								<clipPath id="clip2_442_4408">
-									<rect width="36" height="31" fill="white"></rect>
-								</clipPath>
-								<clipPath id="clip3_442_4408">
-									<rect width="36" height="31" fill="white"></rect>
-								</clipPath>
-								<clipPath id="clip4_442_4408">
-									<rect width="36" height="31" fill="white"></rect>
-								</clipPath>
-								<clipPath id="clip5_442_4408">
-									<rect width="36" height="31" fill="white"></rect>
-								</clipPath>
-								<clipPath id="clip6_442_4408">
-									<rect width="36" height="31" fill="white"></rect>
-								</clipPath>
-								<clipPath id="clip7_442_4408">
-									<rect width="36" height="31" fill="white"></rect>
-								</clipPath>
-							</defs>
-						</svg>
+						<IconWorksDecor />
 					</div>
 				</div>
 				<div class="home-works-main">
@@ -609,5 +114,37 @@ import heroBg from '../assets/images/hero-bg.webp';
 				</div>
 			</div>
 		</section>
+		<div class="home-works-list">
+			<div class="home-works-list-inner">
+				<a href="#" class="home-works-item">
+					<div class="home-works-item-img">
+						<Image class="img-df img-fill" src={work1} alt="Work 1" loading="lazy" />
+					</div>
+				</a>
+				<a href="#" class="home-works-item">
+					<div class="home-works-item-img">
+						<Image class="img-df img-fill" src={work2} alt="Work 2" loading="lazy" />
+					</div>
+				</a>
+				<a href="#" class="home-works-item">
+					<div class="home-works-item-img">
+						<Image class="img-df img-fill" src={work3} alt="Work 3" loading="lazy" />
+					</div>
+				</a>
+				<a href="#" class="home-works-item">
+					<div class="home-works-item-img">
+						<Image class="img-df img-fill" src={work4} alt="Work 4" loading="lazy" />
+					</div>
+				</a>
+			</div>
+			<div class="home-works-list-empty"></div>
+		</div>
 	</div>
+	<!-- <div class="home-how-wrap">
+		<section class="home-how">
+			<div class="container grid full-h">
+				<div class="home-how-main"></div>
+			</div>
+		</section>
+	</div> -->
 </Layout>
