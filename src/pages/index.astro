@@ -19,6 +19,11 @@ import IconDesign1 from '../components/icons/IconDesign1.astro';
 import IconDesign2 from '../components/icons/IconDesign2.astro';
 import IconHeroDecor from '../components/icons/IconHeroDecor.astro';
 import IconWorksDecor from '../components/icons/IconWorksDecor.astro';
+import IconShape1 from '../components/icons/IconShape-1.astro';
+import IconShape2 from '../components/icons/IconShape-2.astro';
+import IconShape3 from '../components/icons/IconShape-3.astro';
+import IconShape4 from '../components/icons/IconShape-4.astro';
+
 ---
 
 <Layout title="Home" namespace="home">
@@ -94,22 +99,33 @@ import IconWorksDecor from '../components/icons/IconWorksDecor.astro';
 		<div class="home-hero-bg-overlay-main"></div>
 	</div>
 	<div class="home-works-wrap">
-		<canvas id="works-gl-canvas" class="works-gl-canvas"></canvas>
-		<section class="home-works">
+		<div class="home-works home-works--decor">
 			<div class="container grid full-h">
 				<div class="home-works-decor">
 					<div class="home-works-svg">
 						<IconWorksDecor />
 					</div>
 				</div>
+			</div>
+		</div>
+		<section class="home-works home-works--main">
+			<div class="container grid full-h">
 				<div class="home-works-main">
 					<div class="home-works-main-title">
-						<p class="heading fs-80 fw-700 trans-upper">Works</p>
+						<h2 class="heading fs-64 fw-700 trans-upper">Works</h2>
 					</div>
 					<div class="home-works-main-desc">
 						<p class="txt fs-14 fw-500">(</p>
 						<p class="txt fs-14 fw-500">Selection of featured <br /> work, across industries</p>
 						<p class="txt fs-14 fw-500">)</p>
+					</div>
+				</div>
+				<div class="home-works-bottom">
+					<div class="home-works-bottom-title">
+						<h2 class="heading fs-64 fw-700 trans-upper">
+							Ready to help<br />
+							with your needs
+						</h2>
 					</div>
 				</div>
 			</div>
@@ -137,14 +153,38 @@ import IconWorksDecor from '../components/icons/IconWorksDecor.astro';
 					</div>
 				</a>
 			</div>
-			<div class="home-works-list-empty"></div>
 		</div>
+		<div class="home-works-trans">
+			<div class="home-works-trans-inner">
+				<div class="home-works-trans-item">
+					<div class="home-works-trans-item-inner">
+						<IconShape1 />
+					</div>
+				</div>
+				<div class="home-works-trans-item">
+					<div class="home-works-trans-item-inner">
+						<IconShape2 />
+					</div>
+				</div>
+				<div class="home-works-trans-item">
+					<div class="home-works-trans-item-inner">
+						<IconShape3 />
+					</div>
+				</div>
+				<div class="home-works-trans-item">
+					<div class="home-works-trans-item-inner">
+						<IconShape4 />
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="home-works-empty"></div>
 	</div>
-	<!-- <div class="home-how-wrap">
+	<div class="home-how-wrap">
 		<section class="home-how">
 			<div class="container grid full-h">
 				<div class="home-how-main"></div>
 			</div>
 		</section>
-	</div> -->
+	</div>
 </Layout>

@@ -10,11 +10,20 @@
 	/* Light Theme (Default) */
 	--cl-white: #FFFFFF;
 	--cl-black: #000000;
+
 	--cl-brand: #EDFF61;
+	--cl-brand-100: #D5FA00;
+	--cl-brand-soft: rgba(242, 242, 240, 1);
+	--cl-brand-soft-light: #EEEEEB;
+
 	--cl-content-strong: #282C07;
 	--cl-content-soft: rgba(40, 44, 7, 0.60);
 	--cl-content-soft-2: rgba(255, 255, 255, 0.60);
-	--cl-brand-soft: rgba(242, 242, 240, 1);
+
+	--cl-decoy-blend: #2A05FF;
+
+	--cl-bg-main: #F1F1F1
+
 }
 
 /* Dark Theme (Auto detect via System Settings) */

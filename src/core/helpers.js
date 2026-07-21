@@ -160,3 +160,81 @@ export const isObjectEmpty = (objectName) => {
         objectName.constructor === Object
     );
 };
+
+export class ParallaxImage {
+    constructor({ el, scaleOffset = 0.15 }) {
+        this.el = el;
+        this.elWrap = null;
+        this.scaleOffset = scaleOffset;
+        this.scrollCallback = null;
+        this.init();
+    }
+    
+    init() {
+        this.elWrap = this.el.parentElement;
+        this.setup();
+    }
+    
+    setup() {
+        const scalePercent = 100 + (this.scaleOffset * 100);
+        gsap.set(this.el, {
+            width: scalePercent + '%',
+            height: this.el.classList.contains('img-fill') ? scalePercent + '%' : 'auto'
+        });
+        
+        // Đảm bảo phần tử cha có overflow hidden
+        if (getComputedStyle(this.elWrap).overflow !== 'hidden') {
+            gsap.set(this.elWrap, { overflow: 'hidden' });
+        }
+        
+        // Đảm bảo wrap có position relative
+        if (getComputedStyle(this.elWrap).position === 'static') {
+            gsap.set(this.elWrap, { position: 'relative' });
+        }
+
+        this.scrub();
+    }
+    
+    scrub() {
+        // Fix khoảng cách bằng công thức từ binderconsulting
+        let dist = this.el.offsetHeight - this.elWrap.offsetHeight;
+        let total = this.elWrap.getBoundingClientRect().height + window.innerHeight;
+        
+        this.updateOnScroll(dist, total);
+        
+        this.scrollCallback = () => {
+            this.updateOnScroll(dist, total);
+        };
+        
+        // Sử dụng dynamic import để tránh circular dependency với lenis.js
+        import('./lenis.js').then(({ smoothScroll }) => {
+            if (smoothScroll && smoothScroll.lenis) {
+                smoothScroll.lenis.on('scroll', this.scrollCallback);
+            } else {
+                window.addEventListener('scroll', this.scrollCallback);
+            }
+        });
+    }
+    
+    updateOnScroll(dist, total) {
+        if (this.el && isInViewport(this.elWrap)) {
+            let percent = this.elWrap.getBoundingClientRect().bottom / total;
+            gsap.quickSetter(this.el, 'y', 'px')(-dist * percent * 1.2);
+            gsap.set(this.el, { scale: 1 + (percent * this.scaleOffset) });
+        }
+    }
+    
+    destroy() {
+        if (this.scrollCallback) {
+            import('./lenis.js').then(({ smoothScroll }) => {
+                if (smoothScroll && smoothScroll.lenis) {
+                    smoothScroll.lenis.off('scroll', this.scrollCallback);
+                } else {
+                    window.removeEventListener('scroll', this.scrollCallback);
+                }
+            });
+        }
+    }
+}
+
+

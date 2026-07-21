@@ -39,6 +39,10 @@ html::-webkit-scrollbar {
 	background-color: transparent;
 }
 
+svg:not(:root) {
+	overflow: visible;
+}
+
 img {
 	vertical-align: middle;
 	max-width: 100%;
@@ -117,16 +121,6 @@ a {
 	transition: width .6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (hover: hover) and (min-width: 991px) {
-	.btn:hover .btn-bg {
-		width: 100%;
-	}
-
-	.btn:hover .btn-ic {
-		transform: rotateZ(360deg);
-	}
-}
-
 /* Audio Popup */
 .audio-popup {
 	position: fixed;
@@ -192,4 +186,14 @@ a {
 	background: transparent;
 	color: #fff;
 	border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@media (hover: hover) and (min-width: 991px) {
+	.btn:hover .btn-bg {
+		width: 100%;
+	}
+
+	.btn:hover .btn-ic {
+		transform: rotateZ(360deg);
+	}
 }
