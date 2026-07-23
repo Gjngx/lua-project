@@ -153,6 +153,7 @@
 	position: relative;
 	margin-top: -100vh;
 	background-color: var(--cl-white);
+	pointer-events: none;
 }
 
 .home-works {
@@ -193,7 +194,6 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	pointer-events: none;
 }
 
 .home-works-main-title {
@@ -321,11 +321,102 @@
 	color: var(--cl-content-strong);
 }
 .home-works-empty {
-	height: 300vh;
+	height: 250vh;
+	pointer-events: none;
+}
+.home-how-intro{
+	grid-column: 8 / 12;
+	grid-row: 1 / 1;
+}
+.home-how-intro-desc{
+	margin-bottom: 6.4rem;
+	text-align: center;
+}
+.home-how-content{
+	grid-column: 2 / -2;
+	grid-row: 2 / 2;
+	height: 100vh;
+	margin-top: -100vh;
+	position: sticky;
+	top: 0;
+	pointer-events: none;
+	/* opacity: 0; */
+}
+.home-how-content-inner{
+	width: 100%;
+	height: 100%;
+}
+.home-how-content-list{
+	width: 100%;
+	height: 100%;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-auto-rows: 1fr;
+}
+.home-how-content-item{
+	grid-column: 1 / 1;
+	grid-row: 1 / 1;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+.home-how-content-item.active{
+	opacity: 1;
+}
+.home-how-content-item-ic{
+	width: 1.2rem;
+}
+.home-how-content-item-left {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	width: calc((var(--container--column-gap) * 3) + (var(--container--one-column)* 4));
+	pointer-events: auto;
+}
+.home-how-content-item-right {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	width: calc((var(--container--column-gap) * 3) + (var(--container--one-column)* 4));
+	pointer-events: auto;
+}
+.home-how-content-item-text {
+	width: calc((var(--container--column-gap) * 1) + (var(--container--one-column)* 2));
+}
+.home-how-content-item-label{
+	margin-bottom: 2.4rem;
+}
+.home-how-content-item-type{
+	margin-bottom: 0.8rem;
+}
+.home-how-content-item-type,
+.home-how-content-item-value{
+	padding: 0.8rem 1.6rem;
 }
 
-.home-how-main {
-	grid-column: 2 / -2;
-	grid-row: 1 / 1;
-	height: 100vh;
+.home-how-thumb {
+	grid-column: 7 / 13;
+	grid-row: 2 / 2;
+	pointer-events: none;
+}
+.home-how-thumb-inner{
+	display: flex;
+	flex-direction: column;
+}
+.home-how-thumb-item{
+	padding-bottom: 12rem;
+	pointer-events: auto;
+}
+
+.home-how-thumb-item-inner{
+	width: 50.9rem;
+	border-radius: 1.6rem;
+	overflow: hidden;
 }

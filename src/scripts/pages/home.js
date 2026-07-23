@@ -216,32 +216,33 @@ export const HomePage = {
 
 			this.tlWorksScroll
 			.to(this.el.querySelector('.home-works-trans-inner'), {
-				rotate: 360,
+				rotate: 125,
 				duration: 1,
 				ease: 'none'
 			})
 			.to(this.el.querySelectorAll('.home-works-trans-item-inner'), {
 				x: 0,
 				y: 0,
-				scale: 4.6,
+				scale: 12,
 				duration: 1,
-				ease: 'none'
+				ease: 'none',
+				force3D: false,
 			}, '<')
 			.to(this.el.querySelectorAll('.home-works-main'), {
 				opacity: 0,
 				scale: 1.1,
 				duration: 0.2,
 				ease: 'power3.inOut'
-			}, '<=0.48')
+			}, '<=0.15')
 			.fromTo(this.el.querySelectorAll('.home-works-bottom-title'),
-				{ opacity: 0, scale: 1.05 },
+				{ opacity: 0, scale: 1.2 },
 				{
 					opacity: 1,
 					scale: 1,
 					duration: 0.2,
 					ease: 'power3.inOut'
 				},
-				'<'
+				'<=' // <= 0.15
 			)
 			.fromTo(this.el,
 				{ backgroundColor: 'var(--cl-white)'},
@@ -280,7 +281,9 @@ export const HomePage = {
 		constructor() {
 			super();
 			this.el = null;
-			this.tlHowScroll = null;
+			this.tlIntroScroll = null;
+			this.tlItemScroll = null;
+
 		}
 
 		trigger(data) {
@@ -304,16 +307,51 @@ export const HomePage = {
 		}
 
 		animationScrub() {
-			// this.tlHowScroll = gsap.timeline({
-			// 	scrollTrigger: {
-			// 		trigger: this.el.querySelector('.home-how-list-empty'),
-			// 		start: 'top bottom',
-			// 		end: 'top top',
-			// 		scrub: true,
-			// 	}
-			// });
-			// this.tlHowScroll
-			// 	.to(this.el.querySelector('.home-how'), { autoAlpha: 0, ease: 'none' });
+
+			this.tlIntroScroll = gsap.timeline({
+				scrollTrigger: {
+					trigger: this.el.querySelector('.home-how-intro'),
+					start: 'top bottom',
+					end: 'top top+=40%',
+					scrub: true,
+				}
+			});
+			this.tlIntroScroll
+				.to(document.querySelector('.home-works-bottom'), { y: '38vh', ease: 'none' });
+
+			this.tlItemScrolls = [];
+			const thumbItems = this.el.querySelectorAll('.home-how-thumb-item');
+			const contentItems = this.el.querySelectorAll('.home-how-content-item');
+
+      const thumbHieght = thumbItems[0].offsetHeight
+
+			thumbItems.forEach((thumb, index) => {
+				const tl = gsap.timeline({
+					scrollTrigger: {
+						trigger: thumb,
+						start: `top center+=${thumbHieght / 2}px`,
+						end: `top center-=${thumbHieght / 2}px`,
+						scrub: true,
+						onEnter: () => {
+							contentItems.forEach(el => el.classList.remove('active'));
+							if (contentItems[index]) contentItems[index].classList.add('active');
+						},
+						onEnterBack: () => {
+							contentItems.forEach(el => el.classList.remove('active'));
+							if (contentItems[index]) contentItems[index].classList.add('active');
+						},
+						onLeave: () => {
+							if (index !== thumbItems.length - 1) {
+								contentItems.forEach(el => el.classList.remove('active'));
+							}
+						},
+						onLeaveBack: () => {
+							contentItems.forEach(el => el.classList.remove('active'));
+						}
+					}
+				});
+				this.tlItemScrolls.push(tl);
+			});
 		}
 
 		interact() {
@@ -321,7 +359,10 @@ export const HomePage = {
 
 		destroy() {
 			super.cleanTrigger();
-			if (this.tlHowScroll) this.tlHowScroll.kill();
+			if (this.tlIntroScroll) this.tlIntroScroll.kill();
+			if (this.tlItemScrolls) {
+				this.tlItemScrolls.forEach(tl => tl.kill());
+			}
 		}
 	}
 };

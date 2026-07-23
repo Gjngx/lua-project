@@ -14,7 +14,7 @@ export class GlobalChange {
 			this.namespace = data.next.namespace;
 		}
 		
-		audioManager.init();
+		// audioManager.init();
 		
 		header.init(data);
 		footer.init(data);
