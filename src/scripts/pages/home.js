@@ -322,8 +322,12 @@ export const HomePage = {
 			this.tlItemScrolls = [];
 			const thumbItems = this.el.querySelectorAll('.home-how-thumb-item');
 			const contentItems = this.el.querySelectorAll('.home-how-content-item');
+			const contentList = this.el.querySelector('.home-how-content-list');
 
-      const thumbHieght = thumbItems[0].offsetHeight
+      const thumbHieght = thumbItems[0].offsetHeight;
+      if (thumbItems.length > 0) {
+      	thumbItems[thumbItems.length - 1].style.paddingBottom = `calc(${thumbHieght / 2}px - 3.2rem)`;
+      }
 
 			thumbItems.forEach((thumb, index) => {
 				const tl = gsap.timeline({
@@ -333,19 +337,21 @@ export const HomePage = {
 						end: `top center-=${thumbHieght / 2}px`,
 						scrub: true,
 						onEnter: () => {
+							if (index === 0) contentList.classList.add('active-ic');
 							contentItems.forEach(el => el.classList.remove('active'));
 							if (contentItems[index]) contentItems[index].classList.add('active');
 						},
 						onEnterBack: () => {
+							if (index === thumbItems.length - 1) contentList.classList.add('active-ic');
 							contentItems.forEach(el => el.classList.remove('active'));
 							if (contentItems[index]) contentItems[index].classList.add('active');
 						},
 						onLeave: () => {
-							if (index !== thumbItems.length - 1) {
-								contentItems.forEach(el => el.classList.remove('active'));
-							}
+							if (index === thumbItems.length - 1) contentList.classList.remove('active-ic');
+							contentItems.forEach(el => el.classList.remove('active'));
 						},
 						onLeaveBack: () => {
+							if (index === 0) contentList.classList.remove('active-ic');
 							contentItems.forEach(el => el.classList.remove('active'));
 						}
 					}

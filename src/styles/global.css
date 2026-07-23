@@ -173,19 +173,26 @@ a {
 }
 
 .audio-btn-yes {
-		font-size: 1.2rem;
-			line-height: 1.1;
+	font-size: 1.2rem;
+	line-height: 1.1;
 	background: var(--cl-brand, #fff);
 	color: #000;
 	border: none;
 }
 
 .audio-btn-no {
-		font-size: 1.2rem;
-			line-height: 1.1;
+	font-size: 1.2rem;
+	line-height: 1.1;
 	background: transparent;
 	color: #fff;
 	border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.line {
+	width: 100%;
+	height: var(--1px);
+	background-color: var(--cl-border-main);
+	pointer-events: none;
 }
 
 @media (hover: hover) and (min-width: 991px) {
@@ -196,4 +203,18 @@ a {
 	.btn:hover .btn-ic {
 		transform: rotateZ(360deg);
 	}
+}
+
+@keyframes marquee {
+	0% {
+		transform: translateX(0)
+	}
+
+	100% {
+		transform: translateX(-100%)
+	}
+}
+
+.anim-marquee {
+	animation: marquee 30s linear infinite;
 }

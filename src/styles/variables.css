@@ -19,10 +19,13 @@
 	--cl-content-strong: #282C07;
 	--cl-content-soft: rgba(40, 44, 7, 0.60);
 	--cl-content-soft-2: rgba(255, 255, 255, 0.60);
+	--cl-content-note: rgba(40, 44, 7, 0.40);
 
 	--cl-decoy-blend: #2A05FF;
 
-	--cl-bg-main: #F1F1F1
+	--cl-bg-main: #F1F1F1;
+
+	--cl-border-main: rgba(40, 44, 7, 0.16);
 
 }
 

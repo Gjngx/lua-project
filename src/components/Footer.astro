@@ -1,8 +1,130 @@
 ---
+import { Image } from 'astro:assets';
+import work1 from '../assets/images/work-1.png';
+import work2 from '../assets/images/work-2.png';
+import work3 from '../assets/images/work-3.png';
+import work4 from '../assets/images/work-4.png';
+import IconHieuSk from '../components/icons/IconHieuSk.astro';
+import IconHieuMain from '../components/icons/IconHieuMain.astro';
 import '../styles/components/footer.css';
+
+const currentYear = new Date().getFullYear();
 ---
+
 <footer class="footer">
-	<div class="footer-content">
-		<p>&copy; {new Date().getFullYear()} My Project. All rights reserved.</p>
+	<div class="footer-inner">
+		<div class="container grid">
+			<div class="footer-top">
+				<div class="footer-top-ic">
+					<div class="footer-top-ic-inner">
+						<div class="footer-top-ic-skeleton">
+							<IconHieuSk />
+						</div>
+						<div class="footer-top-ic-main">
+							<IconHieuMain />
+						</div>
+					</div>
+				</div>
+				<div class="footer-top-title">
+					<h2 class="heading fs-48 fw-700 trans-upper">Let’s make something people remember.</h2>
+				</div>
+			</div>
+			<div class="footer-marquee">
+				<div data-marquee="list" class="footer-marquee-inner">
+					<div data-marquee="item" class="footer-marquee-list">
+						<a href="#" class="footer-marquee-item">
+							<Image class="img-df img-fill" src={work1} alt="item 1" />
+						</a>
+						<a href="#" class="footer-marquee-item">
+							<Image class="img-df img-fill" src={work2} alt="item 2" />
+						</a>
+						<a href="#" class="footer-marquee-item">
+							<Image class="img-df img-fill" src={work3} alt="item 3" />
+						</a>
+						<a href="#" class="footer-marquee-item">
+							<Image class="img-df img-fill" src={work4} alt="item 4" />
+						</a>
+					</div>
+				</div>
+			</div>
+			<div class="footer-bot">
+				<div class="footer-page">
+					<div class="footer-label">
+						<p class="txt fs-14 fw-400 trans-upper">Page</p>
+					</div>
+					<div class="footer-page-links">
+						<a href="#" class="footer-page-link">
+							<p class="txt fs-12 fw-700 trans-upper">Home</p>
+						</a>
+						<a href="#" class="footer-page-link">
+							<p class="txt fs-12 fw-700 trans-upper">Works</p>
+						</a>
+						<a href="#" class="footer-page-link">
+							<p class="txt fs-12 fw-700 trans-upper">Playground</p>
+						</a>
+						<a href="#" class="footer-page-link">
+							<p class="txt fs-12 fw-700 trans-upper">About</p>
+						</a>
+						<a href="#" class="footer-page-link">
+							<p class="txt fs-12 fw-700 trans-upper">Contact</p>
+						</a>
+					</div>
+				</div>
+				<div class="footer-business">
+					<div class="footer-label">
+						<p class="txt fs-14 fw-500 trans-upper">Business</p>
+					</div>
+					<div class="footer-business-links">
+						<a href="#" class="footer-business-link">
+							<p class="txt fs-12 fw-700 trans-upper">
+								<span class="cl-note">E.</span> minhhieu@gmail.com
+							</p>
+						</a>
+						<a href="#" class="footer-business-link">
+							<p class="txt fs-12 fw-700 trans-upper">
+								<span class="cl-note">P.</span> +84 900 900 900
+							</p>
+						</a>
+					</div>
+				</div>
+				<div class="footer-social">
+					<div class="footer-label">
+						<p class="txt fs-14 fw-500 trans-upper">Social</p>
+					</div>
+					<div class="footer-social-links">
+						<a href="#" class="footer-social-link">
+							<p class="txt fs-12 fw-700 trans-upper">Linkedin</p>
+						</a>
+						<a href="#" class="footer-social-link">
+							<p class="txt fs-12 fw-700 trans-upper">Instagram</p>
+						</a>
+						<a href="#" class="footer-social-link">
+							<p class="txt fs-12 fw-700 trans-upper">Dribbble</p>
+						</a>
+						<a href="#" class="footer-social-link">
+							<p class="txt fs-12 fw-700 trans-upper">Behance</p>
+						</a>
+					</div>
+				</div>
+				<div class="footer-date">
+					<div class="footer-label">
+						<p class="txt fs-14 fw-500 trans-upper">Hanoi, Vietnam</p>
+						<p class="txt fs-14 fw-500 trans-upper">
+							<span class="time-h">22</span>
+							<span class="time-dot">:</span>
+							<span class="time-m">12</span>
+							<span class="time-dot">:</span>
+							<span class="time-s">16</span>
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="footer-copyright-line-1 line"></div>
+			<div class="footer-copyright-line-2 line"></div>
+			<div class="footer-copyright">
+				<p class="txt fs-12 fw-500 trans-upper">©Hieu {currentYear}</p>
+				<p class="txt fs-12 fw-500 trans-upper">All rights reserved.</p>
+			</div>
+		</div>
 	</div>
 </footer>

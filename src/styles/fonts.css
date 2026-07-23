@@ -79,6 +79,12 @@ p{
 	line-height: 1.1;
 }
 
+.fs-48 {
+	font-size: 4.8rem;
+	line-height: 1.1;
+	letter-spacing: -0.02em;
+}
+
 .fs-40 {
 	font-size: 4rem;
 	line-height: 1.1;

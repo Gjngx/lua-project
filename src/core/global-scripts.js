@@ -17,7 +17,7 @@ export class GlobalChange {
 		// audioManager.init();
 		
 		header.init(data);
-		footer.init(data);
+		footer.trigger(data);
 		
 		this.refreshOnBreakpoint();
 	}
@@ -27,7 +27,8 @@ export class GlobalChange {
 		this.namespace = data.next.namespace;
 		
 		header.update(data);
-		footer.update(data);
+		footer.destroy();
+		footer.trigger(data);
 	}
 	
 	refreshOnBreakpoint() {

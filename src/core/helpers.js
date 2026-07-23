@@ -237,4 +237,37 @@ export class ParallaxImage {
     }
 }
 
+export class Marquee {
+    constructor(list, duration = 40) {
+        this.list = typeof list === 'string' ? document.querySelector(list) : list;
+        this.duration = duration;
+    }
+    
+    setup(isReverse) {
+        if (!this.list) return;
 
+        let originalItem = this.list.querySelector('[data-marquee="item"]');
+        if (!originalItem) {
+            originalItem = this.list.firstElementChild;
+            if (!originalItem) return;
+        }
+
+        let itemClone = originalItem.cloneNode(true);
+        let itemWidth = originalItem.getBoundingClientRect().width || 1;
+        
+        // Tính toán số lượng clone dựa trên chiều rộng item để đảm bảo lấp đầy màn hình
+        const cloneAmount = Math.ceil(window.innerWidth / itemWidth) + 1;
+
+        this.list.innerHTML = '';
+        
+        new Array(cloneAmount).fill().forEach(() => {
+            let html = itemClone.cloneNode(true);
+            html.style.animationDuration = `${Math.ceil(itemWidth / this.duration)}s`;
+            if (isReverse) {
+                html.style.animationDirection = 'reverse';
+            }
+            html.classList.add('anim-marquee');
+            this.list.appendChild(html);
+        });
+    }
+}
