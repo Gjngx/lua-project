@@ -166,13 +166,13 @@
 	transform: rotatez(165deg);
 }
 
-.home-hero-empty {
+/* .home-hero-empty {
 	height: 100vh;
-}
+} */
 
 .home-works-wrap {
 	position: relative;
-	margin-top: -100vh;
+	/* margin-top: -100vh; */
 	background-color: var(--cl-white);
 	pointer-events: none;
 }

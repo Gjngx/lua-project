@@ -27,7 +27,7 @@ export const HomePage = {
 			this.tlEnter = null;
 			this.tlHeroTop = null;
 			this.tlHeroBot = null;
-			this.tlHeroEnd = null;
+			// this.tlHeroEnd = null;
 
 		}
 
@@ -239,17 +239,17 @@ export const HomePage = {
 				ease: 'none'
 			});
 
-			this.tlHeroEnd = gsap.timeline({
-				scrollTrigger: {
-					trigger: '.home-works',
-					start: 'top bottom',
-					end: 'top top',
-					scrub: true,
-				}
-			});
-			this.tlHeroEnd
-				.to(this.el.querySelector('.home-hero-bg-overlay-main'), { opacity: 0.85, ease: 'none' })
-				.to(this.el.querySelector('.home-hero-bottom-inner'), { yPercent: -10, scale: 1.1, ease: 'none' }, '<')
+			// this.tlHeroEnd = gsap.timeline({
+			// 	scrollTrigger: {
+			// 		trigger: '.home-works',
+			// 		start: 'top bottom',
+			// 		end: 'top top',
+			// 		scrub: true,
+			// 	}
+			// });
+			// this.tlHeroEnd
+			// 	.to(this.el.querySelector('.home-hero-bg-overlay-main'), { opacity: 0.85, ease: 'none' })
+			// 	.to(this.el.querySelector('.home-hero-bottom-inner'), { yPercent: -10, scale: 1.1, ease: 'none' }, '<')
 		}
 
 		interact() {
@@ -276,7 +276,7 @@ export const HomePage = {
 			if (this.tlEnter) this.tlEnter.kill();
 			if (this.tlHeroTop) this.tlHeroTop.kill();
 			if (this.tlHeroBot) this.tlHeroBot.kill();
-			if (this.tlHeroEnd) this.tlHeroEnd.kill();
+			// if (this.tlHeroEnd) this.tlHeroEnd.kill();
 
 			this.video = null;
 			this.worksEl = null;
