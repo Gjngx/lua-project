@@ -3,7 +3,9 @@ import Layout from '../layouts/Layout.astro';
 import Button from '../components/Button.astro';
 import '../styles/pages/home.css';
 import { Image } from 'astro:assets';
-import heroBg from '../assets/images/hero-bg.webp';
+import heroPoster from '../assets/images/home-bg-poster.jpg';
+import heroVideoDesktop from '../assets/video/home-bg-desktop.mp4';
+// import heroVideoMobile from '../assets/video/home-bg-mobile.mp4';
 import work1 from '../assets/images/work-1.png';
 import work2 from '../assets/images/work-2.png';
 import work3 from '../assets/images/work-3.png';
@@ -32,13 +34,20 @@ import IconShape4 from '../components/icons/IconShape-4.astro';
 	<div class="home-hero-wrap">
 		<div class="home-hero-bg">
 			<div class="home-hero-bg-inner">
-				<Image
-					class="img-df img-fill"
-					src={heroBg}
-					alt="Hero Background"
-					fetchpriority="high"
-					loading="eager"
-				/>
+				<video
+					class="home-hero-video"
+					poster={heroPoster.src}
+					preload="auto"
+					muted
+					playsinline
+					disablepictureinpicture
+					disableremoteplayback
+					aria-hidden="true"
+					tabindex="-1"
+				>
+					<!-- <source src={heroVideoMobile} type="video/mp4" media="(max-width: 991px)" /> -->
+					<source src={heroVideoDesktop} type="video/mp4" />
+				</video>
 			</div>
 			<div class="home-hero-bg-overlay"></div>
 		</div>

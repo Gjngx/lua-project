@@ -23,6 +23,16 @@
 	will-change: transform;
 }
 
+.home-hero-video {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	background-color: #000;
+	pointer-events: none;
+	user-select: none;
+}
+
 .home-hero-bg-overlay {
 	position: absolute;
 	inset: 0;
