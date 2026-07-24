@@ -313,7 +313,6 @@
 	height: 100vh;
 	overflow: hidden;
 	z-index: 5;
-	mix-blend-mode: difference;
 	pointer-events: none;
 }
 
@@ -324,9 +323,21 @@
 	margin-inline: auto;
 }
 
+.home-works-trans-canvas {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	color: var(--cl-brand-100);
+}
+
+.home-works-trans.is-canvas-active .home-works-trans-inner {
+	visibility: hidden;
+}
+
 .home-works-trans-item {
 	position: absolute;
-	mix-blend-mode: difference;
 }
 
 .home-works-trans-item:nth-child(1) {
@@ -351,7 +362,7 @@
 .home-works-trans-item-inner {
 	position: relative;
 	width: 25rem;
-	color: var(--cl-decoy-blend); 
+	color: var(--cl-brand-100);
 }
 
 .home-works-trans-item:nth-child(1) .home-works-trans-item-inner{
@@ -371,6 +382,7 @@
 	text-align: center;
 	opacity: 0;
 	color: var(--cl-content-strong);
+	will-change: opacity, transform;
 }
 .home-works-empty {
 	height: 250vh;

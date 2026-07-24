@@ -1,6 +1,6 @@
 
 .footer-inner{
-	height: 100vh;
+	/* height: 100vh; */
 }
 .footer-top {
 	grid-column: 2 / -2;

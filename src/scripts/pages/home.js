@@ -291,6 +291,12 @@ export const HomePage = {
 			this.tlWorksScroll = null;
 			this.tlWorksDecorAssembly = null;
 			this.worksPathParticles = null;
+			this.transitionCanvas = null;
+			this.transitionContext = null;
+			this.transitionItems = null;
+			this.transitionPaths = [];
+			this.transitionState = null;
+			this.onTransitionResize = null;
 		}
 
 		trigger(data) {
@@ -387,50 +393,141 @@ export const HomePage = {
 				}
 			});
 
+			const transition = this.el.querySelector('.home-works-trans');
+			const transitionInner = this.el.querySelector('.home-works-trans-inner');
+			const transitionItems = this.el.querySelectorAll('.home-works-trans-item-inner');
+			const currentContent = this.el.querySelector('.home-works-main');
+			const nextContent = this.el.querySelector('.home-works-bottom-title');
+			const usesCanvasMask = this.setupTransitionCanvas(transition, transitionItems);
+
 			this.tlWorksScroll
-			.to(this.el.querySelector('.home-works-trans-inner'), {
-				rotate: 125,
-				duration: 1,
-				ease: 'none'
-			})
-			.to(this.el.querySelectorAll('.home-works-trans-item-inner'), {
-				x: 0,
-				y: 0,
-				scale: 12,
-				duration: 1,
-				ease: 'none',
-				force3D: false,
-			}, '<')
-			.to(this.el.querySelectorAll('.home-works-main'), {
+			.set(nextContent, {
 				opacity: 0,
-				scale: 1.1,
-				duration: 0.2,
-				ease: 'power3.inOut'
-			}, '<=0.15')
-			.fromTo(this.el.querySelectorAll('.home-works-bottom-title'),
-				{ opacity: 0, scale: 1.2 },
-				{
-					opacity: 1,
-					scale: 1,
-					duration: 0.2,
-					ease: 'power3.inOut'
-				},
-				'<=' // <= 0.15
-			)
-			.fromTo(this.el,
-				{ backgroundColor: 'var(--cl-white)'},
-				{
-					backgroundColor: 'var(--cl-bg-main)',
-					duration: 0.2,
-					ease: 'power3.inOut'
-				},
-				'<'
-			)
-			.to(this.el.querySelectorAll('.home-works-trans'), {
+			}, 0)
+			.to(currentContent, {
 				opacity: 0,
-				duration: 0.25,
-				ease: 'none'
-			}, 0.75);
+				duration: 0.01,
+			}, 0.338)
+			.to(nextContent, {
+				opacity: 1,
+				duration: 0.01,
+			}, 0.338)
+			.to(this.el, {
+				backgroundColor: 'var(--cl-bg-main)',
+				duration: 0.02,
+			}, 0.338)
+			if (usesCanvasMask) {
+				this.tlWorksScroll.to(this.transitionState, {
+					rotate: 125,
+					scale: 14,
+					duration: 1,
+					ease: 'none',
+					onUpdate: () => this.drawTransitionCanvas(),
+				}, 0);
+			} else {
+				this.tlWorksScroll
+				.to(transitionInner, {
+					rotate: 125,
+					duration: 1,
+					ease: 'none'
+				}, 0)
+				.to(transitionItems, {
+					scale: 12,
+					duration: 1,
+					ease: 'none',
+					force3D: false,
+				}, 0);
+			}
+		}
+
+		setupTransitionCanvas(transition, transitionItems) {
+			const canvas = transition?.querySelector('.home-works-trans-canvas');
+			const paths = Array.from(transitionItems)
+				.map((item) => item.querySelector('path')?.getAttribute('d'))
+				.filter(Boolean);
+
+			if (!canvas || paths.length !== 4 || typeof window.Path2D !== 'function') {
+				return false;
+			}
+
+			try {
+				this.transitionPaths = paths.map((path) => new Path2D(path));
+			} catch (error) {
+				console.warn('[Home Works] Không thể tạo canvas mask:', error);
+				this.transitionPaths = [];
+				return false;
+			}
+
+			this.transitionCanvas = canvas;
+			this.transitionContext = canvas.getContext('2d');
+			this.transitionItems = transitionItems;
+			this.transitionState = { rotate: 0, scale: 1 };
+
+			if (!this.transitionContext) {
+				return false;
+			}
+
+			transition.classList.add('is-canvas-active');
+			this.onTransitionResize = () => this.drawTransitionCanvas();
+			window.addEventListener('resize', this.onTransitionResize);
+			this.drawTransitionCanvas();
+			return true;
+		}
+
+		drawTransitionCanvas() {
+			const canvas = this.transitionCanvas;
+			const context = this.transitionContext;
+			const state = this.transitionState;
+			const firstItem = this.transitionItems?.[0];
+
+			if (!canvas || !context || !state || !firstItem || this.transitionPaths.length !== 4) {
+				return;
+			}
+
+			const width = canvas.clientWidth;
+			const height = canvas.clientHeight;
+			const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+			const renderWidth = Math.round(width * pixelRatio);
+			const renderHeight = Math.round(height * pixelRatio);
+
+			if (canvas.width !== renderWidth || canvas.height !== renderHeight) {
+				canvas.width = renderWidth;
+				canvas.height = renderHeight;
+			}
+
+			const innerSize = Math.min(width, height);
+			const innerLeft = (width - innerSize) / 2;
+			const shapeSize = firstItem.offsetWidth;
+			const shapeScale = (shapeSize / 250) * state.scale;
+			const halfShape = shapeSize / 2;
+			const shapeCenters = [
+				[-halfShape, -halfShape],
+				[innerSize + halfShape, -halfShape],
+				[-halfShape, innerSize + halfShape],
+				[innerSize + halfShape, innerSize + halfShape],
+			];
+
+			context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+			context.clearRect(0, 0, width, height);
+			context.save();
+			context.translate(innerLeft + innerSize / 2, innerSize / 2);
+			context.rotate((state.rotate * Math.PI) / 180);
+			context.translate(-innerSize / 2, -innerSize / 2);
+			context.globalCompositeOperation = 'xor';
+			context.fillStyle = getComputedStyle(canvas).color;
+
+			this.transitionPaths.forEach((path, index) => {
+				const [centerX, centerY] = shapeCenters[index];
+
+				context.save();
+				context.translate(centerX, centerY);
+				context.scale(shapeScale, shapeScale);
+				context.translate(-125, -125);
+				context.fill(path);
+				context.restore();
+			});
+
+			context.restore();
 		}
 
 		interact() {
@@ -445,6 +542,9 @@ export const HomePage = {
 			if (this.worksPathParticles) this.worksPathParticles.destroy();
 			if (this.tlWorksTop) this.tlWorksTop.kill();
 			if (this.tlWorksScroll) this.tlWorksScroll.kill();
+			if (this.onTransitionResize) {
+				window.removeEventListener('resize', this.onTransitionResize);
+			}
 			
 			if (this.parallaxImages) {
 				this.parallaxImages.forEach(img => img.destroy());
@@ -453,6 +553,13 @@ export const HomePage = {
 			if (this.itemTriggers) {
 				this.itemTriggers.forEach(tl => tl.kill());
 			}
+
+			this.transitionCanvas = null;
+			this.transitionContext = null;
+			this.transitionItems = null;
+			this.transitionPaths = [];
+			this.transitionState = null;
+			this.onTransitionResize = null;
 		}
 	},
 	How: class extends TriggerSetup {
