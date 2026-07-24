@@ -24,7 +24,6 @@ export const HomePage = {
 			this.onVisibilityChange = null;
 			this.tlOnce = null;
 			this.tlEnter = null;
-			this.tlHeroScroll = null;
 			this.tlHeroTop = null;
 			this.tlHeroBot = null;
 			this.tlHeroEnd = null;
@@ -209,19 +208,6 @@ export const HomePage = {
 				yPercent: 76,
 				opacity: 1
 			});
-			this.tlHeroScroll = gsap.timeline({
-				scrollTrigger: {
-					trigger: this.el.querySelector('.home-hero'),
-					start: 'top top',
-					end: `bottom-=${cvUnit(100, 'vh')} bottom`,
-					scrub: true,
-				}
-			});
-			this.tlHeroScroll.to(this.el.querySelector('.home-hero-bg-inner'), {
-				scale: 2,
-				transformOrigin: 'top center',
-				ease: 'none'
-			});
 
 			this.tlHeroTop = gsap.timeline({
 				scrollTrigger: {
@@ -262,7 +248,6 @@ export const HomePage = {
 			this.tlHeroEnd
 				.to(this.el.querySelector('.home-hero-bg-overlay-main'), { opacity: 0.85, ease: 'none' })
 				.to(this.el.querySelector('.home-hero-bottom-inner'), { yPercent: -10, scale: 1.1, ease: 'none' }, '<')
-				.to(this.el.querySelector('.home-hero-bg-inner'), { scale: 2.5, ease: 'none' }, '<');
 		}
 
 		interact() {
@@ -287,7 +272,6 @@ export const HomePage = {
 			}
 			if (this.tlOnce) this.tlOnce.kill();
 			if (this.tlEnter) this.tlEnter.kill();
-			if (this.tlHeroScroll) this.tlHeroScroll.kill();
 			if (this.tlHeroTop) this.tlHeroTop.kill();
 			if (this.tlHeroBot) this.tlHeroBot.kill();
 			if (this.tlHeroEnd) this.tlHeroEnd.kill();
