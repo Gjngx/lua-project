@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Button from '../components/Button.astro';
 import '../styles/pages/home.css';
 import { Image } from 'astro:assets';
-import heroPoster from '../assets/images/home-bg-poster.jpg';
+import heroPoster from '../assets/images/home-bg-poster.webp';
 import heroVideoDesktop from '../assets/video/home-bg-desktop.mp4';
 // import heroVideoMobile from '../assets/video/home-bg-mobile.mp4';
 import work1 from '../assets/images/work-1.png';
@@ -57,11 +57,6 @@ import IconShape4 from '../components/icons/IconShape-4.astro';
 					<div class="home-hero-desc">
 						<p class="txt fs-14 fw-500 trans-upper">&gt; Open for any collaborations and offers</p>
 					</div>
-					<div class="home-hero-logo">
-						<div class="home-hero-logo-ic">
-							<IconLogo />
-						</div>
-					</div>
 				</div>
 				<div class="home-hero-top top-right">
 					<div class="home-hero-top-title">
@@ -80,6 +75,13 @@ import IconShape4 from '../components/icons/IconShape-4.astro';
 					<div class="home-hero-top-info">
 						<p class="txt fs-14 fw-500 trans-upper">Hanoi, VietNam</p>
 						<p class="txt fs-14 fw-500 trans-upper">22:06:16</p>
+					</div>
+				</div>
+				<div class="home-hero-top top-logo">
+					<div class="home-hero-logo">
+						<div class="home-hero-logo-ic">
+							<IconLogo />
+						</div>
 					</div>
 				</div>
 				<div class="home-hero-bottom">
@@ -115,6 +117,7 @@ import IconShape4 from '../components/icons/IconShape-4.astro';
 				<div class="home-works-decor">
 					<div class="home-works-svg">
 						<IconWorksDecor />
+						<canvas class="home-works-path-canvas" aria-hidden="true"></canvas>
 					</div>
 				</div>
 			</div>

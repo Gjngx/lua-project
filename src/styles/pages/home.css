@@ -63,6 +63,16 @@
 	grid-row: 1 / 1;
 }
 
+.home-hero-top.top-logo {
+	grid-column: 2 / -2;
+	grid-row: 1 / 1;
+	align-self: end;
+	position: sticky;
+	top: 0;
+	height: fit-content;
+	width: fit-content;
+}
+
 .home-hero-top.top-right {
 	grid-column: 13 / -2;
 	grid-row: 1 / 1;
@@ -71,15 +81,16 @@
 .home-hero-desc {
 	width: 12.2rem;
 	color: var(--cl-white);
+	margin-bottom: min(52.1rem, 53.0549898167vh);
 }
 
 .home-hero-logo {
-	margin-top: min(17rem, 17.3116089613vh);
-	margin-bottom: min(3.2rem, 3.2586558045vh);
+	padding-top: 2.8rem;
+	padding-bottom: 3.2rem;
 }
 
 .home-hero-logo-ic {
-	width: 65.1rem;
+	height: min(31.9rem, 32.4847250509vh);
 	color: var(--cl-brand);
 }
 
@@ -105,7 +116,7 @@
 	align-items: center;
 	width: 24.6rem;
 	color: var(--cl-content-soft-2);
-	margin-bottom: min(3.2rem, 3.2586558045vh);
+	margin-bottom: 3.2rem;
 }
 
 .home-hero-bottom {
@@ -189,11 +200,42 @@
 }
 
 .home-works-svg {
+	position: relative;
 	margin-top: 4rem;
 	width: 100%;
 	color: var(--cl-brand-soft-light);
 	transition: color 0.4s ease;
-	pointer-events: auto;
+}
+
+.home-works-svg > svg {
+	display: block;
+}
+
+.home-works-path-canvas {
+	--path-canvas-overscan: clamp(6rem, 8vw, 12rem);
+	position: absolute;
+	top: calc(0px - var(--path-canvas-overscan));
+	left: calc(0px - var(--path-canvas-overscan));
+	width: calc(100% + var(--path-canvas-overscan) + var(--path-canvas-overscan));
+	height: calc(100% + var(--path-canvas-overscan) + var(--path-canvas-overscan));
+	pointer-events: none;
+	visibility: hidden;
+}
+
+.home-works-svg.is-path-particles-active > svg {
+	visibility: hidden;
+}
+
+.home-works-svg.is-path-particles-active > .home-works-path-canvas {
+	visibility: visible;
+}
+
+.home-works-svg.is-path-particles-assembled > svg {
+	visibility: visible;
+}
+
+.home-works-svg.is-path-particles-assembled > .home-works-path-canvas {
+	visibility: hidden;
 }
 
 .home-works-main,

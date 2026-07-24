@@ -1,6 +1,7 @@
 import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit, ParallaxImage } from '../../core/helpers.js';
+import { SvgPathParticles } from '../../core/svg-path-particles.js';
 
 const HERO_VIDEO_FPS = 24;
 const HERO_VIDEO_SEEK_THRESHOLD = 1 / (HERO_VIDEO_FPS * 2);
@@ -203,6 +204,7 @@ export const HomePage = {
 		}
 
 		animationScrub() {
+			const homeLogoHeight = this.el.querySelector('.home-hero-logo').offsetHeight;
 			gsap.set(this.el.querySelector('.home-hero-decor-inner'), {
 				xPercent: -96,
 				yPercent: 76,
@@ -211,17 +213,17 @@ export const HomePage = {
 
 			this.tlHeroTop = gsap.timeline({
 				scrollTrigger: {
-					trigger: this.el.querySelector('.home-hero-top.top-left'),
+					trigger: this.el.querySelector('.home-hero-top.top-right'),
 					start: 'top top',
-					end: 'bottom top',
-					scrub: true,
+					end: `bottom top+=${cvUnit(100, 'rem')}`,
+					scrub: true
 				}
 			});
-			this.tlHeroTop.to(this.el.querySelector('.home-hero-logo-ic'), {
-				scale: 0.3072,
-				transformOrigin: 'left center',
-				ease: 'none'
-			});
+			this.tlHeroTop.
+				to(this.el.querySelector('.home-hero-logo-ic'), {
+					height: cvUnit(40, 'rem'),
+					ease: 'none'
+				});
 
 			this.tlHeroBot = gsap.timeline({
 				scrollTrigger: {
@@ -287,6 +289,8 @@ export const HomePage = {
 			this.el = null;
 			this.tlWorksTop = null;
 			this.tlWorksScroll = null;
+			this.tlWorksDecorAssembly = null;
+			this.worksPathParticles = null;
 		}
 
 		trigger(data) {
@@ -336,6 +340,34 @@ export const HomePage = {
 		}
 
 		animationScrub() {
+			const decorSvg = this.el.querySelector('.home-works-svg svg');
+			const decorCanvas = this.el.querySelector('.home-works-path-canvas');
+			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+			if (decorSvg && decorCanvas && !prefersReducedMotion) {
+				this.worksPathParticles = new SvgPathParticles(decorSvg, decorCanvas);
+				const assemblyState = { progress: 0 };
+
+				this.tlWorksDecorAssembly = gsap.timeline({
+					scrollTrigger: {
+						trigger: this.el.querySelector('.home-works--decor'),
+						start: 'top bottom',
+						end: 'top top',
+						scrub: true,
+						invalidateOnRefresh: true,
+					}
+				});
+
+				this.tlWorksDecorAssembly.to(assemblyState, {
+					progress: 1,
+					duration: 1,
+					ease: 'none',
+					onUpdate: () => {
+						this.worksPathParticles?.render(assemblyState.progress);
+					},
+				});
+			}
+
 			this.tlWorksTop = gsap.timeline({
 				scrollTrigger: {
 					trigger: this.el.querySelector('.home-works-list'),
@@ -406,6 +438,11 @@ export const HomePage = {
 
 		destroy() {
 			super.cleanTrigger();
+			if (this.tlWorksDecorAssembly?.scrollTrigger) {
+				this.tlWorksDecorAssembly.scrollTrigger.kill();
+			}
+			if (this.tlWorksDecorAssembly) this.tlWorksDecorAssembly.kill();
+			if (this.worksPathParticles) this.worksPathParticles.destroy();
 			if (this.tlWorksTop) this.tlWorksTop.kill();
 			if (this.tlWorksScroll) this.tlWorksScroll.kill();
 			
