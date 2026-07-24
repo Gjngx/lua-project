@@ -5,6 +5,10 @@ import { SvgPathParticles } from '../../core/svg-path-particles.js';
 
 const HERO_VIDEO_FPS = 24;
 const HERO_VIDEO_SEEK_THRESHOLD = 1 / (HERO_VIDEO_FPS * 2);
+const WORKS_TRANSITION_ROTATION = 125;
+const WORKS_TRANSITION_MAX_SCALE = 14;
+const WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS = 0.283;
+const WORKS_TRANSITION_BACKGROUND_SPAN = 0.12;
 
 export const HomePage = {
 	Hero: class {
@@ -296,6 +300,12 @@ export const HomePage = {
 			this.transitionItems = null;
 			this.transitionPaths = [];
 			this.transitionState = null;
+			this.transitionInner = null;
+			this.transitionCurrentContent = null;
+			this.transitionNextContent = null;
+			this.transitionSwapProgress = WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS;
+			this.isNextContentVisible = null;
+			this.transitionBackgroundTween = null;
 			this.onTransitionResize = null;
 		}
 
@@ -398,46 +408,45 @@ export const HomePage = {
 			const transitionItems = this.el.querySelectorAll('.home-works-trans-item-inner');
 			const currentContent = this.el.querySelector('.home-works-main');
 			const nextContent = this.el.querySelector('.home-works-bottom-title');
-			const usesCanvasMask = this.setupTransitionCanvas(transition, transitionItems);
-
-			this.tlWorksScroll
-			.set(nextContent, {
-				opacity: 0,
-			}, 0)
-			.to(currentContent, {
-				opacity: 0,
-				duration: 0.01,
-			}, 0.283)
-			.to(nextContent, {
-				opacity: 1,
-				duration: 0.01,
-			}, 0.283)
-			.to(this.el, {
+			this.transitionInner = transitionInner;
+			this.transitionItems = transitionItems;
+			this.transitionCurrentContent = currentContent;
+			this.transitionNextContent = nextContent;
+			this.transitionState = {
+				progress: 0,
+				rotate: 0,
+				scale: 1,
+			};
+			this.transitionBackgroundTween = gsap.to(this.el, {
 				backgroundColor: 'var(--cl-bg-main)',
-				duration: 0.02,
-			}, 0.283)
-			if (usesCanvasMask) {
-				this.tlWorksScroll.to(this.transitionState, {
-					rotate: 125,
-					scale: 14,
-					duration: 1,
-					ease: 'none',
-					onUpdate: () => this.drawTransitionCanvas(),
-				}, 0);
-			} else {
-				this.tlWorksScroll
-				.to(transitionInner, {
-					rotate: 125,
-					duration: 1,
-					ease: 'none'
-				}, 0)
-				.to(transitionItems, {
-					scale: 12,
-					duration: 1,
-					ease: 'none',
-					force3D: false,
-				}, 0);
-			}
+				duration: 1,
+				ease: 'none',
+				paused: true,
+			});
+			const usesCanvasMask = this.setupTransitionCanvas(transition, transitionItems);
+			this.transitionSwapProgress = this.calculateTransitionSwapProgress();
+			this.updateTransitionContent(true);
+
+			this.tlWorksScroll.to(this.transitionState, {
+				progress: 1,
+				rotate: WORKS_TRANSITION_ROTATION,
+				scale: WORKS_TRANSITION_MAX_SCALE,
+				duration: 1,
+				ease: 'none',
+				onUpdate: () => {
+					if (usesCanvasMask) {
+						this.drawTransitionCanvas();
+					} else {
+						gsap.set(transitionInner, { rotate: this.transitionState.rotate });
+						gsap.set(transitionItems, {
+							scale: this.transitionState.scale,
+							force3D: false,
+						});
+					}
+
+					this.updateTransitionContent();
+				},
+			}, 0);
 		}
 
 		setupTransitionCanvas(transition, transitionItems) {
@@ -461,17 +470,119 @@ export const HomePage = {
 			this.transitionCanvas = canvas;
 			this.transitionContext = canvas.getContext('2d');
 			this.transitionItems = transitionItems;
-			this.transitionState = { rotate: 0, scale: 1 };
 
 			if (!this.transitionContext) {
 				return false;
 			}
 
 			transition.classList.add('is-canvas-active');
-			this.onTransitionResize = () => this.drawTransitionCanvas();
+			this.onTransitionResize = () => {
+				this.drawTransitionCanvas();
+				this.transitionSwapProgress = this.calculateTransitionSwapProgress();
+				this.updateTransitionContent(true);
+			};
 			window.addEventListener('resize', this.onTransitionResize);
 			this.drawTransitionCanvas();
 			return true;
+		}
+
+		calculateTransitionSwapProgress() {
+			const canvas = this.transitionCanvas;
+			const context = this.transitionContext;
+			const firstItem = this.transitionItems?.[0];
+
+			if (!canvas || !context || !firstItem || this.transitionPaths.length !== 4) {
+				return WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS;
+			}
+
+			const innerSize = Math.min(canvas.clientWidth, canvas.clientHeight);
+			const shapeSize = firstItem.offsetWidth;
+
+			if (!innerSize || !shapeSize) {
+				return WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS;
+			}
+
+			const halfShape = shapeSize / 2;
+			const focalPoint = innerSize / 2;
+			const shapeCenters = [
+				[-halfShape, -halfShape],
+				[innerSize + halfShape, -halfShape],
+				[-halfShape, innerSize + halfShape],
+				[innerSize + halfShape, innerSize + halfShape],
+			];
+
+			const overlapCountAt = (progress) => {
+				const scale = 1 + (WORKS_TRANSITION_MAX_SCALE - 1) * progress;
+				const pathScale = (shapeSize / 250) * scale;
+
+				context.save();
+				context.setTransform(1, 0, 0, 1, 0, 0);
+				const overlapCount = this.transitionPaths.reduce((count, path, index) => {
+					const [centerX, centerY] = shapeCenters[index];
+					const pathX = (focalPoint - centerX) / pathScale + 125;
+					const pathY = (focalPoint - centerY) / pathScale + 125;
+
+					return count + Number(context.isPointInPath(path, pathX, pathY));
+				}, 0);
+				context.restore();
+
+				return overlapCount;
+			};
+
+			if (overlapCountAt(1) < 2) {
+				return WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS;
+			}
+
+			let start = 0;
+			let end = 1;
+
+			for (let index = 0; index < 24; index += 1) {
+				const middle = (start + end) / 2;
+
+				if (overlapCountAt(middle) >= 2) {
+					end = middle;
+				} else {
+					start = middle;
+				}
+			}
+
+			return Math.min(1, end + 0.002);
+		}
+
+		updateTransitionContent(force = false) {
+			if (
+				!this.transitionState ||
+				!this.transitionCurrentContent ||
+				!this.transitionNextContent
+			) {
+				return;
+			}
+
+			const showNextContent = this.transitionState.progress >= this.transitionSwapProgress;
+			const backgroundProgress = gsap.utils.clamp(
+				0,
+				1,
+				(this.transitionState.progress - this.transitionSwapProgress) /
+					WORKS_TRANSITION_BACKGROUND_SPAN
+			);
+
+			this.transitionBackgroundTween?.progress(backgroundProgress);
+
+			if (!force && showNextContent === this.isNextContentVisible) {
+				return;
+			}
+
+			this.isNextContentVisible = showNextContent;
+			gsap.to(this.transitionCurrentContent, {
+				opacity: showNextContent ? 0 : 1,
+				duration: 0.01,
+				overwrite: true,
+			});
+			gsap.to(this.transitionNextContent, {
+				opacity: showNextContent ? 1 : 0,
+				duration: 0.01,
+				overwrite: true,
+			});
 		}
 
 		drawTransitionCanvas() {
@@ -542,6 +653,7 @@ export const HomePage = {
 			if (this.worksPathParticles) this.worksPathParticles.destroy();
 			if (this.tlWorksTop) this.tlWorksTop.kill();
 			if (this.tlWorksScroll) this.tlWorksScroll.kill();
+			if (this.transitionBackgroundTween) this.transitionBackgroundTween.kill();
 			if (this.onTransitionResize) {
 				window.removeEventListener('resize', this.onTransitionResize);
 			}
@@ -559,6 +671,12 @@ export const HomePage = {
 			this.transitionItems = null;
 			this.transitionPaths = [];
 			this.transitionState = null;
+			this.transitionInner = null;
+			this.transitionCurrentContent = null;
+			this.transitionNextContent = null;
+			this.transitionSwapProgress = WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS;
+			this.isNextContentVisible = null;
+			this.transitionBackgroundTween = null;
 			this.onTransitionResize = null;
 		}
 	},
