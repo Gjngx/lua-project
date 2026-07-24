@@ -407,15 +407,15 @@ export const HomePage = {
 			.to(currentContent, {
 				opacity: 0,
 				duration: 0.01,
-			}, 0.338)
+			}, 0.283)
 			.to(nextContent, {
 				opacity: 1,
 				duration: 0.01,
-			}, 0.338)
+			}, 0.283)
 			.to(this.el, {
 				backgroundColor: 'var(--cl-bg-main)',
 				duration: 0.02,
-			}, 0.338)
+			}, 0.283)
 			if (usesCanvasMask) {
 				this.tlWorksScroll.to(this.transitionState, {
 					rotate: 125,
