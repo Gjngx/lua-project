@@ -35,7 +35,7 @@ export class AudioManager {
 
 			const totalSeconds = Math.floor(this.totalAccumulatedTime + currentTime);
 
-			const textEl = document.querySelector('.header-shape-text .txt');
+			const textEl = document.querySelector('.header-shape-time .txt');
 			if (textEl) {
 				const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
 				const s = (totalSeconds % 60).toString().padStart(2, '0');

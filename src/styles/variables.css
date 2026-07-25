@@ -21,11 +21,13 @@
 	--cl-content-soft-2: rgba(255, 255, 255, 0.60);
 	--cl-content-note: rgba(40, 44, 7, 0.40);
 
+	--cl-content-disable: rgba(40, 44, 7, 0.16);
+
 	--cl-decoy-blend: #2A05FF;
 
 	--cl-bg-main: #F1F1F1;
 	--cl-bg-black: #1A1A1A;
-
+	--cl-bg-overlay: rgba(0, 0, 0, 0.24);
 	--cl-border-main: rgba(40, 44, 7, 0.16);
 
 }

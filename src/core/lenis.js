@@ -48,9 +48,9 @@ export class SmoothScroll {
 		this.lenis = new Lenis({
 			content: contentEl,
 			wrapper: wrapperEl,
-			// Lerp thấp hơn = quán tính cao hơn, cảm giác scroll nặng hơn.
-			lerp: 0.04,
-			wheelMultiplier: 0.6,
+			// Lerp cao hơn = phản hồi nhanh hơn, cảm giác scroll nhẹ hơn.
+			lerp: 0.08,
+			wheelMultiplier: 0.85,
 			syncTouch: false,
 			...(viewport.w <= 767 && CONFIG_INSTANT)
 		});
