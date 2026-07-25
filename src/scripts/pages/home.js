@@ -720,46 +720,92 @@ export const HomePage = {
 				}
 			});
 			this.tlIntroScroll
-				.to(document.querySelector('.home-works-bottom'), { y: '38vh', ease: 'none' });
+				.to(document.querySelector('.home-works-bottom'), { y: '30vh', ease: 'none' })
+
 
 			this.tlItemScrolls = [];
 			const thumbItems = this.el.querySelectorAll('.home-how-thumb-item');
 			const contentItems = this.el.querySelectorAll('.home-how-content-item');
 			const contentList = this.el.querySelector('.home-how-content-list');
 
-      const thumbHieght = thumbItems[0].offsetHeight;
-      if (thumbItems.length > 0) {
-      	thumbItems[thumbItems.length - 1].style.paddingBottom = `calc(${thumbHieght / 2}px - 3.2rem)`;
-      }
-
 			thumbItems.forEach((thumb, index) => {
+				const frame = thumb.querySelector('.home-how-thumb-item-inner');
+				const direction = index % 2 === 0 ? 1 : -1;
+				const clipPath = this.el.querySelector(`#home-how-clip-${index + 1} path`);
+				const shapeA = 'M .055 .098 L .985 .002 Q 1 0 .998 .015 L .953 .985 Q .95 1 .935 .998 L .015 .882 Q 0 .88 .002 .865 L .038 .115 Q .04 .1 .055 .098 Z';
+				const shapeB = 'M .015 .002 L .945 .098 Q .96 .1 .962 .115 L .998 .865 Q 1 .88 .985 .882 L .065 .998 Q .05 1 .047 .985 L .002 .015 Q 0 0 .015 .002 Z';
+				const fromShape = direction === 1 ? shapeA : shapeB;
+				const toShape = direction === 1 ? shapeB : shapeA;
+				gsap.set(frame, { clipPath: `url(#home-how-clip-${index + 1})` });
 				const tl = gsap.timeline({
 					scrollTrigger: {
 						trigger: thumb,
-						start: `top center+=${thumbHieght / 2}px`,
-						end: `top center-=${thumbHieght / 2}px`,
+						start: 'top bottom',
+						end: 'bottom top',
 						scrub: true,
-						onEnter: () => {
-							if (index === 0) contentList.classList.add('active-ic');
-							contentItems.forEach(el => el.classList.remove('active'));
-							if (contentItems[index]) contentItems[index].classList.add('active');
-						},
-						onEnterBack: () => {
-							if (index === thumbItems.length - 1) contentList.classList.add('active-ic');
-							contentItems.forEach(el => el.classList.remove('active'));
-							if (contentItems[index]) contentItems[index].classList.add('active');
-						},
-						onLeave: () => {
-							if (index === thumbItems.length - 1) contentList.classList.remove('active-ic');
-							contentItems.forEach(el => el.classList.remove('active'));
-						},
-						onLeaveBack: () => {
-							if (index === 0) contentList.classList.remove('active-ic');
-							contentItems.forEach(el => el.classList.remove('active'));
-						}
 					}
 				});
+
+				tl
+					.fromTo(
+						frame,
+						{ scale: 0.5 },
+						{
+							scale: 0.75,
+							duration: 0.25,
+							ease: 'none'
+						}
+					)
+					.fromTo(clipPath, { attr: { d: fromShape } }, {
+						attr: { d: toShape },
+						duration: 0.25,
+						ease: 'none'
+					}, 0)
+					.to(frame, {
+						scale: 1,
+						duration: 0.25,
+						ease: 'none'
+					})
+					.to(clipPath, { attr: { d: fromShape }, duration: 0.25, ease: 'none' }, '<')
+					.to(frame, {
+						scale: 0.75,
+						duration: 0.25,
+						ease: 'none'
+					})
+					.to(clipPath, { attr: { d: toShape }, duration: 0.25, ease: 'none' }, '<')
+					.to(frame, {
+						scale: 0.5,
+						duration: 0.25,
+						ease: 'none'
+					})
+					.to(clipPath, { attr: { d: fromShape }, duration: 0.25, ease: 'none' }, '<');
+
 				this.tlItemScrolls.push(tl);
+
+				const contentTrigger = ScrollTrigger.create({
+					trigger: thumb,
+					start: `top center`,
+					end: `bottom center`,
+					onEnter: () => {
+						if (index === 0) contentList.classList.add('active-ic');
+						contentItems.forEach(el => el.classList.remove('active'));
+						if (contentItems[index]) contentItems[index].classList.add('active');
+					},
+					onEnterBack: () => {
+						if (index === thumbItems.length - 1) contentList.classList.add('active-ic');
+						contentItems.forEach(el => el.classList.remove('active'));
+						if (contentItems[index]) contentItems[index].classList.add('active');
+					},
+					onLeave: () => {
+						if (index === thumbItems.length - 1) contentList.classList.remove('active-ic');
+						contentItems.forEach(el => el.classList.remove('active'));
+					},
+					onLeaveBack: () => {
+						if (index === 0) contentList.classList.remove('active-ic');
+						contentItems.forEach(el => el.classList.remove('active'));
+					}
+				});
+				this.tlItemScrolls.push(contentTrigger);
 			});
 		}
 

@@ -370,6 +370,17 @@ import IconShape4 from '../components/icons/IconShape-4.astro';
 						</div>
 					</div>
 				</div>
+				<svg class="home-how-clip-defs" aria-hidden="true">
+					<defs>
+						{
+							[1, 2, 3].map((id) => (
+								<clipPath id={`home-how-clip-${id}`} clipPathUnits="objectBoundingBox">
+									<path d="M .055 .098 L .985 .002 Q 1 0 .998 .015 L .953 .985 Q .95 1 .935 .998 L .015 .882 Q 0 .88 .002 .865 L .038 .115 Q .04 .1 .055 .098 Z" />
+								</clipPath>
+							))
+						}
+					</defs>
+				</svg>
 				<div class="home-how-thumb">
 					<div class="home-how-thumb-inner">
 						<div class="home-how-thumb-item">
