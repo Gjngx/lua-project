@@ -865,17 +865,34 @@ export const HomePage = {
 			this.hoverCleanups = [];
 		}
 	},
-	Playground: class {
+	Playground: class extends TriggerSetup {
 		constructor() {
+			super();
 			this.el = null;
 			this.canvasScenes = [];
+			this.tlTransition = null;
 		}
 
-		setup(data) {
-			this.el = data.next.container.querySelector('.home-playground');
+		trigger(data) {
+			this.el = data.next.container.querySelector('.home-playground-wrap');
+			if (!this.el) return;
+			super.setTrigger(this.el, this.onTrigger.bind(this));
+		}
+
+		onTrigger() {
+			this.setupCanvas();
+			this.animationReveal();
+			this.animationScrub();
+			this.interact();
+		}
+
+		setupCanvas() {
+			if (!this.el || this.canvasScenes.length) return;
+
+			const playground = this.el.querySelector('.home-playground');
 			const backCanvas = this.el?.querySelector('.home-playground-canvas--back');
 			const frontCanvas = this.el?.querySelector('.home-playground-canvas--front');
-			if (!this.el || !backCanvas || !frontCanvas) return;
+			if (!playground || !backCanvas || !frontCanvas) return;
 
 			try {
 				const imageUrls = JSON.parse(backCanvas.dataset.images || '[]');
@@ -884,13 +901,13 @@ export const HomePage = {
 				this.canvasScenes = [
 					new SphericalImageCanvas({
 						canvas: backCanvas,
-						root: this.el,
+						root: playground,
 						imageUrls,
 						layer: 'back',
 					}),
 					new SphericalImageCanvas({
 						canvas: frontCanvas,
-						root: this.el,
+						root: playground,
 						imageUrls,
 						layer: 'front',
 					}),
@@ -904,9 +921,39 @@ export const HomePage = {
 			}
 		}
 
+		animationReveal() {
+		}
+
+		animationScrub() {
+			const transition = this.el?.querySelector('.home-playground-trans');
+			const transitionInner = transition?.querySelector('.home-playground-trans-inner');
+			if (!transition || !transitionInner) return;
+
+			this.tlTransition = gsap.timeline({
+				scrollTrigger: {
+					trigger: transition,
+					start: 'center bottom',
+					end: 'bottom top',
+					scrub: true
+				}
+			});
+			this.tlTransition.to(transitionInner, {
+				scaleX: 1.2,
+				scaleY: 0,
+				transformOrigin: 'top center',
+				ease: 'none'
+			});
+		}
+
+		interact() {
+		}
+
 		destroy() {
+			super.cleanTrigger();
 			this.canvasScenes.forEach((scene) => scene.destroy());
 			this.canvasScenes = [];
+			if (this.tlTransition) this.tlTransition.kill();
+			this.tlTransition = null;
 			this.el = null;
 		}
 	}

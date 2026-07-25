@@ -658,7 +658,25 @@
 	margin-top: 1.6rem;
 }
 
-@media (max-width: 767px) {
+.home-playground-trans {
+	position: relative;
+	height: min(12rem, 13.3333333333vh);
+	margin-top: -1px;
+	overflow: hidden;
+	background-color: var(--cl-white);
+	pointer-events: none;
+}
+
+.home-playground-trans-inner {
+	width: 100%;
+	height: 100%;
+	background-color: var(--cl-bg-main);
+	clip-path: ellipse(50% 100% at 50% 0%);
+	transform-origin: top center;
+	will-change: transform;
+}
+
+/* @media (max-width: 767px) {
 	.home-playground-main-inner {
 		max-width: calc(100vw - 4rem);
 		padding: 2.4rem;
@@ -675,7 +693,7 @@
 	.home-playground-main-content {
 		gap: 1.6rem;
 	}
-}
+} */
 
 @media (prefers-reduced-motion: reduce) {
 	.home-playground-main-inner {
