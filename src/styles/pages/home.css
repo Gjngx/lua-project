@@ -502,13 +502,18 @@
 .home-how-thumb-inner {
 	display: flex;
 	flex-direction: column;
-	padding-bottom: 16rem;
+	padding-bottom: 32rem;
 }
 
 .home-how-thumb-item {
 	padding-top: 6rem;
 	padding-bottom: 6rem;
 	pointer-events: auto;
+	perspective: 100rem;
+}
+
+.home-how-thumb-item:last-child {
+	padding-bottom: 0;
 }
 
 .home-how-clip-defs {
@@ -520,13 +525,12 @@
 
 .home-how-thumb-item-inner {
 	will-change: transform;
+	transform-style: preserve-3d;
 }
 
 .home-how-thumb-item-img {
+	width: 50.9rem;
 	display: block;
 	transform-origin: center;
 	will-change: transform;
-	width: 50.9rem;
-	border-radius: 1.6rem;
-	overflow: hidden;
 }

@@ -121,6 +121,18 @@ a {
 	transition: width .6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Dark Variant */
+.btn-dark .btn-inner {
+	color: var(--cl-white);
+}
+.btn-dark .btn-ic {
+	background-color: var(--cl-bg-black);
+	color: var(--cl-white);
+}
+.btn-dark .btn-bg {
+	background-color: var(--cl-bg-black);
+}
+
 /* Audio Popup */
 .audio-popup {
 	position: fixed;

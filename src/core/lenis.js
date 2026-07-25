@@ -49,8 +49,8 @@ export class SmoothScroll {
 			content: contentEl,
 			wrapper: wrapperEl,
 			// Lerp thấp hơn = quán tính cao hơn, cảm giác scroll nặng hơn.
-			lerp: 0.075,
-			wheelMultiplier: 0.9,
+			lerp: 0.04,
+			wheelMultiplier: 0.6,
 			syncTouch: false,
 			...(viewport.w <= 767 && CONFIG_INSTANT)
 		});

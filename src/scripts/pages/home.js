@@ -686,6 +686,7 @@ export const HomePage = {
 			this.el = null;
 			this.tlIntroScroll = null;
 			this.tlItemScroll = null;
+			this.hoverCleanups = [];
 
 		}
 
@@ -810,6 +811,47 @@ export const HomePage = {
 		}
 
 		interact() {
+			const cards = this.el.querySelectorAll('.home-how-thumb-item');
+
+			cards.forEach((card) => {
+				const frame = card.querySelector('.home-how-thumb-item-inner');
+
+				const onPointerMove = (event) => {
+					const rect = card.getBoundingClientRect();
+					const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+					const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+
+					gsap.to(frame, {
+						rotationX: -y * 10,
+						rotationY: x * 12,
+						x: x * 8,
+						y: y * 8,
+						duration: 0.35,
+						ease: 'power2.out',
+						overwrite: 'auto'
+					});
+				};
+
+				const onPointerLeave = () => {
+					gsap.to(frame, {
+						rotationX: 0,
+						rotationY: 0,
+						x: 0,
+						y: 0,
+						duration: 0.7,
+						ease: 'elastic.out(1, 0.4)',
+						overwrite: 'auto'
+					});
+				};
+
+				card.addEventListener('pointermove', onPointerMove);
+				card.addEventListener('pointerleave', onPointerLeave);
+				this.hoverCleanups.push(() => {
+					card.removeEventListener('pointermove', onPointerMove);
+					card.removeEventListener('pointerleave', onPointerLeave);
+					gsap.killTweensOf(frame);
+				});
+			});
 		}
 
 		destroy() {
@@ -818,6 +860,8 @@ export const HomePage = {
 			if (this.tlItemScrolls) {
 				this.tlItemScrolls.forEach(tl => tl.kill());
 			}
+			this.hoverCleanups.forEach(cleanup => cleanup());
+			this.hoverCleanups = [];
 		}
 	}
 };
