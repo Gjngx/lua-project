@@ -1,0 +1,11 @@
+---
+// IconLeafDouble
+export interface Props {
+	mirrored?: boolean;
+}
+const { mirrored = false } = Astro.props;
+---
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 12 24" fill="none" style={mirrored ? 'transform: scaleX(-1)' : undefined}>
+	<path d="M0.0010252 24.001C0.0010252 17.5197 5.25514 12.2656 11.7364 12.2656C11.7364 18.7469 6.48231 24.001 0.0010252 24.001Z" fill="currentColor"></path>
+	<path d="M0.0010252 0.000927925C0.0010252 6.48221 5.25514 11.7363 11.7364 11.7363C11.7364 5.25504 6.48231 0.000927925 0.0010252 0.000927925Z" fill="currentColor"></path>
+</svg>

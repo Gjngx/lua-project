@@ -2,6 +2,7 @@ import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit, ParallaxImage } from '../../core/helpers.js';
 import { SvgPathParticles } from '../../core/svg-path-particles.js';
+import { SphericalImageCanvas } from '../../core/spherical-image-canvas.js';
 
 const HERO_VIDEO_FPS = 24;
 const HERO_VIDEO_SEEK_THRESHOLD = 1 / (HERO_VIDEO_FPS * 2);
@@ -862,6 +863,51 @@ export const HomePage = {
 			}
 			this.hoverCleanups.forEach(cleanup => cleanup());
 			this.hoverCleanups = [];
+		}
+	},
+	Playground: class {
+		constructor() {
+			this.el = null;
+			this.canvasScenes = [];
+		}
+
+		setup(data) {
+			this.el = data.next.container.querySelector('.home-playground');
+			const backCanvas = this.el?.querySelector('.home-playground-canvas--back');
+			const frontCanvas = this.el?.querySelector('.home-playground-canvas--front');
+			if (!this.el || !backCanvas || !frontCanvas) return;
+
+			try {
+				const imageUrls = JSON.parse(backCanvas.dataset.images || '[]');
+				if (!imageUrls.length) return;
+
+				this.canvasScenes = [
+					new SphericalImageCanvas({
+						canvas: backCanvas,
+						root: this.el,
+						imageUrls,
+						layer: 'back',
+					}),
+					new SphericalImageCanvas({
+						canvas: frontCanvas,
+						root: this.el,
+						imageUrls,
+						layer: 'front',
+					}),
+				];
+				this.canvasScenes.forEach((scene) => scene.init());
+			} catch (error) {
+				console.warn('[Home Playground] Không thể khởi tạo WebGL:', error);
+				this.canvasScenes.forEach((scene) => scene.destroy());
+				this.canvasScenes = [];
+				this.el.classList.add('is-static');
+			}
+		}
+
+		destroy() {
+			this.canvasScenes.forEach((scene) => scene.destroy());
+			this.canvasScenes = [];
+			this.el = null;
 		}
 	}
 };

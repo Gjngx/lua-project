@@ -1,5 +1,6 @@
 .footer-inner{
 	height: 100vh;
+	background-color: var(--cl-white);
 }
 .footer-inner .container{
 	grid-template-rows: auto 1fr auto;
