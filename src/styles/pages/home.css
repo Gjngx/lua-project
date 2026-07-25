@@ -490,6 +490,7 @@
 }
 
 .home-how-content-item-label {
+	color: var(--cl-content-soft);
 	margin-bottom: 2.4rem;
 }
 
