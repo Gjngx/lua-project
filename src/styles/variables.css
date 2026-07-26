@@ -1,6 +1,6 @@
 :root {
 	--container--max-width: 1000vw;
-	--container--padding: 6.4rem;
+	--container--padding: 4rem;
 	--container--column-gap: 1.6rem;
 	--1px: max(1px, .1rem);
 	--container--one-column: calc((var(--container--width) - ((var(--container--column) - 1) * var(--container--column-gap)) - (var(--container--padding) * 2)) / var(--container--column));
