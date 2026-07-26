@@ -918,8 +918,8 @@ export const HomePage = {
 				const frame = thumb.querySelector('.home-how-thumb-item-inner');
 				const direction = index % 2 === 0 ? 1 : -1;
 				const clipPath = this.el.querySelector(`#home-how-clip-${index + 1} path`);
-				const shapeA = 'M .055 .098 L .985 .002 Q 1 0 .998 .015 L .953 .985 Q .95 1 .935 .998 L .015 .882 Q 0 .88 .002 .865 L .038 .115 Q .04 .1 .055 .098 Z';
-				const shapeB = 'M .015 .002 L .945 .098 Q .96 .1 .962 .115 L .998 .865 Q 1 .88 .985 .882 L .065 .998 Q .05 1 .047 .985 L .002 .015 Q 0 0 .015 .002 Z';
+				const shapeA = 'M .082 .095 L .958 .004 Q 1 0 .995 .042 L .954 .958 Q .95 1 .908 .995 L .042 .886 Q 0 .88 .005 .838 L .036 .142 Q .04 .1 .082 .095 Z';
+				const shapeB = 'M .042 .005 L .908 .095 Q .96 .1 .964 .142 L .995 .838 Q 1 .88 .958 .886 L .092 .995 Q .05 1 .046 .958 L .005 .042 Q 0 0 .042 .005 Z';
 				const fromShape = direction === 1 ? shapeA : shapeB;
 				const toShape = direction === 1 ? shapeB : shapeA;
 				gsap.set(frame, { clipPath: `url(#home-how-clip-${index + 1})` });
