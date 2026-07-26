@@ -145,6 +145,23 @@
 	color: inherit;
 }
 
+.header-shape-ic {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+}
+
+.header-shape-ic:focus {
+	outline: none;
+}
+
+.header-shape-ic:focus-visible {
+	border-radius: 0.3rem;
+	outline: var(--1px) solid currentColor;
+	outline-offset: 0.25rem;
+}
+
 .header-shape-pause-ic{
 	width: 2rem;
 	height: 2rem;

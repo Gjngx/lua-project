@@ -214,6 +214,25 @@ export class Header {
 			});
 		}
 
+		const audioPlayPause = this.el.querySelector('.header-shape-ic');
+		if (audioPlayPause) {
+			audioPlayPause.addEventListener('click', (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				audioManager.toggle();
+			});
+
+			const updateAudioControl = (isPlaying) => {
+				audioPlayPause.setAttribute('aria-pressed', String(isPlaying));
+				audioPlayPause.setAttribute('aria-label', isPlaying ? 'Pause music' : 'Play music');
+			};
+
+			updateAudioControl(audioManager.isPlaying);
+			window.addEventListener('audio:state-change', (e) => {
+				updateAudioControl(e.detail.isPlaying);
+			});
+		}
+
 		// Đóng khi click ra ngoài
 		document.addEventListener('click', (e) => {
 			if (!this.isOpen) return;
