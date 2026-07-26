@@ -15,15 +15,38 @@ export class Header {
 		this.tlNav = null;
 		this.tlNameLoop = null;
 		this.navLenis = null;
+		this.headerResizeObserver = null;
+		this.headerMetrics = {
+			outerHeight: 0,
+			innerHeight: 0,
+		};
 	}
 
 	init(data) {
 		this.el = document.querySelector(".header");
 		if (!this.el) return;
 
+		this.setupHeaderMetrics();
 		this.toggleNav();
 		this.setupNavScroll();
 		this.setupScrollListener(data);
+	}
+
+	setupHeaderMetrics() {
+		const headerInner = this.el?.querySelector('.header-inner');
+		if (!this.el || !headerInner) return;
+
+		const updateMetrics = () => {
+			this.headerMetrics.outerHeight = this.el.offsetHeight;
+			this.headerMetrics.innerHeight = headerInner.offsetHeight;
+		};
+
+		updateMetrics();
+		if (this.headerResizeObserver) return;
+
+		this.headerResizeObserver = new ResizeObserver(updateMetrics);
+		this.headerResizeObserver.observe(this.el);
+		this.headerResizeObserver.observe(headerInner);
 	}
 
 	setupNavScroll() {
@@ -79,7 +102,7 @@ export class Header {
 	 */
 	toggleScroll(inst, data) {
 		if (!inst || !this.el) return;
-		const headerHeight = this.el.offsetHeight;
+		const headerHeight = this.headerMetrics.outerHeight;
 		if (inst.scroll > headerHeight * 2) {
 			this.el.classList.add("on-scroll");
 		} else {
@@ -92,7 +115,7 @@ export class Header {
 	 */
 	toggleHide(inst) {
 		if (!inst || !this.el) return;
-		const headerHeight = this.el.offsetHeight;
+		const headerHeight = this.headerMetrics.outerHeight;
 
 		if (inst.scroll <= headerHeight * 3) {
 			this.el.classList.remove("on-hide");
@@ -139,9 +162,7 @@ export class Header {
 	getCurrentSection(attribute, offset = cvUnit(25, "rem")) {
 		const sections = document.querySelectorAll(attribute);
 		let matchedSection = null;
-		const headerInner = this.el.querySelector('.header-inner');
-		if (!headerInner) return null;
-		const headerHeight = headerInner.offsetHeight;
+		const headerHeight = this.headerMetrics.innerHeight;
 
 		for (let i = 0; i < sections.length; i++) {
 			const rect = sections[i].getBoundingClientRect();
@@ -157,27 +178,33 @@ export class Header {
 
 	// ─── Dependent Elements (các phần tử phụ thuộc vào header hide/show) ──
 	onHideDependent() {
-		const headerInner = this.el.querySelector('.header-inner');
-		if (!headerInner) return;
-		const heightHeader = headerInner.offsetHeight;
+		if (!this.listDependent.length) return;
+
+		const heightHeader = this.headerMetrics.innerHeight;
 
 		if (!this.el.classList.contains('on-hide')) {
 			this.listDependent.forEach((entry) => {
 				const el = entry.el || entry;
 				const offset = entry.offset || 0;
-				el.style.top = `${heightHeader - offset}px`;
+				const nextTop = `${heightHeader - offset}px`;
+				if (entry.currentTop === nextTop) return;
+				el.style.top = nextTop;
+				if (entry.el) entry.currentTop = nextTop;
 			});
 		} else {
 			this.listDependent.forEach((entry) => {
 				const el = entry.el || entry;
 				const defaultTop = entry.defaultTop !== undefined ? entry.defaultTop : 0;
-				el.style.top = `${defaultTop}px`;
+				const nextTop = `${defaultTop}px`;
+				if (entry.currentTop === nextTop) return;
+				el.style.top = nextTop;
+				if (entry.el) entry.currentTop = nextTop;
 			});
 		}
 	}
 
 	registerDependent(dependentEl, offset = 0, defaultTop = 0) {
-		this.listDependent.push({ el: dependentEl, offset, defaultTop });
+		this.listDependent.push({ el: dependentEl, offset, defaultTop, currentTop: null });
 	}
 
 	unregisterDependent(dependentEl) {

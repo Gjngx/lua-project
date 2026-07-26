@@ -329,6 +329,13 @@ export const HomePage = {
 			this.isNextContentVisible = null;
 			this.transitionBackgroundTween = null;
 			this.onTransitionResize = null;
+			this.transitionMetrics = null;
+			this.rafId = null;
+			this.isVisible = false;
+			this.renderWorksFrame = null;
+			this.startWorksRender = null;
+			this.stopWorksRender = null;
+			this.onWorksVisibilityChange = null;
 		}
 
 		trigger(data) {
@@ -569,6 +576,7 @@ export const HomePage = {
 				});
 
 				this.viewSize = { w, h, width, height };
+				if (this.isVisible) this.startWorksRender?.();
 			};
 
 			window.addEventListener('resize', this.onResize);
@@ -582,32 +590,63 @@ export const HomePage = {
 			this.observer = new IntersectionObserver((entries) => {
 				this.isVisible = entries[0].isIntersecting;
 				canvas.style.visibility = this.isVisible ? 'visible' : 'hidden';
+				if (this.isVisible && !document.hidden) {
+					this.startWorksRender?.();
+				} else {
+					this.stopWorksRender?.();
+				}
 			}, { rootMargin: '100px 0px' }); // Render trước khi vào màn hình 100px
 			this.observer.observe(this.el);
 
-			const render = () => {
-				if (this.isVisible && this.viewSize) {
-					const { w, h, width, height } = this.viewSize;
-					const scrollY = window.scrollY;
-
-					this.meshes.forEach(obj => {
-						if (!obj.bounds) return;
-
-						// Tính vị trí Y hiện tại = Vị trí tuyệt đối ban đầu - Lượng cuộn chuột
-						const currentTop = obj.bounds.topOffset - scrollY;
-
-						const x = obj.bounds.left + obj.bounds.w / 2;
-						const y = currentTop + obj.bounds.h / 2;
-
-						obj.mesh.position.x = (x / w) * width - width / 2;
-						obj.mesh.position.y = -(y / h) * height + height / 2;
-					});
-
-					this.renderer.render({ scene, camera });
-				}
-				this.rafId = requestAnimationFrame(render);
+			this.stopWorksRender = () => {
+				if (this.rafId === null) return;
+				window.cancelAnimationFrame(this.rafId);
+				this.rafId = null;
 			};
-			this.rafId = requestAnimationFrame(render);
+
+			this.renderWorksFrame = () => {
+				this.rafId = null;
+				if (!this.isVisible || document.hidden || !this.viewSize || !this.renderer) return;
+
+				const { w, h, width, height } = this.viewSize;
+				const scrollY = window.scrollY;
+
+				this.meshes.forEach(obj => {
+					if (!obj.bounds) return;
+
+					const currentTop = obj.bounds.topOffset - scrollY;
+					const x = obj.bounds.left + obj.bounds.w / 2;
+					const y = currentTop + obj.bounds.h / 2;
+
+					obj.mesh.position.x = (x / w) * width - width / 2;
+					obj.mesh.position.y = -(y / h) * height + height / 2;
+				});
+
+				this.renderer.render({ scene, camera });
+				this.rafId = window.requestAnimationFrame(this.renderWorksFrame);
+			};
+
+			this.startWorksRender = () => {
+				if (
+					this.rafId !== null ||
+					!this.isVisible ||
+					document.hidden ||
+					!this.viewSize ||
+					!this.renderer
+				) {
+					return;
+				}
+				this.rafId = window.requestAnimationFrame(this.renderWorksFrame);
+			};
+
+			this.onWorksVisibilityChange = () => {
+				if (document.hidden) {
+					this.stopWorksRender?.();
+				} else if (this.isVisible) {
+					this.startWorksRender?.();
+				}
+			};
+			document.addEventListener('visibilitychange', this.onWorksVisibilityChange);
 		}
 
 		setupTransitionCanvas(transition, transitionItems) {
@@ -650,26 +689,64 @@ export const HomePage = {
 
 			transition.classList.add('is-canvas-active');
 			this.onTransitionResize = () => {
+				this.updateTransitionMetrics();
 				this.drawTransitionCanvas();
 				this.transitionSwapProgress = this.calculateTransitionSwapProgress();
 				this.updateTransitionContent(true);
 			};
 			window.addEventListener('resize', this.onTransitionResize);
-			this.drawTransitionCanvas();
+			this.onTransitionResize();
 			return true;
+		}
+
+		updateTransitionMetrics() {
+			const canvas = this.transitionCanvas;
+			const cutCanvas = this.transitionCutCanvas;
+			const componentCanvas = this.transitionComponentCanvas;
+			const firstItem = this.transitionItems?.[0];
+			if (!canvas || !cutCanvas || !componentCanvas || !firstItem) {
+				this.transitionMetrics = null;
+				return;
+			}
+
+			const width = canvas.clientWidth;
+			const height = canvas.clientHeight;
+			const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+			const renderWidth = Math.round(width * pixelRatio);
+			const renderHeight = Math.round(height * pixelRatio);
+
+			[canvas, cutCanvas, componentCanvas].forEach((targetCanvas) => {
+				if (
+					targetCanvas.width !== renderWidth ||
+					targetCanvas.height !== renderHeight
+				) {
+					targetCanvas.width = renderWidth;
+					targetCanvas.height = renderHeight;
+				}
+			});
+
+			const innerSize = Math.min(width, height);
+			this.transitionMetrics = {
+				width,
+				height,
+				pixelRatio,
+				innerSize,
+				innerLeft: (width - innerSize) / 2,
+				shapeSize: firstItem.offsetWidth,
+				color: getComputedStyle(canvas).color,
+			};
 		}
 
 		calculateTransitionSwapProgress() {
 			const canvas = this.transitionCanvas;
 			const context = this.transitionContext;
-			const firstItem = this.transitionItems?.[0];
+			const metrics = this.transitionMetrics;
 
-			if (!canvas || !context || !firstItem || this.transitionPaths.length !== 4) {
+			if (!canvas || !context || !metrics || this.transitionPaths.length !== 4) {
 				return WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS;
 			}
 
-			const innerSize = Math.min(canvas.clientWidth, canvas.clientHeight);
-			const shapeSize = firstItem.offsetWidth;
+			const { innerSize, shapeSize } = metrics;
 
 			if (!innerSize || !shapeSize) {
 				return WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS;
@@ -766,7 +843,7 @@ export const HomePage = {
 			const componentCanvas = this.transitionComponentCanvas;
 			const componentContext = this.transitionComponentContext;
 			const state = this.transitionState;
-			const firstItem = this.transitionItems?.[0];
+			const metrics = this.transitionMetrics;
 
 			if (
 				!canvas ||
@@ -776,37 +853,21 @@ export const HomePage = {
 				!componentCanvas ||
 				!componentContext ||
 				!state ||
-				!firstItem ||
+				!metrics ||
 				this.transitionPaths.length !== 4
 			) {
 				return;
 			}
 
-			const width = canvas.clientWidth;
-			const height = canvas.clientHeight;
-			const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-			const renderWidth = Math.round(width * pixelRatio);
-			const renderHeight = Math.round(height * pixelRatio);
-
-			if (canvas.width !== renderWidth || canvas.height !== renderHeight) {
-				canvas.width = renderWidth;
-				canvas.height = renderHeight;
-			}
-			if (cutCanvas.width !== renderWidth || cutCanvas.height !== renderHeight) {
-				cutCanvas.width = renderWidth;
-				cutCanvas.height = renderHeight;
-			}
-			if (
-				componentCanvas.width !== renderWidth ||
-				componentCanvas.height !== renderHeight
-			) {
-				componentCanvas.width = renderWidth;
-				componentCanvas.height = renderHeight;
-			}
-
-			const innerSize = Math.min(width, height);
-			const innerLeft = (width - innerSize) / 2;
-			const shapeSize = firstItem.offsetWidth;
+			const {
+				width,
+				height,
+				pixelRatio,
+				innerSize,
+				innerLeft,
+				shapeSize,
+				color,
+			} = metrics;
 			const shapeScale = (shapeSize / 250) * state.scale;
 			const halfShape = shapeSize / 2;
 			const shapeCenters = [
@@ -816,7 +877,6 @@ export const HomePage = {
 				[innerSize + halfShape, innerSize + halfShape],
 			];
 
-			const color = getComputedStyle(canvas).color;
 			const resetContext = (targetContext) => {
 				targetContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 				targetContext.clearRect(0, 0, width, height);
@@ -930,8 +990,12 @@ export const HomePage = {
 			this.isNextContentVisible = null;
 			this.transitionBackgroundTween = null;
 			this.onTransitionResize = null;
+			this.transitionMetrics = null;
 
-			if (this.rafId) cancelAnimationFrame(this.rafId);
+			this.stopWorksRender?.();
+			if (this.onWorksVisibilityChange) {
+				document.removeEventListener('visibilitychange', this.onWorksVisibilityChange);
+			}
 			if (this.webGLResizeTimer) window.clearTimeout(this.webGLResizeTimer);
 			if (this.imageLoadCleanups) {
 				this.imageLoadCleanups.forEach(cleanup => cleanup());
@@ -972,6 +1036,10 @@ export const HomePage = {
 			this.webGLResizeTimer = null;
 			this.rafId = null;
 			this.isVisible = false;
+			this.renderWorksFrame = null;
+			this.startWorksRender = null;
+			this.stopWorksRender = null;
+			this.onWorksVisibilityChange = null;
 			this.renderer = null;
 		}
 	},
