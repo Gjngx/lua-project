@@ -263,6 +263,10 @@
 	text-align: center;
 }
 
+.home-playground{
+	padding-bottom: 24rem;
+}
+
 .home-playground-main-ic,
 .home-works-main-ic {
 	width: 0.6rem;
@@ -564,7 +568,9 @@
 .home-playground {
 	position: relative;
 	min-height: 100svh;
-	overflow: hidden;
+	overflow: visible;
+	isolation: isolate;
+	cursor: grab;
 }
 
 .home-playground-main {
@@ -576,7 +582,8 @@
 	align-items: center;
 	pointer-events: none;
 	position: relative;
-	z-index: 2;
+	z-index: 4;
+	mix-blend-mode: difference;
 }
 
 .home-playground-bg,
@@ -585,7 +592,7 @@
 	grid-row: 1 / 1;
 	position: relative;
 	min-width: 0;
-	overflow: hidden;
+	overflow: visible;
 	pointer-events: none;
 }
 
@@ -610,6 +617,12 @@
 .home-playground.is-dragging * {
 	-webkit-user-select: none;
 	user-select: none;
+	cursor: grabbing !important;
+}
+
+.home-playground a,
+.home-playground button {
+	cursor: pointer;
 }
 
 .home-playground-fallback {

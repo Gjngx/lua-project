@@ -52,16 +52,10 @@ const CARD_LAYOUT = [
 	{ x: -0.66, y: -0.53, scale: 0.8, depth: -1 },
 	{ x: -0.34, y: -0.12, scale: 0.48, depth: 1 },
 	{ x: 0.28, y: -0.62, scale: 0.76, depth: 1 },
-	{ x: -0.9, y: 0.29, scale: 0.58, depth: -1 },
-	{ x: 0.9, y: 0.08, scale: 0.62, depth: 1 },
-	{ x: -0.88, y: -0.3, scale: 0.7, depth: 1 },
-	{ x: 0.63, y: -0.75, scale: 0.68, depth: -1 },
-	{ x: 0.02, y: 0.9, scale: 0.56, depth: 1 },
-	{ x: 0.02, y: -0.88, scale: 0.62, depth: -1 },
 ];
 const CARD_SPHERE_RADIUS = 4.15;
 const CAMERA_FIT_RADIUS = 4.35;
-const CARD_SCALE_MULTIPLIER = 1.45;
+const CARD_SCALE_MULTIPLIER = 1.58;
 const IDLE_ROTATION_SPEED = 0.00016;
 
 export class SphericalImageCanvas {
@@ -160,8 +154,8 @@ export class SphericalImageCanvas {
 				z: z * CARD_SPHERE_RADIUS,
 			};
 			mesh.cardScale = {
-				x: (isLandscape ? 1.42 : 1.12) * layout.scale * CARD_SCALE_MULTIPLIER,
-				y: (isLandscape ? 1.02 : 1.12) * layout.scale * CARD_SCALE_MULTIPLIER,
+				x: (isLandscape ? 1.65 : 1.28) * layout.scale * CARD_SCALE_MULTIPLIER,
+				y: (isLandscape ? 1.05 : 1.12) * layout.scale * CARD_SCALE_MULTIPLIER,
 			};
 			mesh.revealDelay = (((index * 5) % cardCount) / cardCount) * 0.13;
 			mesh.burstCurve = ((((index * 4) % 9) - 4) / 4) * 0.5;
@@ -359,29 +353,48 @@ export class SphericalImageCanvas {
 		const width = Math.max(1, this.root.clientWidth);
 		const height = Math.max(1, this.root.clientHeight);
 		const aspect = width / height;
+		const overscan = Math.min(width, height) * 0.18;
+		const renderWidth = width + overscan * 2;
+		const renderHeight = height + overscan * 2;
+		const renderAspect = renderWidth / renderHeight;
 		const fitAxis = Math.min(1, aspect);
 		this.horizontalSpread = Math.min(1.65, Math.max(1, aspect / 1.1));
 		const halfFov = (this.camera.fov * Math.PI) / 360;
-		const cameraDistance = (CAMERA_FIT_RADIUS * 1.2) / (Math.tan(halfFov) * fitAxis) + 1.4;
+		const baseCameraDistance =
+			(CAMERA_FIT_RADIUS * 1.2) / (Math.tan(halfFov) * fitAxis) + 1.4;
+		const cameraDistance = baseCameraDistance * (renderHeight / height);
 
 		this.renderer.dpr = Math.min(window.devicePixelRatio || 1, 2);
-		this.renderer.setSize(width, height);
+		this.renderer.setSize(renderWidth, renderHeight);
+		this.canvas.style.left = `${-overscan}px`;
+		this.canvas.style.top = `${-overscan}px`;
+		this.canvas.style.right = 'auto';
+		this.canvas.style.bottom = 'auto';
 		this.camera.position.set(0, 0, cameraDistance);
-		this.camera.perspective({ aspect });
+		this.camera.perspective({ aspect: renderAspect });
 		this.camera.lookAt([0, 0, 0]);
-		this.updateRevealOrigin(width, height, cameraDistance, halfFov, aspect);
+		this.updateRevealOrigin(
+			renderWidth,
+			renderHeight,
+			cameraDistance,
+			halfFov,
+			renderAspect,
+			overscan,
+		);
 		this.updateCardTransforms();
 		this.renderer.render({ scene: this.scene, camera: this.camera });
 	}
 
-	updateRevealOrigin(width, height, cameraDistance, halfFov, aspect) {
+	updateRevealOrigin(width, height, cameraDistance, halfFov, aspect, overscan = 0) {
 		const content = this.root.querySelector('.home-playground-main-content');
 		if (!content) return;
 
 		const rootBounds = this.root.getBoundingClientRect();
 		const contentBounds = content.getBoundingClientRect();
-		const contentCenterX = contentBounds.left + contentBounds.width / 2 - rootBounds.left;
-		const contentCenterY = contentBounds.top + contentBounds.height / 2 - rootBounds.top;
+		const contentCenterX =
+			contentBounds.left + contentBounds.width / 2 - rootBounds.left + overscan;
+		const contentCenterY =
+			contentBounds.top + contentBounds.height / 2 - rootBounds.top + overscan;
 		const visibleHeight = 2 * cameraDistance * Math.tan(halfFov);
 		const visibleWidth = visibleHeight * aspect;
 
@@ -467,5 +480,9 @@ export class SphericalImageCanvas {
 		this.assets.clear();
 		this.canvas.width = 1;
 		this.canvas.height = 1;
+		this.canvas.style.left = '';
+		this.canvas.style.top = '';
+		this.canvas.style.right = '';
+		this.canvas.style.bottom = '';
 	}
 }
