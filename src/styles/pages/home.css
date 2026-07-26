@@ -260,6 +260,7 @@
 	justify-content: space-between;
 	width: 21.3rem;
 	pointer-events: auto;
+	text-align: center;
 }
 
 .home-playground-main-ic,
