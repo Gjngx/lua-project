@@ -57,6 +57,40 @@ const CARD_SPHERE_RADIUS = 4.15;
 const CAMERA_FIT_RADIUS = 4.35;
 const CARD_SCALE_MULTIPLIER = 1.58;
 const IDLE_ROTATION_SPEED = 0.00016;
+const MAX_RENDER_DPR = 1.5;
+const SHARED_IMAGE_CACHE = new Map();
+
+function loadSharedImage(url) {
+	const cachedImage = SHARED_IMAGE_CACHE.get(url);
+	if (cachedImage) return cachedImage;
+
+	const image = new Image();
+	image.decoding = 'async';
+
+	const promise = new Promise((resolve, reject) => {
+		image.addEventListener('load', () => resolve(image), { once: true });
+		image.addEventListener(
+			'error',
+			() => {
+				SHARED_IMAGE_CACHE.delete(url);
+				reject(new Error(`Không thể tải ảnh playground: ${url}`));
+			},
+			{ once: true },
+		);
+		image.src = url;
+	}).then(async (loadedImage) => {
+		try {
+			await loadedImage.decode();
+		} catch {
+			// `load` đã hoàn tất nên ảnh vẫn dùng được nếu decode() không được hỗ trợ.
+		}
+		return loadedImage;
+	});
+
+	const asset = { image, promise };
+	SHARED_IMAGE_CACHE.set(url, asset);
+	return asset;
+}
 
 export class SphericalImageCanvas {
 	constructor({ canvas, root, imageUrls, layer = 'all' }) {
@@ -75,9 +109,13 @@ export class SphericalImageCanvas {
 		this.images = [];
 		this.assets = new Map();
 		this.frameId = null;
+		this.pendingRenderId = null;
 		this.lastFrameTime = 0;
 		this.isVisible = false;
 		this.isDestroyed = false;
+		this.assetsReady = false;
+		this.hasWarmedAssets = false;
+		this.lastRenderSize = { width: 0, height: 0, dpr: 0 };
 		this.isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		this.targetVelocity = { x: 0.00003, y: 0.00014 };
 		this.velocity = { x: 0, y: 0 };
@@ -106,8 +144,8 @@ export class SphericalImageCanvas {
 		this.renderer = new Renderer({
 			canvas: this.canvas,
 			alpha: true,
-			antialias: true,
-			dpr: Math.min(window.devicePixelRatio || 1, 2),
+			antialias: false,
+			dpr: this.getRenderDpr(),
 			powerPreference: 'high-performance',
 		});
 		this.gl = this.renderer.gl;
@@ -123,10 +161,15 @@ export class SphericalImageCanvas {
 		this.scene = new Transform();
 		this.geometry = new Plane(this.gl);
 		this.createCards();
+		this.prepareAssets();
 		this.updateCardTransforms();
 		this.bindEvents();
 		this.onResize();
 		this.renderer.render({ scene: this.scene, camera: this.camera });
+	}
+
+	getRenderDpr() {
+		return Math.min(window.devicePixelRatio || 1, MAX_RENDER_DPR);
 	}
 
 	createCards() {
@@ -245,25 +288,55 @@ export class SphericalImageCanvas {
 			depthWrite: true,
 			cullFace: this.gl.BACK,
 		});
-		const image = new Image();
-
-		image.decoding = 'async';
-		image.onload = () => {
+		const sharedImage = loadSharedImage(url);
+		const readyPromise = sharedImage.promise.then((image) => {
 			if (this.isDestroyed) return;
 			texture.image = image;
 			texture.needsUpdate = true;
-			if (this.isReducedMotion || !this.isVisible) {
-				this.renderer?.render({ scene: this.scene, camera: this.camera });
-			}
-		};
-		image.src = url;
+		});
 
-		const asset = { texture, program, image };
+		const asset = { texture, program, image: sharedImage.image, readyPromise };
 		this.assets.set(url, asset);
-		this.images.push(image);
 		this.textures.push(texture);
 		this.programs.push(program);
 		return asset;
+	}
+
+	prepareAssets() {
+		Promise.all([...this.assets.values()].map((asset) => asset.readyPromise))
+			.then(() => {
+				if (this.isDestroyed) return;
+				this.assetsReady = true;
+				this.requestRender();
+			})
+			.catch((error) => {
+				if (this.isDestroyed) return;
+				console.warn('[Home Playground] Không thể chuẩn bị texture:', error);
+				this.root.classList.add('is-static');
+			});
+	}
+
+	requestRender() {
+		if (
+			this.pendingRenderId !== null ||
+			this.frameId !== null ||
+			this.isDestroyed ||
+			!this.renderer
+		) {
+			return;
+		}
+
+		this.pendingRenderId = window.requestAnimationFrame(() => {
+			this.pendingRenderId = null;
+			if (this.isDestroyed || !this.renderer) return;
+
+			this.renderer.render({ scene: this.scene, camera: this.camera });
+			this.hasWarmedAssets = this.assetsReady;
+
+			if (this.isVisible && !this.isReducedMotion) {
+				this.start();
+			}
+		});
 	}
 
 	bindEvents() {
@@ -285,7 +358,7 @@ export class SphericalImageCanvas {
 				this.isVisible = entries[0]?.isIntersecting ?? false;
 				if (this.isVisible) {
 					if (this.isReducedMotion) {
-						this.renderer?.render({ scene: this.scene, camera: this.camera });
+						this.requestRender();
 					} else {
 						this.start();
 					}
@@ -352,6 +425,16 @@ export class SphericalImageCanvas {
 
 		const width = Math.max(1, this.root.clientWidth);
 		const height = Math.max(1, this.root.clientHeight);
+		const dpr = this.getRenderDpr();
+		if (
+			width === this.lastRenderSize.width &&
+			height === this.lastRenderSize.height &&
+			dpr === this.lastRenderSize.dpr
+		) {
+			return;
+		}
+		this.lastRenderSize = { width, height, dpr };
+
 		const aspect = width / height;
 		const overscan = Math.min(width, height) * 0.18;
 		const renderWidth = width + overscan * 2;
@@ -364,7 +447,7 @@ export class SphericalImageCanvas {
 			(CAMERA_FIT_RADIUS * 1.2) / (Math.tan(halfFov) * fitAxis) + 1.4;
 		const cameraDistance = baseCameraDistance * (renderHeight / height);
 
-		this.renderer.dpr = Math.min(window.devicePixelRatio || 1, 2);
+		this.renderer.dpr = dpr;
 		this.renderer.setSize(renderWidth, renderHeight);
 		this.canvas.style.left = `${-overscan}px`;
 		this.canvas.style.top = `${-overscan}px`;
@@ -417,7 +500,19 @@ export class SphericalImageCanvas {
 	}
 
 	start() {
-		if (this.frameId !== null || this.isDestroyed || document.hidden) return;
+		if (
+			this.frameId !== null ||
+			this.isDestroyed ||
+			document.hidden ||
+			!this.assetsReady
+		) {
+			return;
+		}
+		if (!this.hasWarmedAssets) {
+			this.requestRender();
+			return;
+		}
+
 		this.lastFrameTime = performance.now();
 		this.frameId = window.requestAnimationFrame(this.render);
 	}
@@ -454,6 +549,10 @@ export class SphericalImageCanvas {
 	destroy() {
 		this.isDestroyed = true;
 		this.stop();
+		if (this.pendingRenderId !== null) {
+			window.cancelAnimationFrame(this.pendingRenderId);
+			this.pendingRenderId = null;
+		}
 		this.resizeObserver?.disconnect();
 		this.visibilityObserver?.disconnect();
 		this.root.removeEventListener('pointerdown', this.onPointerDown);
@@ -464,10 +563,6 @@ export class SphericalImageCanvas {
 		this.canvas.removeEventListener('webglcontextlost', this.onContextLost);
 		document.removeEventListener('visibilitychange', this.onVisibilityChange);
 
-		this.images.forEach((image) => {
-			image.onload = null;
-			image.src = '';
-		});
 		this.textures.forEach((texture) => this.gl?.deleteTexture(texture.texture));
 		this.programs.forEach((program) => program.remove());
 		this.geometry?.remove();

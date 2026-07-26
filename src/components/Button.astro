@@ -9,7 +9,12 @@ const { href = "#", class: className = "" } = Astro.props;
 <a href={href} class={`btn ${className}`.trim()}>
 	<div class="btn-inner">
 		<div class="btn-txt">
-			<p class="txt fs-14 fw-700 trans-upper"><slot /></p>
+			<div class="btn-txt-top" aria-hidden="true">
+				<p class="txt fs-14 fw-700 trans-upper"><slot /></p>
+			</div>
+			<div class="btn-txt-bottom">
+				<p class="txt fs-14 fw-700 trans-upper"><slot /></p>
+			</div>
 		</div>
 		<div class="btn-ic">
 			<svg

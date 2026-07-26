@@ -1,10 +1,11 @@
 import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
-import { cvUnit, ParallaxImage } from '../../core/helpers.js';
+import { cvUnit } from '../../core/helpers.js';
 import { SvgPathParticles } from '../../core/svg-path-particles.js';
 import { SphericalImageCanvas } from '../../core/spherical-image-canvas.js';
 import { Renderer, Camera, Transform, Texture, Program, Mesh, Plane } from 'ogl';
 import { distortionVertex as vertex, objectFitFragment as fragment } from '../../core/shaders.js';
+import { useSplitPretext } from '../../utils/pretext.js';
 
 const HERO_VIDEO_FPS = 24;
 const HERO_VIDEO_SEEK_THRESHOLD = 1 / (HERO_VIDEO_FPS * 2);
@@ -34,6 +35,7 @@ export const HomePage = {
 			this.tlEnter = null;
 			this.tlHeroTop = null;
 			this.tlHeroBot = null;
+			this.tlHeroBotEnd = null;
 			// this.tlHeroEnd = null;
 
 		}
@@ -160,10 +162,9 @@ export const HomePage = {
 			if (!this.video || !this.videoDuration || this.videoScrollTrigger) return;
 
 			this.videoScrollTrigger = ScrollTrigger.create({
-				trigger: this.el,
+				trigger: this.el.querySelector('.home-hero-top.top-left'),
 				start: 'top top',
-				endTrigger: this.worksEl || this.el,
-				end: this.worksEl ? 'top top' : 'bottom bottom',
+				end: 'bottom top',
 				invalidateOnRefresh: true,
 				onUpdate: (self) => {
 					this.queueVideoSeek(self.progress * this.videoDuration);
@@ -235,14 +236,27 @@ export const HomePage = {
 			this.tlHeroBot = gsap.timeline({
 				scrollTrigger: {
 					trigger: this.el.querySelector('.home-hero-bottom'),
-					start: 'top center',
-					end: 'bottom center',
+					start: 'top top+=20%',
+					end: 'bottom top',
 					scrub: true,
 				}
 			});
 			this.tlHeroBot.to(this.el.querySelector('.home-hero-decor-inner'), {
 				xPercent: 70,
 				yPercent: -175,
+				ease: 'none'
+			});
+
+			this.tlHeroBotEnd = gsap.timeline({
+				scrollTrigger: {
+					trigger: this.el.querySelector('.home-hero-bottom-desc'),
+					start: 'top top+=10%',
+					end: 'bottom top',
+					scrub: true,
+				}
+			});
+			this.tlHeroBotEnd.to(this.el.querySelector('.home-hero-logo'), {
+				yPercent: -100,
 				ease: 'none'
 			});
 
@@ -283,6 +297,7 @@ export const HomePage = {
 			if (this.tlEnter) this.tlEnter.kill();
 			if (this.tlHeroTop) this.tlHeroTop.kill();
 			if (this.tlHeroBot) this.tlHeroBot.kill();
+			if (this.tlHeroBotEnd) this.tlHeroBotEnd.kill();
 			// if (this.tlHeroEnd) this.tlHeroEnd.kill();
 
 			this.video = null;
@@ -967,6 +982,7 @@ export const HomePage = {
 			this.tlIntroScroll = null;
 			this.tlItemScroll = null;
 			this.hoverCleanups = [];
+			this.splitResults = [];
 
 		}
 
@@ -984,7 +1000,26 @@ export const HomePage = {
 		}
 
 		setup() {
-			console.log('How Setup');
+			if (!this.el || this.splitResults.length) return;
+
+			const titles = this.el.querySelectorAll(
+				'.home-how-content-item-title .heading',
+			);
+
+			titles.forEach((title) => {
+				const splitResult = useSplitPretext({
+					selector: title,
+					type: 'words',
+					isMask: true,
+				});
+				if (!splitResult) return;
+
+				splitResult.elements.forEach((word, index) => {
+					word.classList.add('word');
+					word.style.setProperty('--trans-delay', `${(index + 1) * 0.03}s`);
+				});
+				this.splitResults.push(splitResult);
+			});
 		}
 
 		animationReveal() {
@@ -1142,6 +1177,9 @@ export const HomePage = {
 			}
 			this.hoverCleanups.forEach(cleanup => cleanup());
 			this.hoverCleanups = [];
+			this.splitResults.forEach((splitResult) => splitResult.revert());
+			this.splitResults = [];
+			this.el = null;
 		}
 	},
 	Playground: class extends TriggerSetup {
@@ -1149,55 +1187,102 @@ export const HomePage = {
 			super();
 			this.el = null;
 			this.canvasScenes = [];
+			this.canvasInitTasks = new Set();
+			this.canvasSetupQueued = false;
 			this.tlTransition = null;
 		}
 
 		trigger(data) {
 			this.el = data.next.container.querySelector('.home-playground-wrap');
 			if (!this.el) return;
+			this.queueCanvasSetup();
 			super.setTrigger(this.el, this.onTrigger.bind(this));
 		}
 
 		onTrigger() {
-			this.setupCanvas();
+			this.setup();
 			this.animationReveal();
 			this.animationScrub();
 			this.interact();
+		}
+
+		scheduleCanvasTask(callback, timeout = 700) {
+			let task;
+			const run = () => {
+				this.canvasInitTasks.delete(task);
+				callback();
+			};
+
+			if ('requestIdleCallback' in window) {
+				task = {
+					type: 'idle',
+					id: window.requestIdleCallback(run, { timeout }),
+				};
+			} else {
+				task = {
+					type: 'timeout',
+					id: window.setTimeout(run, 80),
+				};
+			}
+
+			this.canvasInitTasks.add(task);
+		}
+
+		cancelCanvasTasks() {
+			this.canvasInitTasks.forEach((task) => {
+				if (task.type === 'idle') {
+					window.cancelIdleCallback(task.id);
+				} else {
+					window.clearTimeout(task.id);
+				}
+			});
+			this.canvasInitTasks.clear();
+		}
+
+		queueCanvasSetup() {
+			if (this.canvasSetupQueued || this.canvasScenes.length) return;
+
+			this.canvasSetupQueued = true;
+			this.scheduleCanvasTask(() => {
+				this.canvasSetupQueued = false;
+				this.setupCanvas();
+			});
+		}
+
+		handleCanvasError(error) {
+			console.warn('[Home Playground] Không thể khởi tạo WebGL:', error);
+			this.cancelCanvasTasks();
+			this.canvasScenes.forEach((scene) => scene.destroy());
+			this.canvasScenes = [];
+			this.el?.classList.add('is-static');
 		}
 
 		setupCanvas() {
 			if (!this.el || this.canvasScenes.length) return;
 
 			const playground = this.el.querySelector('.home-playground');
-			const backCanvas = this.el?.querySelector('.home-playground-canvas--back');
-			const frontCanvas = this.el?.querySelector('.home-playground-canvas--front');
-			if (!playground || !backCanvas || !frontCanvas) return;
+			const canvas = this.el.querySelector('.home-playground-canvas');
+			if (!playground || !canvas) return;
 
 			try {
-				const imageUrls = JSON.parse(backCanvas.dataset.images || '[]');
+				const imageUrls = JSON.parse(canvas.dataset.images || '[]');
 				if (!imageUrls.length) return;
 
-				this.canvasScenes = [
-					new SphericalImageCanvas({
-						canvas: backCanvas,
-						root: playground,
-						imageUrls,
-						layer: 'back',
-					}),
-					new SphericalImageCanvas({
-						canvas: frontCanvas,
-						root: playground,
-						imageUrls,
-						layer: 'front',
-					}),
-				];
-				this.canvasScenes.forEach((scene) => scene.init());
+				const scene = new SphericalImageCanvas({
+					canvas,
+					root: playground,
+					imageUrls,
+					layer: 'all',
+				});
+				this.canvasScenes.push(scene);
+				scene.init();
 			} catch (error) {
-				console.warn('[Home Playground] Không thể khởi tạo WebGL:', error);
-				this.canvasScenes.forEach((scene) => scene.destroy());
-				this.canvasScenes = [];
-				this.el.classList.add('is-static');
+				this.handleCanvasError(error);
 			}
+		}
+
+		setup(){
+
 		}
 
 		animationReveal() {
@@ -1229,6 +1314,8 @@ export const HomePage = {
 
 		destroy() {
 			super.cleanTrigger();
+			this.cancelCanvasTasks();
+			this.canvasSetupQueued = false;
 			this.canvasScenes.forEach((scene) => scene.destroy());
 			this.canvasScenes = [];
 			if (this.tlTransition) this.tlTransition.kill();

@@ -92,7 +92,20 @@ a {
 }
 
 .btn-txt {
+	display: grid;
 	padding-inline: 1.7rem;
+	overflow: hidden;
+}
+
+.btn-txt-top,
+.btn-txt-bottom {
+	grid-column: 1 / 1;
+	grid-row: 1 / 1;
+	transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.btn-txt-bottom {
+	transform: translateY(100%);
 }
 
 .btn-ic {
@@ -214,6 +227,14 @@ a {
 
 	.btn:hover .btn-ic {
 		transform: rotateZ(360deg);
+	}
+
+	.btn:hover .btn-txt-top {
+		transform: translateY(-100%);
+	}
+
+	.btn:hover .btn-txt-bottom {
+		transform: translateY(0);
 	}
 }
 
