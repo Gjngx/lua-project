@@ -300,6 +300,10 @@ export const HomePage = {
 			this.worksPathParticles = null;
 			this.transitionCanvas = null;
 			this.transitionContext = null;
+			this.transitionCutCanvas = null;
+			this.transitionCutContext = null;
+			this.transitionComponentCanvas = null;
+			this.transitionComponentContext = null;
 			this.transitionItems = null;
 			this.transitionPaths = [];
 			this.transitionState = null;
@@ -611,9 +615,21 @@ export const HomePage = {
 
 			this.transitionCanvas = canvas;
 			this.transitionContext = canvas.getContext('2d');
+			this.transitionCutCanvas = document.createElement('canvas');
+			this.transitionCutContext = this.transitionCutCanvas.getContext('2d');
+			this.transitionComponentCanvas = document.createElement('canvas');
+			this.transitionComponentContext = this.transitionComponentCanvas.getContext('2d');
 			this.transitionItems = transitionItems;
 
-			if (!this.transitionContext) {
+			if (
+				!this.transitionContext ||
+				!this.transitionCutContext ||
+				!this.transitionComponentContext
+			) {
+				this.transitionCutCanvas = null;
+				this.transitionCutContext = null;
+				this.transitionComponentCanvas = null;
+				this.transitionComponentContext = null;
 				return false;
 			}
 
@@ -730,10 +746,24 @@ export const HomePage = {
 		drawTransitionCanvas() {
 			const canvas = this.transitionCanvas;
 			const context = this.transitionContext;
+			const cutCanvas = this.transitionCutCanvas;
+			const cutContext = this.transitionCutContext;
+			const componentCanvas = this.transitionComponentCanvas;
+			const componentContext = this.transitionComponentContext;
 			const state = this.transitionState;
 			const firstItem = this.transitionItems?.[0];
 
-			if (!canvas || !context || !state || !firstItem || this.transitionPaths.length !== 4) {
+			if (
+				!canvas ||
+				!context ||
+				!cutCanvas ||
+				!cutContext ||
+				!componentCanvas ||
+				!componentContext ||
+				!state ||
+				!firstItem ||
+				this.transitionPaths.length !== 4
+			) {
 				return;
 			}
 
@@ -746,6 +776,17 @@ export const HomePage = {
 			if (canvas.width !== renderWidth || canvas.height !== renderHeight) {
 				canvas.width = renderWidth;
 				canvas.height = renderHeight;
+			}
+			if (cutCanvas.width !== renderWidth || cutCanvas.height !== renderHeight) {
+				cutCanvas.width = renderWidth;
+				cutCanvas.height = renderHeight;
+			}
+			if (
+				componentCanvas.width !== renderWidth ||
+				componentCanvas.height !== renderHeight
+			) {
+				componentCanvas.width = renderWidth;
+				componentCanvas.height = renderHeight;
 			}
 
 			const innerSize = Math.min(width, height);
@@ -760,26 +801,68 @@ export const HomePage = {
 				[innerSize + halfShape, innerSize + halfShape],
 			];
 
-			context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-			context.clearRect(0, 0, width, height);
-			context.save();
-			context.translate(innerLeft + innerSize / 2, innerSize / 2);
-			context.rotate((state.rotate * Math.PI) / 180);
-			context.translate(-innerSize / 2, -innerSize / 2);
-			context.globalCompositeOperation = 'xor';
-			context.fillStyle = getComputedStyle(canvas).color;
-
-			this.transitionPaths.forEach((path, index) => {
+			const color = getComputedStyle(canvas).color;
+			const resetContext = (targetContext) => {
+				targetContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+				targetContext.clearRect(0, 0, width, height);
+			};
+			const drawShape = (targetContext, index, compositeOperation) => {
 				const [centerX, centerY] = shapeCenters[index];
 
-				context.save();
-				context.translate(centerX, centerY);
-				context.scale(shapeScale, shapeScale);
-				context.translate(-125, -125);
-				context.fill(path);
-				context.restore();
+				targetContext.save();
+				targetContext.translate(innerLeft + innerSize / 2, innerSize / 2);
+				targetContext.rotate((state.rotate * Math.PI) / 180);
+				targetContext.translate(-innerSize / 2, -innerSize / 2);
+				targetContext.globalCompositeOperation = compositeOperation;
+				targetContext.fillStyle = color;
+				targetContext.translate(centerX, centerY);
+				targetContext.scale(shapeScale, shapeScale);
+				targetContext.translate(-125, -125);
+				targetContext.fill(this.transitionPaths[index]);
+				targetContext.restore();
+			};
+
+			// Hợp cả bốn lá: các phần giao của lá kề nhau vẫn giữ màu xanh.
+			resetContext(context);
+			this.transitionPaths.forEach((_, index) => {
+				drawShape(context, index, 'source-over');
 			});
 
+			const mergeComponentIntoCut = () => {
+				cutContext.save();
+				cutContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+				cutContext.globalCompositeOperation = 'source-over';
+				cutContext.drawImage(componentCanvas, 0, 0, width, height);
+				cutContext.restore();
+			};
+
+			// Phần giao đồng thời của đủ bốn lá.
+			resetContext(cutContext);
+			drawShape(cutContext, 0, 'source-over');
+			drawShape(cutContext, 1, 'destination-in');
+			drawShape(cutContext, 2, 'destination-in');
+			drawShape(cutContext, 3, 'destination-in');
+
+			// Chỉ đúng hai lá đối xứng 0–3 chồng nhau; loại vùng có lá thứ ba.
+			resetContext(componentContext);
+			drawShape(componentContext, 0, 'source-over');
+			drawShape(componentContext, 3, 'destination-in');
+			drawShape(componentContext, 1, 'destination-out');
+			drawShape(componentContext, 2, 'destination-out');
+			mergeComponentIntoCut();
+
+			// Chỉ đúng hai lá đối xứng 1–2 chồng nhau; loại vùng có lá thứ ba.
+			resetContext(componentContext);
+			drawShape(componentContext, 1, 'source-over');
+			drawShape(componentContext, 2, 'destination-in');
+			drawShape(componentContext, 0, 'destination-out');
+			drawShape(componentContext, 3, 'destination-out');
+			mergeComponentIntoCut();
+
+			context.save();
+			context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+			context.globalCompositeOperation = 'destination-out';
+			context.drawImage(cutCanvas, 0, 0, width, height);
 			context.restore();
 		}
 
@@ -810,6 +893,18 @@ export const HomePage = {
 
 			this.transitionCanvas = null;
 			this.transitionContext = null;
+			if (this.transitionCutCanvas) {
+				this.transitionCutCanvas.width = 1;
+				this.transitionCutCanvas.height = 1;
+			}
+			if (this.transitionComponentCanvas) {
+				this.transitionComponentCanvas.width = 1;
+				this.transitionComponentCanvas.height = 1;
+			}
+			this.transitionCutCanvas = null;
+			this.transitionCutContext = null;
+			this.transitionComponentCanvas = null;
+			this.transitionComponentContext = null;
 			this.transitionItems = null;
 			this.transitionPaths = [];
 			this.transitionState = null;
