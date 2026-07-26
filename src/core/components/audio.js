@@ -1,8 +1,16 @@
-import bgmSrc from '../../assets/audio/bgm.mp3';
+import niorLounge from '../../assets/audio/nior-lounge.mp3';
+import deepHouse from '../../assets/audio/deep-house.mp3';
+
+// Thêm bài mới bằng cách import file audio và thêm một object vào danh sách này.
+export const playlist = [
+	{ title: 'Nior Lounge', src: niorLounge },
+	{ title: 'Deep House', src: deepHouse }
+];
 
 export class AudioManager {
 	constructor() {
 		this.audio = null;
+		this.currentTrackIndex = 0;
 		this.isPlaying = false;
 		this.isInitialized = false;
 		this.audioCtx = null;
@@ -15,42 +23,54 @@ export class AudioManager {
 		if (this.isInitialized) return;
 		this.isInitialized = true;
 
-		// Tạo thẻ audio từ file đã import qua Vite
-		this.audio = new Audio(bgmSrc);
-		this.audio.loop = true;
+		this.audio = new Audio(this.currentTrack.src);
+		this.audio.loop = false;
 		this.audio.volume = 0.5;
 
-		this.totalAccumulatedTime = 0;
-		this.lastAudioTime = 0;
-
-		// Đồng bộ hóa đồng hồ: Đếm dồn thời gian ngay cả khi nhạc lặp lại
 		this.audio.addEventListener('timeupdate', () => {
-			const currentTime = this.audio.currentTime;
-			
-			// Phát hiện bài nhạc bị lặp (thời gian đột ngột rớt xuống)
-			if (currentTime < this.lastAudioTime - 0.5) {
-				this.totalAccumulatedTime += this.lastAudioTime;
-			}
-			this.lastAudioTime = currentTime;
-
-			const totalSeconds = Math.floor(this.totalAccumulatedTime + currentTime);
-
-			const textEl = document.querySelector('.header-shape-time .txt');
-			if (textEl) {
-				const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-				const s = (totalSeconds % 60).toString().padStart(2, '0');
-				textEl.textContent = `${m}:${s}`;
-			}
+			this.updateTimeDisplay();
 		});
+		this.audio.addEventListener('ended', () => this.next());
+		this.notifyTrackChange();
 
 		// Cố gắng Autoplay ngay lập tức khi load trang
 		this.audio.play().then(() => {
 			this.isPlaying = true;
+			this.notifyStateChange();
 			this.setupVisualizer();
 		}).catch(err => {
 			// Bị chặn -> Hiện popup hỏi người dùng thay vì rình rập
 			this.showAudioPopup();
 		});
+	}
+
+	get currentTrack() {
+		return playlist[this.currentTrackIndex];
+	}
+
+	updateTimeDisplay() {
+		const totalSeconds = Math.floor(this.audio?.currentTime || 0);
+		const textEl = document.querySelector('.header-shape-time .txt');
+		if (!textEl) return;
+
+		const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+		const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+		textEl.textContent = `${minutes}:${seconds}`;
+	}
+
+	notifyTrackChange() {
+		window.dispatchEvent(new CustomEvent('audio:track-change', {
+			detail: {
+				index: this.currentTrackIndex,
+				track: this.currentTrack
+			}
+		}));
+	}
+
+	notifyStateChange() {
+		window.dispatchEvent(new CustomEvent('audio:state-change', {
+			detail: { isPlaying: this.isPlaying }
+		}));
 	}
 	
 	showAudioPopup() {
@@ -172,6 +192,7 @@ export class AudioManager {
 		if (this.audio && !this.isPlaying) {
 			this.audio.play().then(() => {
 				this.isPlaying = true;
+				this.notifyStateChange();
 				// Resume AudioContext nếu trình duyệt tạm dừng
 				if (this.audioCtx && this.audioCtx.state === 'suspended') {
 					this.audioCtx.resume();
@@ -190,8 +211,26 @@ export class AudioManager {
 		if (this.audio && this.isPlaying) {
 			this.audio.pause();
 			this.isPlaying = false;
+			this.notifyStateChange();
 			cancelAnimationFrame(this.rafId);
 			this.rafId = requestAnimationFrame(this.renderFrame);
+		}
+	}
+
+	next() {
+		if (!this.audio || !playlist.length) return;
+
+		const shouldContinuePlaying = this.isPlaying;
+		this.currentTrackIndex = (this.currentTrackIndex + 1) % playlist.length;
+		this.audio.pause();
+		this.audio.src = this.currentTrack.src;
+		this.audio.load();
+		this.updateTimeDisplay();
+		this.notifyTrackChange();
+
+		if (shouldContinuePlaying) {
+			this.isPlaying = false;
+			this.play();
 		}
 	}
 

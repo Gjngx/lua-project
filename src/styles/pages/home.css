@@ -272,6 +272,21 @@
 	pointer-events: none;
 }
 
+.works-gl-canvas {
+	position: fixed;
+	inset: 0;
+	z-index: 4;
+	display: block;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	visibility: hidden;
+}
+
+.home-works-item-img > img.gl-hidden {
+	opacity: 0;
+}
+
 .home-works-item-img {
 	border-radius: 0.8rem;
 	overflow: hidden;
@@ -588,6 +603,12 @@
 	width: 100%;
 	height: 100%;
 	pointer-events: none;
+}
+
+.home-playground.is-dragging,
+.home-playground.is-dragging * {
+	-webkit-user-select: none;
+	user-select: none;
 }
 
 .home-playground-fallback {

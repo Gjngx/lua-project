@@ -3,6 +3,8 @@ import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit, ParallaxImage } from '../../core/helpers.js';
 import { SvgPathParticles } from '../../core/svg-path-particles.js';
 import { SphericalImageCanvas } from '../../core/spherical-image-canvas.js';
+import { Renderer, Camera, Transform, Texture, Program, Mesh, Plane } from 'ogl';
+import { distortionVertex as vertex, objectFitFragment as fragment } from '../../core/shaders.js';
 
 const HERO_VIDEO_FPS = 24;
 const HERO_VIDEO_SEEK_THRESHOLD = 1 / (HERO_VIDEO_FPS * 2);
@@ -314,32 +316,6 @@ export const HomePage = {
 			this.el = data.next.container.querySelector('.home-works-wrap');
 			if (!this.el) return;
 			super.setTrigger(this.el, this.onTrigger.bind(this));
-			
-			// Gọi hiệu ứng parallax cho các hình ảnh trong mục Works
-			this.parallaxImages = [];
-			this.el.querySelectorAll('.home-works-item-img img').forEach(el => {
-				this.parallaxImages.push(new ParallaxImage({ el, scaleOffset: 0.15 }));
-			});
-
-			// Tạo trigger cho từng item riêng lẻ
-			this.itemTriggers = [];
-			this.el.querySelectorAll('.home-works-item').forEach((item) => {
-				const tl = gsap.timeline({
-					scrollTrigger: {
-						trigger: item,
-						start: 'top bottom',
-						end: 'bottom top',
-						scrub: true,
-					}
-				});
-				
-				tl.fromTo(item.querySelector('.home-works-item-img'), 
-					{ scale: 0.9, yPercent: 0 }, 
-					{ scale: 1, yPercent: -20, ease: 'power3.out' }
-				);
-				
-				this.itemTriggers.push(tl);
-			});
 		}
 
 		onTrigger() {
@@ -351,6 +327,7 @@ export const HomePage = {
 
 		setup() {
 			console.log('Works Setup');
+			this.setupWebGL();
 		}
 
 		animationReveal() {
@@ -448,6 +425,170 @@ export const HomePage = {
 					this.updateTransitionContent();
 				},
 			}, 0);
+		}
+
+		setupWebGL() {
+			if (this.renderer) return;
+
+			const canvas = this.el.querySelector('#works-gl-canvas');
+			if (!canvas) return;
+
+			this.renderer = new Renderer({ canvas, alpha: true, antialias: true, dpr: 2 });
+			const gl = this.renderer.gl;
+			const camera = new Camera(gl);
+			camera.fov = 45;
+			camera.position.z = 20;
+
+			const scene = new Transform();
+			// OPTIMIZATION 1: Giảm segments nhưng phải giữ cả height và width để không bị cắt nát hình
+			this.geometry = new Plane(gl, { heightSegments: 30, widthSegments: 30 });
+
+			this.meshes = [];
+			this.programs = [];
+			this.tls = [];
+			this.textures = [];
+			this.imageLoadCleanups = [];
+
+			const items = gsap.utils.toArray(this.el.querySelectorAll('.home-works-item'));
+
+			items.forEach((item, index) => {
+				const imgEl = item.querySelector('img');
+				if (!imgEl) return;
+
+				const texture = new Texture(gl, { generateMipmaps: false });
+				this.textures.push(texture);
+				const program = new Program(gl, {
+					fragment,
+					vertex,
+					uniforms: {
+						tMap: { value: texture },
+						uProgress: { value: 0 },
+						uPlaneSize: { value: [0, 0] },
+						uDOMSize: { value: [0, 0] },
+						uImageSize: { value: [0, 0] },
+						uBorderRadius: { value: 0 },
+						rotationAxis: { value: [0, 1, 0] },
+						distortionAxis: { value: [1, 1, 1] },
+						uDistortion: { value: 2.5 }
+					},
+					cullFace: false,
+					transparent: true
+				});
+
+				this.programs.push(program);
+
+				const setupTexture = (image) => {
+					texture.image = image;
+					program.uniforms.uImageSize.value = [image.naturalWidth, image.naturalHeight];
+					imgEl.classList.add('gl-hidden');
+				};
+
+				if (imgEl.complete && imgEl.naturalWidth > 0) {
+					setupTexture(imgEl);
+				} else {
+					const onImageLoad = () => setupTexture(imgEl);
+					imgEl.addEventListener('load', onImageLoad, { once: true });
+					this.imageLoadCleanups.push(() => {
+						imgEl.removeEventListener('load', onImageLoad);
+					});
+				}
+
+				const mesh = new Mesh(gl, { geometry: this.geometry, program });
+				mesh.setParent(scene);
+				this.meshes.push({ mesh, item, program, imgEl });
+
+				const proxy = { progress: 0 };
+				const tl = gsap.timeline({
+					scrollTrigger: {
+						trigger: item,
+						start: 'top bottom',
+						end: 'bottom top',
+						scrub: 1,
+					}
+				});
+				tl.to(proxy, {
+					progress: 1,
+					ease: "none",
+					onUpdate: () => {
+						program.uniforms.uProgress.value = proxy.progress;
+					}
+				});
+				this.tls.push(tl);
+			});
+
+			this.onResize = () => {
+				const w = window.innerWidth;
+				const h = window.innerHeight;
+
+				this.renderer.setSize(w, h);
+				camera.perspective({ aspect: w / h });
+
+				const fov = camera.fov * (Math.PI / 180);
+				const height = 2 * Math.tan(fov / 2) * camera.position.z;
+				const width = height * camera.aspect;
+
+				// OPTIMIZATION 2: Tính toán kích thước 1 lần duy nhất khi resize
+				this.meshes.forEach(obj => {
+					const container = obj.item.querySelector('.home-works-item-img');
+					if (container) {
+						const style = getComputedStyle(container);
+						obj.program.uniforms.uBorderRadius.value = parseFloat(style.borderRadius) || 0;
+
+						const rect = container.getBoundingClientRect();
+						obj.bounds = {
+							w: rect.width,
+							h: rect.height,
+							left: rect.left,
+							topOffset: rect.top + window.scrollY // Lưu lại vị trí tuyệt đối so với document
+						};
+
+						obj.mesh.scale.x = (width * rect.width) / w;
+						obj.mesh.scale.y = (height * rect.height) / h;
+						obj.program.uniforms.uPlaneSize.value = [obj.mesh.scale.x, obj.mesh.scale.y];
+						obj.program.uniforms.uDOMSize.value = [rect.width, rect.height];
+					}
+				});
+
+				this.viewSize = { w, h, width, height };
+			};
+
+			window.addEventListener('resize', this.onResize);
+			this.webGLResizeTimer = window.setTimeout(() => {
+				this.webGLResizeTimer = null;
+				if (this.renderer && this.onResize) this.onResize();
+			}, 100);
+
+			// OPTIMIZATION 3: Intersection Observer để tạm dừng render khi không cuộn tới
+			this.isVisible = false;
+			this.observer = new IntersectionObserver((entries) => {
+				this.isVisible = entries[0].isIntersecting;
+				canvas.style.visibility = this.isVisible ? 'visible' : 'hidden';
+			}, { rootMargin: '100px 0px' }); // Render trước khi vào màn hình 100px
+			this.observer.observe(this.el);
+
+			const render = () => {
+				if (this.isVisible && this.viewSize) {
+					const { w, h, width, height } = this.viewSize;
+					const scrollY = window.scrollY;
+
+					this.meshes.forEach(obj => {
+						if (!obj.bounds) return;
+
+						// Tính vị trí Y hiện tại = Vị trí tuyệt đối ban đầu - Lượng cuộn chuột
+						const currentTop = obj.bounds.topOffset - scrollY;
+
+						const x = obj.bounds.left + obj.bounds.w / 2;
+						const y = currentTop + obj.bounds.h / 2;
+
+						obj.mesh.position.x = (x / w) * width - width / 2;
+						obj.mesh.position.y = -(y / h) * height + height / 2;
+					});
+
+					this.renderer.render({ scene, camera });
+				}
+				this.rafId = requestAnimationFrame(render);
+			};
+			this.rafId = requestAnimationFrame(render);
 		}
 
 		setupTransitionCanvas(transition, transitionItems) {
@@ -679,6 +820,49 @@ export const HomePage = {
 			this.isNextContentVisible = null;
 			this.transitionBackgroundTween = null;
 			this.onTransitionResize = null;
+
+			if (this.rafId) cancelAnimationFrame(this.rafId);
+			if (this.webGLResizeTimer) window.clearTimeout(this.webGLResizeTimer);
+			if (this.imageLoadCleanups) {
+				this.imageLoadCleanups.forEach(cleanup => cleanup());
+			}
+			if (this.tls) {
+				this.tls.forEach(tl => {
+					if (tl.scrollTrigger) tl.scrollTrigger.kill();
+					tl.kill();
+				});
+			}
+			if (this.meshes) this.meshes.forEach(({ imgEl }) => imgEl.classList.remove('gl-hidden'));
+
+			if (this.geometry) this.geometry.remove();
+			if (this.programs) this.programs.forEach(p => p.remove());
+			if (this.renderer && this.renderer.gl) {
+				if (this.textures) {
+					this.textures.forEach(texture => {
+						if (texture.texture) {
+							this.renderer.gl.deleteTexture(texture.texture);
+						}
+					});
+				}
+				const extension = this.renderer.gl.getExtension('WEBGL_lose_context');
+				if (extension) extension.loseContext();
+			}
+			if (this.onResize) window.removeEventListener('resize', this.onResize);
+			if (this.observer) this.observer.disconnect();
+
+			this.meshes = [];
+			this.programs = [];
+			this.textures = [];
+			this.tls = [];
+			this.imageLoadCleanups = [];
+			this.geometry = null;
+			this.viewSize = null;
+			this.observer = null;
+			this.onResize = null;
+			this.webGLResizeTimer = null;
+			this.rafId = null;
+			this.isVisible = false;
+			this.renderer = null;
 		}
 	},
 	How: class extends TriggerSetup {

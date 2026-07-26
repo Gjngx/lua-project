@@ -32,7 +32,7 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 ---
 
 <Layout title="Home" namespace="home">
-	<div class="home-hero-wrap">
+	<div class="home-hero-wrap" data-section="dark">
 		<div class="home-hero-bg">
 			<div class="home-hero-bg-inner">
 				<video
@@ -112,7 +112,7 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 		</div>
 		<div class="home-hero-bg-overlay-main"></div>
 	</div>
-	<div class="home-works-wrap">
+	<div class="home-works-wrap" id="works" data-section="light">
 		<div class="home-works home-works--decor">
 			<div class="container grid full-h">
 				<div class="home-works-decor">
@@ -149,6 +149,7 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 				</div>
 			</div>
 		</section>
+		<canvas id="works-gl-canvas" class="works-gl-canvas" aria-hidden="true"></canvas>
 		<div class="home-works-list">
 			<div class="home-works-list-inner">
 				<a href="#" class="home-works-item">
@@ -200,7 +201,7 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 		</div>
 		<div class="home-works-empty"></div>
 	</div>
-	<div class="home-how-wrap">
+	<div class="home-how-wrap" data-section="light">
 		<section class="home-how">
 			<div class="container grid">
 				<div class="home-how-intro">
@@ -342,7 +343,7 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 			</div>
 		</section>
 	</div>
-	<div class="home-playground-wrap">
+	<div class="home-playground-wrap" id="playground" data-section="light">
 		<section class="home-playground">
 			<div class="container grid">
 				<div class="home-playground-main">

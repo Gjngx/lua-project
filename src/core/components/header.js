@@ -1,6 +1,8 @@
 import { gsap } from '../gsap';
 import { smoothScroll } from '../lenis';
 import { viewport, cvUnit } from '../helpers';
+import { audioManager } from './audio';
+import Lenis from 'lenis';
 
 export class Header {
 	constructor() {
@@ -12,6 +14,7 @@ export class Header {
 		this.onScroll = null;
 		this.tlNav = null;
 		this.tlNameLoop = null;
+		this.navLenis = null;
 	}
 
 	init(data) {
@@ -19,7 +22,25 @@ export class Header {
 		if (!this.el) return;
 
 		this.toggleNav();
+		this.setupNavScroll();
 		this.setupScrollListener(data);
+	}
+
+	setupNavScroll() {
+		const wrapper = this.el.querySelector('.header-nav');
+		const content = this.el.querySelector('.header-nav-inner');
+		if (!wrapper || !content || this.navLenis) return;
+
+		this.navLenis = new Lenis({
+			wrapper,
+			content,
+			autoRaf: true,
+			lerp: 0.1,
+			wheelMultiplier: 0.85,
+			smoothWheel: true,
+			syncTouch: false
+		});
+		this.navLenis.stop();
 	}
 
 	// ─── Scroll Listener ──────────────────────────────────────────────
@@ -173,16 +194,52 @@ export class Header {
 			btn.addEventListener("click", this.handleClick.bind(this));
 		});
 
+		this.el.querySelectorAll('.header-nav a').forEach(link => {
+			link.addEventListener('click', () => {
+				if (this.isOpen) this.close();
+			});
+		});
+
+		const audioToggle = this.el.querySelector('.header-shape-pause');
+		if (audioToggle) {
+			audioToggle.addEventListener('click', (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				audioManager.next();
+			});
+
+			this.updateTrackTitle(audioManager.currentTrack);
+			window.addEventListener('audio:track-change', (e) => {
+				this.updateTrackTitle(e.detail.track);
+			});
+		}
+
 		// Đóng khi click ra ngoài
 		document.addEventListener('click', (e) => {
 			if (!this.isOpen) return;
 			if (
 				e.target.closest('.header-menu-toggle') ||
 				e.target.closest('.header-logo') ||
-				e.target.closest('.header')
+				e.target.closest('.header-inner')
 			) return;
 			this.close();
 		});
+
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && this.isOpen) this.close();
+		});
+	}
+
+	updateTrackTitle(track) {
+		if (!track?.title || !this.el) return;
+
+		this.el.querySelectorAll('.header-shape-name-track .txt').forEach((text) => {
+			text.textContent = track.title;
+		});
+
+		if (this.isOpen) {
+			requestAnimationFrame(() => this.startNameLoop());
+		}
 	}
 
 	handleClick(e) {
@@ -197,14 +254,23 @@ export class Header {
 	open() {
 		if (this.isOpen || !this.el) return;
 		this.el.classList.add("on-open-nav");
-		this.el.querySelectorAll(".header-menu-toggle").forEach(el => el.classList.add("active"));
+		this.el.querySelector('.header-nav')?.setAttribute('aria-hidden', 'false');
+		this.el.querySelectorAll(".header-menu-toggle").forEach(el => {
+			el.classList.add("active");
+			el.setAttribute('aria-expanded', 'true');
+			el.setAttribute('aria-label', 'Close navigation');
+		});
 		this.isOpen = true;
 		if (smoothScroll) smoothScroll.stop();
 
 		this._savedScrollY = window.scrollY;
-		this._preventTouch = (e) => e.preventDefault();
+		this._preventTouch = (e) => {
+			if (!e.target.closest('.header-nav')) e.preventDefault();
+		};
 		document.addEventListener('touchmove', this._preventTouch, { passive: false });
 
+		this.navLenis?.start();
+		requestAnimationFrame(() => this.navLenis?.resize());
 		this.animateNavOpen();
 	}
 
@@ -218,6 +284,7 @@ export class Header {
 		}
 
 		if (smoothScroll) smoothScroll.start();
+		this.navLenis?.stop();
 
 		this.animateNavClose();
 	}
@@ -227,28 +294,63 @@ export class Header {
 		if (this.tlNav) this.tlNav.kill();
 		const shapeIc = this.el.querySelector('.header-shape-ic');
 		const shapeText = this.el.querySelector('.header-shape-text');
+		const headerShape = this.el.querySelector('.header-shape');
 		const nameBox = this.el.querySelector('.header-shape-name-box');
 		const pause = this.el.querySelector('.header-shape-pause');
 		const overlay = this.el.querySelector('.header-overlay');
 		const toggleIc = this.el.querySelector('.header-menu-toggle .header-circle-ic');
+		const nav = this.el.querySelector('.header-nav');
+		const circles = this.el.querySelectorAll('.header-circle');
+		const navItems = this.el.querySelectorAll(
+			'.header-nav-link, .header-nav-feature, .header-nav-cards > *'
+		);
+		let shapeOpenWidth = null;
+
+		if (headerShape && nav) {
+			const shapeStyle = getComputedStyle(headerShape);
+			const circlesWidth = Array.from(circles).reduce(
+				(total, circle) => total + circle.getBoundingClientRect().width,
+				0
+			);
+			const horizontalSpace = [
+				shapeStyle.paddingLeft,
+				shapeStyle.paddingRight,
+				shapeStyle.borderLeftWidth,
+				shapeStyle.borderRightWidth,
+				shapeStyle.marginLeft,
+				shapeStyle.marginRight
+			].reduce((total, value) => total + (Number.parseFloat(value) || 0), 0);
+
+			shapeOpenWidth = Math.max(nav.getBoundingClientRect().width - circlesWidth - horizontalSpace, 0);
+		}
 
 		this.tlNav = gsap.timeline({
-			defaults: { duration: 0.7, ease: 'power2.inOut', overwrite: 'auto' }
+			defaults: { duration: 0.55, ease: 'power2.inOut', overwrite: 'auto' }
 		});
-		if (shapeIc) this.tlNav.to(shapeIc, { marginRight: 0 }, 0);
-		if (shapeText) this.tlNav.to(shapeText, { marginLeft: '4rem', marginRight: '4rem' }, 0);
+		if (shapeText) this.tlNav.to(shapeText, { x: 0, force3D: true }, 0);
+		if (headerShape && shapeOpenWidth !== null) this.tlNav.to(headerShape, { width: shapeOpenWidth }, 0);
 		if (nameBox) this.tlNav.to(nameBox, { maxWidth: '20rem', autoAlpha: 1 }, 0);
 		if (pause) this.tlNav.to(pause, { maxWidth: '5rem', autoAlpha: 1 }, 0);
-		if (overlay) this.tlNav.to(overlay, { autoAlpha: 1, duration: 0.5, ease: 'sine.inOut' }, 0);
+		if (overlay) this.tlNav.to(overlay, { autoAlpha: 1, duration: 0.35, ease: 'sine.inOut' }, 0);
+		if (nav) this.tlNav.to(nav, { autoAlpha: 1, duration: 0.2, ease: 'sine.out' }, 0.03);
+		if (navItems.length) {
+			this.tlNav.to(navItems, {
+				y: 0,
+				autoAlpha: 1,
+				duration: 0.45,
+				ease: 'power3.out',
+				stagger: 0.025
+			}, 0.08);
+		}
 		if (toggleIc) {
 			this.tlNav.to(toggleIc, {
 				rotation: 225,
-				duration: 0.65,
+				duration: 0.45,
 				ease: 'power2.inOut',
 				force3D: true
 			}, 0);
 		}
-		this.tlNav.call(() => this.startNameLoop(), null, 0.1);
+		this.tlNav.call(() => this.startNameLoop(), null, 0.08);
 	}
 
 	startNameLoop() {
@@ -295,33 +397,57 @@ export class Header {
 		}
 		const shapeIc = this.el.querySelector('.header-shape-ic');
 		const shapeText = this.el.querySelector('.header-shape-text');
+		const headerShape = this.el.querySelector('.header-shape');
 		const nameBox = this.el.querySelector('.header-shape-name-box');
 		const pause = this.el.querySelector('.header-shape-pause');
 		const overlay = this.el.querySelector('.header-overlay');
 		const toggleIc = this.el.querySelector('.header-menu-toggle .header-circle-ic');
+		const nav = this.el.querySelector('.header-nav');
+		const navItems = this.el.querySelectorAll(
+			'.header-nav-link, .header-nav-feature, .header-nav-cards > *'
+		);
 
 		this.tlNav = gsap.timeline({
 			defaults: {
 				ease: 'power2.inOut',
-				duration: 0.65,
+				duration: 0.45,
 				overwrite: 'auto'
 			},
 			onComplete: () => {
 				this.stopNameLoop();
+				this.navLenis?.scrollTo(0, { immediate: true });
 				this.el.classList.remove("on-open-nav");
-				document.querySelectorAll(".header-menu-toggle").forEach(el => el.classList.remove("active"));
-				gsap.set([shapeIc, shapeText, nameBox, pause, overlay, toggleIc].filter(Boolean), { clearProps: 'all' });
+				nav?.setAttribute('aria-hidden', 'true');
+				document.querySelectorAll(".header-menu-toggle").forEach(el => {
+					el.classList.remove("active");
+					el.setAttribute('aria-expanded', 'false');
+					el.setAttribute('aria-label', 'Open navigation');
+				});
+				gsap.set(
+					[headerShape, shapeIc, shapeText, nameBox, pause, overlay, toggleIc, nav, ...navItems].filter(Boolean),
+					{ clearProps: 'all' }
+				);
 			}
 		});
 		if (nameBox) this.tlNav.to(nameBox, { maxWidth: 0, autoAlpha: 0 }, 0);
 		if (pause) this.tlNav.to(pause, { maxWidth: 0, autoAlpha: 0 }, 0);
-		if (shapeText) this.tlNav.to(shapeText, { marginLeft: 0, marginRight: 0 }, 0);
-		if (shapeIc) this.tlNav.to(shapeIc, { marginRight: '4rem' }, 0);
-		if (overlay) this.tlNav.to(overlay, { autoAlpha: 0, duration: 0.5, ease: 'sine.inOut' }, 0);
+		if (shapeText) this.tlNav.to(shapeText, { x: '5.5rem', force3D: true }, 0);
+		if (headerShape) this.tlNav.to(headerShape, { width: '15rem' }, 0);
+		if (overlay) this.tlNav.to(overlay, { autoAlpha: 0, duration: 0.35, ease: 'sine.inOut' }, 0);
+		if (navItems.length) {
+			this.tlNav.to(navItems, {
+				y: '1.6rem',
+				autoAlpha: 0,
+				duration: 0.28,
+				ease: 'power2.in',
+				stagger: { each: 0.015, from: 'end' }
+			}, 0);
+		}
+		if (nav) this.tlNav.to(nav, { autoAlpha: 0, duration: 0.32, ease: 'sine.inOut' }, 0.06);
 		if (toggleIc) {
 			this.tlNav.to(toggleIc, {
 				rotation: 0,
-				duration: 0.6,
+				duration: 0.4,
 				ease: 'power2.inOut',
 				force3D: true
 			}, 0);

@@ -62,6 +62,7 @@ const CARD_LAYOUT = [
 const CARD_SPHERE_RADIUS = 4.15;
 const CAMERA_FIT_RADIUS = 4.35;
 const CARD_SCALE_MULTIPLIER = 1.45;
+const IDLE_ROTATION_SPEED = 0.00016;
 
 export class SphericalImageCanvas {
 	constructor({ canvas, root, imageUrls, layer = 'all' }) {
@@ -84,9 +85,13 @@ export class SphericalImageCanvas {
 		this.isVisible = false;
 		this.isDestroyed = false;
 		this.isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		this.targetVelocity = { x: 0.00008, y: 0.00028 };
+		this.targetVelocity = { x: 0.00003, y: 0.00014 };
 		this.velocity = { x: 0, y: 0 };
 		this.rotation = { x: 0, y: 0 };
+		this.floatTime = 0;
+		this.isDragging = false;
+		this.dragPointerId = null;
+		this.lastPointer = { x: 0, y: 0 };
 		this.horizontalSpread = 1;
 		this.revealProgress = this.isReducedMotion ? 1 : 0;
 		this.revealDuration = 1150;
@@ -94,8 +99,9 @@ export class SphericalImageCanvas {
 		this.resizeObserver = null;
 		this.visibilityObserver = null;
 
+		this.onPointerDown = this.onPointerDown.bind(this);
 		this.onPointerMove = this.onPointerMove.bind(this);
-		this.onPointerLeave = this.onPointerLeave.bind(this);
+		this.onPointerUp = this.onPointerUp.bind(this);
 		this.onResize = this.onResize.bind(this);
 		this.onVisibilityChange = this.onVisibilityChange.bind(this);
 		this.onContextLost = this.onContextLost.bind(this);
@@ -159,6 +165,8 @@ export class SphericalImageCanvas {
 			};
 			mesh.revealDelay = (((index * 5) % cardCount) / cardCount) * 0.13;
 			mesh.burstCurve = ((((index * 4) % 9) - 4) / 4) * 0.5;
+			mesh.floatPhase = index * 0.73;
+			mesh.floatSpeed = 0.7 + (index % 5) * 0.08;
 			mesh.setParent(this.scene);
 
 			this.meshes.push(mesh);
@@ -193,11 +201,15 @@ export class SphericalImageCanvas {
 			const curveProgress = Math.sin(Math.PI * revealProgress);
 			const curveX = (-directionY / directionLength) * mesh.burstCurve * curveProgress;
 			const curveY = (directionX / directionLength) * mesh.burstCurve * curveProgress;
+			const floatWave = this.floatTime * mesh.floatSpeed + mesh.floatPhase;
+			const floatX = Math.cos(floatWave * 0.72) * 0.025;
+			const floatY = Math.sin(floatWave) * 0.045;
+			const floatZ = Math.sin(floatWave * 0.58) * 0.02;
 
 			mesh.position.set(
-				clusterX + directionX * revealEase + curveX,
-				clusterY + directionY * revealEase + curveY,
-				clusterZ + (finalZ - clusterZ) * revealEase,
+				clusterX + directionX * revealEase + curveX + floatX,
+				clusterY + directionY * revealEase + curveY + floatY,
+				clusterZ + (finalZ - clusterZ) * revealEase + floatZ,
 			);
 			mesh.visible =
 				this.layer === 'front'
@@ -262,8 +274,10 @@ export class SphericalImageCanvas {
 
 	bindEvents() {
 		if (!this.isReducedMotion) {
-			this.root.addEventListener('pointermove', this.onPointerMove, { passive: true });
-			this.root.addEventListener('pointerleave', this.onPointerLeave);
+			this.root.addEventListener('pointerdown', this.onPointerDown);
+			this.root.addEventListener('pointermove', this.onPointerMove);
+			window.addEventListener('pointerup', this.onPointerUp);
+			window.addEventListener('pointercancel', this.onPointerUp);
 		}
 
 		this.canvas.addEventListener('webglcontextlost', this.onContextLost);
@@ -290,20 +304,53 @@ export class SphericalImageCanvas {
 		this.visibilityObserver.observe(this.root);
 	}
 
-	onPointerMove(event) {
-		if (event.pointerType === 'touch') return;
+	onPointerDown(event) {
+		if (event.button !== 0 || event.target.closest('a, button, input, textarea, select')) return;
 
-		const bounds = this.root.getBoundingClientRect();
-		const pointerX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
-		const pointerY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
-
-		this.targetVelocity.x = -pointerY * 0.0019;
-		this.targetVelocity.y = pointerX * 0.0028;
+		event.preventDefault();
+		this.isDragging = true;
+		this.dragPointerId = event.pointerId;
+		this.lastPointer.x = event.clientX;
+		this.lastPointer.y = event.clientY;
+		this.targetVelocity.x = 0;
+		this.targetVelocity.y = 0;
+		this.root.setPointerCapture?.(event.pointerId);
+		this.root.classList.add('is-dragging');
 	}
 
-	onPointerLeave() {
-		this.targetVelocity.x = 0.00008;
-		this.targetVelocity.y = 0.00028;
+	onPointerMove(event) {
+		if (!this.isDragging || event.pointerId !== this.dragPointerId) return;
+
+		event.preventDefault();
+		const deltaX = event.clientX - this.lastPointer.x;
+		const deltaY = event.clientY - this.lastPointer.y;
+		this.lastPointer.x = event.clientX;
+		this.lastPointer.y = event.clientY;
+
+		this.rotation.x -= deltaY * 0.0028;
+		this.rotation.y += deltaX * 0.0035;
+		this.velocity.x = -deltaY * 0.0007;
+		this.velocity.y = deltaX * 0.0009;
+		this.targetVelocity.x = 0;
+		this.targetVelocity.y = 0;
+		this.updateCardTransforms();
+	}
+
+	onPointerUp(event) {
+		if (!this.isDragging || event.pointerId !== this.dragPointerId) return;
+
+		this.root.releasePointerCapture?.(event.pointerId);
+		this.isDragging = false;
+		this.dragPointerId = null;
+		const releaseSpeed = Math.hypot(this.velocity.x, this.velocity.y);
+		if (releaseSpeed > 0.00001) {
+			this.targetVelocity.x = (this.velocity.x / releaseSpeed) * IDLE_ROTATION_SPEED;
+			this.targetVelocity.y = (this.velocity.y / releaseSpeed) * IDLE_ROTATION_SPEED;
+		} else {
+			this.targetVelocity.x = 0.00003;
+			this.targetVelocity.y = 0.00014;
+		}
+		this.root.classList.remove('is-dragging');
 	}
 
 	onResize() {
@@ -374,11 +421,13 @@ export class SphericalImageCanvas {
 		const elapsed = Math.min(32, time - this.lastFrameTime);
 		const delta = elapsed / (1000 / 60);
 		this.lastFrameTime = time;
-		const smoothing = 1 - Math.pow(0.935, delta);
+		const velocityDamping = this.isDragging ? 0.92 : 0.97;
+		const smoothing = 1 - Math.pow(velocityDamping, delta);
 
 		if (this.revealProgress < 1) {
 			this.revealProgress = Math.min(1, this.revealProgress + elapsed / this.revealDuration);
 		}
+		this.floatTime += elapsed / 1000;
 		this.velocity.x += (this.targetVelocity.x - this.velocity.x) * smoothing;
 		this.velocity.y += (this.targetVelocity.y - this.velocity.y) * smoothing;
 		this.rotation.x += this.velocity.x * delta;
@@ -394,8 +443,11 @@ export class SphericalImageCanvas {
 		this.stop();
 		this.resizeObserver?.disconnect();
 		this.visibilityObserver?.disconnect();
+		this.root.removeEventListener('pointerdown', this.onPointerDown);
 		this.root.removeEventListener('pointermove', this.onPointerMove);
-		this.root.removeEventListener('pointerleave', this.onPointerLeave);
+		window.removeEventListener('pointerup', this.onPointerUp);
+		window.removeEventListener('pointercancel', this.onPointerUp);
+		this.root.classList.remove('is-dragging');
 		this.canvas.removeEventListener('webglcontextlost', this.onContextLost);
 		document.removeEventListener('visibilitychange', this.onVisibilityChange);
 
