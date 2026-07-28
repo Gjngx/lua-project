@@ -2,6 +2,7 @@ import { gsap } from './gsap';
 import { header } from './components/header';
 import { footer } from './components/footer';
 import { audioManager } from './components/audio';
+import { buttonText } from './components/button-text';
 
 export class GlobalChange {
 	constructor() {
@@ -18,6 +19,7 @@ export class GlobalChange {
 		
 		header.init(data);
 		footer.trigger(data);
+		buttonText.mount(document);
 		
 		this.refreshOnBreakpoint();
 	}
@@ -29,6 +31,7 @@ export class GlobalChange {
 		header.update(data);
 		footer.destroy();
 		footer.trigger(data);
+		buttonText.mount(data.next.container);
 	}
 	
 	refreshOnBreakpoint() {

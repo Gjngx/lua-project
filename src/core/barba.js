@@ -3,6 +3,7 @@ import { PageManagerRegistry } from './page-managers';
 import { globalChange, pageTrans } from './global-scripts';
 import { scrollTop } from './scroll.js';
 import { scrollIndicator } from './components/scroll-indicator.js';
+import { buttonText } from './components/button-text.js';
 
 /**
  * Hàm đồng bộ thẻ <head> khi chuyển trang bằng Barba.
@@ -110,6 +111,7 @@ export function initBarba() {
 
 				beforeLeave(data) {
 					scrollIndicator.pause();
+					buttonText.destroy(data.current.container);
 
 					// Cố định container cũ để không bị giật khi cuộn lên đầu trang (scrollTop ở beforeEnter)
 					let scrollPos = window.scrollY || document.documentElement.scrollTop;

@@ -131,18 +131,22 @@ a {
 .btn-txt {
 	display: grid;
 	padding-inline: 1.7rem;
-	overflow: hidden;
+	overflow: visible;
+	white-space: nowrap;
+	clip-path: inset(-12% 0);
 }
 
-.btn-txt-top,
-.btn-txt-bottom {
-	grid-column: 1 / 1;
-	grid-row: 1 / 1;
-	transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+.btn-txt [data-button-text-label] {
+	display: block;
+	width: max-content;
+	max-width: none;
+	white-space: nowrap;
 }
 
-.btn-txt-bottom {
-	transform: translateY(100%);
+.btn-txt .split-char {
+	display: inline-block;
+	text-shadow: 0 -1.3em currentColor;
+	will-change: transform;
 }
 
 .btn-ic {
@@ -181,6 +185,13 @@ a {
 }
 .btn-dark .btn-bg {
 	background-color: var(--cl-bg-black);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.btn-txt .split-char {
+		text-shadow: none;
+		will-change: auto;
+	}
 }
 
 /* Audio Popup */
@@ -266,14 +277,6 @@ a {
 
 	.btn:hover .btn-ic {
 		transform: rotateZ(360deg);
-	}
-
-	.btn:hover .btn-txt-top {
-		transform: translateY(-100%);
-	}
-
-	.btn:hover .btn-txt-bottom {
-		transform: translateY(0);
 	}
 }
 
