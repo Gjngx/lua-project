@@ -7,32 +7,69 @@
 	scrollbar-gutter: stable;
 }
 
-html {
+html.lenis,
+html.lenis body {
+	height: auto;
+}
+
+.lenis.lenis-smooth {
+	scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped,
+html.is-scroll-locked,
+html.is-scroll-locked body {
+	overflow: hidden;
+}
+
+html.has-custom-scrollbar {
 	scrollbar-width: none;
 	-ms-overflow-style: none;
 }
 
-html::-webkit-scrollbar {
+html.has-custom-scrollbar::-webkit-scrollbar,
+html.has-custom-scrollbar body::-webkit-scrollbar {
 	display: none;
+	width: 0;
+	height: 0;
+}
+
+/*
+ * Hide the page scrollbar before the JavaScript bundle runs so the viewport
+ * width does not change when the custom indicator is initialized.
+ * Touch devices and reduced-motion users keep the native scrollbar.
+ */
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+	html {
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+
+	html::-webkit-scrollbar,
+	body::-webkit-scrollbar {
+		display: none;
+		width: 0;
+		height: 0;
+	}
 }
 
 .custom-scroll::-webkit-scrollbar,
 .custom-scroll::-webkit-scrollbar-track {
-	width: .6rem;
+	width: 0.6rem;
 }
 
 .custom-scroll::-webkit-scrollbar-track {
-	border: solid .2rem transparent;
+	border: solid 0.2rem transparent;
 }
 
 .custom-scroll::-webkit-scrollbar-thumb {
-	box-shadow: inset 0 0 1rem 1rem #A5A5A5;
-	transition: all .4s;
-	border: solid .2rem transparent;
+	box-shadow: inset 0 0 1rem 1rem #a5a5a5;
+	transition: all 0.4s;
+	border: solid 0.2rem transparent;
 }
 
 .custom-scroll::-webkit-scrollbar-thumb:hover {
-	box-shadow: inset 0 0 1rem 1rem #A5A5A5;
+	box-shadow: inset 0 0 1rem 1rem #a5a5a5;
 }
 
 .custom-scroll::-webkit-scrollbar-corner {
@@ -116,7 +153,7 @@ a {
 	height: 4rem;
 	background-color: var(--cl-white);
 	border-radius: 99%;
-	transition: transform .6s cubic-bezier(0.22, 1, 0.36, 1);
+	transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .btn-ic svg {
@@ -131,7 +168,7 @@ a {
 	background-color: var(--cl-white);
 	border-radius: 10vmin;
 	pointer-events: none;
-	transition: width .6s cubic-bezier(0.22, 1, 0.36, 1);
+	transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Dark Variant */
@@ -190,7 +227,9 @@ a {
 	cursor: pointer;
 	flex: 1;
 	font-family: inherit;
-	transition: background 0.3s ease, opacity 0.3s ease;
+	transition:
+		background 0.3s ease,
+		opacity 0.3s ease;
 }
 
 .audio-btn:hover {
@@ -240,11 +279,11 @@ a {
 
 @keyframes marquee {
 	0% {
-		transform: translateX(0)
+		transform: translateX(0);
 	}
 
 	100% {
-		transform: translateX(-100%)
+		transform: translateX(-100%);
 	}
 }
 

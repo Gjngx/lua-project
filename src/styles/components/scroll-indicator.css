@@ -1,0 +1,53 @@
+.scroll-indicator {
+	--scroll-indicator-color: var(--cl-content-strong);
+
+	position: fixed;
+	inset: 0 0.2rem 0 auto;
+	z-index: 150;
+	width: 0.2rem;
+	overflow: hidden;
+	pointer-events: none;
+	visibility: hidden;
+	contain: layout paint style;
+}
+
+.scroll-indicator[data-theme='dark'] {
+	--scroll-indicator-color: var(--cl-brand);
+}
+
+.scroll-indicator__thumb {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: block;
+	width: 100%;
+	min-height: 4.4rem;
+	border-radius: 10vmin;
+	background: var(--scroll-indicator-color);
+	opacity: 0;
+	transform: translate3d(0, 0, 0) scaleY(1);
+	transform-origin: center;
+	transition:
+		opacity 450ms ease,
+		background-color 300ms ease;
+	will-change: transform, opacity;
+}
+
+html.has-custom-scrollbar .scroll-indicator {
+	visibility: visible;
+}
+
+html.has-custom-scrollbar .scroll-indicator.is-active .scroll-indicator__thumb {
+	opacity: 0.9;
+}
+
+html.is-scroll-locked .scroll-indicator__thumb,
+html.is-page-transitioning .scroll-indicator__thumb {
+	opacity: 0 !important;
+}
+
+@media (max-width: 767px), (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+	.scroll-indicator {
+		display: none;
+	}
+}

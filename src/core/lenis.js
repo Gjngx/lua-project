@@ -6,6 +6,11 @@ export class SmoothScroll {
 	constructor() {
 		this.lenis = null;
 		this._tickerCallback = null;
+		this._refreshCallback = null;
+		this._onLenisScroll = (event) => {
+			ScrollTrigger.update();
+			this.updateOnScroll(event);
+		};
 		this.scroller = {
 			scrollX: window.scrollX,
 			scrollY: window.scrollY,
@@ -16,30 +21,30 @@ export class SmoothScroll {
 	}
 
 	init() {
-		this.reInit();
+		if (!this._tickerCallback) {
+			this._tickerCallback = (time) => {
+				this.lenis?.raf(time * 1000);
+			};
+			gsap.ticker.add(this._tickerCallback);
+			gsap.ticker.lagSmoothing(0);
+		}
 
-		this._tickerCallback = (time) => {
-			if (this.lenis) {
-				this.lenis.raf(time * 1000);
-			}
-		};
-		gsap.ticker.add(this._tickerCallback);
-		gsap.ticker.lagSmoothing(0);
+		if (!this._refreshCallback) {
+			this._refreshCallback = () => this.lenis?.resize();
+			ScrollTrigger.addEventListener('refresh', this._refreshCallback);
+		}
+
+		this.reInit();
 	}
 
-	reInit(data) {
+	reInit() {
 		if (this.lenis) {
+			this.lenis.off('scroll', this._onLenisScroll);
 			this.lenis.destroy();
 		}
 
-		const CONFIG_INSTANT = {
-			lerp: 1,
-			duration: 0,
-			normalizeWheel: false,
-			syncTouch: false,
-			smoothWheel: true,
-			smoothTouch: false,
-		};
+		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const useInstantScroll = viewport.w <= 767 || prefersReducedMotion;
 
 		// Trong Astro, ta thường cuộn trên html (document.documentElement)
 		const contentEl = document.documentElement;
@@ -49,29 +54,14 @@ export class SmoothScroll {
 			content: contentEl,
 			wrapper: wrapperEl,
 			// Lerp cao hơn = phản hồi nhanh hơn, cảm giác scroll nhẹ hơn.
-			lerp: 0.08,
-			wheelMultiplier: 0.85,
+			lerp: useInstantScroll ? 1 : 0.08,
+			wheelMultiplier: useInstantScroll ? 1 : 0.85,
+			smoothWheel: !useInstantScroll,
 			syncTouch: false,
-			...(viewport.w <= 767 && CONFIG_INSTANT)
 		});
 
-		// Re-add ticker if it was removed by destroy()
-		if (!this._tickerCallback) {
-			this._tickerCallback = (time) => {
-				if (this.lenis) {
-					this.lenis.raf(time * 1000);
-				}
-			};
-			gsap.ticker.add(this._tickerCallback);
-			gsap.ticker.lagSmoothing(0);
-		}
-
-		this.lenis.on('scroll', ScrollTrigger.update);
-		this.lenis.on('scroll', (e) => {
-			this.updateOnScroll(e);
-		});
-
-		ScrollTrigger.addEventListener('refresh', () => this.lenis?.resize());
+		this.lenis.on('scroll', this._onLenisScroll);
+		this.updateOnScroll(this.lenis);
 		ScrollTrigger.refresh();
 	}
 
@@ -81,7 +71,7 @@ export class SmoothScroll {
 			this.scroller.scrollX,
 			this.scroller.scrollY,
 			this.lastScroller.scrollX,
-			this.lastScroller.scrollY
+			this.lastScroller.scrollY,
 		);
 
 		if (dist > threshold) {
@@ -92,24 +82,46 @@ export class SmoothScroll {
 	}
 
 	updateOnScroll(e) {
-		this.scroller.scrollX = e.scroll;
-		this.scroller.scrollY = e.scroll;
-		this.scroller.velocity = e.velocity;
-		this.scroller.direction = e.direction;
+		const scroll = Number.isFinite(e?.scroll) ? e.scroll : window.scrollY;
+		this.scroller.scrollX = window.scrollX;
+		this.scroller.scrollY = scroll;
+		this.scroller.velocity = Number.isFinite(e?.velocity) ? e.velocity : 0;
+		this.scroller.direction = Number.isFinite(e?.direction) ? e.direction : 0;
+	}
+
+	getScroll() {
+		return this.scroller.scrollY;
+	}
+
+	getLimit() {
+		if (Number.isFinite(this.lenis?.limit)) {
+			return Math.max(0, this.lenis.limit);
+		}
+		return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+	}
+
+	getVelocity() {
+		return this.scroller.velocity;
+	}
+
+	isRunning() {
+		return Boolean(this.lenis && !this.lenis.isStopped);
 	}
 
 	start() {
 		if (this.lenis) {
 			this.lenis.start();
 		}
-		document.body.style.overflow = "initial";
+		document.documentElement.classList.remove('is-scroll-locked');
+		window.dispatchEvent(new CustomEvent('smooth-scroll:start'));
 	}
 
 	stop() {
 		if (this.lenis) {
 			this.lenis.stop();
 		}
-		document.body.style.overflow = "hidden";
+		document.documentElement.classList.add('is-scroll-locked');
+		window.dispatchEvent(new CustomEvent('smooth-scroll:stop'));
 	}
 
 	scrollTo(target, options = {}) {
@@ -120,7 +132,7 @@ export class SmoothScroll {
 
 	scrollToTop(options = {}) {
 		if (this.lenis) {
-			this.lenis.scrollTo("top", { duration: .0001, immediate: true, lock: true, ...options });
+			this.lenis.scrollTo('top', { duration: 0.0001, immediate: true, lock: true, ...options });
 		}
 	}
 
@@ -129,10 +141,16 @@ export class SmoothScroll {
 			gsap.ticker.remove(this._tickerCallback);
 			this._tickerCallback = null;
 		}
+		if (this._refreshCallback) {
+			ScrollTrigger.removeEventListener('refresh', this._refreshCallback);
+			this._refreshCallback = null;
+		}
 		if (this.lenis) {
+			this.lenis.off('scroll', this._onLenisScroll);
 			this.lenis.destroy();
 			this.lenis = null;
 		}
+		document.documentElement.classList.remove('is-scroll-locked');
 	}
 }
 

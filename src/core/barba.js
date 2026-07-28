@@ -2,6 +2,7 @@ import barba from '@barba/core';
 import { PageManagerRegistry } from './page-managers';
 import { globalChange, pageTrans } from './global-scripts';
 import { scrollTop } from './scroll.js';
+import { scrollIndicator } from './components/scroll-indicator.js';
 
 /**
  * Hàm đồng bộ thẻ <head> khi chuyển trang bằng Barba.
@@ -18,19 +19,19 @@ function syncHead(data) {
 	const currentHead = document.head;
 
 	// Xóa các tag cũ đã được thêm bởi lần sync trước
-	currentHead.querySelectorAll('[data-barba-head]').forEach(el => el.remove());
+	currentHead.querySelectorAll('[data-barba-head]').forEach((el) => el.remove());
 
 	// Các selector cần sync
 	const syncSelectors = [
 		'style:not([data-barba-head])',
 		'link[rel="stylesheet"]:not([data-barba-head])',
-		'meta[name="description"]'
+		'meta[name="description"]',
 	];
 
-	syncSelectors.forEach(selector => {
+	syncSelectors.forEach((selector) => {
 		const nextEls = nextHead.querySelectorAll(selector);
 
-		nextEls.forEach(nextEl => {
+		nextEls.forEach((nextEl) => {
 			let alreadyExists = false;
 
 			if (nextEl.tagName === 'LINK') {
@@ -51,7 +52,9 @@ function syncHead(data) {
 				const name = nextEl.getAttribute('name');
 				if (name && currentHead.querySelector(`meta[name="${name}"]`)) {
 					// Với thẻ meta, thay vì thêm mới thì cập nhật content của thẻ hiện tại
-					currentHead.querySelector(`meta[name="${name}"]`).setAttribute('content', nextEl.getAttribute('content'));
+					currentHead
+						.querySelector(`meta[name="${name}"]`)
+						.setAttribute('content', nextEl.getAttribute('content'));
 					alreadyExists = true;
 				}
 			}
@@ -79,10 +82,14 @@ export function initBarba() {
 	if (!wrapper) return;
 
 	// Khai báo các Views để tự động gọi setup / destroy dựa vào data-barba-namespace
-	const VIEWS = Object.keys(PageManagerRegistry).map(namespace => ({
+	const VIEWS = Object.keys(PageManagerRegistry).map((namespace) => ({
 		namespace,
-		beforeEnter(data) { PageManagerRegistry[namespace].initEnter(data); },
-		beforeLeave(data) { PageManagerRegistry[namespace].destroy(data); }
+		beforeEnter(data) {
+			PageManagerRegistry[namespace].initEnter(data);
+		},
+		beforeLeave(data) {
+			PageManagerRegistry[namespace].destroy(data);
+		},
 	}));
 
 	barba.init({
@@ -98,10 +105,12 @@ export function initBarba() {
 		},
 		transitions: [
 			{
-				name: "gsap-transition",
+				name: 'gsap-transition',
 				sync: true,
-				
+
 				beforeLeave(data) {
+					scrollIndicator.pause();
+
 					// Cố định container cũ để không bị giật khi cuộn lên đầu trang (scrollTop ở beforeEnter)
 					let scrollPos = window.scrollY || document.documentElement.scrollTop;
 					if (window.innerWidth <= 767) {
@@ -116,10 +125,10 @@ export function initBarba() {
 						top: `-${scrollPos}px`,
 						left: '0',
 						width: '100%',
-						zIndex: '1'
+						zIndex: '1',
 					});
 				},
-				
+
 				once(data) {
 					// Chạy 1 lần duy nhất khi web vừa mới bật lên
 					globalChange.init(data);
@@ -133,22 +142,27 @@ export function initBarba() {
 					// Chạy animation rời trang được tách ra ở class PageTrans
 					await pageTrans.leaveAnim(data);
 				},
-				
+
 				async beforeEnter(data) {
 					// Cuộn lên đầu trang mượt mà hoặc ngay lập tức
 					scrollTop();
-					
+					scrollIndicator.reset({ immediate: true });
+
 					// Chạy hàm sync thẻ <head>
 					syncHead(data);
 				},
-				
+
 				async enter(data) {
 					// Cập nhật giao diện toàn cục (Header, Nav links...)
 					globalChange.update(data);
-					
+
 					// Chạy animation vào trang được tách ra ở class PageTrans
 					await pageTrans.enterAnim(data);
-				}
+				},
+
+				after() {
+					scrollIndicator.resume();
+				},
 			},
 		],
 	});

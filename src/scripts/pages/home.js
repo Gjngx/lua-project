@@ -250,13 +250,13 @@ export const HomePage = {
 			this.tlHeroBotEnd = gsap.timeline({
 				scrollTrigger: {
 					trigger: this.el.querySelector('.home-hero-bottom-desc'),
-					start: 'top top+=10%',
+					start: 'top top+=15%',
 					end: 'bottom top',
 					scrub: true,
 				}
 			});
 			this.tlHeroBotEnd.to(this.el.querySelector('.home-hero-logo'), {
-				yPercent: -100,
+				yPercent: -200,
 				ease: 'none'
 			});
 
