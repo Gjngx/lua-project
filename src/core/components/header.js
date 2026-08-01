@@ -197,12 +197,12 @@ export class Header {
 
 	// ─── Nav Toggle ──────────────────────────────────────────────────
 	toggleNav() {
-		const toggles = this.el.querySelectorAll(".header-menu-toggle");
+		const toggles = this.el.querySelectorAll('[data-header-toggle]');
 		toggles.forEach(btn => {
 			btn.addEventListener("click", this.handleClick.bind(this));
 		});
 
-		this.el.querySelectorAll('.header-nav a').forEach(link => {
+		this.el.querySelectorAll('[data-header-nav] a').forEach(link => {
 			link.addEventListener('click', () => {
 				if (this.isOpen) this.close();
 			});
@@ -245,7 +245,7 @@ export class Header {
 		document.addEventListener('click', (e) => {
 			if (!this.isOpen) return;
 			if (
-				e.target.closest('.header-menu-toggle') ||
+				e.target.closest('[data-header-toggle]') ||
 				e.target.closest('.header-logo') ||
 				e.target.closest('.header-inner')
 			) return;
@@ -276,8 +276,8 @@ export class Header {
 	open() {
 		if (this.isOpen || !this.el) return;
 		this.el.classList.add("on-open-nav");
-		this.el.querySelector('.header-nav')?.setAttribute('aria-hidden', 'false');
-		this.el.querySelectorAll(".header-menu-toggle").forEach(el => {
+		this.el.querySelector('[data-header-nav]')?.setAttribute('aria-hidden', 'false');
+		this.el.querySelectorAll('[data-header-toggle]').forEach(el => {
 			el.classList.add("active");
 			el.setAttribute('aria-expanded', 'true');
 			el.setAttribute('aria-label', 'Close navigation');
@@ -287,7 +287,7 @@ export class Header {
 
 		this._savedScrollY = window.scrollY;
 		this._preventTouch = (e) => {
-			if (!e.target.closest('.header-nav')) e.preventDefault();
+			if (!e.target.closest('[data-header-nav]')) e.preventDefault();
 		};
 		document.addEventListener('touchmove', this._preventTouch, { passive: false });
 
@@ -304,8 +304,8 @@ export class Header {
 
 		if (smoothScroll) smoothScroll.start();
 		this.el.classList.remove("on-open-nav");
-		this.el.querySelector('.header-nav')?.setAttribute('aria-hidden', 'true');
-		this.el.querySelectorAll(".header-menu-toggle").forEach(el => {
+		this.el.querySelector('[data-header-nav]')?.setAttribute('aria-hidden', 'true');
+		this.el.querySelectorAll('[data-header-toggle]').forEach(el => {
 			el.classList.remove("active");
 			el.setAttribute('aria-expanded', 'false');
 			el.setAttribute('aria-label', 'Open navigation');
