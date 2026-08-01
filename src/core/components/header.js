@@ -227,7 +227,7 @@ export class Header {
 			});
 		});
 
-		const audioToggle = this.el.querySelector('.header-shape-pause');
+		const audioToggle = this.el.querySelector('[data-header-next]');
 		if (audioToggle) {
 			audioToggle.addEventListener('click', (e) => {
 				e.preventDefault();
@@ -241,7 +241,7 @@ export class Header {
 			});
 		}
 
-		const audioPlayPause = this.el.querySelector('.header-shape-ic');
+		const audioPlayPause = this.el.querySelector('[data-header-play]');
 		if (audioPlayPause) {
 			audioPlayPause.addEventListener('click', (e) => {
 				e.preventDefault();
@@ -279,7 +279,7 @@ export class Header {
 	updateTrackTitle(track) {
 		if (!track?.title || !this.el) return;
 
-		this.el.querySelectorAll('.header-shape-name-track .txt').forEach((text) => {
+		this.el.querySelectorAll('[data-header-name-text]').forEach((text) => {
 			text.textContent = track.title;
 		});
 
@@ -338,11 +338,11 @@ export class Header {
 	// ─── Nav Animations ──────────────────────────────────────────────
 	animateNavOpen() {
 		if (this.tlNav) this.tlNav.kill();
-		const shapeIc = this.el.querySelector('.header-shape-ic');
-		const shapeText = this.el.querySelector('.header-shape-text');
-		const headerShape = this.el.querySelector('.header-shape');
-		const nameBox = this.el.querySelector('.header-shape-name-box');
-		const pause = this.el.querySelector('.header-shape-pause');
+		const shapeIc = this.el.querySelector('[data-header-play]');
+		const shapeText = this.el.querySelector('[data-header-audio-content]');
+		const headerShape = this.el.querySelector('[data-header-shape]');
+		const nameBox = this.el.querySelector('[data-header-name-box]');
+		const pause = this.el.querySelector('[data-header-next]');
 		const overlay = this.el.querySelector('.header-overlay');
 		const toggleIc = this.el.querySelector('.header-menu-toggle .header-circle-ic');
 		const nav = this.el.querySelector('.header-nav');
@@ -402,9 +402,9 @@ export class Header {
 	startNameLoop() {
 		if (this.tlNameLoop) this.tlNameLoop.kill();
 
-		const name = this.el.querySelector('.header-shape-name');
-		const track = name?.querySelector('.header-shape-name-track');
-		const text = track?.querySelector('.txt');
+		const name = this.el.querySelector('[data-header-name]');
+		const track = name?.querySelector('[data-header-name-track]');
+		const text = track?.querySelector('[data-header-name-text]');
 		if (!name || !track || !text) return;
 
 		gsap.set(track, { x: 0 });
@@ -429,8 +429,8 @@ export class Header {
 			this.tlNameLoop = null;
 		}
 
-		const name = this.el.querySelector('.header-shape-name');
-		const track = name?.querySelector('.header-shape-name-track');
+		const name = this.el.querySelector('[data-header-name]');
+		const track = name?.querySelector('[data-header-name-track]');
 		name?.classList.remove('is-looping');
 		if (track) gsap.set(track, { clearProps: 'transform' });
 	}
@@ -441,11 +441,11 @@ export class Header {
 			this.tlNameLoop.kill();
 			this.tlNameLoop = null;
 		}
-		const shapeIc = this.el.querySelector('.header-shape-ic');
-		const shapeText = this.el.querySelector('.header-shape-text');
-		const headerShape = this.el.querySelector('.header-shape');
-		const nameBox = this.el.querySelector('.header-shape-name-box');
-		const pause = this.el.querySelector('.header-shape-pause');
+		const shapeIc = this.el.querySelector('[data-header-play]');
+		const shapeText = this.el.querySelector('[data-header-audio-content]');
+		const headerShape = this.el.querySelector('[data-header-shape]');
+		const nameBox = this.el.querySelector('[data-header-name-box]');
+		const pause = this.el.querySelector('[data-header-next]');
 		const overlay = this.el.querySelector('.header-overlay');
 		const toggleIc = this.el.querySelector('.header-menu-toggle .header-circle-ic');
 		const nav = this.el.querySelector('.header-nav');

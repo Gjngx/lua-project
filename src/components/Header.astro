@@ -28,8 +28,14 @@ import navAbout from '../assets/images/header-1.png';
 						</svg>
 					</div>
 				</a>
-				<div class="header-shape">
-					<button class="header-shape-ic" type="button" aria-label="Pause music" aria-pressed="false">
+				<div class="header-shape" data-header-shape>
+					<button
+						class="header-shape-ic"
+						data-header-play
+						type="button"
+						aria-label="Pause music"
+						aria-pressed="false"
+					>
 						<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20 20" fill="none">
 							<rect x="1" y="8.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
 							<rect x="6" y="8.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
@@ -37,23 +43,23 @@ import navAbout from '../assets/images/header-1.png';
 							<rect x="11" y="8.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
 						</svg>
 					</button>
-					<div class="header-shape-text">
+					<div class="header-shape-text" data-header-audio-content>
 						<div class="header-shape-text-inner">
-							<div class="header-shape-name-box">
-								<div class="header-shape-name">
-									<div class="header-shape-name-track">
-										<div class="txt trans-upper fs-12">Nior Lounge</div>
-										<div class="txt trans-upper fs-12" aria-hidden="true">Nior Lounge</div>
+							<div class="header-shape-name-box" data-header-name-box>
+								<div class="header-shape-name" data-header-name>
+									<div class="header-shape-name-track" data-header-name-track>
+										<div class="txt trans-upper fs-12" data-header-name-text>Nior Lounge</div>
+										<div class="txt trans-upper fs-12" data-header-name-text aria-hidden="true">Nior Lounge</div>
 									</div>
 								</div>
 								<div class="header-shape-dot"></div>
 							</div>
 							<div class="header-shape-time">
-								<div class="txt trans-upper fs-12">00:00</div>
+								<div class="txt trans-upper fs-12" data-header-time>00:00</div>
 							</div>
 						</div>
 					</div>
-					<button class="header-shape-pause" type="button" aria-label="Next track">
+					<button class="header-shape-pause" data-header-next type="button" aria-label="Next track">
 							<div class="header-shape-pause-ic">
 								<svg width="100%" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 									<rect x="2" y="8" width="3" height="3" rx="1.5" fill="currentColor"/>

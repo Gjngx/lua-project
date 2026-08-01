@@ -50,7 +50,7 @@ export class AudioManager {
 
 	updateTimeDisplay() {
 		const totalSeconds = Math.floor(this.audio?.currentTime || 0);
-		const textEl = document.querySelector('.header-shape-time .txt');
+		const textEl = document.querySelector('[data-header-time]');
 		if (!textEl) return;
 
 		const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
@@ -131,7 +131,7 @@ export class AudioManager {
 		let needsNextFrame = false;
 		
 		if (!this.rects.length || !document.body.contains(this.rects[0])) {
-			this.rects = Array.from(document.querySelectorAll('.header-shape-ic rect'));
+			this.rects = Array.from(document.querySelectorAll('[data-header-play] rect'));
 		}
 
 		if (this.rects.length === 4) {
