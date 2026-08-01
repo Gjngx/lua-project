@@ -13,6 +13,7 @@ import work4 from '../assets/images/work-4.png';
 import item1 from '../assets/images/item-1.png';
 import item2 from '../assets/images/item-2.png';
 import item3 from '../assets/images/item-3.png';
+import playground8 from '../assets/images/header-1.png';
 import IconLogo from '../components/icons/IconLogo.astro';
 import IconSun from '../components/icons/IconSun.astro';
 import IconRiceFields from '../components/icons/IconRiceFields.astro';
@@ -32,7 +33,7 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 ---
 
 <Layout title="Home" namespace="home">
-	<div class="home-hero-wrap" data-section="dark">
+	<div class="home-hero-wrap" data-section="transparent" data-hidden="logo">
 		<div class="home-hero-bg">
 			<div class="home-hero-bg-inner">
 				<video
@@ -239,9 +240,9 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 			</div>
 			<canvas class="home-works-trans-canvas" aria-hidden="true"></canvas>
 		</div>
-		<div class="home-works-empty"></div>
+		<div class="home-works-empty" data-section="reset"></div>
 	</div>
-	<div class="home-how-wrap" data-section="light">
+	<div class="home-how-wrap">
 		<section class="home-how">
 			<div class="container grid">
 				<div class="home-how-intro">
@@ -386,7 +387,7 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 			</div>
 		</section>
 	</div>
-	<div class="home-playground-wrap" id="playground" data-section="light">
+	<div class="home-playground-wrap" id="playground">
 		<section class="home-playground">
 			<div class="container grid">
 				<div class="home-playground-main">
@@ -422,6 +423,7 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 							work3.src,
 							item3.src,
 							work4.src,
+							playground8.src,
 						])}
 						aria-hidden="true"
 					></canvas>

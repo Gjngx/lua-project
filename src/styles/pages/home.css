@@ -61,6 +61,7 @@
 .home-hero-top.top-left {
 	grid-column: 2 / 10;
 	grid-row: 1 / 1;
+	align-content: start;
 }
 
 .home-hero-top.top-logo {
@@ -82,7 +83,7 @@
 .home-hero-desc {
 	width: 12.2rem;
 	color: var(--cl-white);
-	margin-bottom: min(52.1rem, 53.0549898167vh);
+	margin-top: 2rem;
 }
 
 .home-hero-logo {
@@ -157,7 +158,7 @@
 }
 
 .home-hero-decor-inner {
-	width: 290.7rem;
+	width: 688.5rem;
 	color: var(--cl-brand);
 	opacity: 0;
 }

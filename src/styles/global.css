@@ -166,7 +166,20 @@ a {
 	background-color: var(--cl-white);
 	border-radius: 10vmin;
 	pointer-events: none;
-	transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+	transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+	background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn.btn-no-ic .btn-ic {
+	display: none;
+}
+
+.btn.btn-no-ic .btn-inner {
+	height: 100%;
+}
+
+.btn.btn-no-ic .btn-bg {
+	width: 100%;
 }
 
 /* Dark Variant */

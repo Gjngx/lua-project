@@ -112,10 +112,14 @@ export class Header {
 	/**
 	 * Đổi mode class (on-dark, on-light, v.v.) dựa trên section đang hiển thị
 	 * Section cần có attribute `data-section="dark"` hoặc `data-section="light"`
+	 * `data-hidden="logo"` sẽ thêm class `hidden-logo` vào header.
 	 */
 	toggleMode() {
 		const section = this.getCurrentSection('[data-section]');
 		const mode = section ? section.getAttribute('data-section') : null;
+		const hiddenRules = section?.getAttribute('data-hidden')?.split(/\s+/) || [];
+		this.el.classList.toggle('hidden-logo', hiddenRules.includes('logo'));
+
 		if (this.currentMode === mode) return;
 
 		this.currentMode = mode;

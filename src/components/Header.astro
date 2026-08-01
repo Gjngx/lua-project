@@ -6,11 +6,23 @@ import navBrand from '../assets/images/item-1.png';
 import navWork from '../assets/images/work-4.png';
 import navPortrait from '../assets/images/header-avt.png';
 import headerBg from '../assets/images/header-1.png';
+import Button from './Button.astro';
 ---
 
 <header class="header">
 	<div class="header-inner">
 		<div class="container grid">
+			<a href="/" class="header-logo">
+				<div class="header-logo-ic">
+					<svg width="100%" viewBox="0 0 73 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M61.713 28C59.453 28 57.6582 27.2452 56.3288 25.7356C55.0259 24.1999 54.3745 21.9745 54.3745 19.0594V8.16667H59.5593V18.5909C59.5593 20.2567 59.8784 21.532 60.5165 22.417C61.1812 23.2759 62.1384 23.7054 63.3881 23.7054C64.7973 23.7054 65.8875 23.2239 66.6585 22.2608C67.4296 21.2718 67.8152 19.9053 67.8152 18.1614V8.16667H73V27.5625H67.8152V24.6814C67.2302 25.6965 66.4325 26.5034 65.4222 27.102C64.4118 27.7007 63.1754 28 61.713 28Z" fill="currentColor"/>
+						<path d="M42.0861 28C40.0746 28 38.3014 27.5932 36.7663 26.7795C35.2313 25.9404 34.0271 24.7962 33.1537 23.3468C32.2803 21.872 31.8436 20.1684 31.8436 18.2359C31.8436 16.278 32.2671 14.5362 33.114 13.0106C33.9874 11.4849 35.1916 10.3026 36.7266 9.46346C38.2617 8.59893 40.0482 8.16667 42.0861 8.16667C44.0446 8.16667 45.7649 8.5735 47.247 9.38718C48.7291 10.2009 49.8804 11.3069 50.7008 12.7054C51.5477 14.104 51.9712 15.6932 51.9712 17.4731C51.9712 17.7274 51.9712 18.0071 51.9712 18.3122C51.9712 18.6173 51.9447 18.9352 51.8918 19.2657H35.5754V16.2144H46.7706C46.6912 14.9939 46.2148 14.015 45.3414 13.2776C44.468 12.5402 43.3961 12.1715 42.1258 12.1715C41.173 12.1715 40.2996 12.3749 39.5056 12.7817C38.7116 13.1886 38.0764 13.7988 37.6 14.6125C37.1501 15.4007 36.9251 16.4178 36.9251 17.6638V18.7317C36.9251 19.7997 37.1501 20.7278 37.6 21.516C38.05 22.3043 38.6587 22.9145 39.4262 23.3468C40.1937 23.7536 41.0671 23.9571 42.0464 23.9571C43.0521 23.9571 43.899 23.7409 44.5871 23.3087C45.2752 22.8764 45.8046 22.3043 46.1751 21.5923H51.4154C51.0449 22.7874 50.4229 23.8808 49.5495 24.8724C48.7026 25.8387 47.644 26.6015 46.3736 27.1609C45.1032 27.7203 43.674 28 42.0861 28Z" fill="currentColor"/>
+						<path d="M24.6337 28V8.16667L30.0412 8.16667V28H24.6337ZM24.6337 4.95833V0H30.0412V4.95834L24.6337 4.95833Z" fill="currentColor"/>
+						<path d="M17.6514 28V0H22.8313V28H17.6514ZM0 28V0H5.17987V28H0ZM4.5025 15.8V11.6H18.528V15.8H4.5025Z" fill="currentColor"/>
+						<path d="M34.5473 1.37705L49.8683 0V4.95833H34.5473V1.37705Z" fill="currentColor"/>
+					</svg>
+				</div>
+			</a>
 			<div class="header-menu">
 				<div class="header-menu-inner">
 					<div class="header-menu-main">
@@ -54,27 +66,17 @@ import headerBg from '../assets/images/header-1.png';
 					</div>
 					
 				</div>
-				<a href="#" class="header-menu-contact">
-					<div class="header-menu-contact-txt">
-						<span class="txt fs-12 fw-700 trans-upper">let's talk</span>
-					</div>
-				</a>
-				<button
+				<Button href="#" class="header-menu-contact btn-no-ic">let's talk</Button>
+
+				<div
 					class="header-menu-toggle"
 					data-header-toggle
-					type="button"
 					aria-label="Open navigation"
 					aria-expanded="false"
 				>
-						<div class="header-menu-btn-inner">
-							<div class="header-menu-btn-txt">
-								<span class="txt fs-12 fw-700 trans-upper">menu</span>
-							</div>
-							<div class="header-menu-btn-txt">
-								<span class="txt fs-12 fw-700 trans-upper">close</span>
-							</div>
-						</div>
-				</button>
+				<Button href="#" class="header-menu-menu btn-no-ic">menu</Button>
+				<Button href="#" class="header-menu-close btn-no-ic">close</Button>
+				</div>
 			</div>
 		</div>
 	</div>

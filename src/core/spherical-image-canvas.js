@@ -19,6 +19,7 @@ const FRAGMENT_SHADER = /* glsl */ `
 	precision highp float;
 
 	uniform sampler2D tMap;
+	uniform float uImageAspect;
 	varying vec2 vUv;
 
 	float roundedBox(vec2 point, vec2 halfSize, float radius) {
@@ -32,26 +33,28 @@ const FRAGMENT_SHADER = /* glsl */ `
 
 		if (cardAlpha < 0.01) discard;
 
-		vec4 image = texture2D(tMap, vUv);
+		const float cardAspect = 1.5;
+		vec2 coverUv = vUv;
+		if (uImageAspect > cardAspect) {
+			coverUv.x = (coverUv.x - 0.5) * (cardAspect / uImageAspect) + 0.5;
+		} else {
+			coverUv.y = (coverUv.y - 0.5) * (uImageAspect / cardAspect) + 0.5;
+		}
+
+		vec4 image = texture2D(tMap, coverUv);
 		gl_FragColor = vec4(image.rgb, image.a * cardAlpha);
 	}
 `;
 
 const CARD_LAYOUT = [
 	{ x: -0.76, y: 0.76, scale: 0.92, depth: 1 },
-	{ x: -0.69, y: 0.56, scale: 1.12, depth: 1 },
 	{ x: -0.57, y: 0.35, scale: 0.82, depth: -1 },
 	{ x: -0.25, y: 0.7, scale: 0.62, depth: -1 },
 	{ x: 0.45, y: 0.76, scale: 0.95, depth: -1 },
 	{ x: 0.78, y: 0.42, scale: 0.5, depth: 1 },
 	{ x: -0.77, y: 0.02, scale: 0.66, depth: 1 },
-	{ x: -0.42, y: 0.12, scale: 0.5, depth: -1 },
-	{ x: -0.17, y: 0.34, scale: 0.78, depth: 1 },
-	{ x: 0.39, y: 0.27, scale: 0.7, depth: 1 },
 	{ x: 0.8, y: -0.43, scale: 1.14, depth: -1 },
 	{ x: -0.66, y: -0.53, scale: 0.8, depth: -1 },
-	{ x: -0.34, y: -0.12, scale: 0.48, depth: 1 },
-	{ x: 0.28, y: -0.62, scale: 0.76, depth: 1 },
 ];
 const CARD_SPHERE_RADIUS = 4.15;
 const CAMERA_FIT_RADIUS = 4.35;
@@ -121,6 +124,7 @@ export class SphericalImageCanvas {
 		this.velocity = { x: 0, y: 0 };
 		this.rotation = { x: 0, y: 0 };
 		this.floatTime = 0;
+		this.floatStrength = 1;
 		this.isDragging = false;
 		this.dragPointerId = null;
 		this.lastPointer = { x: 0, y: 0 };
@@ -173,11 +177,10 @@ export class SphericalImageCanvas {
 	}
 
 	createCards() {
-		const cardCount = CARD_LAYOUT.length;
+		const cardCount = Math.min(this.imageUrls.length, CARD_LAYOUT.length);
 
 		for (let index = 0; index < cardCount; index += 1) {
-			const url = this.imageUrls[index % this.imageUrls.length];
-			const isLandscape = url.includes('item-');
+			const url = this.imageUrls[index];
 			const layout = CARD_LAYOUT[index];
 			const { program } = this.getCardAsset(url);
 			const mesh = new Mesh(this.gl, {
@@ -197,8 +200,8 @@ export class SphericalImageCanvas {
 				z: z * CARD_SPHERE_RADIUS,
 			};
 			mesh.cardScale = {
-				x: (isLandscape ? 1.65 : 1.28) * layout.scale * CARD_SCALE_MULTIPLIER,
-				y: (isLandscape ? 1.05 : 1.12) * layout.scale * CARD_SCALE_MULTIPLIER,
+				x: 1.5 * layout.scale * CARD_SCALE_MULTIPLIER,
+				y: layout.scale * CARD_SCALE_MULTIPLIER,
 			};
 			mesh.revealDelay = (((index * 5) % cardCount) / cardCount) * 0.13;
 			mesh.burstCurve = ((((index * 4) % 9) - 4) / 4) * 0.5;
@@ -239,9 +242,9 @@ export class SphericalImageCanvas {
 			const curveX = (-directionY / directionLength) * mesh.burstCurve * curveProgress;
 			const curveY = (directionX / directionLength) * mesh.burstCurve * curveProgress;
 			const floatWave = this.floatTime * mesh.floatSpeed + mesh.floatPhase;
-			const floatX = Math.cos(floatWave * 0.72) * 0.025;
-			const floatY = Math.sin(floatWave) * 0.045;
-			const floatZ = Math.sin(floatWave * 0.58) * 0.02;
+			const floatX = Math.cos(floatWave * 0.72) * 0.06 * this.floatStrength;
+			const floatY = Math.sin(floatWave) * 0.11 * this.floatStrength;
+			const floatZ = Math.sin(floatWave * 0.58) * 0.05 * this.floatStrength;
 
 			mesh.position.set(
 				clusterX + directionX * revealEase + curveX + floatX,
@@ -282,6 +285,7 @@ export class SphericalImageCanvas {
 			fragment: FRAGMENT_SHADER,
 			uniforms: {
 				tMap: { value: texture },
+				uImageAspect: { value: 1 },
 			},
 			transparent: true,
 			depthTest: true,
@@ -293,6 +297,7 @@ export class SphericalImageCanvas {
 			if (this.isDestroyed) return;
 			texture.image = image;
 			texture.needsUpdate = true;
+			program.uniforms.uImageAspect.value = image.naturalWidth / image.naturalHeight;
 		});
 
 		const asset = { texture, program, image: sharedImage.image, readyPromise };
@@ -441,7 +446,7 @@ export class SphericalImageCanvas {
 		const renderHeight = height + overscan * 2;
 		const renderAspect = renderWidth / renderHeight;
 		const fitAxis = Math.min(1, aspect);
-		this.horizontalSpread = Math.min(1.65, Math.max(1, aspect / 1.1));
+		this.horizontalSpread = Math.min(2, Math.max(1, aspect / 0.92));
 		const halfFov = (this.camera.fov * Math.PI) / 360;
 		const baseCameraDistance =
 			(CAMERA_FIT_RADIUS * 1.2) / (Math.tan(halfFov) * fitAxis) + 1.4;
@@ -536,6 +541,9 @@ export class SphericalImageCanvas {
 			this.revealProgress = Math.min(1, this.revealProgress + elapsed / this.revealDuration);
 		}
 		this.floatTime += elapsed / 1000;
+		const targetFloatStrength = this.isDragging ? 0.2 : 1;
+		const floatSmoothing = 1 - Math.pow(0.86, delta);
+		this.floatStrength += (targetFloatStrength - this.floatStrength) * floatSmoothing;
 		this.velocity.x += (this.targetVelocity.x - this.velocity.x) * smoothing;
 		this.velocity.y += (this.targetVelocity.y - this.velocity.y) * smoothing;
 		this.rotation.x += this.velocity.x * delta;
