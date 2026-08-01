@@ -433,7 +433,8 @@
 	flex-direction: column;
 	justify-content: space-between;
 }
-[data-header-reel-track] {
+[data-header-reel-track],
+[data-header-reel-ghost] {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -442,6 +443,11 @@
 	gap: var(--header-reel-gap, 0px);
 	width: 100%;
 	will-change: transform;
+}
+[data-header-reel-ghost] {
+	pointer-events: none;
+	opacity: 0;
+	will-change: transform, opacity;
 }
 .header-nav-card-item .item-ic {
 	display: flex;

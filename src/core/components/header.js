@@ -16,6 +16,10 @@ export class Header {
 			innerHeight: 0,
 		};
 		this.navCardReels = [];
+		this.navCardReelFrame = null;
+		this.navCardReelLastTime = 0;
+		this.isNavCardReelHovered = false;
+		this.lastNavCardReelResult = null;
 	}
 
 	init(data) {
@@ -43,37 +47,60 @@ export class Header {
 			for (let cycle = 0; cycle < 2; cycle += 1) {
 				icons.forEach((icon) => track.append(icon.cloneNode(true)));
 			}
-			reel.replaceChildren(track);
+			const ghostFar = track.cloneNode(true);
+			ghostFar.removeAttribute('data-header-reel-track');
+			ghostFar.setAttribute('data-header-reel-ghost', 'far');
+			const ghostNear = track.cloneNode(true);
+			ghostNear.removeAttribute('data-header-reel-track');
+			ghostNear.setAttribute('data-header-reel-ghost', 'near');
+			reel.replaceChildren(ghostFar, ghostNear, track);
 
 			reel.setAttribute('data-header-reel-ready', '');
 			this.navCardReels.push({
 				el: reel,
 				track,
+				ghosts: [ghostNear, ghostFar],
 				icons,
-				step: index % icons.length,
+				index,
 				stepSize: 0,
-				timer: null,
-				animation: null,
-				startDelay: 600 + index * 180,
-				interval: 1900,
+				cycleSize: 0,
+				position: 0,
+				baseSpeed: 0,
+				maxSpeed: 0,
+				cruiseSpeed: 0,
+				acceleration: 0,
+				currentSpeed: 0,
+				state: 'idle',
+				motion: null,
 			});
 		});
+
+		const reelGroup = this.el.querySelector('[data-header-reel-group]');
+		if (reelGroup && !reelGroup.hasAttribute('data-header-reel-group-ready')) {
+			reelGroup.addEventListener('pointerenter', () => this.stopNavCardReelsRandomly());
+			reelGroup.addEventListener('pointerleave', () => this.resumeNavCardReels());
+			reelGroup.setAttribute('data-header-reel-group-ready', '');
+		}
 	}
 
 	startNavCardReels() {
-		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
 		this.stopNavCardReels();
-		this.navCardReels.forEach((reel) => {
+		this.navCardReels.forEach((reel, index) => {
 			this.measureNavCardReel(reel);
-			const run = () => {
-				if (!this.isOpen) return;
-				this.rollNavCardReel(reel);
-				reel.timer = window.setTimeout(run, reel.interval);
-			};
-
-			reel.timer = window.setTimeout(run, reel.startDelay);
+			reel.position = Math.random() * reel.cycleSize;
+			reel.baseSpeed = reel.stepSize / (290 + index * 22 + Math.random() * 14);
+			reel.maxSpeed = reel.baseSpeed * 1.7;
+			reel.cruiseSpeed = reel.baseSpeed;
+			reel.acceleration = (reel.maxSpeed - reel.baseSpeed) / 8000;
+			reel.currentSpeed = reel.cruiseSpeed;
+			reel.state = 'running';
+			reel.motion = null;
+			this.renderNavCardReel(reel);
 		});
+
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		this.navCardReelLastTime = performance.now();
+		this.navCardReelFrame = window.requestAnimationFrame((time) => this.updateNavCardReels(time));
 	}
 
 	measureNavCardReel(reel) {
@@ -83,42 +110,239 @@ export class Header {
 		const iconHeight = icon.getBoundingClientRect().height;
 		const reelHeight = reel.el.getBoundingClientRect().height;
 		reel.stepSize = Math.max(iconHeight, (reelHeight - iconHeight) / 2);
-		reel.track.style.setProperty('--header-reel-gap', `${Math.max(0, reel.stepSize - iconHeight)}px`);
-		reel.track.style.transform = `translate3d(0, ${-reel.step * reel.stepSize}px, 0)`;
+		reel.cycleSize = reel.stepSize * reel.icons.length;
+		reel.el.style.setProperty('--header-reel-gap', `${Math.max(0, reel.stepSize - iconHeight)}px`);
 	}
 
-	rollNavCardReel(reel) {
-		if (!reel.stepSize || reel.animation) return;
+	updateNavCardReels(time) {
+		if (!this.isOpen) return;
 
-		const nextStep = reel.step + 1;
-		const from = -reel.step * reel.stepSize;
-		const to = -nextStep * reel.stepSize;
-		const animation = reel.track.animate([
-			{ transform: `translate3d(0, ${from}px, 0)` },
-			{ transform: `translate3d(0, ${to}px, 0)` },
-		], {
-			duration: 680,
-			easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
-			fill: 'forwards',
+		const deltaTime = Math.min(time - this.navCardReelLastTime, 50);
+		this.navCardReelLastTime = time;
+
+		this.navCardReels.forEach((reel) => {
+			if (!reel.cycleSize) return;
+
+			if (reel.state === 'running') {
+				reel.cruiseSpeed = Math.min(reel.maxSpeed, reel.cruiseSpeed + reel.acceleration * deltaTime);
+				reel.position = (reel.position + reel.cruiseSpeed * deltaTime) % reel.cycleSize;
+				reel.currentSpeed = reel.cruiseSpeed;
+			} else if (reel.state === 'pending-stop') {
+				reel.cruiseSpeed = Math.min(reel.maxSpeed, reel.cruiseSpeed + reel.acceleration * deltaTime);
+				reel.position = (reel.position + reel.cruiseSpeed * deltaTime) % reel.cycleSize;
+				reel.currentSpeed = reel.cruiseSpeed;
+				if (time >= reel.motion.startAt) this.beginNavCardReelStop(reel, time);
+			} else if (reel.state === 'stopping') {
+				const progress = Math.min((time - reel.motion.startTime) / reel.motion.duration, 1);
+				const distance =
+					reel.motion.velocityDistance * progress +
+					reel.motion.curveA * progress ** 2 +
+					reel.motion.curveB * progress ** 3;
+				reel.position = (reel.motion.from + distance) % reel.cycleSize;
+				reel.currentSpeed = Math.max(0, (
+					reel.motion.velocityDistance +
+					2 * reel.motion.curveA * progress +
+					3 * reel.motion.curveB * progress ** 2
+				) / reel.motion.duration);
+
+				if (progress === 1) {
+					const { targetPosition, overshoot, rebound } = reel.motion;
+					reel.position = targetPosition + overshoot;
+					reel.currentSpeed = 0;
+					reel.state = 'rebounding';
+					reel.motion = {
+						startTime: time,
+						duration: 140,
+						targetPosition,
+						fromOffset: overshoot,
+						toOffset: -rebound,
+					};
+				}
+			} else if (reel.state === 'rebounding') {
+				const progress = Math.min((time - reel.motion.startTime) / reel.motion.duration, 1);
+				const eased = 0.5 - 0.5 * Math.cos(progress * Math.PI);
+				const offset = reel.motion.fromOffset + (reel.motion.toOffset - reel.motion.fromOffset) * eased;
+				reel.position = this.normalizeNavCardReelPosition(reel, reel.motion.targetPosition + offset);
+				reel.currentSpeed = (reel.motion.toOffset - reel.motion.fromOffset) * 0.5 * Math.PI * Math.sin(progress * Math.PI) / reel.motion.duration;
+
+				if (progress === 1) {
+					const { targetPosition, toOffset } = reel.motion;
+					reel.currentSpeed = 0;
+					reel.state = 'locking';
+					reel.motion = {
+						startTime: time,
+						duration: 110,
+						targetPosition,
+						fromOffset: toOffset,
+					};
+				}
+			} else if (reel.state === 'locking') {
+				const progress = Math.min((time - reel.motion.startTime) / reel.motion.duration, 1);
+				const eased = 0.5 - 0.5 * Math.cos(progress * Math.PI);
+				const offset = reel.motion.fromOffset * (1 - eased);
+				reel.position = this.normalizeNavCardReelPosition(reel, reel.motion.targetPosition + offset);
+				reel.currentSpeed = -reel.motion.fromOffset * 0.5 * Math.PI * Math.sin(progress * Math.PI) / reel.motion.duration;
+
+				if (progress === 1) {
+					reel.position = reel.motion.targetPosition;
+					reel.currentSpeed = 0;
+					reel.state = 'stopped';
+					reel.motion = null;
+				}
+			} else if (reel.state === 'pending-resume') {
+				if (time >= reel.motion.startAt) {
+					reel.state = 'accelerating';
+					reel.motion = {
+						startTime: time,
+						duration: 460,
+						fromSpeed: 0,
+					};
+				}
+			} else if (reel.state === 'accelerating') {
+				const progress = Math.min((time - reel.motion.startTime) / reel.motion.duration, 1);
+				const eased = 0.5 - 0.5 * Math.cos(progress * Math.PI);
+				reel.currentSpeed = reel.motion.fromSpeed + (reel.cruiseSpeed - reel.motion.fromSpeed) * eased;
+				reel.position = (reel.position + reel.currentSpeed * deltaTime) % reel.cycleSize;
+
+				if (progress === 1) {
+					reel.state = 'running';
+					reel.currentSpeed = reel.cruiseSpeed;
+					reel.motion = null;
+				}
+			}
+
+			this.renderNavCardReel(reel);
 		});
 
-		reel.animation = animation;
-		animation.finished.then(() => {
-			if (reel.animation !== animation) return;
+		this.navCardReelFrame = window.requestAnimationFrame((nextTime) => this.updateNavCardReels(nextTime));
+	}
 
-			reel.step = nextStep === reel.icons.length ? 0 : nextStep;
-			reel.track.style.transform = `translate3d(0, ${-reel.step * reel.stepSize}px, 0)`;
-			animation.cancel();
-			reel.animation = null;
-		}).catch(() => {});
+	renderNavCardReel(reel) {
+		const speedRatio = reel.baseSpeed
+			? Math.min(Math.abs(reel.currentSpeed) / reel.baseSpeed, 1.7)
+			: 0;
+		const trailStrength = speedRatio < 0.18
+			? 0
+			: Math.min((speedRatio - 0.18) / 0.82, 1);
+		const direction = Math.sign(reel.currentSpeed) || 1;
+		const trailOffsets = [0.11, 0.24];
+		const trailOpacities = [0.26, 0.11];
+
+		reel.track.style.transform = `translate3d(0, ${-reel.position}px, 0)`;
+		reel.ghosts.forEach((ghost, index) => {
+			const lag = reel.stepSize * trailOffsets[index] * speedRatio;
+			const ghostPosition = this.normalizeNavCardReelPosition(
+				reel,
+				reel.position - direction * lag
+			);
+			ghost.style.transform = `translate3d(0, ${-ghostPosition}px, 0)`;
+			ghost.style.opacity = String(trailOpacities[index] * trailStrength);
+		});
+	}
+
+	normalizeNavCardReelPosition(reel, position) {
+		return ((position % reel.cycleSize) + reel.cycleSize) % reel.cycleSize;
+	}
+
+	stopNavCardReelsRandomly() {
+		if (!this.isOpen || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+		this.isNavCardReelHovered = true;
+		const now = performance.now();
+		let result = this.navCardReels.map((reel) => Math.floor(Math.random() * reel.icons.length));
+		let attempts = 0;
+		while (
+			this.lastNavCardReelResult &&
+			result.filter((target, index) => target !== this.lastNavCardReelResult[index]).length < 2 &&
+			attempts < 12
+		) {
+			result = this.navCardReels.map((reel) => Math.floor(Math.random() * reel.icons.length));
+			attempts += 1;
+		}
+		if (
+			this.lastNavCardReelResult &&
+			result.filter((target, index) => target !== this.lastNavCardReelResult[index]).length < 2
+		) {
+			result = this.lastNavCardReelResult.map((target, index) =>
+				(target + 1 + (index % 2)) % this.navCardReels[index].icons.length
+			);
+		}
+		this.lastNavCardReelResult = [...result];
+
+		this.navCardReels.forEach((reel, index) => {
+			reel.state = 'pending-stop';
+			reel.motion = {
+				startAt: now + index * 240,
+				targetStep: result[index],
+				duration: 1450,
+			};
+		});
+	}
+
+	beginNavCardReelStop(reel, time) {
+		const targetPosition = reel.motion.targetStep * reel.stepSize;
+		const distanceToTarget = (targetPosition - reel.position + reel.cycleSize) % reel.cycleSize;
+		const overshoot = reel.stepSize * 0.1;
+		const rebound = reel.stepSize * 0.025;
+		const duration = reel.motion.duration;
+		const velocityDistance = reel.currentSpeed * duration;
+		let distance = reel.cycleSize + distanceToTarget + overshoot;
+		while (distance < velocityDistance / 3) distance += reel.cycleSize;
+		reel.motion = {
+			...reel.motion,
+			startTime: time,
+			from: reel.position,
+			distance,
+			targetPosition,
+			overshoot,
+			rebound,
+			velocityDistance,
+			curveA: 3 * distance - 2 * velocityDistance,
+			curveB: velocityDistance - 2 * distance,
+		};
+		reel.state = 'stopping';
+	}
+
+	resumeNavCardReels() {
+		if (!this.isOpen || !this.isNavCardReelHovered) return;
+
+		this.isNavCardReelHovered = false;
+		const now = performance.now();
+		this.navCardReels.forEach((reel, index) => {
+			const fromSpeed = Math.max(0, reel.currentSpeed);
+			if (fromSpeed >= reel.baseSpeed * 0.98) {
+				reel.cruiseSpeed = Math.min(fromSpeed, reel.maxSpeed);
+				reel.state = 'running';
+				reel.currentSpeed = reel.cruiseSpeed;
+				reel.motion = null;
+				return;
+			}
+
+			reel.cruiseSpeed = reel.baseSpeed;
+			if (reel.state === 'stopped') {
+				reel.state = 'pending-resume';
+				reel.motion = { startAt: now + index * 90 };
+				return;
+			}
+
+			reel.state = 'accelerating';
+			reel.motion = {
+				startTime: now,
+				duration: 460,
+				fromSpeed,
+			};
+		});
 	}
 
 	stopNavCardReels() {
+		if (this.navCardReelFrame) window.cancelAnimationFrame(this.navCardReelFrame);
+		this.navCardReelFrame = null;
+		this.isNavCardReelHovered = false;
+
 		this.navCardReels.forEach((reel) => {
-			if (reel.timer) window.clearTimeout(reel.timer);
-			reel.timer = null;
-			reel.animation?.cancel();
-			reel.animation = null;
+			reel.state = 'idle';
+			reel.currentSpeed = 0;
+			reel.motion = null;
 		});
 	}
 
