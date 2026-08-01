@@ -187,6 +187,7 @@
 
 .home-works--decor {
 	z-index: 2;
+	contain: paint;
 }
 
 .home-works--main {
@@ -306,6 +307,24 @@
 .home-works-item {
 	pointer-events: auto;
 	position: relative;
+}
+
+.home-works-item-label {
+	margin-top: 3.2rem;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.home-works-item-title {
+	color: var(--cl-content-strong);
+}
+
+.home-works-item-categories {
+	display: flex;
+	justify-content: center;
+	gap: 0.8rem;
+	margin-top: 0.8rem;
+	color: var(--cl-content-note);
 }
 
 .home-works-item:nth-child(4n + 1) {
@@ -575,6 +594,10 @@
 	display: block;
 	transform-origin: center;
 	will-change: transform;
+}
+
+.home-playground-wrap {
+	contain: paint;
 }
 
 .home-playground {
