@@ -16,12 +16,6 @@ html.lenis body {
 	scroll-behavior: auto !important;
 }
 
-.lenis.lenis-stopped,
-html.is-scroll-locked,
-html.is-scroll-locked body {
-	overflow: hidden;
-}
-
 html.has-custom-scrollbar {
 	scrollbar-width: none;
 	-ms-overflow-style: none;

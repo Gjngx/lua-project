@@ -1,218 +1,70 @@
 ---
 import '../styles/components/header.css';
 import { Image } from 'astro:assets';
-import navFeature from '../assets/images/item-1.png';
-import navWork from '../assets/images/item-2.png';
-import navAbout from '../assets/images/header-1.png';
+
 ---
 
 <header class="header">
 	<div class="header-inner">
 		<div class="container grid">
-			<div class="header-center">
-				<a href="/" class="header-circle circle-left">
-					<div class="header-circle-ic">
-						<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24" fill="none">
-							<path
-								d="M12.2637 24.0001C12.2637 17.5185 17.518 12.2641 23.9996 12.2641C23.9996 18.7457 18.7453 24.0001 12.2637 24.0001Z"
-								fill="currentcolor"></path>
-							<path
-								d="M12.2637 4.76837e-05C12.2637 6.48165 17.518 11.736 23.9996 11.736C23.9996 5.25443 18.7453 4.76837e-05 12.2637 4.76837e-05Z"
-								fill="currentcolor"></path>
-							<path
-								d="M11.7363 24.0001C11.7363 17.5185 6.48195 12.2641 0.000352859 12.2641C0.000352859 18.7457 5.25473 24.0001 11.7363 24.0001Z"
-								fill="currentcolor"></path>
-							<path
-								d="M11.7363 4.76837e-05C11.7363 6.48165 6.48195 11.736 0.000352859 11.736C0.000352859 5.25443 5.25473 4.76837e-05 11.7363 4.76837e-05Z"
-								fill="currentcolor"></path>
-						</svg>
-					</div>
-				</a>
-				<div class="header-shape" data-header-shape>
-					<button
-						class="header-shape-ic"
-						data-header-play
-						type="button"
-						aria-label="Pause music"
-						aria-pressed="false"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20 20" fill="none">
-							<rect x="1" y="8.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
-							<rect x="6" y="8.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
-							<rect x="16" y="8.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
-							<rect x="11" y="8.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
-						</svg>
-					</button>
-					<div class="header-shape-text" data-header-audio-content>
-						<div class="header-shape-text-inner">
-							<div class="header-shape-name-box" data-header-name-box>
-								<div class="header-shape-name" data-header-name>
-									<div class="header-shape-name-track" data-header-name-track>
-										<div class="txt trans-upper fs-12" data-header-name-text>Nior Lounge</div>
-										<div class="txt trans-upper fs-12" data-header-name-text aria-hidden="true">Nior Lounge</div>
-									</div>
-								</div>
-								<div class="header-shape-dot"></div>
-							</div>
-							<div class="header-shape-time">
-								<div class="txt trans-upper fs-12" data-header-time>00:00</div>
-							</div>
-						</div>
-					</div>
-					<button class="header-shape-pause" data-header-next type="button" aria-label="Next track">
-							<div class="header-shape-pause-ic">
-								<svg width="100%" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<rect x="2" y="8" width="3" height="3" rx="1.5" fill="currentColor"/>
-									<rect x="6" y="8" width="3" height="3" rx="1.5" fill="currentColor"/>
-									<rect x="15" y="8" width="3" height="3" rx="1.5" fill="currentColor"/>
-									<rect x="2" y="12" width="3" height="3" rx="1.5" fill="currentColor"/>
-									<rect x="11" y="12" width="3" height="3" rx="1.5" fill="currentColor"/>
-									<rect x="2" y="4" width="3" height="3" rx="1.5" fill="currentColor"/>
-									<rect x="11" y="4" width="3" height="3" rx="1.5" fill="currentColor"/>
-									<rect x="11" y="8" width="3" height="3" rx="1.5" fill="currentColor"/>
+			<div class="header-menu">
+				<div class="header-menu-inner">
+					<div class="header-menu-main">
+						<div class="header-menu-play">
+							<div class="header-menu-play-ic" data-header-play>
+								<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20 20" fill="none">
+									<rect x="1" y="8.5" width="3" height="3" rx="1.5" fill="currentColor"/>
+									<rect x="6" y="4" width="3" height="12" rx="1.5" fill="currentColor"/>
+									<rect x="16" y="8.5" width="3" height="3" rx="1.5" fill="currentColor"/>
+									<rect x="11" y="7" width="3" height="6" rx="1.5" fill="currentColor"/>
 								</svg>
-
 							</div>
-						</button>
-				</div>
-				<div class="header-circle circle-right">
-					<button class="header-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
-						<div class="header-circle-ic">
-							<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20 20" fill="none">
-								<rect x="3.5" y="8.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
-								<rect x="14" y="8.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
-								<rect x="8.5" y="8.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
-								<rect x="8.5" y="13.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
-								<rect x="8.5" y="3.5" width="3" height="3" rx="1.5" fill="currentcolor"></rect>
-							</svg>
 						</div>
-					</button>
-				</div>
-			</div>
-			<div class="header-nav custom-scroll" aria-hidden="true">
-				<div class="header-nav-inner">
-					<nav class="header-nav-panel" aria-label="Primary navigation">
-						<div class="header-nav-links">
-							<a class="header-nav-link" href="/">
-								<p class="txt fs-14 fw-600 trans-upper">Home</p>
-							</a>
-							<a class="header-nav-link" href="/about">
-								<p class="txt fs-14 fw-600 trans-upper">Story</p>
-							</a>
-							<a class="header-nav-link" href="/#works">
-								<p class="txt fs-14 fw-600 trans-upper">Works</p>
-							</a>
-							<a class="header-nav-link" href="/#playground">
-								<p class="txt fs-14 fw-600 trans-upper">Playground</p>
-							</a>
-							<a class="header-nav-link" href="mailto:minhhieu@gmail.com">
-								<p class="txt fs-14 fw-600 trans-upper">Contact</p>
-							</a>
-						</div>
-
-						<a class="header-nav-feature" href="/#works">
-							<Image
-								class="img-df img-fill"
-								src={navFeature}
-								alt="Featured digital design project"
-								loading="eager"
-							/>
-						</a>
-
-						<div class="header-nav-cards">
-							<a class="header-nav-card header-nav-card--about" href="/about">
-								<div class="header-nav-card-img">
-									<Image src={navAbout} alt="About me" class="img-df img-fill" loading="lazy" />
-								</div>
-								<div class="header-nav-card-label">
-									<p class="heading fs-10 fw-500">BRAND IDENTITY</p>
-									<p class="txt fs-14">OFF Brand: Why you still need a website</p>
-								</div>
-							</a>
-
-							<div class="header-nav-socials" aria-label="Social links">
-								<a href="#" aria-label="LinkedIn">
-									<div class="header-nav-socials-ic ic-linkedin">
-										<svg width="100%" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-											<path d="M9.25326 6.66678C9.2529 7.37402 8.97161 8.05216 8.47126 8.55201C7.97092 9.05185 7.2925 9.33247 6.58526 9.33211C5.87801 9.33176 5.19987 9.05047 4.70003 8.55012C4.20018 8.04977 3.91957 7.37136 3.91992 6.66411C3.92028 5.95687 4.20157 5.27873 4.70191 4.77889C5.20226 4.27904 5.88068 3.99843 6.58792 3.99878C7.29517 3.99913 7.9733 4.28042 8.47315 4.78077C8.973 5.28112 9.25361 5.95954 9.25326 6.66678ZM9.33326 11.3068H3.99992V28.0001H9.33326V11.3068ZM17.7599 11.3068H12.4533V28.0001H17.7066V19.2401C17.7066 14.3601 24.0666 13.9068 24.0666 19.2401V28.0001H29.3333V17.4268C29.3333 9.20011 19.9199 9.50678 17.7066 13.5468L17.7599 11.3068Z" fill="#FFFFFF"/>
-										</svg>
-									</div>
-								</a>
-								<a href="#" aria-label="Dribbble">
-									<div class="header-nav-socials-ic ic-dribbble">
-										<svg width="100%" viewBox="0 0 333333 333333" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd"><path d="M166667 333334C74755 333334-1 258590-1 166666S74730-2 166667-2c91911 0 166668 74730 166668 166668 0 91937-74744 166668-166668 166668zm140559-143870c-4872-1563-44089-13209-88670-6065 18620 51163 26169 92835 27671 101502 31896-21604 54687-55795 61000-95437h-2zm-84955 108455c-2148-12506-10352-55998-30329-107937-333 130-646 191-915 333-80329 27996-109185 83669-111709 88872 24152 18811 54504 30087 87378 30087 19734 0 38547-4041 55604-11331l-31-24h2zM60869 262043c3254-5543 42317-70185 115689-93935 1833-579 3709-1163 5604-1685-3581-8083-7480-16203-11522-24146-71022 21291-140038 20374-146288 20313-67 1441-67 2874-67 4356 0 36516 13878 69913 36583 95122v-26zM27349 137693c6380 61 65041 325 131646-17317-23555-41935-49022-77203-52794-82352-39850 18805-69667 55543-78833 99670h-20zM133337 28464c3914 5266 29811 40502 53126 83331 50648-18941 72061-47799 74608-51441-25130-22331-58207-35876-94398-35876-11455 61-22669 1439-33329 3974l-6 12h-2zm143562 48431c-3002 4035-26902 34646-79504 56128 3309 6766 6514 13669 9437 20646 1039 2478 2085 4872 3063 7350 47392-5911 94459 3587 99152 4559-333-33583-12378-64457-32167-88670l18-12 2-2z" fill="#FFFFFF"/></svg>
-									</div>
-								</a>
-								<a href="#" aria-label="Instagram">
-									<div class="header-nav-socials-ic ic-ig">
-										<svg width="100%" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-											<path d="M6 11.9999C6 10.4086 6.63214 8.88245 7.75736 7.75724C8.88258 6.63202 10.4087 5.99988 12 5.99988H24C25.5913 5.99988 27.1174 6.63202 28.2426 7.75724C29.3679 8.88245 30 10.4086 30 11.9999V23.9999C30 25.5912 29.3679 27.1173 28.2426 28.2425C27.1174 29.3677 25.5913 29.9999 24 29.9999H12C10.4087 29.9999 8.88258 29.3677 7.75736 28.2425C6.63214 27.1173 6 25.5912 6 23.9999V11.9999Z" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-											<path d="M13.5 18C13.5 19.1935 13.9741 20.3381 14.818 21.182C15.6619 22.0259 16.8065 22.5 18 22.5C19.1935 22.5 20.3381 22.0259 21.182 21.182C22.0259 20.3381 22.5 19.1935 22.5 18C22.5 16.8065 22.0259 15.6619 21.182 14.818C20.3381 13.9741 19.1935 13.5 18 13.5C16.8065 13.5 15.6619 13.9741 14.818 14.818C13.9741 15.6619 13.5 16.8065 13.5 18Z" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-											<path d="M24.75 11.25V11.265" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-										</svg>
-									</div>
-								</a>
-								<a href="#" aria-label="Behance">
-									<div class="header-nav-socials-ic ic-behance">
-										<svg width="100%" viewBox="0 0 30 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-											<path d="M0.00179517 0.045922C1.8021 -0.0176445 3.7409 0.0381931 5.51826 0.0244685C9.78289 -0.00839826 15.562 -0.527766 14.6279 5.48779C14.418 6.83974 13.2963 7.59394 12.2133 8.27244C15.3055 9.00056 16.4021 12.4767 15.1262 15.0554C13.2694 18.2959 9.30595 17.977 6.03392 17.9795L0 17.9794L0.00179517 0.045922Z" fill="#FEFEFE"/>
-											<path d="M4.1008 9.96663C4.94115 10.0279 5.9514 9.97414 6.80095 9.97992C8.76786 9.99321 11.3001 9.64627 11.4525 12.2781C11.5016 13.1266 11.3563 13.6869 10.7549 14.3459C9.82303 15.1092 8.42837 14.9773 7.28007 14.9804C6.21615 14.9832 5.16045 14.9619 4.09512 14.9842L4.1008 9.96663Z" fill="#0357FE"/>
-											<path d="M4.0934 3.08368C5.24895 3.1086 6.54607 3.08245 7.68032 3.07349C9.49513 3.05912 10.9741 3.40274 10.7429 5.52478C10.6782 6.1192 10.5753 6.34211 10.1316 6.76432C8.52165 7.64616 6.00925 7.36929 4.09848 7.35744L4.0934 3.08368Z" fill="#0357FE"/>
-											<path d="M22.5006 4.26638C24.5105 3.97231 26.7666 4.50692 28.153 6.00644C29.8219 7.81165 30.0898 9.55041 29.9778 11.9011L20.186 11.9151C20.3245 13.0474 20.7081 14.4794 21.8934 14.9592C23.5974 15.649 25.756 15.2497 26.5691 13.5203C27.1586 13.5555 27.951 13.538 28.5558 13.542C28.9955 13.5491 29.4353 13.5486 29.875 13.5404C29.6113 14.2638 29.3532 14.8378 28.901 15.4752C28.0261 16.7312 26.6601 17.5891 25.1172 17.8517C20.3086 18.704 16.5477 15.8091 16.6238 11.063C16.6826 7.40093 18.7668 4.88593 22.5006 4.26638Z" fill="#FEFEFE"/>
-											<path d="M22.8435 6.93552C24.9865 6.69555 25.9942 7.836 26.3568 9.73266L20.3141 9.7271C20.5131 8.14003 21.1445 7.25299 22.8435 6.93552Z" fill="#0357FE"/>
-											<path d="M19.1985 1.1267L27.4739 1.12561L27.4472 2.84603C27.2795 2.92707 20.1445 2.89074 19.2034 2.89377L19.1985 1.1267Z" fill="#FEFEFE"/>
-										</svg>
-
-									</div>
-								</a>
+						<div class="header-menu-main-inner">
+							<div class="header-menu-name">
+								<p class="txt fs-12 fw-700 trans-upper" data-header-name-text>Come my way - son tung mtp</p>
 							</div>
-
-							<a class="header-nav-card header-nav-card--type" href="/#playground">
-								<div class="header-nav-card-content">
-									<p class="heading fs-56 fw-600">Aa</p>
-								</div>
-								<div class="header-nav-card-ic">
-									<svg width="100%" height="100%" viewBox="0 0 144 144" fill="none" xmlns="http://www.w3.org/2000/svg">
-										<circle cx="72" cy="72" r="69" stroke="white" stroke-opacity="0.4" stroke-width="6" stroke-dasharray="1 6.61"/>
+							<div class="header-menu-dot">
+								<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 16 16" fill="none">
+									<circle cx="8" cy="8" r="4" fill="currentColor"/>
+								</svg>
+							</div>
+							<div class="header-menu-time">
+								<p class="txt fs-12 fw-700" data-header-time>00:00</p>
+							</div>
+							<div class="header-menu-skip" data-header-next>
+								<div class="header-menu-skip-ic">
+									<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20 20" fill="none">
+										<rect x="2" y="8" width="3" height="3" rx="1.5" fill="currentColor"/>
+										<rect x="6" y="8" width="3" height="3" rx="1.5" fill="currentColor"/>
+										<rect x="15" y="8" width="3" height="3" rx="1.5" fill="currentColor"/>
+										<rect x="2" y="12" width="3" height="3" rx="1.5" fill="currentColor"/>
+										<rect x="11" y="12" width="3" height="3" rx="1.5" fill="currentColor"/>
+										<rect x="2" y="4" width="3" height="3" rx="1.5" fill="currentColor"/>
+										<rect x="11" y="4" width="3" height="3" rx="1.5" fill="currentColor"/>
+										<rect x="11" y="8" width="3" height="3" rx="1.5" fill="currentColor"/>
 									</svg>
 								</div>
-							</a>
-
-							<a class="header-nav-card header-nav-card--location" href="mailto:minhhieu@gmail.com">
-								<div class="header-nav-location-label">
-									<p class="heading fs-10 fw-500 trans-upper">Location</p>
-								</div>
-								<div class="header-nav-card-content">
-									<div class="header-nav-location-title">
-										<p class="txt fs-20 fw-600">Based in VietNam 🇻🇳</p>
-									</div>
-									<div class="header-nav-location-time-wrap">
-										<div class="header-nav-location-time">
-											<div class="header-nav-location-time-ic">
-											</div>
-											<div class="header-nav-location-time-inner">
-												<p class="txt fs-12 fw-600 trans-upper">HANOI</p>
-												<p class="txt fs-12">16:30:09 <span>UTC+7</span></p>
-											</div>
-										</div>
-										<div class="header-nav-location-time">
-											<div class="header-nav-location-time-ic">
-											</div>
-											<div class="header-nav-location-time-inner">
-												<p class="txt fs-12 fw-600 trans-upper">LONDON</p>
-												<p class="txt fs-12">16:30:09 <span>UTC+7</span></p>
-											</div>
-										</div>
-									</div>
-								</div>
-							</a>
-
-							<a class="header-nav-card header-nav-card--work" href="/#works">
-								<Image class="img-df img-fill" src={navWork} alt="Selected design work" loading="lazy" />
-							</a>
+							</div>
 						</div>
-					</nav>
+					</div>
+					
 				</div>
+				<a href="#" class="header-menu-contact">
+					<div class="header-menu-contact-txt">
+						<span class="txt fs-12 fw-700 trans-upper">let's talk</span>
+					</div>
+				</a>
+				<button class="header-menu-toggle">
+						<div class="header-menu-btn-inner">
+							<div class="header-menu-btn-txt">
+								<span class="txt fs-12 fw-700 trans-upper">menu</span>
+							</div>
+							<div class="header-menu-btn-txt">
+								<span class="txt fs-12 fw-700 trans-upper">close</span>
+							</div>
+						</div>
+				</button>
 			</div>
 		</div>
 	</div>

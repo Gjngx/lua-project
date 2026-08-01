@@ -1,8 +1,6 @@
-import { gsap } from '../gsap';
 import { smoothScroll } from '../lenis';
 import { viewport, cvUnit } from '../helpers';
 import { audioManager } from './audio';
-import Lenis from 'lenis';
 
 export class Header {
 	constructor() {
@@ -12,9 +10,6 @@ export class Header {
 		this.currentMode = null;
 		this.currentData = null;
 		this.onScroll = null;
-		this.tlNav = null;
-		this.tlNameLoop = null;
-		this.navLenis = null;
 		this.headerResizeObserver = null;
 		this.headerMetrics = {
 			outerHeight: 0,
@@ -28,7 +23,6 @@ export class Header {
 
 		this.setupHeaderMetrics();
 		this.toggleNav();
-		this.setupNavScroll();
 		this.setupScrollListener(data);
 	}
 
@@ -47,23 +41,6 @@ export class Header {
 		this.headerResizeObserver = new ResizeObserver(updateMetrics);
 		this.headerResizeObserver.observe(this.el);
 		this.headerResizeObserver.observe(headerInner);
-	}
-
-	setupNavScroll() {
-		const wrapper = this.el.querySelector('.header-nav');
-		const content = this.el.querySelector('.header-nav-inner');
-		if (!wrapper || !content || this.navLenis) return;
-
-		this.navLenis = new Lenis({
-			wrapper,
-			content,
-			autoRaf: true,
-			lerp: 0.1,
-			wheelMultiplier: 0.85,
-			smoothWheel: true,
-			syncTouch: false
-		});
-		this.navLenis.stop();
 	}
 
 	// ─── Scroll Listener ──────────────────────────────────────────────
@@ -103,9 +80,13 @@ export class Header {
 	toggleScroll(inst, data) {
 		if (!inst || !this.el) return;
 		const headerHeight = this.headerMetrics.outerHeight;
-		if (inst.scroll > headerHeight * 2) {
+		const collapseAt = headerHeight * 2;
+		const expandAt = headerHeight * 1.5;
+		const isCollapsed = this.el.classList.contains("on-scroll");
+
+		if (!isCollapsed && inst.scroll > collapseAt) {
 			this.el.classList.add("on-scroll");
-		} else {
+		} else if (isCollapsed && inst.scroll < expandAt) {
 			this.el.classList.remove("on-scroll");
 		}
 	}
@@ -279,13 +260,8 @@ export class Header {
 	updateTrackTitle(track) {
 		if (!track?.title || !this.el) return;
 
-		this.el.querySelectorAll('[data-header-name-text]').forEach((text) => {
-			text.textContent = track.title;
-		});
-
-		if (this.isOpen) {
-			requestAnimationFrame(() => this.startNameLoop());
-		}
+		const name = this.el.querySelector('[data-header-name-text]');
+		if (name) name.textContent = track.title;
 	}
 
 	handleClick(e) {
@@ -315,9 +291,6 @@ export class Header {
 		};
 		document.addEventListener('touchmove', this._preventTouch, { passive: false });
 
-		this.navLenis?.start();
-		requestAnimationFrame(() => this.navLenis?.resize());
-		this.animateNavOpen();
 	}
 
 	close() {
@@ -330,174 +303,13 @@ export class Header {
 		}
 
 		if (smoothScroll) smoothScroll.start();
-		this.navLenis?.stop();
-
-		this.animateNavClose();
-	}
-
-	// ─── Nav Animations ──────────────────────────────────────────────
-	animateNavOpen() {
-		if (this.tlNav) this.tlNav.kill();
-		const shapeIc = this.el.querySelector('[data-header-play]');
-		const shapeText = this.el.querySelector('[data-header-audio-content]');
-		const headerShape = this.el.querySelector('[data-header-shape]');
-		const nameBox = this.el.querySelector('[data-header-name-box]');
-		const pause = this.el.querySelector('[data-header-next]');
-		const overlay = this.el.querySelector('.header-overlay');
-		const toggleIc = this.el.querySelector('.header-menu-toggle .header-circle-ic');
-		const nav = this.el.querySelector('.header-nav');
-		const circles = this.el.querySelectorAll('.header-circle');
-		const navItems = this.el.querySelectorAll(
-			'.header-nav-link, .header-nav-feature, .header-nav-cards > *'
-		);
-		let shapeOpenWidth = null;
-
-		if (headerShape && nav) {
-			const shapeStyle = getComputedStyle(headerShape);
-			const circlesWidth = Array.from(circles).reduce(
-				(total, circle) => total + circle.getBoundingClientRect().width,
-				0
-			);
-			const horizontalSpace = [
-				shapeStyle.paddingLeft,
-				shapeStyle.paddingRight,
-				shapeStyle.borderLeftWidth,
-				shapeStyle.borderRightWidth,
-				shapeStyle.marginLeft,
-				shapeStyle.marginRight
-			].reduce((total, value) => total + (Number.parseFloat(value) || 0), 0);
-
-			shapeOpenWidth = Math.max(nav.getBoundingClientRect().width - circlesWidth - horizontalSpace, 0);
-		}
-
-		this.tlNav = gsap.timeline({
-			defaults: { duration: 0.55, ease: 'power2.inOut', overwrite: 'auto' }
+		this.el.classList.remove("on-open-nav");
+		this.el.querySelector('.header-nav')?.setAttribute('aria-hidden', 'true');
+		this.el.querySelectorAll(".header-menu-toggle").forEach(el => {
+			el.classList.remove("active");
+			el.setAttribute('aria-expanded', 'false');
+			el.setAttribute('aria-label', 'Open navigation');
 		});
-		if (shapeText) this.tlNav.to(shapeText, { x: 0, force3D: true }, 0);
-		if (headerShape && shapeOpenWidth !== null) this.tlNav.to(headerShape, { width: shapeOpenWidth }, 0);
-		if (nameBox) this.tlNav.to(nameBox, { maxWidth: '20rem', autoAlpha: 1 }, 0);
-		if (pause) this.tlNav.to(pause, { maxWidth: '5rem', autoAlpha: 1 }, 0);
-		if (overlay) this.tlNav.to(overlay, { autoAlpha: 1, duration: 0.35, ease: 'sine.inOut' }, 0);
-		if (nav) this.tlNav.to(nav, { autoAlpha: 1, duration: 0.2, ease: 'sine.out' }, 0.03);
-		if (navItems.length) {
-			this.tlNav.to(navItems, {
-				y: 0,
-				autoAlpha: 1,
-				duration: 0.45,
-				ease: 'power3.out',
-				stagger: 0.025
-			}, 0.08);
-		}
-		if (toggleIc) {
-			this.tlNav.to(toggleIc, {
-				rotation: 225,
-				duration: 0.45,
-				ease: 'power2.inOut',
-				force3D: true
-			}, 0);
-		}
-		this.tlNav.call(() => this.startNameLoop(), null, 0.08);
-	}
-
-	startNameLoop() {
-		if (this.tlNameLoop) this.tlNameLoop.kill();
-
-		const name = this.el.querySelector('[data-header-name]');
-		const track = name?.querySelector('[data-header-name-track]');
-		const text = track?.querySelector('[data-header-name-text]');
-		if (!name || !track || !text) return;
-
-		gsap.set(track, { x: 0 });
-		const shouldLoop = text.scrollWidth > name.clientWidth;
-		name.classList.toggle('is-looping', shouldLoop);
-		if (!shouldLoop) return;
-
-		const trackGap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
-		const loopDistance = text.offsetWidth + trackGap;
-
-		this.tlNameLoop = gsap.to(track, {
-			x: -loopDistance,
-			duration: Math.max(loopDistance / 22, 6),
-			ease: 'none',
-			repeat: -1
-		});
-	}
-
-	stopNameLoop() {
-		if (this.tlNameLoop) {
-			this.tlNameLoop.kill();
-			this.tlNameLoop = null;
-		}
-
-		const name = this.el.querySelector('[data-header-name]');
-		const track = name?.querySelector('[data-header-name-track]');
-		name?.classList.remove('is-looping');
-		if (track) gsap.set(track, { clearProps: 'transform' });
-	}
-
-	animateNavClose() {
-		if (this.tlNav) this.tlNav.kill();
-		if (this.tlNameLoop) {
-			this.tlNameLoop.kill();
-			this.tlNameLoop = null;
-		}
-		const shapeIc = this.el.querySelector('[data-header-play]');
-		const shapeText = this.el.querySelector('[data-header-audio-content]');
-		const headerShape = this.el.querySelector('[data-header-shape]');
-		const nameBox = this.el.querySelector('[data-header-name-box]');
-		const pause = this.el.querySelector('[data-header-next]');
-		const overlay = this.el.querySelector('.header-overlay');
-		const toggleIc = this.el.querySelector('.header-menu-toggle .header-circle-ic');
-		const nav = this.el.querySelector('.header-nav');
-		const navItems = this.el.querySelectorAll(
-			'.header-nav-link, .header-nav-feature, .header-nav-cards > *'
-		);
-
-		this.tlNav = gsap.timeline({
-			defaults: {
-				ease: 'power2.inOut',
-				duration: 0.45,
-				overwrite: 'auto'
-			},
-			onComplete: () => {
-				this.stopNameLoop();
-				this.navLenis?.scrollTo(0, { immediate: true });
-				this.el.classList.remove("on-open-nav");
-				nav?.setAttribute('aria-hidden', 'true');
-				document.querySelectorAll(".header-menu-toggle").forEach(el => {
-					el.classList.remove("active");
-					el.setAttribute('aria-expanded', 'false');
-					el.setAttribute('aria-label', 'Open navigation');
-				});
-				gsap.set(
-					[headerShape, shapeIc, shapeText, nameBox, pause, overlay, toggleIc, nav, ...navItems].filter(Boolean),
-					{ clearProps: 'all' }
-				);
-			}
-		});
-		if (nameBox) this.tlNav.to(nameBox, { maxWidth: 0, autoAlpha: 0 }, 0);
-		if (pause) this.tlNav.to(pause, { maxWidth: 0, autoAlpha: 0 }, 0);
-		if (shapeText) this.tlNav.to(shapeText, { x: '5.5rem', force3D: true }, 0);
-		if (headerShape) this.tlNav.to(headerShape, { width: '15rem' }, 0);
-		if (overlay) this.tlNav.to(overlay, { autoAlpha: 0, duration: 0.35, ease: 'sine.inOut' }, 0);
-		if (navItems.length) {
-			this.tlNav.to(navItems, {
-				y: '1.6rem',
-				autoAlpha: 0,
-				duration: 0.28,
-				ease: 'power2.in',
-				stagger: { each: 0.015, from: 'end' }
-			}, 0);
-		}
-		if (nav) this.tlNav.to(nav, { autoAlpha: 0, duration: 0.32, ease: 'sine.inOut' }, 0.06);
-		if (toggleIc) {
-			this.tlNav.to(toggleIc, {
-				rotation: 0,
-				duration: 0.4,
-				ease: 'power2.inOut',
-				force3D: true
-			}, 0);
-		}
 	}
 }
 
