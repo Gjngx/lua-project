@@ -15,6 +15,7 @@ export class Header {
 			outerHeight: 0,
 			innerHeight: 0,
 		};
+		this.navCardReels = [];
 	}
 
 	init(data) {
@@ -22,8 +23,103 @@ export class Header {
 		if (!this.el) return;
 
 		this.setupHeaderMetrics();
+		this.setupNavCardReels();
 		this.toggleNav();
 		this.setupScrollListener(data);
+	}
+
+	setupNavCardReels() {
+		if (this.navCardReels.length) return;
+
+		this.el.querySelectorAll('[data-header-reel]').forEach((reel, index) => {
+			if (reel.hasAttribute('data-header-reel-ready')) return;
+
+			const icons = Array.from(reel.children).map((icon) => icon.cloneNode(true));
+			if (!icons.length) return;
+
+			const track = document.createElement('div');
+			track.setAttribute('data-header-reel-track', '');
+			track.setAttribute('aria-hidden', 'true');
+			for (let cycle = 0; cycle < 2; cycle += 1) {
+				icons.forEach((icon) => track.append(icon.cloneNode(true)));
+			}
+			reel.replaceChildren(track);
+
+			reel.setAttribute('data-header-reel-ready', '');
+			this.navCardReels.push({
+				el: reel,
+				track,
+				icons,
+				step: index % icons.length,
+				stepSize: 0,
+				timer: null,
+				animation: null,
+				startDelay: 600 + index * 180,
+				interval: 1900,
+			});
+		});
+	}
+
+	startNavCardReels() {
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+		this.stopNavCardReels();
+		this.navCardReels.forEach((reel) => {
+			this.measureNavCardReel(reel);
+			const run = () => {
+				if (!this.isOpen) return;
+				this.rollNavCardReel(reel);
+				reel.timer = window.setTimeout(run, reel.interval);
+			};
+
+			reel.timer = window.setTimeout(run, reel.startDelay);
+		});
+	}
+
+	measureNavCardReel(reel) {
+		const icon = reel.track.firstElementChild;
+		if (!icon) return;
+
+		const iconHeight = icon.getBoundingClientRect().height;
+		const reelHeight = reel.el.getBoundingClientRect().height;
+		reel.stepSize = Math.max(iconHeight, (reelHeight - iconHeight) / 2);
+		reel.track.style.setProperty('--header-reel-gap', `${Math.max(0, reel.stepSize - iconHeight)}px`);
+		reel.track.style.transform = `translate3d(0, ${-reel.step * reel.stepSize}px, 0)`;
+	}
+
+	rollNavCardReel(reel) {
+		if (!reel.stepSize || reel.animation) return;
+
+		const nextStep = reel.step + 1;
+		const from = -reel.step * reel.stepSize;
+		const to = -nextStep * reel.stepSize;
+		const animation = reel.track.animate([
+			{ transform: `translate3d(0, ${from}px, 0)` },
+			{ transform: `translate3d(0, ${to}px, 0)` },
+		], {
+			duration: 680,
+			easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+			fill: 'forwards',
+		});
+
+		reel.animation = animation;
+		animation.finished.then(() => {
+			if (reel.animation !== animation) return;
+
+			reel.step = nextStep === reel.icons.length ? 0 : nextStep;
+			reel.track.style.transform = `translate3d(0, ${-reel.step * reel.stepSize}px, 0)`;
+			animation.cancel();
+			reel.animation = null;
+		}).catch(() => {});
+	}
+
+	stopNavCardReels() {
+		this.navCardReels.forEach((reel) => {
+			if (reel.timer) window.clearTimeout(reel.timer);
+			reel.timer = null;
+			reel.animation?.cancel();
+			reel.animation = null;
+		});
 	}
 
 	setupHeaderMetrics() {
@@ -287,6 +383,7 @@ export class Header {
 			el.setAttribute('aria-label', 'Close navigation');
 		});
 		this.isOpen = true;
+		this.startNavCardReels();
 		if (smoothScroll) smoothScroll.stop();
 
 		this._savedScrollY = window.scrollY;
@@ -300,6 +397,7 @@ export class Header {
 	close() {
 		if (!this.isOpen || !this.el) return;
 		this.isOpen = false;
+		this.stopNavCardReels();
 
 		if (this._preventTouch) {
 			document.removeEventListener('touchmove', this._preventTouch);

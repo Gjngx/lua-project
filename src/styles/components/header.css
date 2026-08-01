@@ -268,14 +268,17 @@
 	flex-direction: row;
 	width: 100%;
 	height: 100%;
+	min-height: 0;
 	justify-content: space-between;
 	align-items: stretch;
+	overflow: hidden;
 }
 .header-nav-brand {
 	grid-column: span 2;
 	grid-row: span 2;
 	position: relative;
 	display: flex;
+	min-height: 0;
 	background-color: var(--cl-content-strong);
 	padding: 1.1rem 2.05rem;
 }
@@ -418,12 +421,31 @@
 	overflow: hidden;
 }
 .header-nav-card-item {
+	position: relative;
+	flex: none;
+	align-self: stretch;
+	width: 2.8rem;
+	min-height: 0;
+	overflow: hidden;
+}
+.header-nav-card-item:not([data-header-reel-ready]) {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 }
+[data-header-reel-track] {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--header-reel-gap, 0px);
+	width: 100%;
+	will-change: transform;
+}
 .header-nav-card-item .item-ic {
 	display: flex;
+	flex: 0 0 2.8rem;
 	align-items: center;
 	justify-content: center;
 	color: var(--cl-brand);
