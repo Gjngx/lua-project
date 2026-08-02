@@ -265,11 +265,24 @@ import Button from './Button.astro';
 				</div>
 			</div>
 
-			<a href="/about" class="header-nav-circle header-nav-portrait" aria-label="About me">
-				<div class="header-nav-portrait-item">
-					<Image class="img-df img-fill" src={navPortrait} alt="Portrait of Minh Hieu" loading="lazy" />
+			<a
+				href="/about"
+				class="header-nav-circle header-nav-portrait"
+				aria-label="About me"
+				data-header-portrait
+			>
+				<div class="header-nav-portrait-layers" aria-hidden="true">
+					<div class="header-nav-portrait-layer is-outer" data-portrait-layer>
+						<Image class="img-df" src={navPortrait} alt="" loading="lazy" />
+					</div>
+					<div class="header-nav-portrait-layer is-middle" data-portrait-layer>
+						<Image class="img-df" src={navPortrait} alt="" loading="lazy" />
+					</div>
+					<div class="header-nav-portrait-layer is-inner" data-portrait-layer>
+						<Image class="img-df" src={navPortrait} alt="" loading="lazy" />
+					</div>
 				</div>
-				<div class="header-nav-portrait-ic">
+				<div class="header-nav-portrait-ic" data-portrait-marker aria-hidden="true">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 133 133" fill="none">
 						<circle
 							cx="66.5"

@@ -1,6 +1,7 @@
 import { smoothScroll } from '../lenis';
 import { viewport, cvUnit } from '../helpers';
 import { audioManager } from './audio';
+import { gsap } from '../gsap';
 
 export class Header {
 	constructor() {
@@ -20,6 +21,11 @@ export class Header {
 		this.navCardReelLastTime = 0;
 		this.isNavCardReelHovered = false;
 		this.lastNavCardReelResult = null;
+		this.portraitTimeline = null;
+		this.portraitLayers = [];
+		this.portraitMarker = null;
+		this.portraitResetCall = null;
+		this.prefersReducedMotion = false;
 	}
 
 	init(data) {
@@ -28,8 +34,102 @@ export class Header {
 
 		this.setupHeaderMetrics();
 		this.setupNavCardReels();
+		this.setupPortraitAnimation();
 		this.toggleNav();
 		this.setupScrollListener(data);
+	}
+
+	setupPortraitAnimation() {
+		if (this.portraitTimeline || !this.el) return;
+
+		const portrait = this.el.querySelector('[data-header-portrait]');
+		if (!portrait) return;
+
+		this.portraitLayers = Array.from(portrait.querySelectorAll('[data-portrait-layer]'));
+		this.portraitMarker = portrait.querySelector('[data-portrait-marker]');
+		if (this.portraitLayers.length !== 3 || !this.portraitMarker) return;
+
+		this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const markerCircle = this.portraitMarker.querySelector('circle');
+		const angles = this.pickPortraitAngles();
+		const [outer, middle, inner] = this.portraitLayers;
+
+		gsap.set(this.portraitLayers, { rotation: 0, transformOrigin: '50% 50%' });
+		gsap.set(this.portraitMarker, {
+			scale: 2,
+			rotation: 0,
+			transformOrigin: '50% 50%',
+		});
+
+		if (this.prefersReducedMotion) return;
+
+		const timeline = gsap.timeline({
+			repeat: -1,
+			paused: true,
+			defaults: { ease: 'power3.inOut' },
+		});
+
+		if (markerCircle) {
+			timeline.fromTo(
+				markerCircle,
+				{ strokeDashoffset: 0, opacity: 0.45 },
+				{ strokeDashoffset: -28, opacity: 1, duration: 1, ease: 'none' }
+			);
+		} else {
+			timeline.to({}, { duration: 1 });
+		}
+
+		timeline
+			.to(this.portraitMarker, { scale: 1, duration: 0.4 })
+			.to(inner, { rotation: angles[0], duration: 0.75 })
+			.to(this.portraitMarker, { rotation: `+=${angles[0]}`, duration: 0.75 }, '<')
+			.to(this.portraitMarker, { scale: 1.5, duration: 0.4 })
+			.to(middle, { rotation: angles[1], duration: 0.75 })
+			.to(this.portraitMarker, { rotation: `+=${angles[1]}`, duration: 0.75 }, '<')
+			.to(this.portraitMarker, { scale: 2, duration: 0.4 })
+			.to(outer, { rotation: angles[2], duration: 0.75 })
+			.to(this.portraitMarker, { rotation: `+=${angles[2]}`, duration: 0.75 }, '<')
+			.to(this.portraitMarker, { scale: 1, duration: 0.4 })
+			.to(inner, { rotation: 0, duration: 0.45 })
+			.to(this.portraitMarker, { rotation: `+=${-angles[0]}`, duration: 0.45 }, '<')
+			.to(this.portraitMarker, { scale: 1.5, duration: 0.4 })
+			.to(middle, { rotation: 0, duration: 0.45 })
+			.to(this.portraitMarker, { rotation: `+=${-angles[1]}`, duration: 0.45 }, '<')
+			.to(this.portraitMarker, { scale: 2, duration: 0.4 })
+			.to(outer, { rotation: 0, duration: 0.45 })
+			.to(this.portraitMarker, { rotation: `+=${-angles[2]}`, duration: 0.45 }, '<')
+			.to(markerCircle || {}, { opacity: 0.45, duration: 0.35 });
+
+		this.portraitTimeline = timeline;
+	}
+
+	pickPortraitAngles() {
+		const pick = () => {
+			let angle = gsap.utils.random(-160, 160);
+			while (Math.abs(angle) < 30) angle = gsap.utils.random(-160, 160);
+			return angle;
+		};
+
+		const angles = [pick()];
+		while (angles.length < 3) {
+			const angle = pick();
+			if (Math.abs(angle - angles[angles.length - 1]) >= 45) angles.push(angle);
+		}
+		return angles;
+	}
+
+	playPortraitAnimation() {
+		this.portraitResetCall?.kill();
+		this.portraitResetCall = null;
+		if (!this.prefersReducedMotion) this.portraitTimeline?.play();
+	}
+
+	pausePortraitAnimation() {
+		this.portraitResetCall?.kill();
+		this.portraitResetCall = gsap.delayedCall(0.55, () => {
+			this.portraitTimeline?.pause(0);
+			this.portraitResetCall = null;
+		});
 	}
 
 	setupNavCardReels() {
@@ -608,6 +708,7 @@ export class Header {
 		});
 		this.isOpen = true;
 		this.startNavCardReels();
+		this.playPortraitAnimation();
 		if (smoothScroll) smoothScroll.stop();
 
 		this._savedScrollY = window.scrollY;
@@ -622,6 +723,7 @@ export class Header {
 		if (!this.isOpen || !this.el) return;
 		this.isOpen = false;
 		this.stopNavCardReels();
+		this.pausePortraitAnimation();
 
 		if (this._preventTouch) {
 			document.removeEventListener('touchmove', this._preventTouch);
