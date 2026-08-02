@@ -460,6 +460,7 @@
 	transform-origin: 50% 50%;
 	pointer-events: none;
 	will-change: transform;
+	mix-blend-mode: difference;
 }
 .header-nav-portrait-ic svg {
 	display: block;
