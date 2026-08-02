@@ -378,7 +378,7 @@
 
 .header-nav-location-item .txt span {
 	color: var(--cl-content-label);
-	margin-left: 1rem;
+	margin-left: 0.6rem;
 }
 
 .header-nav-location-flag {
