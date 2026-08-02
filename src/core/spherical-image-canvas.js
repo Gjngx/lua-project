@@ -59,7 +59,13 @@ const CARD_LAYOUT = [
 const CARD_SPHERE_RADIUS = 4.15;
 const CAMERA_FIT_RADIUS = 4.35;
 const CARD_SCALE_MULTIPLIER = 1.58;
-const IDLE_ROTATION_SPEED = 0.00016;
+const IDLE_ROTATION_VELOCITY = { x: 0.00006, y: 0.00028 };
+const IDLE_ROTATION_SPEED = Math.hypot(
+	IDLE_ROTATION_VELOCITY.x,
+	IDLE_ROTATION_VELOCITY.y,
+);
+const MAX_SCROLL_ROTATION_BOOST = 4;
+const SCROLL_SPEED_FOR_MAX_BOOST = 2.5;
 const MAX_RENDER_DPR = 1.5;
 const SHARED_IMAGE_CACHE = new Map();
 
@@ -120,9 +126,13 @@ export class SphericalImageCanvas {
 		this.hasWarmedAssets = false;
 		this.lastRenderSize = { width: 0, height: 0, dpr: 0 };
 		this.isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		this.targetVelocity = { x: 0.00003, y: 0.00014 };
+		this.targetVelocity = { ...IDLE_ROTATION_VELOCITY };
 		this.velocity = { x: 0, y: 0 };
 		this.rotation = { x: 0, y: 0 };
+		this.scrollRotationBoost = 0;
+		this.scrollRotationBoostTarget = 0;
+		this.lastScrollPosition = 0;
+		this.lastScrollTime = 0;
 		this.floatTime = 0;
 		this.floatStrength = 1;
 		this.isDragging = false;
@@ -138,6 +148,7 @@ export class SphericalImageCanvas {
 		this.onPointerDown = this.onPointerDown.bind(this);
 		this.onPointerMove = this.onPointerMove.bind(this);
 		this.onPointerUp = this.onPointerUp.bind(this);
+		this.onScroll = this.onScroll.bind(this);
 		this.onResize = this.onResize.bind(this);
 		this.onVisibilityChange = this.onVisibilityChange.bind(this);
 		this.onContextLost = this.onContextLost.bind(this);
@@ -354,6 +365,9 @@ export class SphericalImageCanvas {
 
 		this.canvas.addEventListener('webglcontextlost', this.onContextLost);
 		document.addEventListener('visibilitychange', this.onVisibilityChange);
+		document.addEventListener('scroll', this.onScroll, { passive: true, capture: true });
+		this.lastScrollPosition = this.getScrollPosition();
+		this.lastScrollTime = performance.now();
 
 		this.resizeObserver = new ResizeObserver(this.onResize);
 		this.resizeObserver.observe(this.root);
@@ -362,6 +376,8 @@ export class SphericalImageCanvas {
 			(entries) => {
 				this.isVisible = entries[0]?.isIntersecting ?? false;
 				if (this.isVisible) {
+					this.lastScrollPosition = this.getScrollPosition();
+					this.lastScrollTime = performance.now();
 					if (this.isReducedMotion) {
 						this.requestRender();
 					} else {
@@ -371,9 +387,35 @@ export class SphericalImageCanvas {
 					this.stop();
 				}
 			},
-			{ threshold: 0.4 },
+			{ threshold: 0 },
 		);
 		this.visibilityObserver.observe(this.root);
+	}
+
+	getScrollPosition() {
+		const bodyInner = document.querySelector('.body-inner');
+		return Math.max(
+			window.scrollY || document.documentElement.scrollTop || 0,
+			bodyInner?.scrollTop || 0,
+		);
+	}
+
+	onScroll() {
+		const now = performance.now();
+		const position = this.getScrollPosition();
+		const elapsed = Math.max(16, now - this.lastScrollTime);
+		const distance = Math.abs(position - this.lastScrollPosition);
+
+		this.lastScrollPosition = position;
+		this.lastScrollTime = now;
+		if (!this.isVisible || distance === 0) return;
+
+		const scrollSpeed = distance / elapsed;
+		const boost = Math.min(
+			MAX_SCROLL_ROTATION_BOOST,
+			(scrollSpeed / SCROLL_SPEED_FOR_MAX_BOOST) * MAX_SCROLL_ROTATION_BOOST,
+		);
+		this.scrollRotationBoostTarget = Math.max(this.scrollRotationBoostTarget, boost);
 	}
 
 	onPointerDown(event) {
@@ -419,8 +461,8 @@ export class SphericalImageCanvas {
 			this.targetVelocity.x = (this.velocity.x / releaseSpeed) * IDLE_ROTATION_SPEED;
 			this.targetVelocity.y = (this.velocity.y / releaseSpeed) * IDLE_ROTATION_SPEED;
 		} else {
-			this.targetVelocity.x = 0.00003;
-			this.targetVelocity.y = 0.00014;
+			this.targetVelocity.x = IDLE_ROTATION_VELOCITY.x;
+			this.targetVelocity.y = IDLE_ROTATION_VELOCITY.y;
 		}
 		this.root.classList.remove('is-dragging');
 	}
@@ -546,8 +588,13 @@ export class SphericalImageCanvas {
 		this.floatStrength += (targetFloatStrength - this.floatStrength) * floatSmoothing;
 		this.velocity.x += (this.targetVelocity.x - this.velocity.x) * smoothing;
 		this.velocity.y += (this.targetVelocity.y - this.velocity.y) * smoothing;
-		this.rotation.x += this.velocity.x * delta;
-		this.rotation.y += this.velocity.y * delta;
+		const scrollBoostSmoothing = 1 - Math.pow(0.72, delta);
+		this.scrollRotationBoost +=
+			(this.scrollRotationBoostTarget - this.scrollRotationBoost) * scrollBoostSmoothing;
+		this.scrollRotationBoostTarget *= Math.pow(0.9, delta);
+		const rotationMultiplier = 1 + this.scrollRotationBoost;
+		this.rotation.x += this.velocity.x * delta * rotationMultiplier;
+		this.rotation.y += this.velocity.y * delta * rotationMultiplier;
 		this.updateCardTransforms();
 
 		this.renderer.render({ scene: this.scene, camera: this.camera });
@@ -570,6 +617,7 @@ export class SphericalImageCanvas {
 		this.root.classList.remove('is-dragging');
 		this.canvas.removeEventListener('webglcontextlost', this.onContextLost);
 		document.removeEventListener('visibilitychange', this.onVisibilityChange);
+		document.removeEventListener('scroll', this.onScroll, { capture: true });
 
 		this.textures.forEach((texture) => this.gl?.deleteTexture(texture.texture));
 		this.programs.forEach((program) => program.remove());
