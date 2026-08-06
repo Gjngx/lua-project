@@ -25,6 +25,7 @@ import IconDesign1 from '../components/icons/IconDesign1.astro';
 import IconDesign2 from '../components/icons/IconDesign2.astro';
 import IconHeroDecor from '../components/icons/IconHeroDecor.astro';
 import IconWorksDecor from '../components/icons/IconWorksDecor.astro';
+import IconWorksDecorDone from '../components/icons/IconWorksDecorDone.astro';
 import IconShape1 from '../components/icons/IconShape-1.astro';
 import IconShape2 from '../components/icons/IconShape-2.astro';
 import IconShape3 from '../components/icons/IconShape-3.astro';
@@ -118,8 +119,13 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 			<div class="container grid full-h">
 				<div class="home-works-decor">
 					<div class="home-works-svg">
-						<IconWorksDecor />
+						<div class="home-works-svg-anim">
+							<IconWorksDecor />
+						</div>
 						<canvas class="home-works-path-canvas" aria-hidden="true"></canvas>
+						<div class="home-works-svg-done">
+							<IconWorksDecorDone />
+						</div>
 					</div>
 				</div>
 			</div>
@@ -215,6 +221,7 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 				</a>
 			</div>
 		</div>
+		<div class="home-works-block"></div>
 		<div class="home-works-trans">
 			<div class="home-works-trans-inner">
 				<div class="home-works-trans-item">

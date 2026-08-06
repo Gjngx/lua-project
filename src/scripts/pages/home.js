@@ -360,7 +360,7 @@ export const HomePage = {
 		}
 
 		animationScrub() {
-			const decorSvg = this.el.querySelector('.home-works-svg svg');
+			const decorSvg = this.el.querySelector('.home-works-svg .home-works-svg-anim svg');
 			const decorCanvas = this.el.querySelector('.home-works-path-canvas');
 			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -388,16 +388,32 @@ export const HomePage = {
 				});
 			}
 
+			const worksSection = this.el.querySelector('.home-works--main');
+			const worksSvg = this.el.querySelector('.home-works-svg');
+			const worksTitle = this.el.querySelector('.home-works-main-title');
+			const worksDesc = this.el.querySelector('.home-works-main-desc');
+			const worksTitleTop =
+				worksTitle.getBoundingClientRect().top -
+				worksSection.getBoundingClientRect().top - 
+				worksTitle.getBoundingClientRect().height;
+
+			const worksDescHeight = worksDesc.getBoundingClientRect().height;
+
+			console.log(worksTitleTop);
 			this.tlWorksTop = gsap.timeline({
 				scrollTrigger: {
-					trigger: this.el.querySelector('.home-works-list'),
-					start: 'bottom bottom',
+					trigger: this.el.querySelector('.home-works-block'),
+					start: 'top top',
 					end: 'bottom top',
-					scrub: true,
+					scrub: true
 				}
 			});
 			this.tlWorksTop
-				.to(this.el.querySelector('.home-works-decor'), { opacity: 0, ease: 'none' });
+				.to(worksTitle, { y: worksDescHeight, ease: 'none' })
+				.to(worksDesc, { y: worksDescHeight, ease: 'none' },'<=' )
+				.to(worksSvg, { width: cvUnit(291, 'rem'), y: worksTitleTop, color: 'var(--cl-content-disable)' , ease: 'none' }, '<=' )
+
+
 			this.tlWorksScroll = gsap.timeline({
 				scrollTrigger: {
 					trigger: this.el.querySelector('.home-works-empty'),
@@ -824,6 +840,11 @@ export const HomePage = {
 
 			this.isNextContentVisible = showNextContent;
 			gsap.to(this.transitionCurrentContent, {
+				opacity: showNextContent ? 0 : 1,
+				duration: 0.01,
+				overwrite: true,
+			});
+			gsap.to(this.el.querySelector('.home-works--decor'), {
 				opacity: showNextContent ? 0 : 1,
 				duration: 0.01,
 				overwrite: true,

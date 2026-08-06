@@ -200,18 +200,36 @@
 	grid-column: 2 / -2;
 	grid-row: 1 / 1;
 	pointer-events: none;
+	display: flex;
+	justify-content: center;
 }
 
 .home-works-svg {
 	position: relative;
-	margin-top: 4rem;
+	margin-top: 8.8rem;
 	width: 100%;
 	color: var(--cl-brand-soft-light);
 	transition: color 0.4s ease;
 }
 
-.home-works-svg > svg {
+.home-works-svg .home-works-svg-anim {
 	display: block;
+	transition: opacity 0.3s ease;
+}
+
+.home-works-svg .home-works-svg-done {
+	position: absolute;
+	inset: 0;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.home-works-svg.is-path-particles-assembled .home-works-svg-done {
+	opacity: 1;
+}
+
+.home-works-svg.is-path-particles-assembled .home-works-svg-anim {
+	opacity: 0;
 }
 
 .home-works-path-canvas {
@@ -225,19 +243,19 @@
 	visibility: hidden;
 }
 
-.home-works-svg.is-path-particles-active > svg {
+.home-works-svg.is-path-particles-active .home-works-svg-anim {
 	visibility: hidden;
 }
 
-.home-works-svg.is-path-particles-active > .home-works-path-canvas {
+.home-works-svg.is-path-particles-active .home-works-path-canvas {
 	visibility: visible;
 }
 
-.home-works-svg.is-path-particles-assembled > svg {
+.home-works-svg.is-path-particles-assembled .home-works-svg-anim {
 	visibility: visible;
 }
 
-.home-works-svg.is-path-particles-assembled > .home-works-path-canvas {
+.home-works-svg.is-path-particles-assembled .home-works-path-canvas {
 	visibility: hidden;
 }
 
@@ -245,14 +263,16 @@
 .home-works-bottom {
 	grid-column: 2 / -2;
 	grid-row: 1 / 1;
+	height: fit-content;
+	margin: auto;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	overflow: hidden;
 }
 
 .home-works-main-title {
-	margin-bottom: 3.2rem;
 	pointer-events: auto;
 }
 
@@ -263,6 +283,7 @@
 	width: 21.3rem;
 	pointer-events: auto;
 	text-align: center;
+	padding-top: 3.2rem;
 }
 
 .home-playground{
@@ -444,7 +465,10 @@
 	height: 250vh;
 	pointer-events: none;
 }
-
+.home-works-block{
+	height: 150vh;
+	pointer-events: none;
+}
 .home-how-intro {
 	grid-column: 8 / 12;
 	grid-row: 1 / 1;
