@@ -436,9 +436,9 @@ export const HomePage = {
 				}
 			});
 			this.tlWorksTop
-				.to(worksTitle, { y: worksDescHeight, ease: 'none' })
-				.to(worksDesc, { y: worksDescHeight, ease: 'none' },'<=' )
-				.to(worksSvg, { width: cvUnit(291, 'rem'), y: worksTitleTop, color: 'var(--cl-content-disable)' , ease: 'none' }, '<=' )
+				.to(worksTitle, { y: worksDescHeight, ease: 'power3.inOut' })
+				.to(worksDesc, { y: worksDescHeight, ease: 'power3.inOut' },'<=' )
+				.to(worksSvg, { width: cvUnit(291, 'rem'), y: worksTitleTop, color: 'var(--cl-content-disable)' , ease: 'power3.inOut' }, '<=' )
 
 
 			this.tlWorksScroll = gsap.timeline({
@@ -1095,6 +1095,7 @@ export const HomePage = {
 		constructor() {
 			super();
 			this.el = null;
+			this.tlDecor = null;
 			this.tlItemScroll = null;
 			this.hoverCleanups = [];
 			this.splitResults = [];
@@ -1141,6 +1142,32 @@ export const HomePage = {
 		}
 
 		animationScrub() {
+			const decor = this.el.querySelector('.home-how-intro-decor');
+			const shapeWraps = decor.querySelectorAll('.home-how-intro-decor-shape-wrap');
+			this.tlDecor = gsap.timeline({
+				scrollTrigger: {
+					trigger: decor,
+					start: 'top center',
+					endTrigger: this.el.querySelector('.home-how-thumb-inner'),
+					end: 'top center-=5%',
+					scrub: true,
+				}
+			});
+
+			const widthDecor = decor.getBoundingClientRect().width;
+			const transDecor = (widthDecor / 2) - (shapeWraps[0].getBoundingClientRect().width / 2);
+
+			this.tlDecor
+				.to(shapeWraps[0], {
+					x: -transDecor,
+					ease: 'power3.inOut',
+				})
+				.to(shapeWraps[1], {
+					x: transDecor,
+					ease: 'power3.inOut',
+				}, '<');
+
+
 			this.tlItemScrolls = [];
 			const thumbItems = this.el.querySelectorAll('.home-how-thumb-item');
 			const contentItems = this.el.querySelectorAll('.home-how-content-item');
@@ -1220,10 +1247,10 @@ export const HomePage = {
 
 				this.tlItemScrolls.push(tl);
 
-				const contentTrigger = ScrollTrigger.create({
-					trigger: thumb,
-					start: `top center`,
-					end: `bottom center`,
+					const contentTrigger = ScrollTrigger.create({
+						trigger: thumb,
+						start: `top center`,
+						end: `bottom center`,
 						onEnter: () => {
 							if (index === 0) contentList.classList.add('active-ic');
 							activateContent(index, 'forward');
