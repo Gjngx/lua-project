@@ -49,6 +49,9 @@ export class Header {
 		this.portraitMarker = portrait.querySelector('[data-portrait-marker]');
 		if (this.portraitLayers.length !== 3 || !this.portraitMarker) return;
 
+		portrait.addEventListener('pointerenter', () => this.playPortraitAnimation());
+		portrait.addEventListener('pointerleave', () => this.reversePortraitAnimation());
+
 		this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		const markerCircle = this.portraitMarker.querySelector('circle');
 		const angles = this.pickPortraitAngles();
@@ -124,9 +127,18 @@ export class Header {
 		if (!this.prefersReducedMotion) this.portraitTimeline?.play();
 	}
 
-	pausePortraitAnimation() {
+	reversePortraitAnimation() {
 		this.portraitResetCall?.kill();
-		this.portraitResetCall = gsap.delayedCall(0.55, () => {
+		this.portraitResetCall = null;
+		if (this.prefersReducedMotion || !this.portraitTimeline) return;
+
+		// Keep only the current loop so reversing always returns to the initial frame.
+		this.portraitTimeline.totalTime(this.portraitTimeline.time(), true).reverse();
+	}
+
+	pausePortraitAnimation(delay = 0.55) {
+		this.portraitResetCall?.kill();
+		this.portraitResetCall = gsap.delayedCall(delay, () => {
 			this.portraitTimeline?.pause(0);
 			this.portraitResetCall = null;
 		});
@@ -708,7 +720,6 @@ export class Header {
 		});
 		this.isOpen = true;
 		this.startNavCardReels();
-		this.playPortraitAnimation();
 		if (smoothScroll) smoothScroll.stop();
 
 		this._savedScrollY = window.scrollY;

@@ -8,21 +8,14 @@ const { href = "#", class: className = "" } = Astro.props;
 ---
 <a href={href} class={`btn ${className}`.trim()} data-button-text>
 	<div class="btn-inner">
-		<div class="btn-txt">
-			<p class="txt fs-14 fw-700 trans-upper" data-button-text-label><slot /></p>
+		<div class="btn-ic ic-left">
+			<div class="btn-ic-inner"></div>
 		</div>
-		<div class="btn-ic">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="100%"
-				viewBox="0 0 20 20"
-				fill="none"
-			>
-				<rect x="12" y="8.5" width="3" height="3" rx="1.5" fill="currentColor"></rect>
-				<rect x="6" y="2.5" width="3" height="3" rx="1.5" fill="currentColor"></rect>
-				<rect x="6" y="14.5" width="3" height="3" rx="1.5" fill="currentColor"></rect>
-				<rect x="6" y="8.5" width="3" height="3" rx="1.5" fill="currentColor"></rect>
-			</svg>
+		<div class="btn-txt">
+			<p class="txt fs-14 fw-500" data-button-text-label><slot /></p>
+		</div>
+		<div class="btn-ic ic-right">
+			<div class="btn-ic-inner"></div>
 		</div>
 	</div>
 	<div class="btn-bg"></div>

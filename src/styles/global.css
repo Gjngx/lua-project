@@ -117,14 +117,50 @@ a {
 	display: flex;
 	justify-content: flex-start;
 	align-items: center;
+	height: 100%;
 	color: var(--cl-content-strong);
 	position: relative;
 	z-index: 2;
+	padding-inline: 2.4rem;
 }
-
+.btn.btn-sc .btn-ic{
+ display: none;
+}
+.btn-ic {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex: none;
+	width: 1.6rem;
+}
+.btn-ic-inner {
+	flex: none;
+	width: 0.4rem;
+	height: 0.4rem;
+	border-radius: 99%;
+	background-color: var(--cl-content-strong);
+	transition:
+		opacity 0.25s ease,
+		transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-ic.ic-left .btn-ic-inner {
+	margin-right: 1.2rem;
+}
+.btn-ic.ic-left {
+	margin-left: -0.8rem;
+}
+.btn-ic.ic-right .btn-ic-inner {
+	margin-left: 1.2rem;
+}
+.btn-ic.ic-right{
+	margin-right: -1.2rem;
+}
+.btn-ic.ic-right .btn-ic-inner {
+	opacity: 0;
+	transform: translateX(-0.5rem) scale(0.35);
+}
 .btn-txt {
 	display: grid;
-	padding-inline: 1.7rem;
 	overflow: visible;
 	white-space: nowrap;
 	clip-path: inset(-12% 0);
@@ -143,25 +179,9 @@ a {
 	will-change: transform;
 }
 
-.btn-ic {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 4rem;
-	height: 4rem;
-	background-color: var(--cl-white);
-	border-radius: 99%;
-	transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.btn-ic svg {
-	width: 2rem;
-}
-
 .btn-bg {
 	position: absolute;
 	inset: 0;
-	width: calc(100% - 3.8rem);
 	z-index: 1;
 	background-color: var(--cl-white);
 	border-radius: 10vmin;
@@ -170,34 +190,57 @@ a {
 	background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.btn.btn-no-ic .btn-ic {
-	display: none;
+.hover-line {
+	position: relative;
+	display: inline-block;
 }
 
-.btn.btn-no-ic .btn-inner {
-	height: 100%;
-}
-
-.btn.btn-no-ic .btn-bg {
+.hover-line::before,
+.hover-line::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: -0.3em;
 	width: 100%;
+	height: 1px;
+	background: currentColor;
 }
 
-/* Dark Variant */
-.btn-dark .btn-inner {
-	color: var(--cl-white);
+
+.hover-line::before {
+	transform: scaleX(1);
+	transform-origin: left;
+	transition: transform 0.3s ease;
 }
-.btn-dark .btn-ic {
-	background-color: var(--cl-bg-black);
-	color: var(--cl-white);
+
+.hover-line::after {
+	transform: scaleX(0);
+	transform-origin: left;
+	transition: transform 0.3s ease;
 }
-.btn-dark .btn-bg {
-	background-color: var(--cl-bg-black);
+
+/* Line 2 chạy ra */
+.hover-line:not(:hover)::after {
+	transform: scaleX(0);
+	transform-origin: right;
+	transition-delay: 0s;
+}
+
+/* Line 1 chạy vào lại */
+.hover-line:not(:hover)::before {
+	transform: scaleX(1);
+	transform-origin: left;
+	transition-delay: 0.2s;
 }
 
 @media (prefers-reduced-motion: reduce) {
 	.btn-txt .split-char {
 		text-shadow: none;
 		will-change: auto;
+	}
+	.btn-ic,
+	.btn-ic-inner {
+		transition: none;
 	}
 }
 
@@ -278,13 +321,33 @@ a {
 }
 
 @media (hover: hover) and (min-width: 991px) {
-	.btn:hover .btn-bg {
-		width: 100%;
+	.btn:hover .btn-ic.ic-left {
+		width: 1.6rem;
+	}
+	.btn:hover .btn-ic.ic-left .btn-ic-inner {
+		opacity: 0;
+		transform: translateX(0.5rem) scale(0.35);
 	}
 
-	.btn:hover .btn-ic {
-		transform: rotateZ(360deg);
+	.btn:hover .btn-ic.ic-right {
+		width: 1.6rem;
 	}
+	.btn:hover .btn-ic.ic-right .btn-ic-inner {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+		.hover-line:hover::before {
+			transform: scaleX(0);
+			transform-origin: right;
+		}
+	
+		/* Line 2 chạy vào */
+		.hover-line:hover::after {
+			transform: scaleX(1);
+			transform-origin: left;
+			transition-delay: 0.2s;
+		}
 }
 
 @keyframes marquee {

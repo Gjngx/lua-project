@@ -31,6 +31,8 @@ export const HomePage = {
 			this.onVideoSeeked = null;
 			this.onVideoError = null;
 			this.onVisibilityChange = null;
+			this.timeEl = null;
+			this.timeTimer = null;
 			this.tlOnce = null;
 			this.tlEnter = null;
 			this.tlHeroTop = null;
@@ -46,6 +48,7 @@ export const HomePage = {
 
 			this.video = this.el.querySelector('.home-hero-video');
 			this.worksEl = data.next.container.querySelector('.home-works-wrap');
+			this.setupHeroTime();
 			this.setupHeroVideo();
 			this.interact();
 
@@ -90,6 +93,25 @@ export const HomePage = {
 
 		animationReveal(timeline) {
 			// Thêm animation khi trang xuất hiện (Reveal Animation)
+		}
+
+		setupHeroTime() {
+			this.timeEl = this.el.querySelector('[data-time]');
+			if (!this.timeEl) return;
+
+			const formatter = new Intl.DateTimeFormat('en-GB', {
+				timeZone: 'Asia/Ho_Chi_Minh',
+				hour: '2-digit',
+				minute: '2-digit',
+				second: '2-digit',
+				hourCycle: 'h23',
+			});
+			const updateTime = () => {
+				if (this.timeEl) this.timeEl.textContent = formatter.format(new Date());
+			};
+
+			updateTime();
+			this.timeTimer = window.setInterval(updateTime, 1000);
 		}
 
 		setupHeroVideo() {
@@ -278,6 +300,10 @@ export const HomePage = {
 		}
 
 		destroy() {
+			if (this.timeTimer !== null) {
+				window.clearInterval(this.timeTimer);
+				this.timeTimer = null;
+			}
 			if (this.videoRaf !== null) {
 				window.cancelAnimationFrame(this.videoRaf);
 				this.videoRaf = null;
@@ -301,6 +327,7 @@ export const HomePage = {
 			// if (this.tlHeroEnd) this.tlHeroEnd.kill();
 
 			this.video = null;
+			this.timeEl = null;
 			this.worksEl = null;
 		}
 	},
@@ -1068,7 +1095,6 @@ export const HomePage = {
 		constructor() {
 			super();
 			this.el = null;
-			this.tlIntroScroll = null;
 			this.tlItemScroll = null;
 			this.hoverCleanups = [];
 			this.splitResults = [];
@@ -1115,23 +1141,30 @@ export const HomePage = {
 		}
 
 		animationScrub() {
-
-			this.tlIntroScroll = gsap.timeline({
-				scrollTrigger: {
-					trigger: this.el.querySelector('.home-how-intro'),
-					start: 'top bottom',
-					end: 'top top+=40%',
-					scrub: true,
-				}
-			});
-			this.tlIntroScroll
-				.to(document.querySelector('.home-works-bottom'), { y: '30vh', ease: 'none' })
-
-
 			this.tlItemScrolls = [];
 			const thumbItems = this.el.querySelectorAll('.home-how-thumb-item');
 			const contentItems = this.el.querySelectorAll('.home-how-content-item');
 			const contentList = this.el.querySelector('.home-how-content-list');
+			const activateContent = (activeIndex, direction) => {
+				contentItems.forEach((item, itemIndex) => {
+					if (itemIndex === activeIndex) {
+						item.classList.toggle('is-above', direction === 'backward');
+						item.classList.add('active');
+						return;
+					}
+
+					if (!item.classList.contains('active')) return;
+					item.classList.toggle('is-above', direction === 'forward');
+					item.classList.remove('active');
+				});
+			};
+			const clearContent = (direction) => {
+				contentItems.forEach((item) => {
+					if (!item.classList.contains('active')) return;
+					item.classList.toggle('is-above', direction === 'forward');
+					item.classList.remove('active');
+				});
+			};
 
 			thumbItems.forEach((thumb, index) => {
 				const frame = thumb.querySelector('.home-how-thumb-item-inner');
@@ -1191,24 +1224,24 @@ export const HomePage = {
 					trigger: thumb,
 					start: `top center`,
 					end: `bottom center`,
-					onEnter: () => {
-						if (index === 0) contentList.classList.add('active-ic');
-						contentItems.forEach(el => el.classList.remove('active'));
-						if (contentItems[index]) contentItems[index].classList.add('active');
-					},
-					onEnterBack: () => {
-						if (index === thumbItems.length - 1) contentList.classList.add('active-ic');
-						contentItems.forEach(el => el.classList.remove('active'));
-						if (contentItems[index]) contentItems[index].classList.add('active');
-					},
-					onLeave: () => {
-						if (index === thumbItems.length - 1) contentList.classList.remove('active-ic');
-						contentItems.forEach(el => el.classList.remove('active'));
-					},
-					onLeaveBack: () => {
-						if (index === 0) contentList.classList.remove('active-ic');
-						contentItems.forEach(el => el.classList.remove('active'));
-					}
+						onEnter: () => {
+							if (index === 0) contentList.classList.add('active-ic');
+							activateContent(index, 'forward');
+						},
+						onEnterBack: () => {
+							if (index === thumbItems.length - 1) contentList.classList.add('active-ic');
+							activateContent(index, 'backward');
+						},
+						onLeave: () => {
+							if (index !== thumbItems.length - 1) return;
+							contentList.classList.remove('active-ic');
+							clearContent('forward');
+						},
+						onLeaveBack: () => {
+							if (index !== 0) return;
+							contentList.classList.remove('active-ic');
+							clearContent('backward');
+						}
 				});
 				this.tlItemScrolls.push(contentTrigger);
 			});
@@ -1260,7 +1293,6 @@ export const HomePage = {
 
 		destroy() {
 			super.cleanTrigger();
-			if (this.tlIntroScroll) this.tlIntroScroll.kill();
 			if (this.tlItemScrolls) {
 				this.tlItemScrolls.forEach(tl => tl.kill());
 			}

@@ -31,6 +31,7 @@ import IconShape2 from '../components/icons/IconShape-2.astro';
 import IconShape3 from '../components/icons/IconShape-3.astro';
 import IconShape4 from '../components/icons/IconShape-4.astro';
 import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
+import IconArrowRight from '../components/icons/IconArrowRight.astro';
 ---
 
 <Layout title="Home" namespace="home">
@@ -58,26 +59,28 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 			<div class="container grid">
 				<div class="home-hero-top top-left">
 					<div class="home-hero-desc">
-						<p class="txt fs-14 fw-500 trans-upper">&gt; Open for any collaborations and offers</p>
+						<p class="txt fs-14">Open for any collaborations & offers</p>
 					</div>
 				</div>
 				<div class="home-hero-top top-right">
 					<div class="home-hero-top-title">
-						<h1 class="heading fs-32 fw-600 trans-upper">
+						<h1 class="heading fs-24 fw-400">
 							Creating websites and digital products for great experiences
 						</h1>
 					</div>
-					<div class="home-hero-top-sub">
-						<div class="home-hero-top-ic">
-							<IconSun />
+					<div class="home-hero-top-sub-group">
+						<div class="home-hero-top-sub">
+							<div class="home-hero-top-ic">
+								<IconSun />
+							</div>
+							<h2 class="heading fs-14 fw-400">
+								Digital designer <br />Based in VietNam
+							</h2>
 						</div>
-						<h2 class="heading fs-14 fw-500 trans-upper">
-							Digital designer <br />Based in VietNam
-						</h2>
-					</div>
-					<div class="home-hero-top-info">
-						<p class="txt fs-14 fw-500 trans-upper">Hanoi, VietNam</p>
-						<p class="txt fs-14 fw-500 trans-upper">22:06:16</p>
+						<div class="home-hero-top-info">
+							<p class="txt fs-10 fw-400">Hanoi, VietNam</p>
+							<p class="txt fs-10 fw-400" data-time>00:00:00</p>
+						</div>
 					</div>
 				</div>
 				<div class="home-hero-top top-logo">
@@ -99,7 +102,26 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 								<IconDesign2 />
 							</p>
 						</div>
-						<Button href="/about" class="home-hero-btn">MORE ABOUT US</Button>
+						<div class="home-hero-bottom-action">
+							<div class="home-hero-bottom-ic">
+								<div class="home-hero-bottom-ic-inner">
+								
+								</div>
+							</div>
+							<a href="#" class="home-hero-bottom-link hover-line">
+								<p class="txt fs-14">More about me</p>
+								<div class="home-hero-bottom-link-ic">
+										<div class="home-hero-bottom-link-ic-inner ic-top">
+											<IconArrowRight
+										/>
+										</div>
+										<div class="home-hero-bottom-link-ic-inner ic-bottom">
+											<IconArrowRight
+										/>
+										</div>
+								</div>
+							</a>
+						</div>
 					</div>
 					<div class="home-hero-empty"></div>
 				</div>
@@ -255,8 +277,9 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 				<div class="home-how-intro">
 					<div class="home-how-intro-desc">
 						<p class="txt fs-14">
-							Discover the amazing features of our <br />software that can transform your workflow<br
-							/>and boost productivity!
+							Discover the amazing features of our software that<br>
+							can transform your workflow and boost productivity!<br>
+							Here's what I can do for you:
 						</p>
 					</div>
 				</div>
@@ -266,32 +289,21 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 							<div class="home-how-content-item">
 								<div class="home-how-content-item-left">
 									<div class="home-how-content-item-title">
-										<p class="heading fs-40 fw-700 trans-upper">
-											Digital <br />Creative <br />Design
+										<p class="heading fs-40 fw-400">
+											Digital Design
 										</p>
 									</div>
-									<div class="home-how-content-item-ic">
-										<IconLeafDouble mirrored />
-									</div>
 								</div>
 								<div class="home-how-content-item-right">
-									<div class="home-how-content-item-ic">
-										<IconLeafDouble />
-									</div>
 									<div class="home-how-content-item-text">
-										<div class="home-how-content-item-label">
-											<p class="txt fs-12 fw-700 trans-upper">
-												Here’s what I can <br />do for you:
-											</p>
+										<div class="home-how-content-item-type">
+											<p class="txt fs-14">UI/UX</p>
 										</div>
 										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fw-700 trans-upper">UI/UX</p>
+											<p class="txt fs-14">Interactive</p>
 										</div>
 										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fw-700 trans-upper">Interactive</p>
-										</div>
-										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fw-700 trans-upper">Website</p>
+											<p class="txt fs-14">Website</p>
 										</div>
 									</div>
 								</div>
@@ -299,27 +311,16 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 							<div class="home-how-content-item">
 								<div class="home-how-content-item-left">
 									<div class="home-how-content-item-title">
-										<p class="heading fs-40 fw-700 trans-upper">Web <br />Development</p>
-									</div>
-									<div class="home-how-content-item-ic">
-										<IconLeafDouble mirrored />
+										<p class="heading fs-40 fw-400">Development</p>
 									</div>
 								</div>
 								<div class="home-how-content-item-right">
-									<div class="home-how-content-item-ic">
-										<IconLeafDouble />
-									</div>
 									<div class="home-how-content-item-text">
-										<div class="home-how-content-item-label">
-											<p class="txt fs-12 fw-700 trans-upper">
-												Here’s what I can <br />do for you:
-											</p>
+										<div class="home-how-content-item-type">
+											<p class="txt fs-14">Framer</p>
 										</div>
 										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fw-700 trans-upper">Framer</p>
-										</div>
-										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fw-700 trans-upper">webflow</p>
+											<p class="txt fs-14">Webflow</p>
 										</div>
 									</div>
 								</div>
@@ -327,27 +328,16 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 							<div class="home-how-content-item">
 								<div class="home-how-content-item-left">
 									<div class="home-how-content-item-title">
-										<p class="heading fs-40 fw-700 trans-upper">Brand <br />Identity</p>
-									</div>
-									<div class="home-how-content-item-ic">
-										<IconLeafDouble mirrored />
+										<p class="heading fs-40 fw-400">Branding</p>
 									</div>
 								</div>
 								<div class="home-how-content-item-right">
-									<div class="home-how-content-item-ic">
-										<IconLeafDouble />
-									</div>
 									<div class="home-how-content-item-text">
-										<div class="home-how-content-item-label">
-											<p class="txt fs-12 fw-700 trans-upper">
-												Here’s what I can <br />do for you:
-											</p>
+										<div class="home-how-content-item-type">
+											<p class="txt fs-14">Identity</p>
 										</div>
 										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fw-700 trans-upper">Identity</p>
-										</div>
-										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fw-700 trans-upper">Visual Systems</p>
+											<p class="txt fs-14">Visual Systems</p>
 										</div>
 									</div>
 								</div>
@@ -413,9 +403,6 @@ import IconLeafDouble from '../components/icons/IconLeafDouble.astro';
 							<div class="home-playground-main-ic">
 								<IconLeafDouble />
 							</div>
-						</div>
-						<div class="home-playground-main-action">
-							<Button href="/playground" class="home-playground-main-btn btn-dark">View my playground</Button>
 						</div>
 					</div>
 				</div>
