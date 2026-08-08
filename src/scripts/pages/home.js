@@ -4,7 +4,6 @@ import { cvUnit } from '../../core/helpers.js';
 import { SvgPathParticles } from '../../core/svg-path-particles.js';
 import { Renderer, Camera, Transform, Texture, Program, Mesh, Plane } from 'ogl';
 import { distortionVertex as vertex, objectFitFragment as fragment } from '../../core/shaders.js';
-import { useSplitPretext } from '../../utils/pretext.js';
 
 const HERO_VIDEO_FPS = 24;
 const HERO_VIDEO_SEEK_THRESHOLD = 1 / (HERO_VIDEO_FPS * 2);
@@ -867,16 +866,19 @@ export const HomePage = {
 			this.isNextContentVisible = showNextContent;
 			gsap.to(this.transitionCurrentContent, {
 				opacity: showNextContent ? 0 : 1,
+				pointerEvents: showNextContent ? 'none' : 'auto',
 				duration: 0.01,
 				overwrite: true,
 			});
 			gsap.to(this.el.querySelector('.home-works--decor'), {
 				opacity: showNextContent ? 0 : 1,
+				pointerEvents: showNextContent ? 'none' : 'auto',
 				duration: 0.01,
 				overwrite: true,
 			});
 			gsap.to(this.transitionNextContent, {
 				opacity: showNextContent ? 1 : 0,
+				pointerEvents: showNextContent ? 'auto' : 'none',
 				duration: 0.01,
 				overwrite: true,
 			});
@@ -1095,10 +1097,9 @@ export const HomePage = {
 			super();
 			this.el = null;
 			this.tlDecor = null;
+			this.tlTrans = null;
 			this.tlItemScroll = null;
 			this.hoverCleanups = [];
-			this.splitResults = [];
-
 		}
 
 		trigger(data) {
@@ -1115,26 +1116,7 @@ export const HomePage = {
 		}
 
 		setup() {
-			if (!this.el || this.splitResults.length) return;
-
-			const titles = this.el.querySelectorAll(
-				'.home-how-content-item-title .heading',
-			);
-
-			titles.forEach((title) => {
-				const splitResult = useSplitPretext({
-					selector: title,
-					type: 'words',
-					isMask: true,
-				});
-				if (!splitResult) return;
-
-				splitResult.elements.forEach((word, index) => {
-					word.classList.add('word');
-					word.style.setProperty('--trans-delay', `${(index + 1) * 0.03}s`);
-				});
-				this.splitResults.push(splitResult);
-			});
+			if (!this.el) return;
 		}
 
 		animationReveal() {
@@ -1143,6 +1125,21 @@ export const HomePage = {
 		animationScrub() {
 			const decor = this.el.querySelector('.home-how-intro-decor');
 			const shapeWraps = decor.querySelectorAll('.home-how-intro-decor-shape-wrap');
+			const shapeDecor1 = shapeWraps[0].querySelector('.ic-1');
+			const shapeDecor2 = shapeWraps[0].querySelector('.ic-2');
+			const shapeDecor3 = shapeWraps[1].querySelector('.ic-3');
+			const shapeDecor4 = shapeWraps[1].querySelector('.ic-4');
+			const lastItem = this.el.querySelector('.home-how-content-item:last-child');
+			const lastItemLeft = lastItem.querySelector('.home-how-content-item-left');
+			const lastItemRight = lastItem.querySelector('.home-how-content-item-right');
+			const lastItemTitle = lastItem.querySelector('.home-how-content-item-title');
+			const lastItemText = lastItem.querySelector('.home-how-content-item-text');
+			const getShapeWidth = () => shapeWraps[0].getBoundingClientRect().width;
+			const getDecorDistance = () => (
+				decor.getBoundingClientRect().width / 2 - getShapeWidth() / 2
+			);
+
+
 			this.tlDecor = gsap.timeline({
 				scrollTrigger: {
 					trigger: decor,
@@ -1150,22 +1147,102 @@ export const HomePage = {
 					endTrigger: this.el.querySelector('.home-how-thumb-inner'),
 					end: 'top center-=5%',
 					scrub: true,
+					invalidateOnRefresh: true,
 				}
 			});
 
-			const widthDecor = decor.getBoundingClientRect().width;
-			const transDecor = (widthDecor / 2) - (shapeWraps[0].getBoundingClientRect().width / 2);
-
 			this.tlDecor
 				.to(shapeWraps[0], {
-					x: -transDecor,
-					ease: 'none',
+					x: () => -getDecorDistance(),
+					ease: 'power3.inOut',
 				})
 				.to(shapeWraps[1], {
-					x: transDecor,
-					ease: 'none',
+					x: () => getDecorDistance(),
+					ease: 'power3.inOut',
 				}, '<');
 
+			this.tlTrans = gsap.timeline({
+				scrollTrigger: {
+					trigger: this.el.querySelector('.home-how-trans'),
+					start: 'top top+=50%',
+					end: 'bottom bottom',
+					scrub: true,
+					invalidateOnRefresh: true,
+				}
+			});
+			this.tlTrans
+			.to(shapeWraps[0], {
+				x: () => getShapeWidth(),
+				ease: 'power2.inOut',
+				duration: 0.7,
+			})
+			.to(lastItemLeft, {
+				x: () => lastItem.getBoundingClientRect().width / 2
+					- lastItemTitle.getBoundingClientRect().width
+					- cvUnit(100, 'rem'),
+				ease: 'power3.inOut',
+				duration: 0.7,
+			}, '<')
+			.to(lastItemRight, {
+				x: () => -(lastItem.getBoundingClientRect().width / 2
+					- lastItemText.getBoundingClientRect().width
+					- cvUnit(100, 'rem')),
+				ease: 'power3.inOut',
+				duration: 0.7,
+			}, '<')
+			.to(shapeWraps[1], {
+				x: () => getShapeWidth(),
+				ease: 'power3.inOut',
+				duration: 0.7,
+			}, '<')
+			.to(shapeDecor1, {
+				xPercent: -100,
+				yPercent: 100,
+				ease: 'power3.out',
+				duration: 0.3,
+			}, 0.4)
+			.to(shapeDecor2, {
+				xPercent: -100,
+				yPercent: -100,
+				ease: 'power3.out',
+				duration: 0.3,
+			}, '<')
+			.to(shapeDecor3, {
+				xPercent: -100,
+				yPercent: 100,
+				ease: 'power3.out',
+				duration: 0.3,
+			}, '<')
+			.to(shapeDecor4, {
+				xPercent: -100,
+				yPercent: -100,
+				ease: 'power3.out',
+				duration: 0.3,
+			}, '<')
+			.to([lastItemLeft, lastItemRight], {
+				y: () => lastItem.getBoundingClientRect().height,
+				ease: 'power3.inOut',
+				duration: 0.3,
+			}, '>')
+			.to(document.querySelectorAll('.home-playground-trans-decor'), {
+				opacity: 1,
+				ease: 'power1.inOut',
+				duration: 0.01,
+			}, '<')
+			.to([shapeWraps[0], shapeWraps[1]], {
+				opacity: 0,
+				ease: 'power1.inOut',
+				duration: 0.01,
+			}, '<')
+			.fromTo([document.querySelectorAll('.home-playground-content-left-title'), document.querySelectorAll('.home-playground-content-right-title')],
+			{
+				yPercent: 100,
+			},
+			{
+				yPercent: 0,
+				ease: 'power3.inOut',
+				duration: 0.3,
+			}, 1);
 
 			this.tlItemScrolls = [];
 			const thumbItems = this.el.querySelectorAll('.home-how-thumb-item');
@@ -1321,13 +1398,15 @@ export const HomePage = {
 
 		destroy() {
 			super.cleanTrigger();
+			if (this.tlDecor) this.tlDecor.kill();
+			if (this.tlTrans) this.tlTrans.kill();
 			if (this.tlItemScrolls) {
 				this.tlItemScrolls.forEach(tl => tl.kill());
 			}
+			this.tlDecor = null;
+			this.tlTrans = null;
 			this.hoverCleanups.forEach(cleanup => cleanup());
 			this.hoverCleanups = [];
-			this.splitResults.forEach((splitResult) => splitResult.revert());
-			this.splitResults = [];
 			this.el = null;
 		}
 	},
@@ -1357,6 +1436,59 @@ export const HomePage = {
 		animationReveal() {}
 
 		animationScrub() {
+			const itemLeft = this.el.querySelector('.home-playground-content-left');
+			const itemRight = this.el.querySelector('.home-playground-content-right');
+			const titleLeft = this.el.querySelector('.home-playground-content-left-title');
+			const titleRight = this.el.querySelector('.home-playground-content-right-title');
+			const transInner = this.el.querySelector('.home-playground-trans-inner');
+
+			const widthTransLeft = itemLeft.getBoundingClientRect().width - titleLeft.getBoundingClientRect().width;
+			const widthTransRight = itemRight.getBoundingClientRect().width - titleRight.getBoundingClientRect().width;
+
+			this.tlTrans = gsap.timeline({
+				scrollTrigger: {
+					trigger: this.el.querySelector('.home-playground-empty'),
+					start: 'top top+=50%',
+					end: 'bottom bottom',
+					scrub: true,
+					invalidateOnRefresh: true,
+				}
+			});
+			this.tlTrans
+				.to(titleLeft, {
+					x: `-${widthTransLeft}`,
+					ease: 'power3.inOut',
+					duration: 1,
+				})
+				.to(titleRight, {
+					x: `${widthTransRight}`,
+					ease: 'power3.inOut',
+					duration: 1,
+				}, '<')
+				.to(transInner.querySelector('.ic-1'), {
+					x: () => -transInner.getBoundingClientRect().width / 2,
+					y: () => -transInner.getBoundingClientRect().height / 2,
+					ease: 'power3.inOut',
+					duration: 1,
+				}, '<')
+				.to(transInner.querySelector('.ic-2'), {
+					x: () => transInner.getBoundingClientRect().width / 2,
+					y: () => -transInner.getBoundingClientRect().height / 2,
+					ease: 'power3.inOut',
+					duration: 1,
+				}, '<')
+				.to(transInner.querySelector('.ic-3'), {
+					x: () => -transInner.getBoundingClientRect().width / 2,
+					y: () => transInner.getBoundingClientRect().height / 2,
+					ease: 'power3.inOut',
+					duration: 1,
+				}, '<')
+				.to(transInner.querySelector('.ic-4'), {
+					x: () => transInner.getBoundingClientRect().width / 2,
+					y: () => transInner.getBoundingClientRect().height / 2,
+					ease: 'power3.inOut',
+					duration: 1,
+				}, '<')
 		}
 
 		interact() {}

@@ -536,6 +536,15 @@
 
 .home-how-intro-decor-inner {
 	display: flex;
+	width: 2rem;
+	height: 2rem;
+	flex: 0 0 auto;
+}
+
+.home-how-intro-decor-shape-wrap {
+	width: 1rem;
+	height: 2rem;
+	flex: 0 0 1rem;
 }
 
 .home-how-intro-decor-shape {
@@ -586,11 +595,12 @@
 	align-items: center;
 	transition: opacity 0.3s ease;
 	pointer-events: none;
+	overflow: hidden;
 }
 
 .home-how-content-item-left,
 .home-how-content-item-right {
-	width: calc((var(--container--column-gap) * 3) + (var(--container--one-column) * 4));
+	width: 50%;
 	overflow: hidden;
 }
 
@@ -618,11 +628,14 @@
 	transform: translateY(0%);
 	pointer-events: auto;
 }
-
+.home-how-content-item-title{
+	width: fit-content;
+}
 .home-how-content-item-text {
+	width: fit-content;
+	margin-left: auto;
 	display: flex;
 	flex-direction: row;
-	justify-content: flex-end;
 }
 
 .home-how-content-item-type {
@@ -642,7 +655,6 @@
 .home-how-thumb-inner {
 	display: flex;
 	flex-direction: column;
-	padding-bottom: 32rem;
 }
 
 .home-how-thumb-item {
@@ -672,6 +684,88 @@
 	display: block;
 	transform-origin: center;
 	will-change: transform;
+}
+
+.home-how-trans{
+	grid-column: 2 / -2;
+	grid-row: 4 / 4;
+	height: 150vh;
+	pointer-events: none;
+}
+
+.home-playground-wrap{
+	margin-top: -150vh;
+}
+
+.home-playground{
+	position: sticky;
+	top: 0;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.home-playground-trans-decor{
+	width: 1rem;
+	height: 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+}
+
+.home-playground-trans-inner{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: calc(var(--container--one-column) * 12 + var(--container--column-gap) * 11);
+	height: min(45rem, 46.1538461538vh);
+}
+
+.home-playground-trans-decor-wrap{
+	width: 2rem;
+	height: 2rem;
+	display: grid;
+	grid-template-columns: repeat(2, 1rem);
+	grid-template-rows: repeat(2, 1rem);
+	gap: 0;
+}
+.home-playground-main,
+.home-playground-content{
+	position: absolute;
+	inset: 0;
+	height: 100vh;
+}
+
+.home-playground-content-left{
+	width: 100%;
+	grid-column: 2 / 10;
+	grid-row: 1 / 1;
+	align-self: center;
+	overflow: hidden;
+}
+
+.home-playground-content-right {
+	width: 100%;
+	grid-column: 10 / -2;
+	grid-row: 1 / 1;
+	align-self: center;
+	overflow: hidden;
+}
+
+.home-playground-content-left-title{
+	width: fit-content;
+	margin-left: auto;
+	padding-right: 11rem;
+}
+.home-playground-content-right-title{
+	width: fit-content;
+	padding-left: 11rem;
+}
+
+.home-playground-empty{
+	height: 100vh;
 }
 
 @media (hover: hover) and (min-width: 991px) {
