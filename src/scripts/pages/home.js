@@ -2,7 +2,6 @@ import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit } from '../../core/helpers.js';
 import { SvgPathParticles } from '../../core/svg-path-particles.js';
-import { SphericalImageCanvas } from '../../core/spherical-image-canvas.js';
 import { Renderer, Camera, Transform, Texture, Program, Mesh, Plane } from 'ogl';
 import { distortionVertex as vertex, objectFitFragment as fragment } from '../../core/shaders.js';
 import { useSplitPretext } from '../../utils/pretext.js';
@@ -1160,11 +1159,11 @@ export const HomePage = {
 			this.tlDecor
 				.to(shapeWraps[0], {
 					x: -transDecor,
-					ease: 'power3.inOut',
+					ease: 'none',
 				})
 				.to(shapeWraps[1], {
 					x: transDecor,
-					ease: 'power3.inOut',
+					ease: 'none',
 				}, '<');
 
 
@@ -1175,6 +1174,7 @@ export const HomePage = {
 			const activateContent = (activeIndex, direction) => {
 				contentItems.forEach((item, itemIndex) => {
 					if (itemIndex === activeIndex) {
+						item.classList.remove('is-static-exit');
 						item.classList.toggle('is-above', direction === 'backward');
 						item.classList.add('active');
 						return;
@@ -1185,10 +1185,11 @@ export const HomePage = {
 					item.classList.remove('active');
 				});
 			};
-			const clearContent = (direction) => {
+			const clearContent = (direction, staticExit = false) => {
 				contentItems.forEach((item) => {
 					if (!item.classList.contains('active')) return;
-					item.classList.toggle('is-above', direction === 'forward');
+					item.classList.toggle('is-static-exit', staticExit);
+					item.classList.toggle('is-above', direction === 'forward' && !staticExit);
 					item.classList.remove('active');
 				});
 			};
@@ -1262,7 +1263,7 @@ export const HomePage = {
 						onLeave: () => {
 							if (index !== thumbItems.length - 1) return;
 							contentList.classList.remove('active-ic');
-							clearContent('forward');
+							clearContent('forward', true);
 						},
 						onLeaveBack: () => {
 							if (index !== 0) return;
@@ -1334,16 +1335,12 @@ export const HomePage = {
 		constructor() {
 			super();
 			this.el = null;
-			this.canvasScenes = [];
-			this.canvasInitTasks = new Set();
-			this.canvasSetupQueued = false;
-			this.tlTransition = null;
+			this.tlTrans = null;
 		}
 
 		trigger(data) {
 			this.el = data.next.container.querySelector('.home-playground-wrap');
 			if (!this.el) return;
-			this.queueCanvasSetup();
 			super.setTrigger(this.el, this.onTrigger.bind(this));
 		}
 
@@ -1354,121 +1351,21 @@ export const HomePage = {
 			this.interact();
 		}
 
-		scheduleCanvasTask(callback, timeout = 700) {
-			let task;
-			const run = () => {
-				this.canvasInitTasks.delete(task);
-				callback();
-			};
-
-			if ('requestIdleCallback' in window) {
-				task = {
-					type: 'idle',
-					id: window.requestIdleCallback(run, { timeout }),
-				};
-			} else {
-				task = {
-					type: 'timeout',
-					id: window.setTimeout(run, 80),
-				};
-			}
-
-			this.canvasInitTasks.add(task);
-		}
-
-		cancelCanvasTasks() {
-			this.canvasInitTasks.forEach((task) => {
-				if (task.type === 'idle') {
-					window.cancelIdleCallback(task.id);
-				} else {
-					window.clearTimeout(task.id);
-				}
-			});
-			this.canvasInitTasks.clear();
-		}
-
-		queueCanvasSetup() {
-			if (this.canvasSetupQueued || this.canvasScenes.length) return;
-
-			this.canvasSetupQueued = true;
-			this.scheduleCanvasTask(() => {
-				this.canvasSetupQueued = false;
-				this.setupCanvas();
-			});
-		}
-
-		handleCanvasError(error) {
-			console.warn('[Home Playground] Không thể khởi tạo WebGL:', error);
-			this.cancelCanvasTasks();
-			this.canvasScenes.forEach((scene) => scene.destroy());
-			this.canvasScenes = [];
-			this.el?.classList.add('is-static');
-		}
-
-		setupCanvas() {
-			if (!this.el || this.canvasScenes.length) return;
-
-			const playground = this.el.querySelector('.home-playground');
-			const canvas = this.el.querySelector('.home-playground-canvas');
-			if (!playground || !canvas) return;
-
-			try {
-				const imageUrls = JSON.parse(canvas.dataset.images || '[]');
-				if (!imageUrls.length) return;
-
-				const scene = new SphericalImageCanvas({
-					canvas,
-					root: playground,
-					imageUrls,
-					layer: 'all',
-				});
-				this.canvasScenes.push(scene);
-				scene.init();
-			} catch (error) {
-				this.handleCanvasError(error);
-			}
-		}
-
 		setup(){
-
 		}
 
-		animationReveal() {
-		}
+		animationReveal() {}
 
 		animationScrub() {
-			const transition = this.el?.querySelector('.home-playground-trans');
-			const transitionInner = transition?.querySelector('.home-playground-trans-inner');
-			if (!transition || !transitionInner) return;
-
-			this.tlTransition = gsap.timeline({
-				scrollTrigger: {
-					trigger: transition,
-					start: 'center bottom',
-					end: 'bottom top',
-					scrub: true
-				}
-			});
-			this.tlTransition.to(transitionInner, {
-				scaleX: 1.2,
-				scaleY: 0,
-				transformOrigin: 'top center',
-				ease: 'none'
-			});
 		}
 
-		interact() {
-		}
+		interact() {}
 
 		destroy() {
 			super.cleanTrigger();
-			this.cancelCanvasTasks();
-			this.canvasSetupQueued = false;
-			this.canvasScenes.forEach((scene) => scene.destroy());
-			this.canvasScenes = [];
-			if (this.tlTransition) this.tlTransition.kill();
-			this.tlTransition = null;
+			if (this.tlTrans) this.tlTrans.kill();
+			this.tlTrans = null;
 			this.el = null;
 		}
-	}
-};
+		}
+	};

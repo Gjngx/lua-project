@@ -13,7 +13,6 @@ import work4 from '../assets/images/work-4.png';
 import item1 from '../assets/images/item-1.png';
 import item2 from '../assets/images/item-2.png';
 import item3 from '../assets/images/item-3.png';
-import playground8 from '../assets/images/header-1.png';
 import IconLogo from '../components/icons/IconLogo.astro';
 import IconSun from '../components/icons/IconSun.astro';
 import IconRiceFields from '../components/icons/IconRiceFields.astro';
@@ -411,51 +410,8 @@ import IconHowIntroShape4 from '../components/icons/IconHowIntroShape4.astro';
 	<div class="home-playground-wrap" id="playground">
 		<section class="home-playground">
 			<div class="container grid">
-				<div class="home-playground-main">
-					<div class="home-playground-main-inner">
-						<div class="home-playground-main-title">
-							<h2 class="heading fs-64 fw-700 trans-upper">Playground</h2>
-						</div>
-						<div class="home-playground-main-content">
-							<div class="home-playground-main-ic">
-								<IconLeafDouble mirrored />
-							</div>
-							<p class="txt fs-14">
-								I enjoy turning ideas into things people <br />
-								can see, use and remember.
-							</p>
-							<div class="home-playground-main-ic">
-								<IconLeafDouble />
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="home-playground-bg">
-					<canvas
-						class="home-playground-canvas"
-						data-images={JSON.stringify([
-							work1.src,
-							item1.src,
-							work2.src,
-							item2.src,
-							work3.src,
-							item3.src,
-							work4.src,
-							playground8.src,
-						])}
-						aria-hidden="true"
-					></canvas>
-					<div class="home-playground-fallback" aria-hidden="true">
-						<Image class="img-df img-fill" src={work1} alt="" loading="lazy" />
-						<Image class="img-df img-fill" src={item1} alt="" loading="lazy" />
-						<Image class="img-df img-fill" src={work3} alt="" loading="lazy" />
-						<Image class="img-df img-fill" src={item3} alt="" loading="lazy" />
-					</div>
-				</div>
+				<div class="home-playground-main"></div>
 			</div>
 		</section>
-		<div class="home-playground-trans" aria-hidden="true">
-			<div class="home-playground-trans-inner"></div>
-		</div>
 	</div>
 </Layout>
