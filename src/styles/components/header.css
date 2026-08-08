@@ -183,7 +183,7 @@
 
 .header-nav {
 	position: fixed;
-	top: 6.4rem;
+	top: 8rem;
 	right: var(--container--padding);
 	z-index: 100;
 	width: calc(var(--container--one-column) * 5 + var(--container--column-gap) * 4);
