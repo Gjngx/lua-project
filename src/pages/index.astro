@@ -442,7 +442,42 @@ import IconHowIntroShape4 from '../components/icons/IconHowIntroShape4.astro';
 				</div>
 			</div>
 			<div class="home-playground-main">
-				
+				<canvas
+					class="home-playground-sphere-canvas"
+					aria-label="Interactive patterned 3D sphere. Drag or use the arrow keys to rotate it."
+					role="img"
+					tabindex="0"
+				></canvas>
+				<div class="home-playground-sphere-hitarea" aria-hidden="true"></div>
+				<div class="home-playground-card-layer" aria-hidden="true">
+					<div class="home-playground-card" data-latitude="48" data-longitude="-35" data-radius="1.08" data-width="0.15" data-size="xs">
+						<Image src={work4} alt="" />
+					</div>
+					<div class="home-playground-card" data-latitude="56" data-longitude="18" data-radius="1.12" data-width="0.24" data-size="md">
+						<Image src={item2} alt="" />
+					</div>
+					<div class="home-playground-card" data-latitude="30" data-longitude="-12" data-radius="1.06" data-width="0.24" data-size="md">
+						<Image src={item1} alt="" />
+					</div>
+					<div class="home-playground-card" data-latitude="12" data-longitude="-58" data-radius="1.09" data-width="0.2" data-size="sm">
+						<Image src={work2} alt="" />
+					</div>
+					<div class="home-playground-card" data-latitude="12" data-longitude="24" data-radius="1.08" data-width="0.16" data-size="xs">
+						<Image src={work4} alt="" />
+					</div>
+					<div class="home-playground-card" data-latitude="-2" data-longitude="62" data-radius="1.12" data-width="0.15" data-size="xs">
+						<Image src={item3} alt="" />
+					</div>
+					<div class="home-playground-card" data-latitude="-20" data-longitude="-48" data-radius="1.1" data-width="0.27" data-size="md">
+						<Image src={work3} alt="" />
+					</div>
+					<div class="home-playground-card" data-latitude="-24" data-longitude="22" data-radius="1.13" data-width="0.41" data-size="lg">
+						<Image src={work2} alt="" />
+					</div>
+					<div class="home-playground-card" data-latitude="-52" data-longitude="-12" data-radius="1.1" data-width="0.17" data-size="sm">
+						<Image src={work1} alt="" />
+					</div>
+				</div>
 			</div>
 		</section>
 		<div class="home-playground-empty"></div>

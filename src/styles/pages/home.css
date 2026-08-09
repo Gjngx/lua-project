@@ -700,6 +700,8 @@
 .home-playground{
 	position: sticky;
 	top: 0;
+	z-index: 20;
+	isolation: isolate;
 	height: 100vh;
 	display: flex;
 	justify-content: center;
@@ -716,6 +718,9 @@
 }
 
 .home-playground-trans-inner{
+	position: relative;
+	z-index: 4;
+	pointer-events: none;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -736,6 +741,107 @@
 	position: absolute;
 	inset: 0;
 	height: 100vh;
+}
+
+.home-playground-content{
+	z-index: 3;
+	pointer-events: none;
+}
+
+.home-playground-main{
+	z-index: 2;
+	overflow: hidden;
+	opacity: 0;
+	transform: scale(0.4);
+	pointer-events: none;
+}
+
+.home-playground-sphere-hitarea{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	z-index: 3;
+	width: 59vh;
+	height: 59vh;
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+	cursor: grab;
+	touch-action: none;
+	user-select: none;
+}
+
+.home-playground-sphere-hitarea.is-dragging{
+	cursor: grabbing;
+}
+
+.home-playground-sphere-canvas{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	z-index: 1;
+	display: block;
+	width: 65vh;
+	height: 65vh;
+	transform: translate(-50%, -50%);
+	outline: none;
+	cursor: grab;
+	touch-action: none;
+	user-select: none;
+}
+
+.home-playground-card-layer{
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.home-playground-card{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: var(--playground-card-width, 10vh);
+	aspect-ratio: 3 / 2;
+	overflow: hidden;
+	border-radius: clamp(.35rem, .7vw, .75rem);
+	background: var(--cl-bg);
+	box-shadow: 0 1rem 2.5rem rgba(40, 44, 7, .12);
+	opacity: 0;
+	transform-origin: center;
+	will-change: transform, opacity;
+}
+
+.home-playground-card[data-size="xs"]{
+	--playground-card-width: clamp(4.5rem, 10vh, 7rem);
+}
+
+.home-playground-card[data-size="sm"]{
+	--playground-card-width: clamp(5.5rem, 13vh, 9rem);
+}
+
+.home-playground-card[data-size="md"]{
+	--playground-card-width: clamp(7rem, 17vh, 12rem);
+}
+
+.home-playground-card[data-size="lg"]{
+	--playground-card-width: clamp(11rem, 30vh, 21rem);
+}
+
+.home-playground-card img{
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.home-playground-sphere-canvas.is-dragging{
+	cursor: grabbing;
+}
+
+.home-playground-sphere-canvas:focus-visible{
+	outline: var(--1px) solid var(--cl-content-strong);
+	outline-offset: calc(var(--1px) * -4);
 }
 
 .home-playground-content-left{

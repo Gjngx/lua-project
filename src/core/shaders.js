@@ -74,3 +74,41 @@ export const objectFitFragment = `
         gl_FragColor = vec4(texColor.rgb, texColor.a * alpha);
     }
 `;
+
+export const playgroundSphereVertex = `
+    precision highp float;
+
+    attribute vec3 position;
+    attribute vec3 normal;
+    attribute vec2 uv;
+
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+    uniform mat3 normalMatrix;
+
+    varying vec2 vUv;
+    varying vec3 vNormal;
+
+    void main() {
+        vUv = uv;
+        vNormal = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+`;
+
+export const playgroundSphereFragment = `
+    precision highp float;
+
+    uniform sampler2D tPattern;
+
+    varying vec2 vUv;
+    varying vec3 vNormal;
+
+    void main() {
+        vec4 pattern = texture2D(tPattern, vUv);
+        if (pattern.a < 0.5) discard;
+
+        vec3 neon = vec3(0.871, 0.984, 0.216);
+        gl_FragColor = vec4(neon, 1.0);
+    }
+`;

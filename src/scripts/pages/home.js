@@ -2,8 +2,13 @@ import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit } from '../../core/helpers.js';
 import { SvgPathParticles } from '../../core/svg-path-particles.js';
-import { Renderer, Camera, Transform, Texture, Program, Mesh, Plane } from 'ogl';
-import { distortionVertex as vertex, objectFitFragment as fragment } from '../../core/shaders.js';
+import { Renderer, Camera, Transform, Texture, Program, Mesh, Plane, Sphere, Vec3 } from 'ogl';
+import {
+	distortionVertex as vertex,
+	objectFitFragment as fragment,
+	playgroundSphereVertex,
+	playgroundSphereFragment,
+} from '../../core/shaders.js';
 
 const HERO_VIDEO_FPS = 24;
 const HERO_VIDEO_SEEK_THRESHOLD = 1 / (HERO_VIDEO_FPS * 2);
@@ -1415,6 +1420,22 @@ export const HomePage = {
 			super();
 			this.el = null;
 			this.tlTrans = null;
+			this.renderer = null;
+			this.sphereCamera = null;
+			this.sphereScene = null;
+			this.sphereTiltPivot = null;
+			this.sphereGeometry = null;
+			this.sphereProgram = null;
+			this.sphereTexture = null;
+			this.sphereMesh = null;
+			this.sphereCards = [];
+			this.sphereCardClones = [];
+			this.sphereCanvas = null;
+			this.sphereObserver = null;
+			this.sphereRaf = null;
+			this.sphereVisible = false;
+			this.sphereCleanups = [];
+			this.sphereState = null;
 		}
 
 		trigger(data) {
@@ -1431,6 +1452,335 @@ export const HomePage = {
 		}
 
 		setup(){
+			this.setupSphere();
+		}
+
+		setupSphere() {
+			if (this.renderer || !this.el) return;
+
+			const canvas = this.el.querySelector('.home-playground-sphere-canvas');
+			const main = this.el.querySelector('.home-playground-main');
+			const hitArea = this.el.querySelector('.home-playground-sphere-hitarea');
+			if (!canvas || !main || !hitArea) return;
+
+			this.sphereCanvas = canvas;
+			this.renderer = new Renderer({
+				canvas,
+				alpha: true,
+				antialias: true,
+				dpr: Math.min(window.devicePixelRatio || 1, 2),
+			});
+
+			const gl = this.renderer.gl;
+			gl.clearColor(0, 0, 0, 0);
+
+			this.sphereCamera = new Camera(gl, { fov: 45 });
+			this.sphereScene = new Transform();
+			this.sphereTiltPivot = new Transform();
+			this.sphereTiltPivot.rotation.z = -23.5 * (Math.PI / 180);
+			this.sphereTiltPivot.setParent(this.sphereScene);
+			this.sphereGeometry = new Sphere(gl, {
+				radius: 1,
+				widthSegments: 96,
+				heightSegments: 64,
+			});
+
+			const patternCanvas = document.createElement('canvas');
+			const patternSize = 2048;
+			const leavesPerRing = 60;
+			const patternRows = 24;
+			const leafLeftTipX = 0.000350508;
+			const leafRightTipX = 9.17299;
+			const leafTopTipY = 0.145151;
+			const leafBottomTipY = 6.3322;
+			const mirroredLeafOffsetX = leafRightTipX - leafLeftTipX;
+			const mirroredLeafOffsetY = leafTopTipY - (7 - leafBottomTipY);
+			const leafPairStepX = (leafRightTipX - leafLeftTipX) * 2;
+			const pairsPerRing = leavesPerRing / 2;
+			const ringStepY = 6.55;
+			const patternScaleX = patternSize / (pairsPerRing * leafPairStepX);
+			const patternScaleY = patternSize / (patternRows * ringStepY);
+			patternCanvas.width = patternSize;
+			patternCanvas.height = patternSize;
+			const patternContext = patternCanvas.getContext('2d');
+			const leafPath = new Path2D(
+				'M9.17299 0.145151C4.93154 -0.679303 0.824805 2.09075 0.000350508 6.3322C4.2418 7.15666 8.34854 4.3866 9.17299 0.145151Z'
+			);
+			patternContext.clearRect(0, 0, patternSize, patternSize);
+			patternContext.fillStyle = '#DEFB37';
+			patternContext.strokeStyle = '#DEFB37';
+			patternContext.lineWidth = 0.9;
+			patternContext.lineJoin = 'round';
+			patternContext.lineCap = 'round';
+
+			for (let row = -1; row <= patternRows; row += 1) {
+				for (let pair = -1; pair <= pairsPerRing; pair += 1) {
+					const pairX = pair * leafPairStepX;
+
+					patternContext.save();
+					patternContext.translate(
+						pairX * patternScaleX,
+						row * ringStepY * patternScaleY,
+					);
+					patternContext.scale(patternScaleX, patternScaleY);
+					patternContext.fill(leafPath);
+					patternContext.stroke(leafPath);
+					patternContext.restore();
+
+					patternContext.save();
+					patternContext.translate(
+						(pairX + mirroredLeafOffsetX) * patternScaleX,
+						(row * ringStepY + mirroredLeafOffsetY) * patternScaleY,
+					);
+					patternContext.scale(patternScaleX, patternScaleY);
+					patternContext.translate(0, 7);
+					patternContext.scale(1, -1);
+					patternContext.fill(leafPath);
+					patternContext.stroke(leafPath);
+					patternContext.restore();
+
+					// Hai path chỉ chạm nhau tại một điểm. Bù một nút rất nhỏ để
+					// mipmap/texture filtering không làm đứt chuỗi trên WebGL.
+					patternContext.save();
+					patternContext.translate(
+						pairX * patternScaleX,
+						row * ringStepY * patternScaleY,
+					);
+					patternContext.scale(patternScaleX, patternScaleY);
+					patternContext.beginPath();
+					patternContext.arc(leafRightTipX, leafTopTipY, 0.13, 0, Math.PI * 2);
+					patternContext.arc(
+						leafPairStepX + leafLeftTipX,
+						leafBottomTipY,
+						0.13,
+						0,
+						Math.PI * 2,
+					);
+					patternContext.fill();
+					patternContext.restore();
+				}
+			}
+
+			this.sphereTexture = new Texture(gl, {
+				generateMipmaps: false,
+				minFilter: gl.LINEAR,
+				magFilter: gl.LINEAR,
+				wrapS: gl.REPEAT,
+				wrapT: gl.CLAMP_TO_EDGE,
+			});
+			this.sphereTexture.image = patternCanvas;
+			this.sphereProgram = new Program(gl, {
+				vertex: playgroundSphereVertex,
+				fragment: playgroundSphereFragment,
+				uniforms: {
+					tPattern: { value: this.sphereTexture },
+				},
+				cullFace: gl.BACK,
+				transparent: false,
+			});
+			this.sphereMesh = new Mesh(gl, {
+				geometry: this.sphereGeometry,
+				program: this.sphereProgram,
+			});
+			this.sphereMesh.setParent(this.sphereTiltPivot);
+
+			const toRadians = (degrees) => degrees * (Math.PI / 180);
+			const cardLayer = main.querySelector('.home-playground-card-layer');
+			const baseCards = Array.from(main.querySelectorAll('.home-playground-card'));
+			this.sphereCardClones = baseCards.flatMap((card, index) => {
+				const offsets = [180];
+				if (index % 2 === 0) offsets.push(index % 4 === 0 ? 90 : -90);
+
+				return offsets.map((longitudeOffset) => {
+					const clone = card.cloneNode(true);
+					clone.classList.add('is-orbit-clone');
+					clone.dataset.longitude = String(
+						Number(card.dataset.longitude || 0) + longitudeOffset,
+					);
+					cardLayer?.appendChild(clone);
+					return clone;
+				});
+			});
+
+			this.sphereCards = [...baseCards, ...this.sphereCardClones].map((card) => {
+				const latitude = toRadians(Number(card.dataset.latitude || 0));
+				const longitude = toRadians(Number(card.dataset.longitude || 0));
+				const anchorRadius = Number(card.dataset.radius || 1.06);
+				const latitudeRadius = Math.cos(latitude) * anchorRadius;
+
+				return {
+					el: card,
+					widthRatio: Number(card.dataset.width || 0.16),
+					anchorRadius,
+					anchor: new Vec3(
+						Math.sin(longitude) * latitudeRadius,
+						Math.sin(latitude) * anchorRadius,
+						Math.cos(longitude) * latitudeRadius,
+					),
+					world: new Vec3(),
+					projected: new Vec3(),
+				};
+			});
+
+			this.sphereState = {
+				isDragging: false,
+				pointerId: null,
+				lastX: 0,
+				targetX: -0.08,
+				targetY: -0.35,
+				velocityY: 0,
+			};
+			this.sphereMesh.rotation.x = this.sphereState.targetX;
+			this.sphereMesh.rotation.y = this.sphereState.targetY;
+
+			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+			const onPointerDown = (event) => {
+				if (event.pointerType === 'mouse' && event.button !== 0) return;
+				this.sphereState.isDragging = true;
+				this.sphereState.pointerId = event.pointerId;
+				this.sphereState.lastX = event.clientX;
+				this.sphereState.velocityY = 0;
+				hitArea.classList.add('is-dragging');
+				canvas.classList.add('is-dragging');
+				hitArea.setPointerCapture?.(event.pointerId);
+			};
+
+			const onPointerMove = (event) => {
+				if (!this.sphereState.isDragging || this.sphereState.pointerId !== event.pointerId) return;
+				const deltaX = event.clientX - this.sphereState.lastX;
+				this.sphereState.lastX = event.clientX;
+				this.sphereState.targetY += deltaX * 0.008;
+				this.sphereState.velocityY = deltaX * 0.0018;
+			};
+
+			const endPointerDrag = (event) => {
+				if (!this.sphereState.isDragging) return;
+				if (event.pointerId != null && this.sphereState.pointerId !== event.pointerId) return;
+				this.sphereState.isDragging = false;
+				this.sphereState.pointerId = null;
+				hitArea.classList.remove('is-dragging');
+				canvas.classList.remove('is-dragging');
+			};
+
+			const onKeyDown = (event) => {
+				const keyRotation = 0.16;
+				if (event.key === 'ArrowLeft') this.sphereState.targetY -= keyRotation;
+				else if (event.key === 'ArrowRight') this.sphereState.targetY += keyRotation;
+				else return;
+				event.preventDefault();
+			};
+
+			const onResize = () => {
+				if (!this.renderer || !this.sphereCamera) return;
+				// Renderer khởi tạo canvas ở 300x150px bằng inline style, nên phải
+				// đo viewport của scene thay vì đo chính canvas.
+				const canvasSize = Math.max(1, Math.min(window.innerHeight * 0.65, main.clientWidth));
+				const width = canvasSize;
+				const height = canvasSize;
+				const aspect = width / height;
+				this.renderer.setSize(width, height);
+				const sphereHitSize = canvasSize * 0.91;
+				hitArea.style.width = `${sphereHitSize}px`;
+				hitArea.style.height = `${sphereHitSize}px`;
+				this.sphereCamera.position.z = aspect < 0.8 ? 3.4 : 2.85;
+				this.sphereCamera.perspective({ aspect });
+			};
+
+			const stopRender = () => {
+				if (this.sphereRaf === null) return;
+				window.cancelAnimationFrame(this.sphereRaf);
+				this.sphereRaf = null;
+			};
+
+			const updateCards = () => {
+				if (!this.sphereCards.length || !this.sphereMesh || !this.sphereCamera) return;
+				// Dùng kích thước layout chưa transform. getBoundingClientRect() đã
+				// chứa scale của playgroundMain và làm tọa độ card bị scale hai lần.
+				const canvasWidth = canvas.clientWidth;
+				const canvasHeight = canvas.clientHeight;
+				const canvasLeft = (main.clientWidth - canvasWidth) * 0.5;
+				const canvasTop = (main.clientHeight - canvasHeight) * 0.5;
+
+				this.sphereCards.forEach((card) => {
+					card.world.copy(card.anchor).applyMatrix4(this.sphereMesh.worldMatrix);
+					card.projected
+						.copy(card.world)
+						.applyMatrix4(this.sphereCamera.viewMatrix)
+						.applyMatrix4(this.sphereCamera.projectionMatrix);
+
+					const x = canvasLeft + (card.projected.x * 0.5 + 0.5) * canvasWidth;
+					const y = canvasTop + (0.5 - card.projected.y * 0.5) * canvasHeight;
+					const depthProgress = Math.max(0, Math.min(1, card.world.z / card.anchorRadius));
+					const scaleProgress = depthProgress * depthProgress * (3 - 2 * depthProgress);
+					const fadeProgress = Math.max(0, Math.min(1, depthProgress / 0.22));
+					const facing = fadeProgress * fadeProgress * (3 - 2 * fadeProgress);
+					const edgeScale = 0.55 + scaleProgress * 0.45;
+
+					card.el.style.opacity = String(facing);
+					card.el.style.visibility = facing <= 0.01 ? 'hidden' : 'visible';
+					card.el.style.zIndex = String(20 + Math.round(card.world.z * 10));
+					card.el.style.width = `${canvasWidth * card.widthRatio}px`;
+					card.el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${edgeScale})`;
+				});
+			};
+
+			const render = () => {
+				this.sphereRaf = null;
+				if (!this.renderer || !this.sphereVisible || document.hidden) return;
+
+				const state = this.sphereState;
+				if (!state.isDragging) {
+					if (!prefersReducedMotion) state.targetY += 0.0012;
+					state.targetY += state.velocityY;
+					state.velocityY *= 0.92;
+				}
+
+				this.sphereMesh.rotation.x = state.targetX;
+				this.sphereMesh.rotation.y += (state.targetY - this.sphereMesh.rotation.y) * 0.14;
+				this.renderer.render({ scene: this.sphereScene, camera: this.sphereCamera });
+				updateCards();
+				this.sphereRaf = window.requestAnimationFrame(render);
+			};
+
+			const startRender = () => {
+				if (this.sphereRaf !== null || !this.sphereVisible || document.hidden) return;
+				this.sphereRaf = window.requestAnimationFrame(render);
+			};
+
+			const onVisibilityChange = () => {
+				if (document.hidden) stopRender();
+				else startRender();
+			};
+
+			hitArea.addEventListener('pointerdown', onPointerDown);
+			hitArea.addEventListener('pointermove', onPointerMove);
+			hitArea.addEventListener('pointerup', endPointerDrag);
+			hitArea.addEventListener('pointercancel', endPointerDrag);
+			hitArea.addEventListener('lostpointercapture', endPointerDrag);
+			canvas.addEventListener('keydown', onKeyDown);
+			window.addEventListener('resize', onResize);
+			document.addEventListener('visibilitychange', onVisibilityChange);
+			onResize();
+
+			this.sphereObserver = new IntersectionObserver((entries) => {
+				this.sphereVisible = entries[0].isIntersecting;
+				if (this.sphereVisible) startRender();
+				else stopRender();
+			}, { rootMargin: '100px 0px' });
+			this.sphereObserver.observe(main);
+
+			this.sphereCleanups.push(
+				() => hitArea.removeEventListener('pointerdown', onPointerDown),
+				() => hitArea.removeEventListener('pointermove', onPointerMove),
+				() => hitArea.removeEventListener('pointerup', endPointerDrag),
+				() => hitArea.removeEventListener('pointercancel', endPointerDrag),
+				() => hitArea.removeEventListener('lostpointercapture', endPointerDrag),
+				() => canvas.removeEventListener('keydown', onKeyDown),
+				() => window.removeEventListener('resize', onResize),
+				() => document.removeEventListener('visibilitychange', onVisibilityChange),
+				stopRender,
+			);
 		}
 
 		animationReveal() {}
@@ -1441,6 +1791,9 @@ export const HomePage = {
 			const titleLeft = this.el.querySelector('.home-playground-content-left-title');
 			const titleRight = this.el.querySelector('.home-playground-content-right-title');
 			const transInner = this.el.querySelector('.home-playground-trans-inner');
+			const playgroundMain = this.el.querySelector('.home-playground-main');
+			const playgroundContent = this.el.querySelector('.home-playground-content');
+			const transitionDecor = transInner.querySelectorAll('.home-playground-trans-decor');
 
 			const widthTransLeft = itemLeft.getBoundingClientRect().width - titleLeft.getBoundingClientRect().width;
 			const widthTransRight = itemRight.getBoundingClientRect().width - titleRight.getBoundingClientRect().width;
@@ -1489,6 +1842,13 @@ export const HomePage = {
 					ease: 'power3.inOut',
 					duration: 1,
 				}, '<')
+				.to(playgroundMain, {
+					opacity: 1,
+					scale: 1,
+					pointerEvents: 'auto',
+					ease: 'power2.out',
+					duration: 0.36,
+				}, 0.46)
 		}
 
 		interact() {}
@@ -1496,7 +1856,31 @@ export const HomePage = {
 		destroy() {
 			super.cleanTrigger();
 			if (this.tlTrans) this.tlTrans.kill();
+			if (this.sphereObserver) this.sphereObserver.disconnect();
+			this.sphereCleanups.forEach(cleanup => cleanup());
+			this.sphereGeometry?.remove();
+			this.sphereProgram?.remove();
+			if (this.sphereTexture?.texture && this.renderer?.gl) {
+				this.renderer.gl.deleteTexture(this.sphereTexture.texture);
+			}
 			this.tlTrans = null;
+			this.renderer = null;
+			this.sphereCamera = null;
+			this.sphereScene = null;
+			this.sphereTiltPivot = null;
+			this.sphereGeometry = null;
+			this.sphereProgram = null;
+			this.sphereTexture = null;
+			this.sphereMesh = null;
+			this.sphereCards = [];
+			this.sphereCardClones.forEach((card) => card.remove());
+			this.sphereCardClones = [];
+			this.sphereCanvas = null;
+			this.sphereObserver = null;
+			this.sphereRaf = null;
+			this.sphereVisible = false;
+			this.sphereCleanups = [];
+			this.sphereState = null;
 			this.el = null;
 		}
 		}
