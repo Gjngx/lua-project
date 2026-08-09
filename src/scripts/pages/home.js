@@ -425,7 +425,7 @@ export const HomePage = {
 			const worksTitleTop =
 				worksTitle.getBoundingClientRect().top -
 				worksSection.getBoundingClientRect().top - 
-				worksTitle.getBoundingClientRect().height;
+				worksTitle.getBoundingClientRect().height - cvUnit(16, 'rem');
 
 			const worksDescHeight = worksDesc.getBoundingClientRect().height;
 
