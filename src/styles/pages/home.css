@@ -870,6 +870,16 @@
 	padding-left: 11rem;
 }
 
+.home-playground-action {
+	height: 4rem;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 15;
+	opacity: 0;
+}
+
 .home-playground-empty{
 	height: 100vh;
 }

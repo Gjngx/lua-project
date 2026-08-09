@@ -1849,6 +1849,12 @@ export const HomePage = {
 					ease: 'power2.out',
 					duration: 0.36,
 				}, 0.46)
+				.to(this.el.querySelector('.home-playground-action'), {
+					opacity: 1,
+					pointerEvents: 'auto',
+					ease: 'power2.out',
+					duration: 0.3,
+				}, 0.52)
 		}
 
 		interact() {}

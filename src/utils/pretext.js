@@ -314,7 +314,10 @@ export function useSplitPretext({ selector, type = 'lines', isMask = false }) {
 	const rootFontSizePx = parseFloat(cs.fontSize);
 	const lineHeight = parseFloat(cs.lineHeight) || rootFontSizePx * 1.5;
 	const rect = el.getBoundingClientRect();
-	const containerWidth = rect.width || 600;
+	// Text layout must use the pre-transform width. getBoundingClientRect()
+	// includes an ancestor's scale and would create false line breaks while
+	// reveal animations are still scaled down.
+	const containerWidth = el.offsetWidth || el.scrollWidth || rect.width || 600;
 	const textIndentPx = parseFloat(cs.textIndent) || 0;
 
 	// Dynamically read 1rem in px from the html element — auto-adapts to any

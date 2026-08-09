@@ -110,6 +110,7 @@ a {
 .btn {
 	display: block;
 	width: fit-content;
+	height: 100%;
 	position: relative;
 }
 
@@ -153,7 +154,7 @@ a {
 	margin-left: 1.2rem;
 }
 .btn-ic.ic-right{
-	margin-right: -1.2rem;
+	margin-right: -0.8rem;
 }
 .btn-ic.ic-right .btn-ic-inner {
 	opacity: 0;

@@ -44,9 +44,10 @@ class ButtonText {
 			marginRight: label.style.marginRight,
 		};
 		const labelRect = label.getBoundingClientRect();
+		const layoutWidth = label.scrollWidth || label.offsetWidth || labelRect.width;
 		const fontSize = parseFloat(getComputedStyle(label).fontSize) || 14;
 		const measurementBuffer = Math.ceil(fontSize);
-		label.style.width = `${Math.ceil(labelRect.width + measurementBuffer)}px`;
+		label.style.width = `${Math.ceil(layoutWidth + measurementBuffer)}px`;
 		label.style.marginRight = `${-measurementBuffer}px`;
 
 		const splitResult = useSplitPretext({
