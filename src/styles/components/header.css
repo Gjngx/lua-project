@@ -57,7 +57,7 @@
 .header-menu-inner{
 	width: 100%;
 	overflow: hidden;
-	transition: width 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+	border-radius: 10vmin;
 }
 
 .header-menu-play-ic,
@@ -78,9 +78,12 @@
 	grid-template-columns: auto minmax(0, 1fr);
 	border-radius: 10vmin;
 	background-color: var(--cl-white);
-	backdrop-filter: blur(4px);
 	padding: 0.8rem;
-	transition: background-color 0.3s ease;
+	transform: translate3d(0, 0, 0);
+	will-change: transform;
+	transition:
+		transform 0.72s cubic-bezier(0.4, 0, 0.2, 1),
+		background-color 0.3s ease;
 }
 
 .header-menu-main-inner {
@@ -92,7 +95,7 @@
 	color: var(--cl-content-strong);
 	overflow: hidden;
 	transition:
-		opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+		opacity 0.64s cubic-bezier(0.22, 0.61, 0.36, 1),
 		color 0.3s ease;
 }
 
@@ -169,15 +172,33 @@
 }
 .header.on-scroll .header-menu-main-inner {
 	opacity: 0;
+	pointer-events: none;
 }
 .header.on-scroll .header-menu-inner {
-	width: 3.6rem;
+	overflow: hidden;
 }
 .header.on-open-nav .header-menu-main-inner{
 	opacity: 1;
+	pointer-events: auto;
 }
-.header.on-open-nav .header-menu-inner{
-	width: 100%;
+.header.on-scroll .header-menu-main {
+	transform: translate3d(calc(100% - 3.6rem), 0, 0);
+}
+
+.header.on-open-nav .header-menu-main {
+	transform: translate3d(0, 0, 0);
+}
+
+.header.on-open-nav:not(.is-nav-closing) .header-menu-main-inner {
+	transition:
+		opacity 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) 0.1s,
+		color 0.3s ease;
+}
+
+.header.on-open-nav:not(.is-nav-closing) .header-menu-main {
+	transition:
+		transform 0.78s cubic-bezier(0.4, 0, 0.2, 1),
+		background-color 0.3s ease;
 }
 
 .header-nav {
@@ -211,6 +232,21 @@
 
 .header.is-nav-closing .header-menu-menu:nth-child(1) {
 	opacity: 1;
+}
+
+.header.is-nav-closing.on-scroll .header-menu-main-inner {
+	opacity: 0;
+	pointer-events: none;
+	transition:
+		opacity 0.6s cubic-bezier(0.4, 0, 1, 1),
+		color 0.3s ease;
+}
+
+.header.is-nav-closing.on-scroll .header-menu-main {
+	transform: translate3d(calc(100% - 3.6rem), 0, 0);
+	transition:
+		transform 0.78s cubic-bezier(0.45, 0, 0.55, 1),
+		background-color 0.3s ease;
 }
 
 .header-nav-grid {
