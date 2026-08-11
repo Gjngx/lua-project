@@ -19,19 +19,18 @@
 	bottom: 0;
 	z-index: 99;
 	background-color: var(--cl-bg-overlay);
-	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(12px);
+	backdrop-filter: blur(12px);
+	transform: translateZ(0);
+	will-change: opacity;
 	visibility: hidden;
 	opacity: 0;
 	pointer-events: none;
-	transition:
-		opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-		visibility 0s linear 0.45s;
 }
 .header.on-open-nav .header-overlay {
 	pointer-events: auto;
 	visibility: visible;
 	opacity: 1;
-	transition-delay: 0s;
 }
 .header-logo {
 	grid-column: 2 / 2;
@@ -192,21 +191,26 @@
 	overscroll-behavior: contain;
 	visibility: hidden;
 	opacity: 0;
-	transform: translateY(-0.8rem) scale(0.985);
-	transform-origin: top right;
 	pointer-events: none;
-	transition:
-		opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-		transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-		visibility 0s linear 0.55s;
 }
 
 .header.on-open-nav .header-nav {
 	visibility: visible;
 	opacity: 1;
-	transform: none;
 	pointer-events: auto;
-	transition-delay: 0s;
+}
+
+.header.is-nav-closing .header-nav,
+.header.is-nav-closing .header-overlay {
+	pointer-events: none;
+}
+
+.header.is-nav-closing .header-menu-close {
+	opacity: 0;
+}
+
+.header.is-nav-closing .header-menu-menu:nth-child(1) {
+	opacity: 1;
 }
 
 .header-nav-grid {

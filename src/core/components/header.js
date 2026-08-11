@@ -26,6 +26,7 @@ export class Header {
 		this.portraitMarker = null;
 		this.portraitResetCall = null;
 		this.prefersReducedMotion = false;
+		this.navTransition = null;
 	}
 
 	init(data) {
@@ -631,6 +632,182 @@ export class Header {
 		});
 	}
 
+	getNavAnimationElements() {
+		const nav = this.el?.querySelector('[data-header-nav]');
+		const grid = nav?.querySelector('.header-nav-grid');
+		const lead = nav?.querySelector('.header-nav-links');
+		const socialGroup = nav?.querySelector('.header-nav-socials');
+		const cards = [];
+		Array.from(grid?.children || []).forEach((item) => {
+			if (item === lead) return;
+			if (item === socialGroup) {
+				cards.push(...item.querySelectorAll('.header-nav-social'));
+				return;
+			}
+			cards.push(item);
+		});
+		const overlay = this.el?.querySelector('.header-overlay');
+
+		return { nav, lead, cards, overlay };
+	}
+
+	clearNavAnimationStyles(elements = this.getNavAnimationElements()) {
+		const targets = [
+			elements.nav,
+			elements.lead,
+			...elements.cards,
+			elements.overlay,
+		].filter(Boolean);
+
+		if (!targets.length) return;
+		gsap.set(targets, {
+			clearProps:
+				'opacity,visibility,transform,transformOrigin,clipPath,pointerEvents,overflow,willChange',
+		});
+	}
+
+	finishNavClose(elements = this.getNavAnimationElements()) {
+		if (!this.el) return;
+
+		this.el.classList.remove('on-open-nav', 'is-nav-closing');
+		this.clearNavAnimationStyles(elements);
+		this.portraitTimeline?.pause(0);
+		this.navTransition = null;
+	}
+
+	playNavOpenAnimation() {
+		const elements = this.getNavAnimationElements();
+		const { nav, lead, cards, overlay } = elements;
+		if (!nav || !lead) return;
+
+		const navWidth = nav.getBoundingClientRect().width;
+		const travel = Math.max(72, Math.min(navWidth * 0.34, 190));
+
+		gsap.set([lead, ...cards], { willChange: 'transform, opacity' });
+		gsap.set(overlay, { willChange: 'opacity' });
+		gsap.set(nav, { overflow: 'visible' });
+		gsap.set(overlay, { autoAlpha: 0 });
+		gsap.set(lead, {
+			scaleX: 0.12,
+			scaleY: 0.12,
+			autoAlpha: 0,
+			transformOrigin: '100% 0%',
+			force3D: true,
+		});
+		gsap.set(cards, {
+			x: (index) => travel + index * 8,
+			y: (index) => -10 + Math.min(index, 4) * 4,
+			rotation: (index) => (index % 2 ? 0.9 : -0.9),
+			scale: 0.99,
+			autoAlpha: 0,
+			transformOrigin: 'top right',
+		});
+
+		this.navTransition = gsap.timeline({
+			onComplete: () => {
+				this.clearNavAnimationStyles(elements);
+				this.navTransition = null;
+				if (this.isOpen) this.startNavCardReels();
+			},
+		});
+
+		this.navTransition
+			.to(
+				overlay,
+				{
+					autoAlpha: 1,
+					duration: 0.28,
+					ease: 'power2.out',
+				},
+				0,
+			)
+			.to(
+				lead,
+				{
+					scaleX: 1,
+					scaleY: 1,
+					autoAlpha: 1,
+					duration: 0.6,
+					ease: 'power4.out',
+					force3D: true,
+				},
+				0,
+			)
+			.to(
+				cards,
+				{
+					x: 0,
+					y: 0,
+					rotation: 0,
+					scale: 1,
+					autoAlpha: 1,
+					duration: 0.5,
+					stagger: 0.032,
+					ease: 'power4.out',
+				},
+				0.025,
+			);
+	}
+
+	playNavCloseAnimation() {
+		const elements = this.getNavAnimationElements();
+		const { nav, lead, cards, overlay } = elements;
+		if (!nav || !lead) {
+			this.finishNavClose(elements);
+			return;
+		}
+
+		const navWidth = nav.getBoundingClientRect().width;
+		const travel = Math.max(120, Math.min(navWidth * 0.46, 250));
+		const rotations = [-3.5, 2.8, -2.4, 4.2, -4.5];
+		gsap.set([lead, ...cards], { willChange: 'transform, opacity' });
+		gsap.set(overlay, { willChange: 'opacity' });
+		gsap.set([nav, overlay].filter(Boolean), { pointerEvents: 'none' });
+		gsap.set(nav, { overflow: 'visible' });
+
+		this.navTransition = gsap.timeline({
+			onComplete: () => this.finishNavClose(elements),
+		});
+
+		this.navTransition
+			.to(
+				overlay,
+				{
+					opacity: 0,
+					duration: 0.24,
+					ease: 'power2.out',
+				},
+				0,
+			)
+			.to(
+				lead,
+				{
+					scaleX: 0.12,
+					scaleY: 0.12,
+					autoAlpha: 0,
+					duration: 0.52,
+					ease: 'power3.in',
+					transformOrigin: '100% 0%',
+					force3D: true,
+				},
+				0.015,
+			)
+			.to(
+				cards,
+				{
+					x: (index) => travel * (1.05 + index * 0.16),
+					y: (index) => 42 + Math.min(index, 5) * 48,
+					rotation: (index) => rotations[index % rotations.length],
+					scale: (index) => 1 - Math.min(index, 5) * 0.008,
+					autoAlpha: 0,
+					duration: (index) => 0.62 + Math.min(index, 4) * 0.035,
+					stagger: 0.025,
+					ease: 'power2.in',
+				},
+				0.025,
+			);
+	}
+
 	// ─── Nav Toggle ──────────────────────────────────────────────────
 	toggleNav() {
 		const toggles = this.el.querySelectorAll('[data-header-toggle]');
@@ -711,15 +888,26 @@ export class Header {
 
 	open() {
 		if (this.isOpen || !this.el) return;
-		this.el.classList.add("on-open-nav");
+
+		this.navTransition?.kill();
+		this.navTransition = null;
+		this.portraitResetCall?.kill();
+		this.portraitResetCall = null;
+		this.clearNavAnimationStyles();
+		this.el.classList.remove('is-nav-closing');
+		this.el.classList.add('on-open-nav');
 		this.el.querySelector('[data-header-nav]')?.setAttribute('aria-hidden', 'false');
-		this.el.querySelectorAll('[data-header-toggle]').forEach(el => {
-			el.classList.add("active");
+		this.el.querySelectorAll('[data-header-toggle]').forEach((el) => {
+			el.classList.add('active');
 			el.setAttribute('aria-expanded', 'true');
 			el.setAttribute('aria-label', 'Close navigation');
 		});
 		this.isOpen = true;
-		this.startNavCardReels();
+		if (this.prefersReducedMotion) {
+			this.startNavCardReels();
+		} else {
+			this.playNavOpenAnimation();
+		}
 		if (smoothScroll) smoothScroll.stop();
 
 		this._savedScrollY = window.scrollY;
@@ -727,14 +915,16 @@ export class Header {
 			if (!e.target.closest('[data-header-nav]')) e.preventDefault();
 		};
 		document.addEventListener('touchmove', this._preventTouch, { passive: false });
-
 	}
 
 	close() {
 		if (!this.isOpen || !this.el) return;
 		this.isOpen = false;
+		this.navTransition?.kill();
+		this.navTransition = null;
+		this.clearNavAnimationStyles();
 		this.stopNavCardReels();
-		this.pausePortraitAnimation();
+		this.pausePortraitAnimation(this.prefersReducedMotion ? 0 : 0.9);
 
 		if (this._preventTouch) {
 			document.removeEventListener('touchmove', this._preventTouch);
@@ -742,13 +932,19 @@ export class Header {
 		}
 
 		if (smoothScroll) smoothScroll.start();
-		this.el.classList.remove("on-open-nav");
+		this.el.classList.add('is-nav-closing');
 		this.el.querySelector('[data-header-nav]')?.setAttribute('aria-hidden', 'true');
-		this.el.querySelectorAll('[data-header-toggle]').forEach(el => {
-			el.classList.remove("active");
+		this.el.querySelectorAll('[data-header-toggle]').forEach((el) => {
+			el.classList.remove('active');
 			el.setAttribute('aria-expanded', 'false');
 			el.setAttribute('aria-label', 'Open navigation');
 		});
+
+		if (this.prefersReducedMotion) {
+			this.finishNavClose();
+		} else {
+			this.playNavCloseAnimation();
+		}
 	}
 }
 
