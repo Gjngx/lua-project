@@ -1477,7 +1477,7 @@ export const HomePage = {
 			this.sphereCamera = new Camera(gl, { fov: 45 });
 			this.sphereScene = new Transform();
 			this.sphereTiltPivot = new Transform();
-			this.sphereTiltPivot.rotation.z = -23.5 * (Math.PI / 180);
+			this.sphereTiltPivot.rotation.z = -30 * (Math.PI / 180);
 			this.sphereTiltPivot.setParent(this.sphereScene);
 			this.sphereGeometry = new Sphere(gl, {
 				radius: 1,
@@ -1487,77 +1487,69 @@ export const HomePage = {
 
 			const patternCanvas = document.createElement('canvas');
 			const patternSize = 2048;
-			const leavesPerRing = 60;
-			const patternRows = 24;
-			const leafLeftTipX = 0.000350508;
-			const leafRightTipX = 9.17299;
-			const leafTopTipY = 0.145151;
-			const leafBottomTipY = 6.3322;
-			const mirroredLeafOffsetX = leafRightTipX - leafLeftTipX;
-			const mirroredLeafOffsetY = leafTopTipY - (7 - leafBottomTipY);
-			const leafPairStepX = (leafRightTipX - leafLeftTipX) * 2;
-			const pairsPerRing = leavesPerRing / 2;
-			const ringStepY = 6.55;
-			const patternScaleX = patternSize / (pairsPerRing * leafPairStepX);
-			const patternScaleY = patternSize / (patternRows * ringStepY);
+			const leafPairsPerRing = 30;
+			const patternRows = 34;
+			const pairWidth = patternSize / leafPairsPerRing;
+			const rowHeight = patternSize / patternRows;
+			const curve = 0.552284;
 			patternCanvas.width = patternSize;
 			patternCanvas.height = patternSize;
 			const patternContext = patternCanvas.getContext('2d');
-			const leafPath = new Path2D(
-				'M9.17299 0.145151C4.93154 -0.679303 0.824805 2.09075 0.000350508 6.3322C4.2418 7.15666 8.34854 4.3866 9.17299 0.145151Z'
-			);
 			patternContext.clearRect(0, 0, patternSize, patternSize);
 			patternContext.fillStyle = '#DEFB37';
-			patternContext.strokeStyle = '#DEFB37';
-			patternContext.lineWidth = 0.9;
-			patternContext.lineJoin = 'round';
-			patternContext.lineCap = 'round';
 
-			for (let row = -1; row <= patternRows; row += 1) {
-				for (let pair = -1; pair <= pairsPerRing; pair += 1) {
-					const pairX = pair * leafPairStepX;
+			for (let row = 0; row < patternRows; row += 1) {
+				const top = row * rowHeight;
+				const bottom = top + rowHeight;
 
-					patternContext.save();
-					patternContext.translate(
-						pairX * patternScaleX,
-						row * ringStepY * patternScaleY,
-					);
-					patternContext.scale(patternScaleX, patternScaleY);
-					patternContext.fill(leafPath);
-					patternContext.stroke(leafPath);
-					patternContext.restore();
+				for (let pair = 0; pair < leafPairsPerRing; pair += 1) {
+					const left = pair * pairWidth;
+					const tip = left + pairWidth * 0.5;
+					const right = left + pairWidth;
+					const leftRadius = tip - left;
+					const rightRadius = right - tip;
 
-					patternContext.save();
-					patternContext.translate(
-						(pairX + mirroredLeafOffsetX) * patternScaleX,
-						(row * ringStepY + mirroredLeafOffsetY) * patternScaleY,
-					);
-					patternContext.scale(patternScaleX, patternScaleY);
-					patternContext.translate(0, 7);
-					patternContext.scale(1, -1);
-					patternContext.fill(leafPath);
-					patternContext.stroke(leafPath);
-					patternContext.restore();
-
-					// Hai path chỉ chạm nhau tại một điểm. Bù một nút rất nhỏ để
-					// mipmap/texture filtering không làm đứt chuỗi trên WebGL.
-					patternContext.save();
-					patternContext.translate(
-						pairX * patternScaleX,
-						row * ringStepY * patternScaleY,
-					);
-					patternContext.scale(patternScaleX, patternScaleY);
 					patternContext.beginPath();
-					patternContext.arc(leafRightTipX, leafTopTipY, 0.13, 0, Math.PI * 2);
-					patternContext.arc(
-						leafPairStepX + leafLeftTipX,
-						leafBottomTipY,
-						0.13,
-						0,
-						Math.PI * 2,
+					patternContext.moveTo(left, top);
+					patternContext.bezierCurveTo(
+						left + leftRadius * curve,
+						top,
+						tip,
+						top + rowHeight * (1 - curve),
+						tip,
+						bottom,
 					);
+					patternContext.bezierCurveTo(
+						left + leftRadius * (1 - curve),
+						bottom,
+						left,
+						top + rowHeight * curve,
+						left,
+						top,
+					);
+					patternContext.closePath();
 					patternContext.fill();
-					patternContext.restore();
+
+					patternContext.beginPath();
+					patternContext.moveTo(right, top);
+					patternContext.bezierCurveTo(
+						right - rightRadius * curve,
+						top,
+						tip,
+						top + rowHeight * (1 - curve),
+						tip,
+						bottom,
+					);
+					patternContext.bezierCurveTo(
+						right - rightRadius * (1 - curve),
+						bottom,
+						right,
+						top + rowHeight * curve,
+						right,
+						top,
+					);
+					patternContext.closePath();
+					patternContext.fill();
 				}
 			}
 
