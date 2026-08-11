@@ -228,7 +228,7 @@ export class Header {
 	}
 
 	updateNavCardReels(time) {
-		if (!this.isOpen) return;
+		if (!this.isOpen && !this.el?.classList.contains('is-nav-closing')) return;
 
 		const deltaTime = Math.min(time - this.navCardReelLastTime, 50);
 		this.navCardReelLastTime = time;
@@ -669,6 +669,7 @@ export class Header {
 	finishNavClose(elements = this.getNavAnimationElements()) {
 		if (!this.el) return;
 
+		this.stopNavCardReels();
 		this.el.classList.remove('on-open-nav', 'is-nav-closing');
 		this.clearNavAnimationStyles(elements);
 		this.portraitTimeline?.pause(0);
@@ -707,7 +708,6 @@ export class Header {
 			onComplete: () => {
 				this.clearNavAnimationStyles(elements);
 				this.navTransition = null;
-				if (this.isOpen) this.startNavCardReels();
 			},
 		});
 
@@ -903,9 +903,8 @@ export class Header {
 			el.setAttribute('aria-label', 'Close navigation');
 		});
 		this.isOpen = true;
-		if (this.prefersReducedMotion) {
-			this.startNavCardReels();
-		} else {
+		this.startNavCardReels();
+		if (!this.prefersReducedMotion) {
 			this.playNavOpenAnimation();
 		}
 		if (smoothScroll) smoothScroll.stop();
@@ -923,7 +922,6 @@ export class Header {
 		this.navTransition?.kill();
 		this.navTransition = null;
 		this.clearNavAnimationStyles();
-		this.stopNavCardReels();
 		this.pausePortraitAnimation(this.prefersReducedMotion ? 0 : 0.9);
 
 		if (this._preventTouch) {
