@@ -27,6 +27,7 @@ export class Header {
 		this.portraitResetCall = null;
 		this.prefersReducedMotion = false;
 		this.navTransition = null;
+		this.locationClockTimer = null;
 	}
 
 	init(data) {
@@ -36,8 +37,64 @@ export class Header {
 		this.setupHeaderMetrics();
 		this.setupNavCardReels();
 		this.setupPortraitAnimation();
+		this.setupLocationClocks();
 		this.toggleNav();
 		this.setupScrollListener(data);
+	}
+
+	setupLocationClocks() {
+		if (!this.el) return;
+
+		if (this.locationClockTimer) window.clearTimeout(this.locationClockTimer);
+		this.locationClockTimer = null;
+
+		const clocks = Array.from(
+			this.el.querySelectorAll('[data-header-location-clock]'),
+		).map((clock) => {
+			const timeZone = clock.dataset.timeZone;
+			if (!timeZone) return null;
+
+			return {
+				clock,
+				offset: clock.parentElement?.querySelector('[data-header-location-offset]'),
+				timeFormatter: new Intl.DateTimeFormat('en-GB', {
+					timeZone,
+					hour: '2-digit',
+					minute: '2-digit',
+					second: '2-digit',
+					hourCycle: 'h23',
+				}),
+				offsetFormatter: new Intl.DateTimeFormat('en-GB', {
+					timeZone,
+					timeZoneName: 'shortOffset',
+				}),
+			};
+		}).filter(Boolean);
+
+		if (!clocks.length) return;
+
+		const updateClocks = () => {
+			const now = new Date();
+
+			clocks.forEach(({ clock, offset, timeFormatter, offsetFormatter }) => {
+				clock.textContent = timeFormatter.format(now);
+				clock.dateTime = now.toISOString();
+
+				const rawOffset = offsetFormatter
+					.formatToParts(now)
+					.find((part) => part.type === 'timeZoneName')?.value;
+				if (offset && rawOffset) {
+					offset.textContent = rawOffset === 'GMT'
+						? 'UTC+0'
+						: rawOffset.replace('GMT', 'UTC').replace(':00', '');
+				}
+			});
+
+			const nextSecond = 1000 - (Date.now() % 1000) + 10;
+			this.locationClockTimer = window.setTimeout(updateClocks, nextSecond);
+		};
+
+		updateClocks();
 	}
 
 	setupPortraitAnimation() {

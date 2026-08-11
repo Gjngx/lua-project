@@ -252,14 +252,20 @@ import Button from './Button.astro';
 						<span class="header-nav-location-flag">★</span>
 						<div>
 							<p class="txt fs-10 fw-600 trans-upper">Hanoi</p>
-							<p class="txt fs-10">16:30:09 <span>UTC+7</span></p>
+							<p class="txt fs-10">
+								<time data-header-location-clock data-time-zone="Asia/Ho_Chi_Minh">16:30:09</time>
+								<span data-header-location-offset>UTC+7</span>
+							</p>
 						</div>
 					</div>
 					<div class="header-nav-location-item">
 						<span class="header-nav-location-flag header-nav-location-flag--london">✚</span>
 						<div>
 							<p class="txt fs-10 fw-600 trans-upper">London</p>
-							<p class="txt fs-10">09:30:09 <span>UTC+0</span></p>
+							<p class="txt fs-10">
+								<time data-header-location-clock data-time-zone="Europe/London">09:30:09</time>
+								<span data-header-location-offset>UTC+0</span>
+							</p>
 						</div>
 					</div>
 				</div>
