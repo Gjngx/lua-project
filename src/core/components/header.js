@@ -6,6 +6,7 @@ import { gsap } from '../gsap';
 export class Header {
 	constructor() {
 		this.el = null;
+		this.elLogoAnimated = null;
 		this.isOpen = false;
 		this.listDependent = [];
 		this.currentMode = null;
@@ -33,6 +34,7 @@ export class Header {
 	init(data) {
 		this.el = document.querySelector(".header");
 		if (!this.el) return;
+		this.elLogoAnimated = document.querySelector('.header-logo-amin');
 
 		this.setupHeaderMetrics();
 		this.setupNavCardReels();
@@ -40,6 +42,17 @@ export class Header {
 		this.setupLocationClocks();
 		this.toggleNav();
 		this.setupScrollListener(data);
+		this.togglePageClass(data);
+	}
+
+	togglePageClass(data) {
+		if (!this.el) return;
+
+		const namespace = data?.next?.namespace ||
+			document.querySelector('[data-barba="container"]')?.dataset.barbaNamespace;
+		const isHome = namespace === 'home';
+		this.el.classList.toggle('header-home', isHome);
+		this.elLogoAnimated?.classList.toggle('header-home', isHome);
 	}
 
 	setupLocationClocks() {
@@ -550,6 +563,7 @@ export class Header {
 	// ─── Update (gọi mỗi khi chuyển trang qua Barba) ─────────────────
 	update(data) {
 		if (!this.el) return;
+		this.togglePageClass(data);
 		this.setupScrollListener(data);
 		this.updateOnScroll(smoothScroll.lenis, data);
 		this.toggleMode();
@@ -576,9 +590,15 @@ export class Header {
 
 		if (!isCollapsed && inst.scroll > collapseAt) {
 			this.el.classList.add("on-scroll");
+			this.elLogoAnimated?.classList.add('on-scroll');
 		} else if (isCollapsed && inst.scroll < expandAt) {
 			this.el.classList.remove("on-scroll");
+			this.elLogoAnimated?.classList.remove('on-scroll');
 		}
+		this.elLogoAnimated?.classList.toggle(
+			'on-scroll',
+			this.el.classList.contains('on-scroll'),
+		);
 	}
 
 	/**
@@ -590,13 +610,20 @@ export class Header {
 
 		if (inst.scroll <= headerHeight * 3) {
 			this.el.classList.remove("on-hide");
+			this.elLogoAnimated?.classList.remove('on-hide');
 		} else if (inst.direction == 1) {
 			// Scroll xuống → ẩn header
 			this.el.classList.add("on-hide");
+			this.elLogoAnimated?.classList.add('on-hide');
 		} else if (inst.direction == -1) {
 			// Scroll lên → hiện header
 			this.el.classList.remove("on-hide");
+			this.elLogoAnimated?.classList.remove('on-hide');
 		}
+		this.elLogoAnimated?.classList.toggle(
+			'on-hide',
+			this.el.classList.contains('on-hide'),
+		);
 	}
 
 	/**
@@ -609,6 +636,7 @@ export class Header {
 		const mode = section ? section.getAttribute('data-section') : null;
 		const hiddenRules = section?.getAttribute('data-hidden')?.split(/\s+/) || [];
 		this.el.classList.toggle('hidden-logo', hiddenRules.includes('logo'));
+		this.elLogoAnimated?.classList.toggle('hidden-logo', hiddenRules.includes('logo'));
 
 		if (this.currentMode === mode) return;
 
@@ -624,10 +652,22 @@ export class Header {
 			cls !== 'on-loader'
 		);
 		modeClasses.forEach(cls => this.el.classList.remove(cls));
+		if (this.elLogoAnimated) {
+			Array.from(this.elLogoAnimated.classList)
+				.filter((cls) =>
+					cls.startsWith('on-') &&
+					cls !== 'on-scroll' &&
+					cls !== 'on-hide' &&
+					cls !== 'on-open-nav' &&
+					cls !== 'on-loader'
+				)
+				.forEach((cls) => this.elLogoAnimated.classList.remove(cls));
+		}
 
 		// Thêm mode class mới
 		if (mode) {
 			this.el.classList.add(`on-${mode}`);
+			this.elLogoAnimated?.classList.add(`on-${mode}`);
 		}
 	}
 

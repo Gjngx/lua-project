@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Button from '../components/Button.astro';
 import '../styles/pages/home.css';
 import { Image } from 'astro:assets';
 import heroPoster from '../assets/images/home-bg-poster.webp';
@@ -38,7 +37,7 @@ import IconHowIntroShape4 from '../components/icons/IconHowIntroShape4.astro';
 ---
 
 <Layout title="Home" namespace="home">
-	<div class="home-hero-wrap" data-section="transparent" data-hidden="logo">
+	<div class="home-hero-wrap" data-section="transparent">
 		<div class="home-hero-bg">
 			<div class="home-hero-bg-inner">
 				<video
@@ -83,13 +82,6 @@ import IconHowIntroShape4 from '../components/icons/IconHowIntroShape4.astro';
 						<div class="home-hero-top-info">
 							<p class="txt fs-10 fw-400">Hanoi, VietNam</p>
 							<p class="txt fs-10 fw-400" data-time>00:00:00</p>
-						</div>
-					</div>
-				</div>
-				<div class="home-hero-top top-logo">
-					<div class="home-hero-logo">
-						<div class="home-hero-logo-ic">
-							<IconLogo />
 						</div>
 					</div>
 				</div>
@@ -477,9 +469,6 @@ import IconHowIntroShape4 from '../components/icons/IconHowIntroShape4.astro';
 					<div class="home-playground-card" data-latitude="-52" data-longitude="-12" data-radius="1.1" data-width="0.17" data-size="sm">
 						<Image src={work1} alt="" />
 					</div>
-				</div>
-				<div class="home-playground-action">
-					<Button href="#" class="home-playground-btn">View full my playground</Button>
 				</div>
 			</div>
 		</section>

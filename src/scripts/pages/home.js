@@ -41,8 +41,8 @@ export const HomePage = {
 			this.tlHeroTop = null;
 			this.tlHeroBot = null;
 			this.tlHeroBotEnd = null;
-			// this.tlHeroEnd = null;
-
+			this.tlHeroTextColor = null;
+			this.heroTextOriginalHTML = null;
 		}
 
 		setup(data, mode) {
@@ -237,26 +237,58 @@ export const HomePage = {
 		}
 
 		animationScrub() {
-			const homeLogoHeight = this.el.querySelector('.home-hero-logo').offsetHeight;
+			const headerLogoAnimated = document.querySelector('.header-logo-ic-amin');
+			const headerLogoTarget = document.querySelector('.header-logo-ic');
+			const headerLogoAnimatedWrap = document.querySelector('.header-logo-amin');
+			const getHeaderLogoTransform = () => {
+				if (!headerLogoAnimated || !headerLogoTarget || !headerLogoAnimatedWrap) {
+					return { x: 0, y: 0, scale: 1 };
+				}
+
+				const wrapRect = headerLogoAnimatedWrap.getBoundingClientRect();
+				const targetRect = headerLogoTarget.getBoundingClientRect();
+				const sourceHeight = headerLogoAnimated.offsetHeight;
+				const sourceLeft = wrapRect.left + headerLogoAnimated.offsetLeft;
+				const sourceTop = wrapRect.bottom - sourceHeight;
+
+				return {
+					x: targetRect.left - sourceLeft,
+					y: targetRect.top - sourceTop,
+					scale: sourceHeight ? targetRect.height / sourceHeight : 1,
+				};
+			};
+
 			gsap.set(this.el.querySelector('.home-hero-decor-inner'), {
 				xPercent: -96,
 				yPercent: 76,
 				opacity: 1
 			});
+			if (headerLogoAnimated) {
+				gsap.set(headerLogoAnimated, {
+					x: 0,
+					y: 0,
+					scale: 1,
+					transformOrigin: '0 0',
+				});
+			}
 
 			this.tlHeroTop = gsap.timeline({
 				scrollTrigger: {
 					trigger: this.el.querySelector('.home-hero-top.top-right'),
 					start: 'top top',
 					end: `bottom top+=${cvUnit(100, 'rem')}`,
-					scrub: true
+					scrub: true,
+					invalidateOnRefresh: true,
 				}
 			});
-			this.tlHeroTop.
-				to(this.el.querySelector('.home-hero-logo-ic'), {
-					height: cvUnit(40, 'rem'),
+			if (headerLogoAnimated && headerLogoTarget) {
+				this.tlHeroTop.to(headerLogoAnimated, {
+					x: () => getHeaderLogoTransform().x,
+					y: () => getHeaderLogoTransform().y,
+					scale: () => getHeaderLogoTransform().scale,
 					ease: 'none'
 				});
+			}
 
 			this.tlHeroBot = gsap.timeline({
 				scrollTrigger: {
@@ -266,43 +298,63 @@ export const HomePage = {
 					scrub: true,
 				}
 			});
-			this.tlHeroBot.to(this.el.querySelector('.home-hero-decor-inner'), {
+			this.tlHeroBot
+			.to(this.el.querySelector('.home-hero-decor-inner'), {
 				xPercent: 70,
 				yPercent: -175,
+				duration: 1,
 				ease: 'none'
-			});
+			})
 
-			this.tlHeroBotEnd = gsap.timeline({
-				scrollTrigger: {
-					trigger: this.el.querySelector('.home-hero-bottom-desc'),
-					start: 'top top+=15%',
-					end: 'bottom top',
-					scrub: true,
-				}
-			});
-			this.tlHeroBotEnd.to(this.el.querySelector('.home-hero-logo'), {
-				yPercent: -200,
-				ease: 'none'
-			});
+			const heroDescription = this.el.querySelector('.home-hero-bottom-desc .txt');
+			if (heroDescription) {
+				this.heroTextOriginalHTML = heroDescription.innerHTML;
+				const textNodes = [];
+				const walker = document.createTreeWalker(heroDescription, NodeFilter.SHOW_TEXT);
+				while (walker.nextNode()) textNodes.push(walker.currentNode);
 
-			// this.tlHeroEnd = gsap.timeline({
-			// 	scrollTrigger: {
-			// 		trigger: '.home-works',
-			// 		start: 'top bottom',
-			// 		end: 'top top',
-			// 		scrub: true,
-			// 	}
-			// });
-			// this.tlHeroEnd
-			// 	.to(this.el.querySelector('.home-hero-bg-overlay-main'), { opacity: 0.85, ease: 'none' })
-			// 	.to(this.el.querySelector('.home-hero-bottom-inner'), { yPercent: -10, scale: 1.1, ease: 'none' }, '<')
+				textNodes.forEach((textNode) => {
+					const fragment = document.createDocumentFragment();
+					textNode.textContent.split(/(\s+)/).forEach((part) => {
+						if (!part || /^\s+$/.test(part)) {
+							fragment.appendChild(document.createTextNode(part));
+							return;
+						}
+
+						const word = document.createElement('span');
+						word.className = 'home-hero-bottom-word';
+						word.textContent = part;
+						fragment.appendChild(word);
+					});
+					textNode.replaceWith(fragment);
+				});
+
+				const revealItems = heroDescription.querySelectorAll(
+					'.home-hero-bottom-word, svg',
+				);
+				gsap.set(revealItems, { color: 'rgba(255, 255, 255, 0.28)' });
+				this.tlHeroTextColor = gsap.timeline({
+					scrollTrigger: {
+						trigger: this.el.querySelector('.home-hero-bottom'),
+						start: 'top center',
+						end: 'bottom bottom',
+						scrub: true,
+					},
+				});
+				this.tlHeroTextColor.to(revealItems, {
+					color: (index, element) =>
+						element.matches('svg') ? 'var(--cl-brand)' : '#fff',
+					stagger: 0.06,
+					ease: 'none',
+				});
+			}
 		}
 
 		interact() {
 			// Thêm các tương tác click, hover
 		}
 
-		destroy() {
+			destroy() {
 			if (this.timeTimer !== null) {
 				window.clearInterval(this.timeTimer);
 				this.timeTimer = null;
@@ -326,8 +378,11 @@ export const HomePage = {
 			if (this.tlEnter) this.tlEnter.kill();
 			if (this.tlHeroTop) this.tlHeroTop.kill();
 			if (this.tlHeroBot) this.tlHeroBot.kill();
-			if (this.tlHeroBotEnd) this.tlHeroBotEnd.kill();
-			// if (this.tlHeroEnd) this.tlHeroEnd.kill();
+			if (this.tlHeroTextColor) this.tlHeroTextColor.kill();
+			const heroDescription = this.el?.querySelector('.home-hero-bottom-desc .txt');
+			if (heroDescription && this.heroTextOriginalHTML !== null) {
+				heroDescription.innerHTML = this.heroTextOriginalHTML;
+			}
 
 			this.video = null;
 			this.timeEl = null;
@@ -1841,12 +1896,6 @@ export const HomePage = {
 					ease: 'power2.out',
 					duration: 0.36,
 				}, 0.46)
-				.to(this.el.querySelector('.home-playground-action'), {
-					opacity: 1,
-					pointerEvents: 'auto',
-					ease: 'power2.out',
-					duration: 0.3,
-				}, 0.52)
 		}
 
 		interact() {}

@@ -36,15 +36,40 @@
 	grid-column: 2 / 2;
 	color: var(--cl-content-strong);
 	opacity: 1;
-	transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 	pointer-events: auto;
 }
 .header-logo-ic{
-	width: 7.3rem;
+	height: 2.8rem;
+	transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.header.hidden-logo .header-logo{
+.header.header-home .header-logo-ic {
 	opacity: 0;
 	pointer-events: none;
+}
+
+.header-logo-amin{
+	display: none;
+	position: fixed;
+	left: 0;
+	top: 3.2rem;
+	bottom: 3.2rem;
+	z-index: 100;
+	display: flex;
+	align-items: flex-end;
+	padding-left: var(--container--padding);
+	pointer-events: none;
+}
+.header-logo-ic-amin{
+	height: min(31.9rem, 32.4847250509vh);
+	color: var(--cl-content-strong);
+	pointer-events: auto;
+	transition: color 0.3s ease-out;
+}
+.header-logo-amin.on-transparent .header-logo-ic-amin{
+	color: var(--cl-brand);
+}
+.header-logo-ic-amin.header-home {
+	display: block;
 }
 .header-menu {
 	grid-column: -7 / -2;

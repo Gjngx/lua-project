@@ -64,17 +64,6 @@
 	align-content: start;
 }
 
-.home-hero-top.top-logo {
-	grid-column: 2 / -2;
-	grid-row: 1 / 1;
-	align-self: end;
-	position: sticky;
-	top: 0;
-	z-index: 3;
-	height: fit-content;
-	width: fit-content;
-}
-
 .home-hero-top.top-right {
 	grid-column: 13 / -2;
 	grid-row: 1 / 1;
@@ -84,16 +73,6 @@
 	width: 16.5rem;
 	color: var(--cl-white);
 	margin-top: 3.2rem;
-}
-
-.home-hero-logo {
-	padding-top: 3.2rem;
-	padding-bottom: 3.2rem;
-}
-
-.home-hero-logo-ic {
-	height: min(31.9rem, 32.4847250509vh);
-	color: var(--cl-brand);
 }
 
 .home-hero-top-title {
@@ -124,7 +103,7 @@
 	justify-content: space-between;
 	align-items: center;
 	width: 24.6rem;
-	color: var(--cl-content-soft-2);
+	color: var(--cl-white);
 }
 
 .home-hero-bottom {
@@ -146,6 +125,12 @@
 .home-hero-bottom-desc {
 	width: 55.8rem;
 	color: var(--cl-white);
+}
+
+.home-hero-bottom-word,
+.home-hero-bottom-desc svg {
+	display: inline;
+	will-change: color;
 }
 
 .home-hero-bottom-desc svg {
@@ -327,7 +312,8 @@
 .home-works-main-desc {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: center;
+	gap: 1.2rem;
 	width: 21.3rem;
 	pointer-events: auto;
 	text-align: center;
@@ -868,16 +854,6 @@
 .home-playground-content-right-title{
 	width: fit-content;
 	padding-left: 11rem;
-}
-
-.home-playground-action {
-	height: 4rem;
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	z-index: 15;
-	opacity: 0;
 }
 
 .home-playground-empty{
