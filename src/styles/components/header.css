@@ -210,9 +210,24 @@
 	max-height: calc(100svh - 7.6rem);
 	overflow-y: auto;
 	overscroll-behavior: contain;
+	scrollbar-width: thin;
+	scrollbar-color: var(--cl-content-strong) transparent;
 	visibility: hidden;
 	opacity: 0;
 	pointer-events: none;
+}
+
+.header-nav::-webkit-scrollbar {
+	width: 0.2rem;
+}
+
+.header-nav::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.header-nav::-webkit-scrollbar-thumb {
+	border-radius: 10vmin;
+	background: var(--cl-content-strong);
 }
 
 .header.on-open-nav .header-nav {

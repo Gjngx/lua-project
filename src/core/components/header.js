@@ -814,10 +814,9 @@ export class Header {
 			return;
 		}
 
-		const navWidth = nav.getBoundingClientRect().width;
-		const travel = Math.max(120, Math.min(navWidth * 0.46, 250));
-		const rotations = [-3.5, 2.8, -2.4, 4.2, -4.5];
-		gsap.set([lead, ...cards], { willChange: 'transform, opacity' });
+		const dropDistance = nav.getBoundingClientRect().height + 80;
+		gsap.set(lead, { willChange: 'transform' });
+		gsap.set(cards, { willChange: 'transform' });
 		gsap.set(overlay, { willChange: 'opacity' });
 		gsap.set([nav, overlay].filter(Boolean), { pointerEvents: 'none' });
 		gsap.set(nav, { overflow: 'visible' });
@@ -831,34 +830,36 @@ export class Header {
 				overlay,
 				{
 					opacity: 0,
-					duration: 0.24,
+					duration: 0.52,
 					ease: 'power2.out',
 				},
-				0,
+				0.42,
 			)
 			.to(
 				lead,
 				{
-					scaleX: 0.12,
-					scaleY: 0.12,
-					autoAlpha: 0,
-					duration: 0.52,
-					ease: 'power3.in',
-					transformOrigin: '100% 0%',
+					x: 0,
+					y: dropDistance,
+					rotation: -8,
+					duration: 0.78,
+					ease: 'power2.in',
+					transformOrigin: '50% 0%',
 					force3D: true,
 				},
-				0.015,
+				0.2,
 			)
 			.to(
 				cards,
 				{
-					x: (index) => travel * (1.05 + index * 0.16),
-					y: (index) => 42 + Math.min(index, 5) * 48,
-					rotation: (index) => rotations[index % rotations.length],
-					scale: (index) => 1 - Math.min(index, 5) * 0.008,
-					autoAlpha: 0,
-					duration: (index) => 0.62 + Math.min(index, 4) * 0.035,
-					stagger: 0.025,
+					x: 0,
+					y: (index) => dropDistance + index * 32,
+					rotation: (index) => (index % 2 === 0 ? -12 : 10),
+					transformOrigin: '50% 0%',
+					duration: (index) => 0.76 + Math.min(index, 4) * 0.035,
+					stagger: {
+						each: 0.025,
+						from: 'end',
+					},
 					ease: 'power2.in',
 				},
 				0.025,
