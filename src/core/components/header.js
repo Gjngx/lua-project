@@ -65,7 +65,7 @@ export class Header {
 			this.el.querySelectorAll('[data-header-location-clock]'),
 		).map((clock) => {
 			const timeZone = clock.dataset.timeZone;
-			if (!timeZone) return null;
+			if (!timeZone || timeZone === 'Europe/London') return null;
 
 			return {
 				clock,
@@ -146,8 +146,8 @@ export class Header {
 		if (markerCircle) {
 			timeline.fromTo(
 				markerCircle,
-				{ strokeDashoffset: 0, opacity: 0.45 },
-				{ strokeDashoffset: -28, opacity: 1, duration: 1, ease: 'none' }
+				{ strokeDashoffset: 0 },
+				{ strokeDashoffset: -28, duration: 1, ease: 'none' }
 			);
 		} else {
 			timeline.to({}, { duration: 1 });
@@ -171,8 +171,7 @@ export class Header {
 			.to(this.portraitMarker, { rotation: `+=${-angles[1]}`, duration: 0.45 }, '<')
 			.to(this.portraitMarker, { scale: 2, duration: 0.4 })
 			.to(outer, { rotation: 0, duration: 0.45 })
-			.to(this.portraitMarker, { rotation: `+=${-angles[2]}`, duration: 0.45 }, '<')
-			.to(markerCircle || {}, { opacity: 0.45, duration: 0.35 });
+			.to(this.portraitMarker, { rotation: `+=${-angles[2]}`, duration: 0.45 }, '<');
 
 		this.portraitTimeline = timeline;
 	}
@@ -759,7 +758,7 @@ export class Header {
 		if (!targets.length) return;
 		gsap.set(targets, {
 			clearProps:
-				'opacity,visibility,transform,transformOrigin,clipPath,pointerEvents,overflow,willChange',
+				'opacity,visibility,transform,transformOrigin,backfaceVisibility,clipPath,pointerEvents,overflow,willChange',
 		});
 	}
 
@@ -854,9 +853,24 @@ export class Header {
 			return;
 		}
 
-		const dropDistance = nav.getBoundingClientRect().height + 80;
-		gsap.set(lead, { willChange: 'transform' });
-		gsap.set(cards, { willChange: 'transform' });
+		const viewportHeight = window.visualViewport?.height || window.innerHeight;
+		const getDropDistance = (element) => {
+			const rect = element.getBoundingClientRect();
+			// Move the element's top edge beyond the viewport. The extra clearance
+			// accounts for the upper corner swinging back into view as it rotates.
+			const rotationClearance = Math.max(64, rect.width * 0.18);
+			return Math.ceil(viewportHeight - rect.top + rotationClearance);
+		};
+		gsap.set(lead, {
+			willChange: 'transform',
+			force3D: true,
+			backfaceVisibility: 'hidden',
+		});
+		gsap.set(cards, {
+			willChange: 'transform',
+			force3D: true,
+			backfaceVisibility: 'hidden',
+		});
 		gsap.set(overlay, { willChange: 'opacity' });
 		gsap.set([nav, overlay].filter(Boolean), { pointerEvents: 'none' });
 		gsap.set(nav, { overflow: 'visible' });
@@ -879,7 +893,7 @@ export class Header {
 				lead,
 				{
 					x: 0,
-					y: dropDistance,
+					y: () => getDropDistance(lead),
 					rotation: -8,
 					duration: 0.78,
 					ease: 'power2.in',
@@ -892,10 +906,11 @@ export class Header {
 				cards,
 				{
 					x: 0,
-					y: (index) => dropDistance + index * 32,
+					y: (index, card) => getDropDistance(card) + index * 16,
 					rotation: (index) => (index % 2 === 0 ? -12 : 10),
 					transformOrigin: '50% 0%',
 					duration: (index) => 0.76 + Math.min(index, 4) * 0.035,
+					force3D: true,
 					stagger: {
 						each: 0.025,
 						from: 'end',

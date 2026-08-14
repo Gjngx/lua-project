@@ -5,6 +5,7 @@
 	grid-template-rows: 1fr auto auto;
 }
 .footer-main{
+	position: relative;
 	grid-column: 2 / -2;
 	grid-row: 1 / 1;
 	width: 100%;
@@ -15,8 +16,9 @@
 }
 
 .footer-main-content{
-	width: 92rem;
+	width: 110rem;
 	text-align: center;
+	position: relative;
 }
 
 .footer-main-decor{
@@ -59,6 +61,11 @@
 	align-items: center;
 	color: var(--cl-content-strong);
 	background-color: var(--cl-white);
+	transition: background-color 0.4s ease-in-out;
+}
+
+.footer-info-center-ic-wrap:hover{
+	background-color: var(--cl-brand);
 }
 
 .footer-info-left{
@@ -74,6 +81,10 @@
 	align-items: center;
 	gap: 0.4rem;
 	color: var(--cl-content-soft);
+}
+
+.footer-main-content:hover .footer-main-say-hello{
+	opacity: 1;
 }
 
 .footer-info-link,
@@ -105,4 +116,65 @@
 
 .footer-info-right-label {
 	color: var(--cl-content-soft);
+}
+
+.footer-main-say-hello {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	opacity: 0;
+	transition: opacity 0.3s ease-in;
+}
+
+.footer-main-say-hello-ic {
+	width: 12.4rem;
+	margin-bottom: 0.7rem;
+	transform-origin: 62% 86%;
+	will-change: transform;
+}
+
+.footer-main-content:hover .footer-main-say-hello-ic {
+	animation: footer-hand-wave 1.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+}
+
+@keyframes footer-hand-wave {
+	0%,
+	8%,
+	100% {
+		transform: rotate(0deg);
+	}
+	14% {
+		transform: rotate(-5deg);
+	}
+	25% {
+		transform: rotate(15deg);
+	}
+	39% {
+		transform: rotate(-11deg);
+	}
+	53% {
+		transform: rotate(12deg);
+	}
+	67% {
+		transform: rotate(-7deg);
+	}
+	79% {
+		transform: rotate(7deg);
+	}
+	90% {
+		transform: rotate(-2deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.footer-main-content:hover .footer-main-say-hello-ic {
+		animation: none;
+	}
+}
+
+.footer-main-say-hello-btn-inner {
+	padding: 2rem 4rem;
+	border-radius: 10vmin;
+	background-color: var(--cl-brand);
 }

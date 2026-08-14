@@ -438,7 +438,6 @@ export const HomePage = {
 
 		setup() {
 			console.log('Works Setup');
-			this.setupWebGL();
 		}
 
 		animationReveal() {

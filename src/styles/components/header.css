@@ -53,7 +53,7 @@
 	left: 0;
 	top: 3.2rem;
 	bottom: 3.2rem;
-	z-index: 100;
+	z-index: 99;
 	display: flex;
 	align-items: flex-end;
 	padding-left: var(--container--padding);
@@ -299,7 +299,7 @@
 .header-nav-location {
 	background-color: var(--cl-white);
 	color: var(--cl-content-strong);
-	border-radius: 1.2rem;
+	border-radius: 1.6rem;
 }
 
 .header-nav-links {
@@ -336,11 +336,11 @@
 .header-nav-links-thumb-item{
 	width: 15.4rem;
 	height: 21.6rem;
-	border-radius: 0.8rem;
+	border-radius: 1.2rem;
 	overflow: hidden;
 }
 .header-nav-card{
-	border-radius: 1.2rem;
+	border-radius: 1.6rem;
 	overflow: hidden;
 }
 .header-nav-card-inner{
@@ -382,7 +382,6 @@
 	left: 0.4rem;
 	right: 0.4rem;
 	height: 0.8rem;
-	transform: rotate(180deg);
 	display: flex;
 }
 .header-nav-card-overlay{
@@ -408,31 +407,23 @@
 	background-color: var(--cl-white);
 	color: var(--cl-white);
 	aspect-ratio: 1;
+	transition: background-color 0.4s ease-in-out;
 }
-.header-nav-social-linked-in{
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 3.1rem;
+
+.header-nav-socials a:hover{
+	background-color: var(--cl-brand);
 }
+
+.header-nav-social-linked-in,
+.header-nav-social-behance,
+.header-nav-social-instagram,
 .header-nav-social-dribbble{
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	width: 3.1rem;
+	width: 2.4rem;
 }
-.header-nav-social-instagram{
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 3.5rem;
-}
-.header-nav-social-behance{
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 3.1rem;
-}
+
 .header-nav-location {
 	grid-column: 1 / 5;
 	grid-row: span 2;
@@ -455,30 +446,16 @@
 	align-items: center;
 	gap: 0.8rem;
 }
+.header-nav-location-item .header-nav-location-item-img{
+	width: 2.8rem;
+	height: 2.8rem;
+	border-radius: 50%;
+	overflow: hidden;
+}
 
 .header-nav-location-item .txt span {
 	color: var(--cl-content-label);
 	margin-left: 0.6rem;
-}
-
-.header-nav-location-flag {
-	flex: none;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 2.4rem;
-	height: 2.4rem;
-	border-radius: 50%;
-	background-color: #e21b22;
-	color: #ffe600;
-	font-size: 1rem;
-}
-
-.header-nav-location-flag--london {
-	border-radius: 0;
-	background-color: var(--cl-white);
-	color: #c8102e;
-	font-size: 2rem;
 }
 
 .header-nav-portrait {
@@ -540,7 +517,6 @@
 	transform-origin: 50% 50%;
 	pointer-events: none;
 	will-change: transform;
-	mix-blend-mode: difference;
 }
 .header-nav-portrait-ic svg {
 	display: block;
