@@ -43,6 +43,7 @@ export class Header {
 		this.toggleNav();
 		this.setupScrollListener(data);
 		this.togglePageClass(data);
+		this.toggleMode();
 	}
 
 	togglePageClass(data) {

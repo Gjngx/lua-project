@@ -60,7 +60,7 @@
 	pointer-events: none;
 }
 .header-logo-ic-amin{
-	height: min(31.9rem, 32.4847250509vh);
+	height: 28rem;
 	color: var(--cl-content-strong);
 	pointer-events: auto;
 	transition: color 0.3s ease-out;

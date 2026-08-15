@@ -1,31 +1,57 @@
 ---
 import '../styles/components/loader.css';
 import IconLogo from '../components/icons/IconLogo.astro';
+
+const unitDigits = Array.from({ length: 101 }, (_, index) => index % 10);
+const tensDigits = Array.from({ length: 11 }, (_, index) => index === 10 ? 1 : index);
 ---
 
 <div class="loader">
 	<div class="loader-inner">
 		<div class="loader-home">
-			<div class="loader-home-bg"></div>
-			<div class="container grid full-h">
-				<div class="loader-home-left">
-					<div class="loader-home-progress">
-						<div class="loader-home-progress-percent">
-							<p class="txt fs-400 fw-800">0</p>
-							<p class="txt fs-400 fw-800">0</p>
-							<p class="txt fs-400 fw-800">0</p>
+			<div class="loader-home-panel">
+				<div class="loader-home-bg"></div>
+				<div class="container grid full-h">
+					<div class="loader-home-left">
+						<div class="loader-home-progress">
+							<div class="loader-home-progress-percent">
+								<div class="loader-home-progress-digit">
+									<div class="loader-home-progress-reel loader-home-progress-tens">
+										{tensDigits.map((digit) => <p class="txt fs-400 fw-800">{digit}</p>)}
+									</div>
+								</div>
+								<div class="loader-home-progress-digit">
+									<div class="loader-home-progress-reel loader-home-progress-units">
+										{unitDigits.map((digit) => <p class="txt fs-400 fw-800">{digit}</p>)}
+									</div>
+								</div>
+								<div class="loader-home-progress-digit loader-home-progress-trailing">
+									<div class="loader-home-progress-trailing-reel">
+										<p class="txt fs-400 fw-800">0</p>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
-					<div class="loader-home-logo">
-						<div class="loader-home-logo-ic">
-							<IconLogo />
+					<div class="loader-home-right">
+						<div class="loader-home-desc">
+							<p class="txt fs-24">Creating websites <br>and digital products for great experiences</p>
 						</div>
 					</div>
 				</div>
-				<div class="loader-home-right">
-					<div class="loader-home-desc">
-						<p class="txt fs-24">Creating websites and digital products for great experiences</p>
-					</div>
+			</div>
+		</div>
+		<div class="loader-home-logo-mask loader-home-logo-mask-dark">
+			<div class="loader-home-logo is-dark">
+				<div class="loader-home-logo-ic">
+					<IconLogo />
+				</div>
+			</div>
+		</div>
+		<div class="loader-home-logo-mask loader-home-logo-mask-brand">
+			<div class="loader-home-logo is-brand">
+				<div class="loader-home-logo-ic">
+					<IconLogo />
 				</div>
 			</div>
 		</div>
