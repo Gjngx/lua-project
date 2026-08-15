@@ -330,8 +330,26 @@
 	padding: 1.2rem;
 	color: var(--cl-content-label);
 }
+
+.header-nav-link.link-current{
+	pointer-events: none;
+}
+
+.header-nav-link.link-current .header-nav-link-ic{
+	display: block;
+}
+.header-nav-link-ic{
+	width: 2rem;
+	height: 2rem;
+	display: none;
+}
 .header-nav-link{
+	display: flex;
 	color: var(--cl-content-strong);
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.8rem;
 }
 .header-nav-links-thumb-item{
 	width: 15.4rem;

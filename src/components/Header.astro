@@ -11,6 +11,7 @@ import IconLogo from '../components/icons/IconLogo.astro';
 import vietNam from '../assets/images/vn.png';
 import worldWide from '../assets/images/w.png';
 
+const pathname = Astro.url.pathname;
 ---
 
 <header class="header">
@@ -84,17 +85,49 @@ import worldWide from '../assets/images/w.png';
 				<div class="header-nav-links-inner">
 					<p class="txt fs-10 fw-500 trans-upper">Menu</p>
 					<div class="header-nav-links-list">
-						<a href="/" class="header-nav-link">
-							<span class="txt fs-32 fw-600 trans-upper">Home</span>
+						<a href="/" class:list={["header-nav-link", { "link-current": pathname === "/" }]}>
+							<div class="header-nav-link-ic">
+								<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20 21" fill="none">
+									<path d="M10 21C10 15.3289 5.52285 10.7316 0 10.7316C0 16.4027 4.47715 21 10 21Z" fill="currentColor"/>
+									<path d="M10 0C10 5.6711 5.52285 10.2684 0 10.2684C0 4.59733 4.47715 0 10 0Z" fill="currentColor"/>
+									<path d="M10 21C10 15.3289 14.4772 10.7316 20 10.7316C20 16.4027 15.5228 21 10 21Z" fill="currentColor"/>
+									<path d="M10 0C10 5.6711 14.4772 10.2684 20 10.2684C20 4.59733 15.5228 0 10 0Z" fill="currentColor"/>
+								</svg>
+							</div>
+							<span class="txt fs-32 fw-600">Home</span>
 						</a>
-						<a href="/about" class="header-nav-link">
-							<span class="txt fs-32 fw-600 trans-upper">Story</span>
+						<a href="/about" class:list={["header-nav-link", { "link-current": pathname.startsWith("/about") }]}>
+							<div class="header-nav-link-ic">
+								<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20 21" fill="none">
+									<path d="M10 21C10 15.3289 5.52285 10.7316 0 10.7316C0 16.4027 4.47715 21 10 21Z" fill="currentColor"/>
+									<path d="M10 0C10 5.6711 5.52285 10.2684 0 10.2684C0 4.59733 4.47715 0 10 0Z" fill="currentColor"/>
+									<path d="M10 21C10 15.3289 14.4772 10.7316 20 10.7316C20 16.4027 15.5228 21 10 21Z" fill="currentColor"/>
+									<path d="M10 0C10 5.6711 14.4772 10.2684 20 10.2684C20 4.59733 15.5228 0 10 0Z" fill="currentColor"/>
+								</svg>
+							</div>
+							<span class="txt fs-32 fw-600">Story</span>
 						</a>
 						<a href="/#works" class="header-nav-link">
-							<span class="txt fs-32 fw-600 trans-upper">Works</span>
+							<div class="header-nav-link-ic">
+								<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20 21" fill="none">
+									<path d="M10 21C10 15.3289 5.52285 10.7316 0 10.7316C0 16.4027 4.47715 21 10 21Z" fill="currentColor"/>
+									<path d="M10 0C10 5.6711 5.52285 10.2684 0 10.2684C0 4.59733 4.47715 0 10 0Z" fill="currentColor"/>
+									<path d="M10 21C10 15.3289 14.4772 10.7316 20 10.7316C20 16.4027 15.5228 21 10 21Z" fill="currentColor"/>
+									<path d="M10 0C10 5.6711 14.4772 10.2684 20 10.2684C20 4.59733 15.5228 0 10 0Z" fill="currentColor"/>
+								</svg>
+							</div>
+							<span class="txt fs-32 fw-600">Works</span>
 						</a>
 						<a href="/#playground" class="header-nav-link">
-							<span class="txt fs-32 fw-600 trans-upper">Playground</span>
+							<div class="header-nav-link-ic">
+								<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20 21" fill="none">
+									<path d="M10 21C10 15.3289 5.52285 10.7316 0 10.7316C0 16.4027 4.47715 21 10 21Z" fill="currentColor"/>
+									<path d="M10 0C10 5.6711 5.52285 10.2684 0 10.2684C0 4.59733 4.47715 0 10 0Z" fill="currentColor"/>
+									<path d="M10 21C10 15.3289 14.4772 10.7316 20 10.7316C20 16.4027 15.5228 21 10 21Z" fill="currentColor"/>
+									<path d="M10 0C10 5.6711 14.4772 10.2684 20 10.2684C20 4.59733 15.5228 0 10 0Z" fill="currentColor"/>
+								</svg>
+							</div>
+							<span class="txt fs-32 fw-600">Playground</span>
 						</a>
 					</div>
 				</div>
