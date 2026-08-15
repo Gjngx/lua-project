@@ -75,16 +75,6 @@
 	height: 100%;
 }
 
-.loader-home-progress-trailing{
-	width: 0;
-	flex: none;
-	opacity: 0;
-}
-
-.loader-home-progress-trailing-reel{
-	will-change: transform;
-}
-
 .loader-home-progress-reel{
 	display: flex;
 	flex-direction: column;

@@ -51,12 +51,8 @@ class Loader {
 			const percent = this.loaderEl.querySelector('.loader-home-progress-percent');
 			const percentText = percent.querySelector('.loader-home-progress-tens .txt');
 			const percentHeight = percentText?.getBoundingClientRect().height || 0;
-			const percentDigitWidth = percentText?.getBoundingClientRect().width || 0;
-			const trailingZeroWidth = Math.ceil(percentDigitWidth) + 1;
 			const units = percent.querySelector('.loader-home-progress-units');
 			const tens = percent.querySelector('.loader-home-progress-tens');
-			const trailingZero = percent.querySelector('.loader-home-progress-trailing');
-			const trailingZeroReel = percent.querySelector('.loader-home-progress-trailing-reel');
 			const logos = Array.from(this.loaderEl.querySelectorAll('.loader-home-logo'));
 			const logoIcons = logos.map((item) => item.querySelector('.loader-home-logo-ic'));
 			const logo = this.loaderEl.querySelector('.loader-home-logo.is-dark');
@@ -115,13 +111,7 @@ class Loader {
 			gsap.set(percent, {
 				y: percentHeight,
 			});
-			// Giữ sẵn ô của số 0 cuối để khi 99 -> 100 counter không đổi width
-			// và mép glyph không bị mask cắt trong frame đầu của transition.
-			gsap.set(trailingZero, {
-				width: trailingZeroWidth,
-				autoAlpha: 0,
-			});
-			gsap.set(trailingZeroReel, { yPercent: 100 });
+			gsap.set([tens, units], { y: 0 });
 			gsap.set(logoIcons, {
 				y: logoRiseStartY,
 				autoAlpha: 1
@@ -173,34 +163,47 @@ class Loader {
 				// gần như hoàn tất ngay từ mốc 40 như expo.out.
 				ease: 'power2.inOut',
 			}, 'counterStart');
-			this.tlFirstLoad.to(units, {
-				y: -percentHeight * 100,
-				duration: counterDuration,
-				ease: fakeLoadingEase,
-				force3D: true,
-			}, 'counterStart');
 
-			const digitTransitionDuration = 0.24;
-			for (let decade = 1; decade <= 10; decade += 1) {
-				const position = `counterStart+=${getCounterTime(decade * 10) - digitTransitionDuration}`;
+			// Mat Voyce-style counter: lấy mẫu tiến độ theo từng nhịp thay vì
+			// cuộn qua mọi số. Mỗi lần cập nhật tiến tối đa 35 và hai reel 0-9
+			// tự đi đến digit mới bằng một chuyển động dài, có quán tính.
+			const counterStepDuration = 1.2;
+			const counterSampleTimes = [0.85, 2.3, 3.75, 5.2, 6.65];
+			let displayedCounter = 0;
+			const counterSamples = counterSampleTimes.map((time) => {
+				const targetCounter = Math.min(
+					99,
+					Math.round(fakeLoadingEase(time / counterDuration) * 100),
+				);
+				displayedCounter = Math.min(
+					targetCounter,
+					displayedCounter + 35,
+				);
+				return { time, value: displayedCounter };
+			});
+			counterSamples.push({ time: 7.4, value: 99 });
+
+			counterSamples.forEach(({ time, value }) => {
+				const digits = String(value).padStart(2, '0').split('').map(Number);
+				const tensIndex = digits[0];
+				const unitsIndex = digits[1];
+				const position = `counterStart+=${time}`;
+
 				this.tlFirstLoad.to(tens, {
-					y: -percentHeight * decade,
-					duration: digitTransitionDuration,
-					ease: 'power2.inOut',
+					y: -percentHeight * tensIndex,
+					duration: counterStepDuration,
+					ease: 'power3.inOut',
+					overwrite: 'auto',
 					force3D: true,
 				}, position);
-			}
-
-			const trailingZeroStart = `counterStart+=${8 - digitTransitionDuration}`;
-			this.tlFirstLoad.set(trailingZero, {
-				autoAlpha: 1,
-			}, trailingZeroStart);
-			this.tlFirstLoad.to(trailingZeroReel, {
-				yPercent: 0,
-				duration: digitTransitionDuration,
-				ease: 'power2.inOut',
-				force3D: true,
-			}, trailingZeroStart);
+				this.tlFirstLoad.to(units, {
+					y: -percentHeight * unitsIndex,
+					duration: counterStepDuration,
+					ease: 'power3.inOut',
+					overwrite: 'auto',
+					force3D: true,
+				}, position);
+			});
 
 			this.tlFirstLoad.to(logoRevealProgress, {
 				value: 1,
