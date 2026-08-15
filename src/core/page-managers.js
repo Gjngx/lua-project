@@ -33,14 +33,23 @@ export class PageManager {
 		return this._loadPromise;
 	}
 
-	initOnce(data) {
+	prepareOnce(data) {
 		return this._loadSections().then(() => {
 			this._sections?.forEach((section) => {
 				if (section.trigger) section.trigger(data);
 				if (section.setup) section.setup(data, 'once');
-				if (section.playOnce) section.playOnce(data);
 			});
 		});
+	}
+
+	playOnce(data) {
+		this._sections?.forEach((section) => {
+			if (section.playOnce) section.playOnce(data);
+		});
+	}
+
+	initOnce(data) {
+		return this.prepareOnce(data).then(() => this.playOnce(data));
 	}
 
 	initEnter(data) {

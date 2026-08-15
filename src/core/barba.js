@@ -4,6 +4,7 @@ import { globalChange, pageTrans } from './global-scripts';
 import { scrollTop } from './scroll.js';
 import { scrollIndicator } from './components/scroll-indicator.js';
 import { buttonText } from './components/button-text.js';
+import { loader } from './loader.js';
 
 /**
  * Hàm đồng bộ thẻ <head> khi chuyển trang bằng Barba.
@@ -131,13 +132,11 @@ export function initBarba() {
 					});
 				},
 
-				once(data) {
+				async once(data) {
 					// Chạy 1 lần duy nhất khi web vừa mới bật lên
 					globalChange.init(data);
-					const namespace = data.next.namespace;
-					if (PageManagerRegistry[namespace]) {
-						PageManagerRegistry[namespace].initOnce(data);
-					}
+					await loader.init(data);
+					loader.play();
 				},
 
 				async leave(data) {

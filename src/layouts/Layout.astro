@@ -6,6 +6,7 @@ import SEO from '../components/SEO.astro';
 import LayoutGrid from '../components/LayoutGrid.astro';
 import ScrollIndicator from '../components/ScrollIndicator.astro';
 import Cursor from '../components/Cursor.astro';
+import Loader from '../components/Loader.astro';
 
 interface Props {
 	title: string;
@@ -29,6 +30,7 @@ const { title, namespace, description } = Astro.props;
 	<body class="body">
 		<Cursor />
 		<Header />
+		<Loader />
 		<div class="body-inner">
 			<!-- <LayoutGrid /> -->
 			<main class="main" data-barba="wrapper">

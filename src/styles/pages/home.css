@@ -55,7 +55,6 @@
 
 .home-hero-top {
 	height: 100vh;
-	align-content: end;
 }
 
 .home-hero-top.top-left {
@@ -67,6 +66,9 @@
 .home-hero-top.top-right {
 	grid-column: 13 / -2;
 	grid-row: 1 / 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 }
 
 .home-hero-desc {
@@ -78,7 +80,7 @@
 .home-hero-top-title {
 	width: 27.1rem;
 	color: var(--cl-white);
-	margin-bottom: min(15.2rem, 15.4786150713vh);
+	margin-top: min(44rem, 44.8065173116vh);
 }
 
 .home-hero-top-ic {

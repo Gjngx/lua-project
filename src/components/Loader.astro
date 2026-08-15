@@ -1,0 +1,34 @@
+---
+import '../styles/components/loader.css';
+import IconLogo from '../components/icons/IconLogo.astro';
+---
+
+<div class="loader">
+	<div class="loader-inner">
+		<div class="loader-home">
+			<div class="loader-home-bg"></div>
+			<div class="container grid full-h">
+				<div class="loader-home-left">
+					<div class="loader-home-progress">
+						<div class="loader-home-progress-percent">
+							<p class="txt fs-400 fw-800">0</p>
+							<p class="txt fs-400 fw-800">0</p>
+							<p class="txt fs-400 fw-800">0</p>
+						</div>
+					</div>
+					<div class="loader-home-logo">
+						<div class="loader-home-logo-ic">
+							<IconLogo />
+						</div>
+					</div>
+				</div>
+				<div class="loader-home-right">
+					<div class="loader-home-desc">
+						<p class="txt fs-24">Creating websites and digital products for great experiences</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="loader-page"></div>
+	</div>
+</div>
