@@ -34,6 +34,12 @@ export class Footer extends TriggerSetup {
 	}
 	handleTrailMove = (event) => {
 		if (event.pointerType && event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
+		if (event.target.closest?.(
+			'.txt, .footer-sub-content, .footer-info-link, .footer-info-right-phone',
+		)) {
+			this.lastTrailPoint = null;
+			return;
+		}
 
 		const point = { x: event.clientX, y: event.clientY };
 		if (!this.lastTrailPoint) {

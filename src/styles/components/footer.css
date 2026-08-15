@@ -164,6 +164,7 @@
 
 .footer-main-content:hover .footer-main-say-hello{
 	opacity: 1;
+	transform: translate(-50%, -50%) scale(1);
 }
 
 .footer-info-link,
@@ -201,9 +202,14 @@
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(-50%, -50%);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 0.4rem;
+	transform: translate(-50%, -50%) scale(0.8);
 	opacity: 0;
-	transition: opacity 0.3s ease-in;
+	transition: opacity 0.3s ease-in, transform 0.3s ease-in-out;
 }
 
 .footer-main-say-hello-ic {
@@ -253,7 +259,7 @@
 }
 
 .footer-main-say-hello-btn-inner {
-	padding: 2rem 4rem;
+	padding: 1.2rem 3.2rem;
 	border-radius: 10vmin;
 	background-color: var(--cl-brand);
 }
