@@ -2,8 +2,7 @@
 import '../styles/components/loader.css';
 import IconLogo from '../components/icons/IconLogo.astro';
 
-const unitDigits = Array.from({ length: 10 }, (_, index) => index);
-const tensDigits = Array.from({ length: 10 }, (_, index) => index);
+const counterDigits = Array.from({ length: 130 }, (_, index) => index % 10);
 ---
 
 <div class="loader">
@@ -17,12 +16,12 @@ const tensDigits = Array.from({ length: 10 }, (_, index) => index);
 							<div class="loader-home-progress-percent">
 								<div class="loader-home-progress-digit">
 									<div class="loader-home-progress-reel loader-home-progress-tens">
-										{tensDigits.map((digit) => <p class="txt fs-400 fw-800">{digit}</p>)}
+										{counterDigits.map((digit) => <p class="txt fs-400 fw-800">{digit}</p>)}
 									</div>
 								</div>
 								<div class="loader-home-progress-digit">
 									<div class="loader-home-progress-reel loader-home-progress-units">
-										{unitDigits.map((digit) => <p class="txt fs-400 fw-800">{digit}</p>)}
+										{counterDigits.map((digit) => <p class="txt fs-400 fw-800">{digit}</p>)}
 									</div>
 								</div>
 							</div>

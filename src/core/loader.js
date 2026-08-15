@@ -111,7 +111,8 @@ class Loader {
 			gsap.set(percent, {
 				y: percentHeight,
 			});
-			gsap.set([tens, units], { y: 0 });
+			const initialCounterIndex = 60;
+			gsap.set([tens, units], { y: -percentHeight * initialCounterIndex });
 			gsap.set(logoIcons, {
 				y: logoRiseStartY,
 				autoAlpha: 1
@@ -165,10 +166,10 @@ class Loader {
 			}, 'counterStart');
 
 			// Mat Voyce-style counter: lấy mẫu tiến độ theo từng nhịp thay vì
-			// cuộn qua mọi số. Mỗi lần cập nhật tiến tối đa 35 và hai reel 0-9
-			// tự đi đến digit mới bằng một chuyển động dài, có quán tính.
+			// cuộn qua mọi số. Hai reel luôn chạy ngược hướng và đổi hướng cho
+			// nhau ở nhịp kế tiếp, kể cả khi digit đích không thay đổi.
 			const counterStepDuration = 1.2;
-			const counterSampleTimes = [0.85, 2.3, 3.75, 5.2, 6.65];
+			const counterSampleTimes = [0.85, 2.3, 3.75, 5.2];
 			let displayedCounter = 0;
 			const counterSamples = counterSampleTimes.map((time) => {
 				const targetCounter = Math.min(
@@ -182,22 +183,34 @@ class Loader {
 				return { time, value: displayedCounter };
 			});
 			counterSamples.push({ time: 7.4, value: 99 });
+			let tensReelIndex = initialCounterIndex;
+			let unitsReelIndex = initialCounterIndex;
+			const getDirectionalIndex = (currentIndex, targetDigit, direction) => {
+				const currentDigit = ((currentIndex % 10) + 10) % 10;
+				let distance = direction === 1
+					? (targetDigit - currentDigit + 10) % 10
+					: (currentDigit - targetDigit + 10) % 10;
+				if (distance === 0) distance = 10;
+				return currentIndex + direction * distance;
+			};
 
-			counterSamples.forEach(({ time, value }) => {
+			counterSamples.forEach(({ time, value }, index) => {
 				const digits = String(value).padStart(2, '0').split('').map(Number);
-				const tensIndex = digits[0];
-				const unitsIndex = digits[1];
+				const tensDirection = index % 2 === 0 ? 1 : -1;
+				const unitsDirection = -tensDirection;
+				tensReelIndex = getDirectionalIndex(tensReelIndex, digits[0], tensDirection);
+				unitsReelIndex = getDirectionalIndex(unitsReelIndex, digits[1], unitsDirection);
 				const position = `counterStart+=${time}`;
 
 				this.tlFirstLoad.to(tens, {
-					y: -percentHeight * tensIndex,
+					y: -percentHeight * tensReelIndex,
 					duration: counterStepDuration,
 					ease: 'power3.inOut',
 					overwrite: 'auto',
 					force3D: true,
 				}, position);
 				this.tlFirstLoad.to(units, {
-					y: -percentHeight * unitsIndex,
+					y: -percentHeight * unitsReelIndex,
 					duration: counterStepDuration,
 					ease: 'power3.inOut',
 					overwrite: 'auto',
