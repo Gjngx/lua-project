@@ -134,6 +134,12 @@ p{
 	letter-spacing: -0.02em;
 }
 
+.fs-14 {
+	font-size: 1.4rem;
+	line-height: 1;
+	letter-spacing: -0.02em;
+}
+
 .fs-12 {
 	font-size: 1.2rem;
 	line-height: 1;
