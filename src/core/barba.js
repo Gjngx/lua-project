@@ -6,6 +6,8 @@ import { scrollIndicator } from './components/scroll-indicator.js';
 import { buttonText } from './components/button-text.js';
 import { loader } from './loader.js';
 
+let staleHeadElements = [];
+
 /**
  * Hàm đồng bộ thẻ <head> khi chuyển trang bằng Barba.
  * Đảm bảo các <style>, <link stylesheet>, và <meta> mới được thêm vào,
@@ -20,8 +22,11 @@ function syncHead(data) {
 	const nextHead = nextDoc.head;
 	const currentHead = document.head;
 
-	// Xóa các tag cũ đã được thêm bởi lần sync trước
-	currentHead.querySelectorAll('[data-barba-head]').forEach((el) => el.remove());
+	// Giữ CSS của trang cũ cho tới khi leave animation kết thúc. Với sync: true,
+	// container cũ và mới cùng tồn tại trong suốt transition.
+	const previousSyncedElements = new Set(
+		currentHead.querySelectorAll('[data-barba-head]'),
+	);
 
 	// Các selector cần sync
 	const syncSelectors = [
@@ -38,15 +43,18 @@ function syncHead(data) {
 
 			if (nextEl.tagName === 'LINK') {
 				const href = nextEl.getAttribute('href');
-				if (href && currentHead.querySelector(`link[href="${href}"]`)) {
+				const existing = href && currentHead.querySelector(`link[href="${href}"]`);
+				if (existing) {
 					alreadyExists = true;
+					previousSyncedElements.delete(existing);
 				}
 			} else if (nextEl.tagName === 'STYLE') {
 				const content = nextEl.textContent.trim();
-				const existingStyles = currentHead.querySelectorAll('style:not([data-barba-head])');
+				const existingStyles = currentHead.querySelectorAll('style');
 				for (const existing of existingStyles) {
 					if (existing.textContent.trim() === content) {
 						alreadyExists = true;
+						previousSyncedElements.delete(existing);
 						break;
 					}
 				}
@@ -54,9 +62,9 @@ function syncHead(data) {
 				const name = nextEl.getAttribute('name');
 				if (name && currentHead.querySelector(`meta[name="${name}"]`)) {
 					// Với thẻ meta, thay vì thêm mới thì cập nhật content của thẻ hiện tại
-					currentHead
-						.querySelector(`meta[name="${name}"]`)
-						.setAttribute('content', nextEl.getAttribute('content'));
+					const existing = currentHead.querySelector(`meta[name="${name}"]`);
+					existing.setAttribute('content', nextEl.getAttribute('content'));
+					previousSyncedElements.delete(existing);
 					alreadyExists = true;
 				}
 			}
@@ -69,11 +77,18 @@ function syncHead(data) {
 		});
 	});
 
+	staleHeadElements = Array.from(previousSyncedElements);
+
 	// Cập nhật title của document
 	const newTitle = nextDoc.title;
 	if (newTitle) {
 		document.title = newTitle;
 	}
+}
+
+function cleanupStaleHead() {
+	staleHeadElements.forEach((el) => el.remove());
+	staleHeadElements = [];
 }
 
 /**
@@ -111,6 +126,8 @@ export function initBarba() {
 				sync: true,
 
 				beforeLeave(data) {
+					// Đóng menu và transition trang chạy đồng thời.
+					globalChange.beforeLeave();
 					scrollIndicator.pause();
 					buttonText.destroy(data.current.container);
 
@@ -162,6 +179,7 @@ export function initBarba() {
 				},
 
 				after() {
+					cleanupStaleHead();
 					scrollIndicator.resume();
 				},
 			},

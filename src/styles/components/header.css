@@ -48,7 +48,6 @@
 }
 
 .header-logo-amin{
-	display: none;
 	position: fixed;
 	left: 0;
 	top: 3.2rem;
@@ -58,7 +57,17 @@
 	align-items: flex-end;
 	padding-left: var(--container--padding);
 	pointer-events: none;
+	transition: opacity 0.3s ease-out;
 }
+
+.header-logo-amin.header-home{
+	opacity: 1;
+}
+
+.header-logo-amin {
+	opacity: 0;
+}
+
 .header-logo-ic-amin{
 	height: 28rem;
 	color: var(--cl-content-strong);

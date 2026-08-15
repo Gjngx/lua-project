@@ -5,7 +5,7 @@ import { useSplitPretext } from '../utils/pretext.js';
 
 class Loader {
 	constructor() {
-		this.isLoaded = sessionStorage.getItem('isLoaded') === 'true';
+		this.isLoaded = false;
 		this.data = null;
 		this.manager = null;
 		this.isInitialized = false;
@@ -46,7 +46,7 @@ class Loader {
 		this.tlEnd = gsap.timeline({ paused: true });
 
 		const isHome = this.data.next.namespace === 'home';
-		if (isHome) {
+		if (isHome && !this.isLoaded) {
 			const progress = this.loaderEl.querySelector('.loader-home-progress');
 			const percent = this.loaderEl.querySelector('.loader-home-progress-percent');
 			const percentText = percent.querySelector('.loader-home-progress-tens .txt');
@@ -338,7 +338,6 @@ class Loader {
 		this.manager?.playOnce(this.data);
 
 		this.isLoaded = true;
-		sessionStorage.setItem('isLoaded', 'true');
 	}
 
 	restorePage() {

@@ -76,6 +76,22 @@ export class Header {
 		this.elLogoAnimated?.classList.toggle('header-home', isHome);
 	}
 
+	updateActiveNavLink() {
+		if (!this.el) return;
+		const pathname = window.location.pathname;
+		const navLinks = this.el.querySelectorAll('.header-nav-link');
+		navLinks.forEach((link) => {
+			const href = link.getAttribute('href');
+			if (!href) return;
+			// Bỏ qua hash (#works, #playground) khi so sánh
+			const linkPath = href.split('#')[0] || '/';
+			const isCurrent =
+				(linkPath === '/' && pathname === '/') ||
+				(linkPath !== '/' && pathname.startsWith(linkPath));
+			link.classList.toggle('link-current', isCurrent);
+		});
+	}
+
 	setupLocationClocks() {
 		if (!this.el) return;
 
@@ -1023,6 +1039,9 @@ export class Header {
 	open() {
 		if (this.isOpen || !this.el) return;
 
+		// Cập nhật link active dựa trên trang hiện tại mỗi khi menu mở
+		this.updateActiveNavLink();
+
 		this.navTransition?.kill();
 		this.navTransition = null;
 		this.portraitResetCall?.kill();
@@ -1077,6 +1096,10 @@ export class Header {
 		} else {
 			this.playNavCloseAnimation();
 		}
+	}
+
+	closeForNavigation() {
+		if (this.isOpen) this.close();
 	}
 }
 

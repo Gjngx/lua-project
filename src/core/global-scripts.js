@@ -1,6 +1,5 @@
 import { gsap } from './gsap';
 import { header } from './components/header';
-import { footer } from './components/footer';
 import { audioManager } from './components/audio';
 import { buttonText } from './components/button-text';
 
@@ -18,7 +17,6 @@ export class GlobalChange {
 		audioManager.init();
 		
 		header.init(data);
-		footer.trigger(data);
 		buttonText.mount(document);
 		
 		this.refreshOnBreakpoint();
@@ -29,9 +27,11 @@ export class GlobalChange {
 		this.namespace = data.next.namespace;
 		
 		header.update(data);
-		footer.destroy();
-		footer.trigger(data);
 		buttonText.mount(data.next.container);
+	}
+
+	beforeLeave() {
+		header.closeForNavigation();
 	}
 	
 	refreshOnBreakpoint() {

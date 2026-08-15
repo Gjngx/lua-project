@@ -2,6 +2,7 @@ import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit } from '../../core/helpers.js';
 import { SvgPathParticles } from '../../core/svg-path-particles.js';
+import { footer } from '../../core/components/footer.js';
 import { Renderer, Camera, Transform, Texture, Program, Mesh, Sphere, Vec3 } from 'ogl';
 import {
 	playgroundSphereVertex,
@@ -2002,5 +2003,14 @@ export const HomePage = {
 			this.sphereState = null;
 			this.el = null;
 		}
+	},
+	Footer: class {
+		setup(data) {
+			footer.trigger(data);
 		}
-	};
+
+		destroy() {
+			footer.destroy();
+		}
+	},
+};
