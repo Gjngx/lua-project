@@ -338,6 +338,10 @@
 	overflow: hidden;
 }
 
+.home-works-item-img img {
+	will-change: transform;
+}
+
 .home-works-list-inner {
 	margin-top: 12.4rem;
 	display: flex;

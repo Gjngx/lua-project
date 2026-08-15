@@ -397,6 +397,7 @@ export const HomePage = {
 			this.tlWorksTop = null;
 			this.tlWorksScroll = null;
 			this.tlWorksDecorAssembly = null;
+			this.parallaxImages = [];
 			this.worksPathParticles = null;
 			this.transitionCanvas = null;
 			this.transitionContext = null;
@@ -551,6 +552,36 @@ export const HomePage = {
 					this.updateTransitionContent();
 				},
 			}, 0);
+
+			this.setupImageParallax(prefersReducedMotion);
+		}
+
+		setupImageParallax(prefersReducedMotion) {
+			if (prefersReducedMotion) return;
+
+			const imageWraps = gsap.utils.toArray(
+				this.el.querySelectorAll('.home-works-item-img')
+			);
+
+			this.parallaxImages = imageWraps.flatMap((imageWrap) => {
+				const image = imageWrap.querySelector('img');
+				if (!image) return [];
+
+				return [gsap.fromTo(image, {
+					scale: 1.25,
+					yPercent: -10,
+				}, {
+					yPercent: 10,
+					ease: 'none',
+					scrollTrigger: {
+						trigger: imageWrap,
+						start: 'top bottom',
+						end: 'bottom top',
+						scrub: 0.8,
+						invalidateOnRefresh: true,
+					},
+				})];
+			});
 		}
 
 		setupWebGL() {
@@ -1067,7 +1098,11 @@ export const HomePage = {
 			}
 			
 			if (this.parallaxImages) {
-				this.parallaxImages.forEach(img => img.destroy());
+				this.parallaxImages.forEach((tween) => {
+					tween.scrollTrigger?.kill();
+					tween.kill();
+				});
+				this.parallaxImages = [];
 			}
 			
 			if (this.itemTriggers) {
