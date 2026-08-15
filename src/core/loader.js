@@ -52,6 +52,7 @@ class Loader {
 			const percentText = percent.querySelector('.loader-home-progress-tens .txt');
 			const percentHeight = percentText?.getBoundingClientRect().height || 0;
 			const percentDigitWidth = percentText?.getBoundingClientRect().width || 0;
+			const trailingZeroWidth = Math.ceil(percentDigitWidth) + 1;
 			const units = percent.querySelector('.loader-home-progress-units');
 			const tens = percent.querySelector('.loader-home-progress-tens');
 			const trailingZero = percent.querySelector('.loader-home-progress-trailing');
@@ -113,6 +114,12 @@ class Loader {
 			});
 			gsap.set(percent, {
 				y: percentHeight,
+			});
+			// Giữ sẵn ô của số 0 cuối để khi 99 -> 100 counter không đổi width
+			// và mép glyph không bị mask cắt trong frame đầu của transition.
+			gsap.set(trailingZero, {
+				width: trailingZeroWidth,
+				autoAlpha: 0,
 			});
 			gsap.set(trailingZeroReel, { yPercent: 100 });
 			gsap.set(logoIcons, {
@@ -187,7 +194,6 @@ class Loader {
 			const trailingZeroStart = `counterStart+=${8 - digitTransitionDuration}`;
 			this.tlFirstLoad.set(trailingZero, {
 				autoAlpha: 1,
-				width: percentDigitWidth,
 			}, trailingZeroStart);
 			this.tlFirstLoad.to(trailingZeroReel, {
 				yPercent: 0,
