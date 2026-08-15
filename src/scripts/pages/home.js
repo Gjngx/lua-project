@@ -2,10 +2,8 @@ import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit } from '../../core/helpers.js';
 import { SvgPathParticles } from '../../core/svg-path-particles.js';
-import { Renderer, Camera, Transform, Texture, Program, Mesh, Plane, Sphere, Vec3 } from 'ogl';
+import { Renderer, Camera, Transform, Texture, Program, Mesh, Sphere, Vec3 } from 'ogl';
 import {
-	distortionVertex as vertex,
-	objectFitFragment as fragment,
 	playgroundSphereVertex,
 	playgroundSphereFragment,
 } from '../../core/shaders.js';
@@ -397,7 +395,6 @@ export const HomePage = {
 			this.tlWorksTop = null;
 			this.tlWorksScroll = null;
 			this.tlWorksDecorAssembly = null;
-			this.parallaxImages = [];
 			this.worksPathParticles = null;
 			this.transitionCanvas = null;
 			this.transitionContext = null;
@@ -422,6 +419,14 @@ export const HomePage = {
 			this.startWorksRender = null;
 			this.stopWorksRender = null;
 			this.onWorksVisibilityChange = null;
+			this.onWorksScroll = null;
+			this.worksContext = null;
+			this.worksCanvas = null;
+			this.worksCanvasParent = null;
+			this.worksCanvasNextSibling = null;
+			this.lastWorksFrameTime = null;
+			this.lastWorksScrollY = null;
+			this.worksCurlStrength = 0;
 		}
 
 		trigger(data) {
@@ -553,168 +558,84 @@ export const HomePage = {
 				},
 			}, 0);
 
-			this.setupImageParallax(prefersReducedMotion);
+			this.setupWebGL(prefersReducedMotion);
 		}
 
-		setupImageParallax(prefersReducedMotion) {
-			if (prefersReducedMotion) return;
-
-			const imageWraps = gsap.utils.toArray(
-				this.el.querySelectorAll('.home-works-item-img')
-			);
-
-			this.parallaxImages = imageWraps.flatMap((imageWrap) => {
-				const image = imageWrap.querySelector('img');
-				if (!image) return [];
-
-				return [gsap.fromTo(image, {
-					scale: 1.25,
-					yPercent: -10,
-				}, {
-					yPercent: 10,
-					ease: 'none',
-					scrollTrigger: {
-						trigger: imageWrap,
-						start: 'top bottom',
-						end: 'bottom top',
-						scrub: 0.8,
-						invalidateOnRefresh: true,
-					},
-				})];
-			});
-		}
-
-		setupWebGL() {
-			if (this.renderer) return;
+		setupWebGL(prefersReducedMotion) {
+			if (this.worksContext || prefersReducedMotion || window.innerWidth <= 991) return;
 
 			const canvas = this.el.querySelector('#works-gl-canvas');
 			if (!canvas) return;
 
-			this.renderer = new Renderer({ canvas, alpha: true, antialias: true, dpr: 2 });
-			const gl = this.renderer.gl;
-			const camera = new Camera(gl);
-			camera.fov = 45;
-			camera.position.z = 20;
+			// Keep the full-screen render surface outside every section/container
+			// so ancestor overflow, transforms and paint containment cannot clip it.
+			this.worksCanvas = canvas;
+			this.worksCanvasParent = canvas.parentNode;
+			this.worksCanvasNextSibling = canvas.nextSibling;
+			document.body.appendChild(canvas);
 
-			const scene = new Transform();
-			// OPTIMIZATION 1: Giảm segments nhưng phải giữ cả height và width để không bị cắt nát hình
-			this.geometry = new Plane(gl, { heightSegments: 30, widthSegments: 30 });
-
+			this.worksContext = canvas.getContext('2d', { alpha: true });
+			if (!this.worksContext) {
+				this.worksCanvasParent?.appendChild(canvas);
+				this.worksCanvas = null;
+				this.worksCanvasParent = null;
+				this.worksCanvasNextSibling = null;
+				return;
+			}
 			this.meshes = [];
-			this.programs = [];
-			this.tls = [];
-			this.textures = [];
 			this.imageLoadCleanups = [];
 
 			const items = gsap.utils.toArray(this.el.querySelectorAll('.home-works-item'));
 
-			items.forEach((item, index) => {
+			items.forEach((item) => {
 				const imgEl = item.querySelector('img');
-				if (!imgEl) return;
+				const container = item.querySelector('.home-works-item-img');
+				if (!imgEl || !container) return;
 
-				const texture = new Texture(gl, { generateMipmaps: false });
-				this.textures.push(texture);
-				const program = new Program(gl, {
-					fragment,
-					vertex,
-					uniforms: {
-						tMap: { value: texture },
-						uProgress: { value: 0 },
-						uPlaneSize: { value: [0, 0] },
-						uDOMSize: { value: [0, 0] },
-						uImageSize: { value: [0, 0] },
-						uBorderRadius: { value: 0 },
-						rotationAxis: { value: [0, 1, 0] },
-						distortionAxis: { value: [1, 1, 1] },
-						uDistortion: { value: 2.5 }
-					},
-					cullFace: false,
-					transparent: true
-				});
+				const layer = {
+					item,
+					container,
+					imgEl,
+					textureReady: false,
+					canvasRendered: false,
+					borderRadius: 0,
+				};
 
-				this.programs.push(program);
-
-				const setupTexture = (image) => {
-					texture.image = image;
-					program.uniforms.uImageSize.value = [image.naturalWidth, image.naturalHeight];
-					imgEl.classList.add('gl-hidden');
+				const setupTexture = () => {
+					layer.textureReady = true;
 				};
 
 				if (imgEl.complete && imgEl.naturalWidth > 0) {
-					setupTexture(imgEl);
+					setupTexture();
 				} else {
-					const onImageLoad = () => setupTexture(imgEl);
+					const onImageLoad = setupTexture;
 					imgEl.addEventListener('load', onImageLoad, { once: true });
 					this.imageLoadCleanups.push(() => {
 						imgEl.removeEventListener('load', onImageLoad);
 					});
 				}
-
-				const mesh = new Mesh(gl, { geometry: this.geometry, program });
-				mesh.setParent(scene);
-				this.meshes.push({ mesh, item, program, imgEl });
-
-				const proxy = { progress: 0 };
-				const tl = gsap.timeline({
-					scrollTrigger: {
-						trigger: item,
-						start: 'top bottom',
-						end: 'bottom top',
-						scrub: 1,
-					}
-				});
-				tl.to(proxy, {
-					progress: 1,
-					ease: "none",
-					onUpdate: () => {
-						program.uniforms.uProgress.value = proxy.progress;
-					}
-				});
-				this.tls.push(tl);
+				this.meshes.push(layer);
 			});
 
 			this.onResize = () => {
 				const w = window.innerWidth;
 				const h = window.innerHeight;
-
-				this.renderer.setSize(w, h);
-				camera.perspective({ aspect: w / h });
-
-				const fov = camera.fov * (Math.PI / 180);
-				const height = 2 * Math.tan(fov / 2) * camera.position.z;
-				const width = height * camera.aspect;
-
-				// OPTIMIZATION 2: Tính toán kích thước 1 lần duy nhất khi resize
-				this.meshes.forEach(obj => {
-					const container = obj.item.querySelector('.home-works-item-img');
-					if (container) {
-						const style = getComputedStyle(container);
-						obj.program.uniforms.uBorderRadius.value = parseFloat(style.borderRadius) || 0;
-
-						const rect = container.getBoundingClientRect();
-						obj.bounds = {
-							w: rect.width,
-							h: rect.height,
-							left: rect.left,
-							topOffset: rect.top + window.scrollY // Lưu lại vị trí tuyệt đối so với document
-						};
-
-						obj.mesh.scale.x = (width * rect.width) / w;
-						obj.mesh.scale.y = (height * rect.height) / h;
-						obj.program.uniforms.uPlaneSize.value = [obj.mesh.scale.x, obj.mesh.scale.y];
-						obj.program.uniforms.uDOMSize.value = [rect.width, rect.height];
-					}
+				const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+				canvas.width = Math.round(w * dpr);
+				canvas.height = Math.round(h * dpr);
+				this.worksContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+				this.worksContext.imageSmoothingEnabled = true;
+				this.worksContext.imageSmoothingQuality = 'high';
+				this.meshes.forEach((layer) => {
+					layer.borderRadius = parseFloat(getComputedStyle(layer.container).borderRadius) || 0;
 				});
-
-				this.viewSize = { w, h, width, height };
+				this.viewSize = { w, h, dpr };
 				if (this.isVisible) this.startWorksRender?.();
 			};
 
 			window.addEventListener('resize', this.onResize);
-			this.webGLResizeTimer = window.setTimeout(() => {
-				this.webGLResizeTimer = null;
-				if (this.renderer && this.onResize) this.onResize();
-			}, 100);
+			ScrollTrigger.addEventListener('refresh', this.onResize);
+			this.onResize();
 
 			// OPTIMIZATION 3: Intersection Observer để tạm dừng render khi không cuộn tới
 			this.isVisible = false;
@@ -737,24 +658,132 @@ export const HomePage = {
 
 			this.renderWorksFrame = () => {
 				this.rafId = null;
-				if (!this.isVisible || document.hidden || !this.viewSize || !this.renderer) return;
+				if (!this.isVisible || document.hidden || !this.viewSize || !this.worksContext) return;
 
-				const { w, h, width, height } = this.viewSize;
+				const { w, h, dpr } = this.viewSize;
+				const context = this.worksContext;
 				const scrollY = window.scrollY;
+				const now = performance.now();
+				const deltaTime = this.lastWorksFrameTime === null
+					? 1 / 60
+					: Math.max(1 / 240, Math.min((now - this.lastWorksFrameTime) / 1000, 0.1));
+				const scrollVelocity = this.lastWorksScrollY === null
+					? 0
+					: Math.abs(scrollY - this.lastWorksScrollY) / deltaTime;
+				const targetCurl = Math.min(1, scrollVelocity / 800) * 0.06;
+				const damping = targetCurl > this.worksCurlStrength ? 0.025 : 0.175;
+				const blend = 1 - Math.exp(-deltaTime / damping);
+				this.worksCurlStrength += (targetCurl - this.worksCurlStrength) * blend;
+				if (targetCurl === 0 && this.worksCurlStrength < 0.0001) {
+					this.worksCurlStrength = 0;
+				}
+				this.lastWorksFrameTime = now;
+				this.lastWorksScrollY = scrollY;
+
+				context.clearRect(0, 0, w, h);
 
 				this.meshes.forEach(obj => {
-					if (!obj.bounds) return;
+					if (!obj.textureReady) return;
+					const rect = obj.container.getBoundingClientRect();
+					if (rect.bottom <= 0 || rect.top >= h || rect.width <= 0 || rect.height <= 0) return;
 
-					const currentTop = obj.bounds.topOffset - scrollY;
-					const x = obj.bounds.left + obj.bounds.w / 2;
-					const y = currentTop + obj.bounds.h / 2;
+					const image = obj.imgEl;
+					const imageAspect = image.naturalWidth / image.naturalHeight;
+					const rectAspect = rect.width / rect.height;
+					let sourceX = 0;
+					let sourceY = 0;
+					let sourceWidth = image.naturalWidth;
+					let sourceHeight = image.naturalHeight;
+					if (imageAspect > rectAspect) {
+						sourceWidth = image.naturalHeight * rectAspect;
+						sourceX = (image.naturalWidth - sourceWidth) * 0.5;
+					} else {
+						sourceHeight = image.naturalWidth / rectAspect;
+						sourceY = (image.naturalHeight - sourceHeight) * 0.5;
+					}
 
-					obj.mesh.position.x = (x / w) * width - width / 2;
-					obj.mesh.position.y = -(y / h) * height + height / 2;
+					const radius = Math.min(
+						obj.borderRadius,
+						rect.width * 0.5,
+						rect.height * 0.5,
+					);
+					const getWarpedEdges = (screenY) => {
+						const localY = screenY - rect.top;
+						const cornerDistance = Math.max(0, Math.min(localY, rect.height - localY));
+						const cornerInset = cornerDistance < radius
+							? radius - Math.sqrt(Math.max(0, radius * radius - (radius - cornerDistance) ** 2))
+							: 0;
+						const sourceLeft = rect.left + cornerInset;
+						const sourceRight = rect.right - cornerInset;
+						const screenUvY = 1 - screenY / h;
+						const centered = 2 * screenUvY - 1;
+						const profile = 1 - Math.sqrt(Math.max(0, 1 - centered * centered));
+						const scale = 1 - profile * this.worksCurlStrength;
+						return {
+							left: ((sourceLeft / w - 0.5) / scale + 0.5) * w,
+							right: ((sourceRight / w - 0.5) / scale + 0.5) * w,
+						};
+					};
+
+					const bandHeight = 2;
+					const firstY = Math.max(0, Math.floor(rect.top));
+					const lastY = Math.min(h, Math.ceil(rect.bottom));
+					const edgeStep = 3;
+					context.save();
+					context.beginPath();
+					let edge = getWarpedEdges(firstY);
+					context.moveTo(edge.left, firstY);
+					for (let screenY = firstY + edgeStep; screenY < lastY; screenY += edgeStep) {
+						edge = getWarpedEdges(screenY);
+						context.lineTo(edge.left, screenY);
+					}
+					edge = getWarpedEdges(lastY);
+					context.lineTo(edge.left, lastY);
+					context.lineTo(edge.right, lastY);
+					for (let screenY = lastY - edgeStep; screenY > firstY; screenY -= edgeStep) {
+						edge = getWarpedEdges(screenY);
+						context.lineTo(edge.right, screenY);
+					}
+					edge = getWarpedEdges(firstY);
+					context.lineTo(edge.right, firstY);
+					context.closePath();
+					context.clip();
+
+					for (let screenY = firstY; screenY < lastY; screenY += bandHeight) {
+						const drawHeight = Math.min(bandHeight + 0.5, lastY - screenY);
+						const localY = (screenY - rect.top) / rect.height;
+						const sourceBandY = sourceY + localY * sourceHeight;
+						const availableSourceHeight = sourceY + sourceHeight - sourceBandY;
+						const sourceBandHeight = Math.min(
+							Math.max(0.5, (drawHeight / rect.height) * sourceHeight),
+							availableSourceHeight,
+						);
+						if (sourceBandHeight <= 0) continue;
+						const drawEdges = getWarpedEdges(screenY + drawHeight * 0.5);
+
+						context.drawImage(
+							image,
+							sourceX,
+							sourceBandY,
+							sourceWidth,
+							sourceBandHeight,
+							drawEdges.left,
+							screenY,
+							drawEdges.right - drawEdges.left,
+							drawHeight,
+						);
+					}
+					context.restore();
+
+					if (!obj.canvasRendered) {
+						obj.imgEl.classList.add('is-canvas-rendered');
+						obj.canvasRendered = true;
+					}
 				});
 
-				this.renderer.render({ scene, camera });
-				this.rafId = window.requestAnimationFrame(this.renderWorksFrame);
+				if (this.worksCurlStrength > 0.0001) {
+					this.rafId = window.requestAnimationFrame(this.renderWorksFrame);
+				}
 			};
 
 			this.startWorksRender = () => {
@@ -763,12 +792,21 @@ export const HomePage = {
 					!this.isVisible ||
 					document.hidden ||
 					!this.viewSize ||
-					!this.renderer
+					!this.worksContext
 				) {
 					return;
 				}
+				this.lastWorksFrameTime = null;
+				if (this.lastWorksScrollY === null) {
+					this.lastWorksScrollY = window.scrollY;
+				}
 				this.rafId = window.requestAnimationFrame(this.renderWorksFrame);
 			};
+
+			this.onWorksScroll = () => {
+				if (this.isVisible && !document.hidden) this.startWorksRender?.();
+			};
+			window.addEventListener('scroll', this.onWorksScroll, { passive: true });
 
 			this.onWorksVisibilityChange = () => {
 				if (document.hidden) {
@@ -1097,14 +1135,6 @@ export const HomePage = {
 				window.removeEventListener('resize', this.onTransitionResize);
 			}
 			
-			if (this.parallaxImages) {
-				this.parallaxImages.forEach((tween) => {
-					tween.scrollTrigger?.kill();
-					tween.kill();
-				});
-				this.parallaxImages = [];
-			}
-			
 			if (this.itemTriggers) {
 				this.itemTriggers.forEach(tl => tl.kill());
 			}
@@ -1139,51 +1169,59 @@ export const HomePage = {
 			if (this.onWorksVisibilityChange) {
 				document.removeEventListener('visibilitychange', this.onWorksVisibilityChange);
 			}
-			if (this.webGLResizeTimer) window.clearTimeout(this.webGLResizeTimer);
+			if (this.onWorksScroll) {
+				window.removeEventListener('scroll', this.onWorksScroll);
+			}
 			if (this.imageLoadCleanups) {
 				this.imageLoadCleanups.forEach(cleanup => cleanup());
 			}
-			if (this.tls) {
-				this.tls.forEach(tl => {
-					if (tl.scrollTrigger) tl.scrollTrigger.kill();
-					tl.kill();
-				});
+			if (this.meshes) {
+				this.meshes.forEach(({ imgEl }) => imgEl.classList.remove('is-canvas-rendered'));
 			}
-			if (this.meshes) this.meshes.forEach(({ imgEl }) => imgEl.classList.remove('gl-hidden'));
-
-			if (this.geometry) this.geometry.remove();
-			if (this.programs) this.programs.forEach(p => p.remove());
-			if (this.renderer && this.renderer.gl) {
-				if (this.textures) {
-					this.textures.forEach(texture => {
-						if (texture.texture) {
-							this.renderer.gl.deleteTexture(texture.texture);
-						}
-					});
-				}
-				const extension = this.renderer.gl.getExtension('WEBGL_lose_context');
-				if (extension) extension.loseContext();
+			if (this.worksContext && this.viewSize) {
+				this.worksContext.clearRect(0, 0, this.viewSize.w, this.viewSize.h);
 			}
-			if (this.onResize) window.removeEventListener('resize', this.onResize);
+			if (this.onResize) {
+				window.removeEventListener('resize', this.onResize);
+				ScrollTrigger.removeEventListener('refresh', this.onResize);
+			}
 			if (this.observer) this.observer.disconnect();
+			if (this.worksCanvas) {
+				this.worksCanvas.style.visibility = 'hidden';
+				if (this.worksCanvasParent) {
+					if (
+						this.worksCanvasNextSibling &&
+						this.worksCanvasNextSibling.parentNode === this.worksCanvasParent
+					) {
+						this.worksCanvasParent.insertBefore(
+							this.worksCanvas,
+							this.worksCanvasNextSibling,
+						);
+					} else {
+						this.worksCanvasParent.appendChild(this.worksCanvas);
+					}
+				}
+			}
 
 			this.meshes = [];
-			this.programs = [];
-			this.textures = [];
-			this.tls = [];
 			this.imageLoadCleanups = [];
-			this.geometry = null;
 			this.viewSize = null;
 			this.observer = null;
 			this.onResize = null;
-			this.webGLResizeTimer = null;
 			this.rafId = null;
 			this.isVisible = false;
 			this.renderWorksFrame = null;
 			this.startWorksRender = null;
 			this.stopWorksRender = null;
 			this.onWorksVisibilityChange = null;
-			this.renderer = null;
+			this.onWorksScroll = null;
+			this.worksContext = null;
+			this.worksCanvas = null;
+			this.worksCanvasParent = null;
+			this.worksCanvasNextSibling = null;
+			this.lastWorksFrameTime = null;
+			this.lastWorksScrollY = null;
+			this.worksCurlStrength = 0;
 		}
 	},
 	How: class extends TriggerSetup {

@@ -5,13 +5,13 @@ import { Image } from 'astro:assets';
 import heroPoster from '../assets/images/home-bg-poster.webp';
 import heroVideoDesktop from '../assets/video/home-bg-desktop.mp4';
 // import heroVideoMobile from '../assets/video/home-bg-mobile.mp4';
-import work1 from '../assets/images/work-1.png';
-import work2 from '../assets/images/work-2.png';
-import work3 from '../assets/images/work-3.png';
-import work4 from '../assets/images/work-4.png';
-import item1 from '../assets/images/item-1.png';
-import item2 from '../assets/images/item-2.png';
-import item3 from '../assets/images/item-3.png';
+import tesla from '../assets/images/tesla.jpg';
+import airofit from '../assets/images/airofit.jpg';
+import vietson from '../assets/images/vietson.jpg';
+import moida from '../assets/images/moida.jpg';
+import digitalDesign from '../assets/images/digital-design.png';
+import development from '../assets/images/development.png';
+import branding from '../assets/images/branding.png';
 import IconSun from '../components/icons/IconSun.astro';
 import IconRiceFields from '../components/icons/IconRiceFields.astro';
 import IconSports1 from '../components/icons/IconSports1.astro';
@@ -131,6 +131,7 @@ import IconHowIntroShape4 from '../components/icons/IconHowIntroShape4.astro';
 		<div class="home-hero-bg-overlay-main"></div>
 	</div>
 	<div class="home-works-wrap" id="works" data-section="light">
+		<canvas id="works-gl-canvas" class="home-works-gl-canvas" aria-hidden="true"></canvas>
 		<div class="home-works home-works--decor">
 			<div class="container grid full-h">
 				<div class="home-works-decor">
@@ -176,61 +177,65 @@ import IconHowIntroShape4 from '../components/icons/IconHowIntroShape4.astro';
 			<div class="home-works-list-inner">
 				<a href="#" class="home-works-item">
 					<div class="home-works-item-img" data-cursor="ic-external">
-						<Image class="img-df img-fill" src={work1} alt="Joby campaign" loading="lazy" />
+						<div class="home-works-item-img-inner">
+							<Image class="img-df img-fill" src={tesla} alt="Tesla education" loading="lazy" />
+						</div>
 					</div>
 					<div class="home-works-item-label">
 						<div class="home-works-item-title">
-							<p class="txt fs-20 fw-700">Joby</p>
+							<p class="txt fs-20 fw-700 trans-upper">Tesla education</p>
 						</div>
 						<div class="home-works-item-categories">
-							<span class="txt fs-12 fw-500">Branding</span>
-							<span class="txt fs-12 fw-500" aria-hidden="true">•</span>
-							<span class="txt fs-12 fw-500">Art direction</span>
+							<span class="txt fs-12 fw-500">Website Design</span>
 						</div>
 					</div>
 				</a>
 				<a href="#" class="home-works-item">
 					<div class="home-works-item-img" data-cursor="ic-external">
-						<Image class="img-df img-fill" src={work2} alt="Air Training app" loading="lazy" />
+						<div class="home-works-item-img-inner">
+							<Image class="img-df img-fill" src={airofit} alt="Airofit" loading="lazy" />
+						</div>
 					</div>
 					<div class="home-works-item-label">
 						<div class="home-works-item-title">
-							<p class="txt fs-20 fw-700">Air Training</p>
+							<p class="txt fs-20 fw-700 trans-upper">Airofit</p>
 						</div>
 						<div class="home-works-item-categories">
-							<span class="txt fs-12 fw-500">Product design </span>
+							<span class="txt fs-12 fw-500">Branding</span>
 							<span class="txt fs-12 fw-500" aria-hidden="true">•</span>
-							<span class="txt fs-12 fw-500">App development</span>
+							<span class="txt fs-12 fw-500">Mobile App Design</span>
 						</div>
 					</div>
 				</a>
 				<a href="#" class="home-works-item">
 					<div class="home-works-item-img" data-cursor="ic-external">
-						<Image class="img-df img-fill" src={work3} alt="Nike au Pompidou" loading="lazy" />
+						<div class="home-works-item-img-inner">
+							<Image class="img-df img-fill" src={vietson} alt="vietson logistics" loading="lazy" />
+						</div>
 					</div>
 					<div class="home-works-item-label">
 						<div class="home-works-item-title">
-							<p class="txt fs-20 fw-700">Nike au Pompidou</p>
+							<p class="txt fs-20 fw-700 trans-upper">vietson logistics</p>
 						</div>
 						<div class="home-works-item-categories">
-							<span class="txt fs-12 fw-500">Branding</span>
+							<span class="txt fs-12 fw-500">Art Direction</span>
 							<span class="txt fs-12 fw-500" aria-hidden="true">•</span>
-							<span class="txt fs-12 fw-500">Art direction</span>
+							<span class="txt fs-12 fw-500">Website Design</span>
 						</div>
 					</div>
 				</a>
 				<a href="#" class="home-works-item">
 					<div class="home-works-item-img" data-cursor="ic-external">
-						<Image class="img-df img-fill" src={work4} alt="MedExpress" loading="lazy" />
+						<div class="home-works-item-img-inner">
+							<Image class="img-df img-fill" src={moida} alt="MOIDA Brand Identity Renewal" loading="lazy" />
+						</div>
 					</div>
 					<div class="home-works-item-label">
 						<div class="home-works-item-title">
-							<p class="txt fs-20 fw-700">MedExpress</p>
+							<p class="txt fs-20 fw-700 trans-upper">MOIDA Brand Identity Renewal</p>
 						</div>
 						<div class="home-works-item-categories">
-							<span class="txt fs-12 fw-500">Branding</span>
-							<span class="txt fs-12 fw-500" aria-hidden="true">•</span>
-							<span class="txt fs-12 fw-500">Art direction</span>
+							<span class="txt fs-12 fw-500">Brand Identity</span>
 						</div>
 					</div>
 				</a>
@@ -374,21 +379,21 @@ import IconHowIntroShape4 from '../components/icons/IconHowIntroShape4.astro';
 						<div class="home-how-thumb-item">
 							<div class="home-how-thumb-item-inner">
 								<div class="home-how-thumb-item-img">
-									<Image class="img-df img-fill" src={item1} alt="item 1" />
+									<Image class="img-df img-fill" src={digitalDesign} alt="Digital Design" />
 								</div>
 							</div>
 						</div>
 						<div class="home-how-thumb-item">
 							<div class="home-how-thumb-item-inner">
 								<div class="home-how-thumb-item-img">
-									<Image class="img-df img-fill" src={item2} alt="item 2" />
+									<Image class="img-df img-fill" src={development} alt="Development" />
 								</div>
 							</div>
 						</div>
 						<div class="home-how-thumb-item">
 							<div class="home-how-thumb-item-inner">
 								<div class="home-how-thumb-item-img">
-									<Image class="img-df img-fill" src={item3} alt="item 3" />
+									<Image class="img-df img-fill" src={branding} alt="Branding" />
 								</div>
 							</div>
 						</div>
@@ -443,31 +448,31 @@ import IconHowIntroShape4 from '../components/icons/IconHowIntroShape4.astro';
 				<div class="home-playground-sphere-hitarea" aria-hidden="true"></div>
 				<div class="home-playground-card-layer" aria-hidden="true">
 					<div class="home-playground-card" data-latitude="48" data-longitude="-35" data-radius="1.08" data-width="0.15" data-size="xs">
-						<Image src={work4} alt="" />
+						<Image src={tesla} alt="" />
 					</div>
 					<div class="home-playground-card" data-latitude="56" data-longitude="18" data-radius="1.12" data-width="0.24" data-size="md">
-						<Image src={item2} alt="" />
+						<Image src={branding} alt="" />
 					</div>
 					<div class="home-playground-card" data-latitude="30" data-longitude="-12" data-radius="1.06" data-width="0.24" data-size="md">
-						<Image src={item1} alt="" />
+						<Image src={digitalDesign} alt="" />
 					</div>
 					<div class="home-playground-card" data-latitude="12" data-longitude="-58" data-radius="1.09" data-width="0.2" data-size="sm">
-						<Image src={work2} alt="" />
+						<Image src={airofit} alt="" />
 					</div>
 					<div class="home-playground-card" data-latitude="12" data-longitude="24" data-radius="1.08" data-width="0.16" data-size="xs">
-						<Image src={work4} alt="" />
+						<Image src={vietson} alt="" />
 					</div>
 					<div class="home-playground-card" data-latitude="-2" data-longitude="62" data-radius="1.12" data-width="0.15" data-size="xs">
-						<Image src={item3} alt="" />
+						<Image src={development} alt="" />
 					</div>
 					<div class="home-playground-card" data-latitude="-20" data-longitude="-48" data-radius="1.1" data-width="0.27" data-size="md">
-						<Image src={work3} alt="" />
+						<Image src={moida} alt="" />
 					</div>
 					<div class="home-playground-card" data-latitude="-24" data-longitude="22" data-radius="1.13" data-width="0.41" data-size="lg">
-						<Image src={work2} alt="" />
+						<Image src={vietson} alt="" />
 					</div>
 					<div class="home-playground-card" data-latitude="-52" data-longitude="-12" data-radius="1.1" data-width="0.17" data-size="sm">
-						<Image src={work1} alt="" />
+						<Image src={tesla} alt="" />
 					</div>
 				</div>
 			</div>

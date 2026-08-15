@@ -216,6 +216,17 @@
 	pointer-events: none;
 }
 
+.home-works-gl-canvas {
+	position: fixed;
+	inset: 0;
+	z-index: 4;
+	display: block;
+	width: 100vw;
+	height: 100vh;
+	visibility: hidden;
+	pointer-events: none;
+}
+
 .home-works {
 	height: 100vh;
 	position: sticky;
@@ -333,13 +344,15 @@
 	pointer-events: none;
 }
 
-.home-works-item-img {
-	border-radius: 0.8rem;
-	overflow: hidden;
+.home-works-item-img-inner {
+	width: 100%;
+	height: 100%;
+	border-radius: inherit;
+	overflow: visible;
 }
 
-.home-works-item-img img {
-	will-change: transform;
+.home-works-item-img img.is-canvas-rendered {
+	visibility: hidden;
 }
 
 .home-works-list-inner {
@@ -349,6 +362,7 @@
 }
 
 .home-works-item {
+	width: fit-content;
 	pointer-events: auto;
 	position: relative;
 }
@@ -356,7 +370,6 @@
 .home-works-item-label {
 	margin-top: 3.2rem;
 	text-align: center;
-	text-transform: uppercase;
 }
 
 .home-works-item-title {
@@ -372,20 +385,17 @@
 }
 
 .home-works-item:nth-child(4n + 1) {
-	width: 42.2rem;
 	margin-left: var(--container--padding);
 	z-index: 5;
 }
 
 .home-works-item:nth-child(4n + 2) {
-	width: 59.6rem;
 	margin-left: auto;
 	margin-right: var(--container--padding);
 	z-index: 3;
 }
 
 .home-works-item:nth-child(4n + 3) {
-	width: 50.9rem;
 	margin-left: calc(
 		var(--container--padding) + var(--container--one-column) + var(--container--column-gap)
 	);
@@ -393,12 +403,34 @@
 }
 
 .home-works-item:nth-child(4n) {
-	width: 42.2rem;
-	margin-right: calc(
-		var(--container--padding) + var(--container--one-column) + var(--container--column-gap)
-	);
+	margin-right: calc(var(--container--padding) + var(--container--one-column) + var(--container--column-gap));
 	margin-left: auto;
 	z-index: 3;
+}
+
+.home-works-item-img{
+	border-radius: 1.6rem;
+	overflow: visible;
+}
+
+.home-works-item:nth-child(4n + 1) .home-works-item-img {
+	width: 43.7rem;
+	height: 51.2rem;
+}
+
+.home-works-item:nth-child(4n + 2) .home-works-item-img {
+	width: 61.7rem;
+	height: 70.2rem;
+}
+
+.home-works-item:nth-child(4n + 3) .home-works-item-img {
+	width: 52.7rem;
+	height: 60.8rem;
+}
+
+.home-works-item:nth-child(4n) .home-works-item-img {
+	width: 43.7rem;
+	height: 50.6rem;
 }
 
 .home-works-trans {
