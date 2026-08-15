@@ -68,6 +68,7 @@ class Loader {
 					.filter(Boolean),
 			);
 			const logoPartRotations = [0, 8, -7, 5, -4];
+			const logoPartLags = [-7, -13, -10, -15, -18];
 			const logoParts = logoPartGroups.flat();
 			const screenLogoSvg = screenLogoIcon?.querySelector('svg');
 			const darkLogoMask = this.loaderEl.querySelector('.loader-home-logo-mask-dark');
@@ -205,11 +206,12 @@ class Loader {
 			this.tlFirstLoad.set(logos, { overflow: 'visible' }, '>');
 			this.tlFirstLoad.call(updateLogoOffset, null, '>');
 
-			// Logo tối của loader trượt xuống đúng vị trí logo vàng trên hero.
-			// Tween bắt đầu trước reveal một nhịp, nên khi mép mask đi qua logo
-			// sẽ tạo cảm giác một logo duy nhất đổi màu giữa hai screen.
+			// Di chuyển toàn bộ SVG bằng tọa độ màn hình để điểm đáp luôn trùng
+			// chính xác với logo trên hero. Path chỉ nhận offset cục bộ để tạo độ
+			// trễ; mọi offset phải trở về 0 trước khi đổi sang logo thật.
 			this.tlEnd.to(logos, {
 				x: () => logoOffset.x,
+				y: () => logoOffset.y,
 				duration: 1.6,
 				ease: 'power2.inOut',
 				force3D: true,
@@ -217,10 +219,18 @@ class Loader {
 			logoPartGroups.forEach((parts, index) => {
 				const partStart = index * 0.045;
 				this.tlEnd.to(parts, {
-					y: () => logoOffset.y,
-					duration: 1.6,
-					ease: 'power2.inOut',
-					force3D: true,
+					keyframes: [
+						{
+							y: logoPartLags[index],
+							duration: 0.32,
+							ease: 'power1.out',
+						},
+						{
+							y: 0,
+							duration: 1.28,
+							ease: 'power2.inOut',
+						},
+					],
 				}, partStart);
 
 				if (logoPartRotations[index] !== 0) {
