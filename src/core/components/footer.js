@@ -10,6 +10,7 @@ export class Footer extends TriggerSetup {
 		this.trailItems = new Set();
 		this.occupiedTrailCells = new Set();
 		this.lastTrailPoint = null;
+		this.iconHoverButtons = [];
 	}
 	trigger(data) {
 		this.el = document.querySelector(".footer");
@@ -31,7 +32,24 @@ export class Footer extends TriggerSetup {
 
 		this.el.addEventListener('pointermove', this.handleTrailMove, { passive: true });
 		this.el.addEventListener('pointerleave', this.handleTrailLeave, { passive: true });
+		this.setupIconHovers();
 	}
+	setupIconHovers() {
+		this.iconHoverButtons = Array.from(
+			this.el.querySelectorAll('.footer-info-center-ic-wrap')
+		);
+		this.iconHoverButtons.forEach((button) => {
+			button.addEventListener('pointerenter', this.handleIconHoverPoint, { passive: true });
+			button.addEventListener('pointerleave', this.handleIconHoverPoint, { passive: true });
+		});
+	}
+	handleIconHoverPoint = (event) => {
+		const bounds = event.currentTarget.getBoundingClientRect();
+		const x = ((event.clientX - bounds.left) / bounds.width) * 100;
+		const y = ((event.clientY - bounds.top) / bounds.height) * 100;
+		event.currentTarget.style.setProperty('--footer-icon-hover-x', `${x}%`);
+		event.currentTarget.style.setProperty('--footer-icon-hover-y', `${y}%`);
+	};
 	handleTrailMove = (event) => {
 		if (event.pointerType && event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
 		if (event.target.closest?.(
@@ -126,6 +144,11 @@ export class Footer extends TriggerSetup {
 	destroy() {
 		this.el?.removeEventListener('pointermove', this.handleTrailMove);
 		this.el?.removeEventListener('pointerleave', this.handleTrailLeave);
+		this.iconHoverButtons.forEach((button) => {
+			button.removeEventListener('pointerenter', this.handleIconHoverPoint);
+			button.removeEventListener('pointerleave', this.handleIconHoverPoint);
+		});
+		this.iconHoverButtons = [];
 		this.trailItems.forEach((item) => {
 			item.getAnimations().forEach((animation) => animation.cancel());
 			this.occupiedTrailCells.delete(item.dataset.trailCell);

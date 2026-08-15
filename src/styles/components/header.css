@@ -400,6 +400,10 @@
 }
 
 .header-nav-socials a {
+	--header-social-hover-x: 50%;
+	--header-social-hover-y: 50%;
+	position: relative;
+	overflow: hidden;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -407,17 +411,27 @@
 	background-color: var(--cl-white);
 	color: var(--cl-white);
 	aspect-ratio: 1;
-	transition: background-color 0.4s ease-in-out;
 }
 
-.header-nav-socials a:hover{
+.header-nav-socials a::before {
+	content: "";
+	position: absolute;
+	inset: 0;
 	background-color: var(--cl-brand);
+	clip-path: circle(0% at var(--header-social-hover-x) var(--header-social-hover-y));
+	transition: clip-path 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.header-nav-socials a:hover::before {
+	clip-path: circle(141.4% at var(--header-social-hover-x) var(--header-social-hover-y));
 }
 
 .header-nav-social-linked-in,
 .header-nav-social-behance,
 .header-nav-social-instagram,
 .header-nav-social-dribbble{
+	position: relative;
+	z-index: 1;
 	display: flex;
 	justify-content: center;
 	align-items: center;

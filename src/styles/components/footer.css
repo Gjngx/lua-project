@@ -130,6 +130,9 @@
 }
 
 .footer-info-center-ic-wrap{
+	--footer-icon-hover-x: 50%;
+	--footer-icon-hover-y: 50%;
+	position: relative;
 	flex: none;
 	width: 4.8rem;
 	height: 4.8rem;
@@ -140,11 +143,19 @@
 	align-items: center;
 	color: var(--cl-content-strong);
 	background-color: var(--cl-white);
-	transition: background-color 0.4s ease-in-out;
 }
 
-.footer-info-center-ic-wrap:hover{
+.footer-info-center-ic-wrap::before {
+	content: "";
+	position: absolute;
+	inset: 0;
 	background-color: var(--cl-brand);
+	clip-path: circle(0% at var(--footer-icon-hover-x) var(--footer-icon-hover-y));
+	transition: clip-path 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.footer-info-center-ic-wrap:hover::before {
+	clip-path: circle(141.4% at var(--footer-icon-hover-x) var(--footer-icon-hover-y));
 }
 
 .footer-info-left{
@@ -180,6 +191,8 @@
 }
 
 .footer-info-center-ic{
+	position: relative;
+	z-index: 1;
 	width: 1.6rem;
 	display: flex;
 	justify-content: center;

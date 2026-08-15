@@ -29,6 +29,7 @@ export class Header {
 		this.prefersReducedMotion = false;
 		this.navTransition = null;
 		this.locationClockTimer = null;
+		this.socialHoverButtons = [];
 	}
 
 	init(data) {
@@ -40,11 +41,30 @@ export class Header {
 		this.setupNavCardReels();
 		this.setupPortraitAnimation();
 		this.setupLocationClocks();
+		this.setupSocialHovers();
 		this.toggleNav();
 		this.setupScrollListener(data);
 		this.togglePageClass(data);
 		this.toggleMode();
 	}
+
+	setupSocialHovers() {
+		this.socialHoverButtons = Array.from(
+			this.el.querySelectorAll('.header-nav-social')
+		);
+		this.socialHoverButtons.forEach((button) => {
+			button.addEventListener('pointerenter', this.handleSocialHoverPoint, { passive: true });
+			button.addEventListener('pointerleave', this.handleSocialHoverPoint, { passive: true });
+		});
+	}
+
+	handleSocialHoverPoint = (event) => {
+		const bounds = event.currentTarget.getBoundingClientRect();
+		const x = ((event.clientX - bounds.left) / bounds.width) * 100;
+		const y = ((event.clientY - bounds.top) / bounds.height) * 100;
+		event.currentTarget.style.setProperty('--header-social-hover-x', `${x}%`);
+		event.currentTarget.style.setProperty('--header-social-hover-y', `${y}%`);
+	};
 
 	togglePageClass(data) {
 		if (!this.el) return;
