@@ -102,7 +102,7 @@ export function initBarba() {
 	const VIEWS = Object.keys(PageManagerRegistry).map((namespace) => ({
 		namespace,
 		beforeEnter(data) {
-			PageManagerRegistry[namespace].initEnter(data);
+			return PageManagerRegistry[namespace].initEnter(data);
 		},
 		beforeLeave(data) {
 			PageManagerRegistry[namespace].destroy(data);
@@ -110,6 +110,8 @@ export function initBarba() {
 	}));
 
 	barba.init({
+		// Home có module hình ảnh/WebGL lớn; dev server có thể cần hơn 5 giây
+		// cho lần compile đầu tiên. Tránh để Barba fallback sang hard navigation.
 		timeout: 5000,
 		views: VIEWS,
 		prevent: ({ el, event }) => {

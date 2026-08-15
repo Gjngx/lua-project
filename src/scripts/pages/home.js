@@ -285,7 +285,13 @@ export const HomePage = {
 					x: () => getHeaderLogoTransform().x,
 					y: () => getHeaderLogoTransform().y,
 					scale: () => getHeaderLogoTransform().scale,
-					ease: 'none'
+					ease: 'none',
+					onComplete: () => {
+						gsap.set(headerLogoAnimated, { pointerEvents: 'auto' });
+					},
+					onReverseComplete: () => {
+						gsap.set(headerLogoAnimated, { pointerEvents: 'none' });
+					},
 				});
 			}
 

@@ -123,6 +123,7 @@ a {
 	position: relative;
 	z-index: 2;
 	padding-inline: 1.6rem 2.4rem;
+	transition: color 0.3s ease;
 }
 
 .btn.btn-sc .btn-inner{

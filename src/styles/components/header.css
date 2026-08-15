@@ -71,7 +71,6 @@
 .header-logo-ic-amin{
 	height: 28rem;
 	color: var(--cl-content-strong);
-	pointer-events: auto;
 	transition: color 0.3s ease-out;
 }
 .header-logo-amin.on-transparent .header-logo-ic-amin{
@@ -623,4 +622,16 @@
 }
 .header.on-light .header-menu-toggle .btn-bg{
 	background-color: var(--cl-bg-main);
+}
+
+.header.on-dark .header-menu-contact .btn-bg{
+	background-color: var(--cl-sf-2);
+}
+
+.header.on-dark .header-menu-contact .btn-inner {
+	color: var(--cl-white);
+}
+
+.header.on-dark .header-menu-contact .btn-ic-inner{
+	background-color: var(--cl-white);
 }

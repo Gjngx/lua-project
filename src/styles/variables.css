@@ -13,6 +13,7 @@
 
 	--cl-brand: #DEFB37;
 	--cl-brand-100: #D5FA00;
+	--cl-brand-light: #EDFF61;
 	--cl-brand-soft: rgba(242, 242, 240, 1);
 	--cl-brand-soft-light: #EEEEEB;
 
@@ -29,6 +30,7 @@
 
 	--cl-bg-main: #F3F5EB;
 	--cl-bg-black: #1A1A1A;
+	--cl-sf-2: #111111;
 	--cl-bg-overlay: rgba(0, 0, 0, 0.24);
 	--cl-border-main: rgba(40, 44, 7, 0.16);
 

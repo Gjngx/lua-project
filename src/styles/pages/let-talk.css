@@ -1,4 +1,166 @@
-.let-talk-wrap {
-    padding-top: 20rem; /* Give some space for header */
-    min-height: 100vh;
+.let-talk-wrap{
+    background-color: var(--cl-brand-light);
+}
+
+.let-talk-decor{
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.let-talk-decor-services{
+    position: absolute;
+    top: 50%;
+    left: var(--container--padding);
+    right: var(--container--padding);
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: auto;
+}
+
+.let-talk-decor-service{
+    overflow: hidden;
+}
+
+.let-talk-decor-service-inner{
+    transform: translateY(100%);
+}
+
+.let-talk-decor-inner {
+    position: absolute;
+    top: 50%;
+    left: var(--container--padding);
+    right: var(--container--padding);
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.let-talk-decor-left,
+.let-talk-decor-right {
+    display: flex;
+    flex-direction: column;
+}
+
+.let-talk-decor-ic{
+    width: 1rem;
+    height: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.let-talk-main{
+    margin-top: -100vh;
+    height: 100vh;
+}
+.let-talk-top{
+    grid-column: 2 / -2;
+    grid-row: 1 / 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.let-talk-img{
+    width: 14.2rem;
+    height: 14.2rem;
+}
+
+.let-talk-top-line {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 0.8rem;
+}
+
+.let-talk-scroll{
+    position: absolute;
+    bottom: 3.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.let-talk-footer {
+    position: relative;
+    z-index: 11;
+}
+
+.let-talk-footer-inner{
+    height: 100vh;
+}
+
+.let-talk-footer-services{
+    grid-column: 2 / -2;
+    grid-row: 1 / 1;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+
+.let-talk-footer-info {
+    grid-column: 2 / -2;
+    grid-row: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 3.2rem;
+}
+
+.let-talk-footer-links{
+    margin-top: 1.6rem;
+}
+
+.let-talk-footer-links-inner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.let-talk-footer-link {
+    --footer-icon-hover-x: 50%;
+    --footer-icon-hover-y: 50%;
+    position: relative;
+    flex: none;
+    width: 4.8rem;
+    height: 4.8rem;
+    border-radius: 99%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--cl-content-strong);
+    background-color: var(--cl-white);
+}
+
+.let-talk-footer-link::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: var(--cl-brand);
+    clip-path: circle(0% at var(--footer-icon-hover-x) var(--footer-icon-hover-y));
+    transition: clip-path 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.let-talk-footer-link.is-hovered::before {
+    clip-path: circle(141.4% at var(--footer-icon-hover-x) var(--footer-icon-hover-y));
+}
+
+.let-talk-footer-link-ic {
+    position: relative;
+    z-index: 1;
+    width: 1.6rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
