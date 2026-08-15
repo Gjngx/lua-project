@@ -220,6 +220,24 @@ a {
 	transition: transform 0.3s ease;
 }
 
+.hover-un {
+	position: relative;
+	display: inline-block;
+}
+
+.hover-un::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0em;
+	width: 100%;
+	height: var(--1px);
+	background: currentColor;
+	transform: scaleX(0);
+	transform-origin: right;
+	transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* Line 2 chạy ra */
 .hover-line:not(:hover)::after {
 	transform: scaleX(0);
@@ -433,6 +451,11 @@ a {
 			transform: scaleX(1);
 			transform-origin: left;
 			transition-delay: 0.2s;
+		}
+
+		.hover-un:hover::after {
+			transform: scaleX(1);
+			transform-origin: left;
 		}
 }
 

@@ -335,9 +335,9 @@ export const HomePage = {
 				gsap.set(revealItems, { color: 'rgba(255, 255, 255, 0.28)' });
 				this.tlHeroTextColor = gsap.timeline({
 					scrollTrigger: {
-						trigger: this.el.querySelector('.home-hero-bottom'),
-						start: 'top center',
-						end: 'bottom bottom',
+						trigger: this.el.querySelector('.home-hero-bottom-inner'),
+						start: 'top top+=80%',
+						end: 'top top+=40%',
 						scrub: true,
 					},
 				});
