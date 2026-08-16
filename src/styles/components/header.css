@@ -33,7 +33,9 @@
 	opacity: 1;
 }
 .header-logo {
-	grid-column: 2 / 2;
+	position: fixed;
+	top: 3.2rem;
+	left: var(--container--padding);
 	color: var(--cl-content-strong);
 	opacity: 1;
 	pointer-events: auto;
