@@ -443,6 +443,7 @@ export const HomePage = {
 		}
 
 		onTrigger() {
+			if (!this.el) return;
 			this.setup();
 			this.animationReveal();
 			this.animationScrub();
@@ -1130,13 +1131,19 @@ export const HomePage = {
 
 		destroy() {
 			super.cleanTrigger();
-			if (this.tlWorksDecorAssembly?.scrollTrigger) {
-				this.tlWorksDecorAssembly.scrollTrigger.kill();
-			}
-			if (this.tlWorksDecorAssembly) this.tlWorksDecorAssembly.kill();
 			if (this.worksPathParticles) this.worksPathParticles.destroy();
-			if (this.tlWorksTop) this.tlWorksTop.kill();
-			if (this.tlWorksScroll) this.tlWorksScroll.kill();
+			if (this.tlWorksTop) {
+				if (this.tlWorksTop.scrollTrigger) this.tlWorksTop.scrollTrigger.kill();
+				this.tlWorksTop.kill();
+			}
+			if (this.tlWorksScroll) {
+				if (this.tlWorksScroll.scrollTrigger) this.tlWorksScroll.scrollTrigger.kill();
+				this.tlWorksScroll.kill();
+			}
+			if (this.tlWorksDecorAssembly) {
+				if (this.tlWorksDecorAssembly.scrollTrigger) this.tlWorksDecorAssembly.scrollTrigger.kill();
+				this.tlWorksDecorAssembly.kill();
+			}
 			if (this.transitionBackgroundTween) this.transitionBackgroundTween.kill();
 			if (this.onTransitionResize) {
 				window.removeEventListener('resize', this.onTransitionResize);
@@ -1248,6 +1255,7 @@ export const HomePage = {
 		}
 
 		onTrigger() {
+			if (!this.el) return;
 			this.setup();
 			this.animationReveal();
 			this.animationScrub();
@@ -1537,10 +1545,19 @@ export const HomePage = {
 
 		destroy() {
 			super.cleanTrigger();
-			if (this.tlDecor) this.tlDecor.kill();
-			if (this.tlTrans) this.tlTrans.kill();
+			if (this.tlDecor) {
+				if (this.tlDecor.scrollTrigger) this.tlDecor.scrollTrigger.kill();
+				this.tlDecor.kill();
+			}
+			if (this.tlTrans) {
+				if (this.tlTrans.scrollTrigger) this.tlTrans.scrollTrigger.kill();
+				this.tlTrans.kill();
+			}
 			if (this.tlItemScrolls) {
-				this.tlItemScrolls.forEach(tl => tl.kill());
+				this.tlItemScrolls.forEach(tl => {
+					if (tl.scrollTrigger) tl.scrollTrigger.kill();
+					if (tl.kill) tl.kill();
+				});
 			}
 			this.tlDecor = null;
 			this.tlTrans = null;
@@ -1579,6 +1596,7 @@ export const HomePage = {
 		}
 
 		onTrigger() {
+			if (!this.el) return;
 			this.setup();
 			this.animationReveal();
 			this.animationScrub();
@@ -1981,7 +1999,10 @@ export const HomePage = {
 
 		destroy() {
 			super.cleanTrigger();
-			if (this.tlTrans) this.tlTrans.kill();
+			if (this.tlTrans) {
+				if (this.tlTrans.scrollTrigger) this.tlTrans.scrollTrigger.kill();
+				this.tlTrans.kill();
+			}
 			if (this.sphereObserver) this.sphereObserver.disconnect();
 			this.sphereCleanups.forEach(cleanup => cleanup());
 			this.sphereGeometry?.remove();

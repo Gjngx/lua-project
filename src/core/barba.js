@@ -5,6 +5,7 @@ import { scrollTop } from './scroll.js';
 import { scrollIndicator } from './components/scroll-indicator.js';
 import { buttonText } from './components/button-text.js';
 import { loader } from './loader.js';
+import { ScrollTrigger } from './gsap.js';
 
 let staleHeadElements = [];
 
@@ -183,6 +184,12 @@ export function initBarba() {
 				after() {
 					cleanupStaleHead();
 					scrollIndicator.resume();
+					// Đợi trình duyệt render xong layout cuối (khi container cũ đã bị gỡ)
+					requestAnimationFrame(() => {
+						ScrollTrigger.refresh();
+						// Kích hoạt resize để WebGL/Canvas đo lại đúng kích thước
+						window.dispatchEvent(new Event('resize'));
+					});
 				},
 			},
 		],
