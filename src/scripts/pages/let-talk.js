@@ -1,10 +1,12 @@
-import { gsap } from '../../core/gsap.js';
+import { gsap, ScrollTrigger } from '../../core/gsap.js';
 
 export const LetTalkPage = {
 	Hero: class {
 		constructor() {
 			this.el = null;
 			this.footerLinkCleanups = [];
+			this.tlIntro = null;
+			this.tlMove = null;
 		}
 
 		setup(data, mode) {
@@ -56,6 +58,52 @@ export const LetTalkPage = {
 		}
 
 		animationScrub(){
+			const decorWraps = this.el.querySelectorAll('.let-talk-decor-wrap');
+			const getWrapWidth = () => this.el.querySelector('.let-talk-decor-inner').getBoundingClientRect().width;
+			const getDecorTranslateX = () => (
+				getWrapWidth() / 2 - decorWraps[0].getBoundingClientRect().width
+			);
+
+			const itemServices = this.el.querySelectorAll('.let-talk-decor-service-inner');
+			const itemPhone = this.el.querySelector('.let-talk-footer-phone-inner');
+			const itemEmail = this.el.querySelector('.let-talk-footer-email-inner');
+			const itemLinks = this.el.querySelector('.let-talk-footer-link-inner');
+			const scrollText = this.el.querySelector('.let-talk-scroll-inner');
+
+			this.tlIntro = gsap.timeline({
+				scrollTrigger: {
+					trigger: this.el.querySelector('.let-talk-top'),
+					start: 'top top',
+					endTrigger: this.el.querySelector('.let-talk-top .heading'),
+					end: 'bottom top',
+					scrub: 1,
+				},
+			});
+
+			this.tlMove = gsap.timeline({
+				scrollTrigger: {
+					trigger: this.el.querySelector('.let-talk-top .heading'),
+					start: 'bottom top',
+					endTrigger: this.el,
+					end: 'bottom bottom',
+					scrub: 1
+				},
+			});
+
+			this.tlIntro
+			.to(this.el.querySelector('.let-talk-top .heading'), { scale: 0.68, ease: 'power3.out' })
+			.to(decorWraps[0], { x: () => getDecorTranslateX(), ease: 'power3.inOut' }, '<')
+			.to(decorWraps[1], { x: () => -getDecorTranslateX(), ease: 'power3.inOut' }, '<');
+
+
+			this.tlMove
+			.to(itemServices, { yPercent: -100, ease: 'power3.inOut', duration: 0.6 })
+			.to(itemPhone, { yPercent: -100, ease: 'power3.inOut', duration: 0.4 })
+			.to(itemEmail, { yPercent: -100, ease: 'power3.inOut', duration: 0.4 })
+			.to(itemLinks, { yPercent: -100, ease: 'power3.inOut', duration: 0.4 })
+			.to(scrollText, { yPercent: -100, ease: 'power3.inOut', duration: 0.4 }, '<');
+
+
 
 		}
 		
@@ -106,6 +154,8 @@ export const LetTalkPage = {
 		destroy() {
 			this.footerLinkCleanups.forEach((cleanup) => cleanup());
 			this.footerLinkCleanups = [];
+			this.tlIntro?.kill();
+			this.tlMove?.kill();
 			this.el = null;
 		}
 	},
