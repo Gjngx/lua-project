@@ -6,6 +6,7 @@ import { scrollIndicator } from './components/scroll-indicator.js';
 import { buttonText } from './components/button-text.js';
 import { loader } from './loader.js';
 import { ScrollTrigger } from './gsap.js';
+import { smoothScroll } from './lenis.js';
 
 let staleHeadElements = [];
 
@@ -15,8 +16,9 @@ let staleHeadElements = [];
  * và dọn dẹp các thẻ cũ của trang trước.
  */
 function syncHead(data) {
-	const nextHtml = data.next.html;
-	if (!nextHtml) return;
+	return new Promise((resolve) => {
+		const nextHtml = data.next.html;
+		if (!nextHtml) return resolve();
 
 	const parser = new DOMParser();
 	const nextDoc = parser.parseFromString(nextHtml, 'text/html');
@@ -35,6 +37,8 @@ function syncHead(data) {
 		'link[rel="stylesheet"]:not([data-barba-head])',
 		'meta[name="description"]',
 	];
+
+	const loadPromises = [];
 
 	syncSelectors.forEach((selector) => {
 		const nextEls = nextHead.querySelectorAll(selector);
@@ -73,6 +77,14 @@ function syncHead(data) {
 			if (!alreadyExists) {
 				const cloned = nextEl.cloneNode(true);
 				cloned.setAttribute('data-barba-head', '');
+				
+				if (cloned.tagName === 'LINK') {
+					loadPromises.push(new Promise((res) => {
+						cloned.onload = res;
+						cloned.onerror = res; // Proceed even if it fails
+					}));
+				}
+				
 				currentHead.appendChild(cloned);
 			}
 		});
@@ -85,6 +97,9 @@ function syncHead(data) {
 	if (newTitle) {
 		document.title = newTitle;
 	}
+
+	Promise.all(loadPromises).then(resolve);
+	});
 }
 
 function cleanupStaleHead() {
@@ -133,8 +148,8 @@ export function initBarba() {
 					globalChange.beforeLeave();
 					scrollIndicator.pause();
 					buttonText.destroy(data.current.container);
-
-					// Cố định container cũ để không bị giật khi cuộn lên đầu trang (scrollTop ở beforeEnter)
+					
+					// Dùng transform thay vì absolute để tránh làm vỡ layout (flex/grid) của trang cũ
 					let scrollPos = window.scrollY || document.documentElement.scrollTop;
 					if (window.innerWidth <= 767) {
 						const bodyInner = document.querySelector('.body-inner');
@@ -143,13 +158,7 @@ export function initBarba() {
 						}
 					}
 
-					Object.assign(data.current.container.style, {
-						position: 'absolute',
-						top: `-${scrollPos}px`,
-						left: '0',
-						width: '100%',
-						zIndex: '1',
-					});
+					data.current.container.style.transform = `translateY(-${scrollPos}px)`;
 				},
 
 				async once(data) {
@@ -170,7 +179,16 @@ export function initBarba() {
 					scrollIndicator.reset({ immediate: true });
 
 					// Chạy hàm sync thẻ <head>
-					syncHead(data);
+					await syncHead(data);
+
+					// Đặt trang mới đè lên trang cũ bằng absolute
+					Object.assign(data.next.container.style, {
+						position: 'absolute',
+						top: '0',
+						left: '0',
+						width: '100%',
+						zIndex: '2',
+					});
 				},
 
 				async enter(data) {
@@ -181,7 +199,16 @@ export function initBarba() {
 					await pageTrans.enterAnim(data);
 				},
 
-				after() {
+				after(data) {
+					// Gỡ bỏ absolute của trang mới để đưa nó về normal flow
+					Object.assign(data.next.container.style, {
+						position: '',
+						top: '',
+						left: '',
+						width: '',
+						zIndex: '',
+					});
+
 					cleanupStaleHead();
 					scrollIndicator.resume();
 					// Đợi trình duyệt render xong layout cuối (khi container cũ đã bị gỡ)
