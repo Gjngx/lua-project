@@ -1,24 +1,80 @@
-import { TriggerSetup } from '../../core/trigger-setup.js';
+import { gsap } from '../../core/gsap.js';
+import { footer } from '../../core/components/footer.js';
 
-export class AboutScript extends TriggerSetup {
-	setup(data, mode) {
-		console.log(`ℹ️ About Script Setup (Mode: ${mode})`);
-	}
+export const AboutPage = {
+	Hero: class {
+		constructor() {
+			this.el = null;
+			this.footerLinkCleanups = [];
+		}
 
-	playOnce(data) {
-		console.log("ℹ️ About Script Play Once");
-	}
+		setup(data, mode) {
+			this.el = data.next.container.querySelector('.about-hero-wrap');
+			if (!this.el) return;
+			this.interact();
 
-	playEnter(data) {
-		console.log("ℹ️ About Script Play Enter");
-	}
+			if (mode === 'once') {
+				this.setupOnce(data);
+			} else if (mode === 'enter') {
+				this.setupEnter(data);
+			}
+		}
 
-	trigger(data) {
-		// Gọi hàm setTrigger từ class cha TriggerSetup
-	}
+		setupOnce(data) {
+			this.animationScrub();
 
-	destroy() {
-		this.cleanTrigger();
-		console.log("🧹 About Script Destroyed");
-	}
-}
+			this.tlOnce = gsap.timeline({
+				paused: true,
+			});
+
+			this.animationReveal(this.tlOnce);
+		}
+
+		setupEnter(data) {
+			this.animationScrub();
+
+			this.tlEnter = gsap.timeline({
+				paused: true,
+			});
+
+			this.animationReveal(this.tlEnter);
+		}
+
+		playOnce() {
+			if (this.tlOnce) {
+				this.tlOnce.play();
+			}
+		}
+
+		playEnter() {
+			if (this.tlEnter) {
+				this.tlEnter.play();
+			}
+		}
+
+		animationReveal(timeline) {
+
+		}
+
+		animationScrub() {
+
+		}
+
+		interact() {
+			
+		}
+
+		destroy() {
+			this.el = null;
+		}
+	},
+	Footer: class {
+		setup(data) {
+			footer.trigger(data);
+		}
+
+		destroy() {
+			footer.destroy();
+		}
+	},
+};
