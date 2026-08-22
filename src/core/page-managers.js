@@ -52,14 +52,23 @@ export class PageManager {
 		return this.prepareOnce(data).then(() => this.playOnce(data));
 	}
 
-	initEnter(data) {
+	prepareEnter(data) {
 		return this._loadSections().then(() => {
 			this._sections?.forEach((section) => {
 				if (section.trigger) section.trigger(data);
 				if (section.setup) section.setup(data, 'enter');
-				if (section.playEnter) section.playEnter(data);
 			});
 		});
+	}
+
+	playEnter(data) {
+		this._sections?.forEach((section) => {
+			if (section.playEnter) section.playEnter(data);
+		});
+	}
+
+	initEnter(data) {
+		return this.prepareEnter(data).then(() => this.playEnter(data));
 	}
 
 	destroy(data) {

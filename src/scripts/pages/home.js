@@ -9,6 +9,8 @@ import {
 	playgroundSphereFragment,
 } from '../../core/shaders.js';
 
+import { MasterTimeline, FadeIn, FadeSplitText } from '../../core/animation.js';
+
 const HERO_VIDEO_FPS = 24;
 const HERO_VIDEO_SEEK_THRESHOLD = 1 / (HERO_VIDEO_FPS * 2);
 const WORKS_TRANSITION_ROTATION = 125;
@@ -36,6 +38,7 @@ export const HomePage = {
 			this.onVisibilityChange = null;
 			this.timeEl = null;
 			this.timeTimer = null;
+			this.updateHeroTime = null;
 			this.tlOnce = null;
 			this.tlEnter = null;
 			this.tlHeroTop = null;
@@ -43,6 +46,8 @@ export const HomePage = {
 			this.tlHeroBotEnd = null;
 			this.tlHeroTextColor = null;
 			this.heroTextOriginalHTML = null;
+			this.masterReveal = null;
+			this.revealReady = null;
 		}
 
 		setup(data, mode) {
@@ -63,39 +68,69 @@ export const HomePage = {
 		}
 
 		setupOnce(data) {
-			this.animationScrub(); // Đưa ra ngoài để chạy ngay
-
 			this.tlOnce = gsap.timeline({
 				paused: true,
+				delay: 0.2,
+				onStart: () => {
+					$(this.el).find('[data-init-hidden]').removeAttr('data-init-hidden');
+				},
+				onComplete: () => {
+					this.animationScrub();
+					this.startHeroTime();
+				},
 			});
 
-			this.animationReveal(this.tlOnce);
+			this.revealReady = this.animationReveal(this.tlOnce);
+			this.tlOnce.to({}, { duration: 0.001 });
 		}
 
 		setupEnter(data) {
-			this.animationScrub(); // Đưa ra ngoài để chạy ngay
-
 			this.tlEnter = gsap.timeline({
 				paused: true,
+				delay: 0.3,
+				onStart: () => {
+					$(this.el).find('[data-init-hidden]').removeAttr('data-init-hidden');
+				},
+				onComplete: () => {
+					this.animationScrub();
+					this.startHeroTime();
+				},
 			});
 
-			this.animationReveal(this.tlEnter);
+			this.revealReady = this.animationReveal(this.tlEnter, { includeTitle: true });
+			this.tlEnter.to({}, { duration: 0.001 });
 		}
 
-		playOnce() {
-			if (this.tlOnce) {
-				this.tlOnce.play();
-			}
+		async playOnce() {
+			await this.revealReady;
+			if (!this.el?.isConnected || !this.tlOnce?.duration()) return;
+			this.tlOnce.play(0);
 		}
 
-		playEnter() {
-			if (this.tlEnter) {
-				this.tlEnter.play();
-			}
+		async playEnter() {
+			await this.revealReady;
+			if (!this.el?.isConnected || !this.tlEnter?.duration()) return;
+			this.tlEnter.play(0);
 		}
 
-		animationReveal(timeline) {
-			// Thêm animation khi trang xuất hiện (Reveal Animation)
+		animationReveal(timeline, { includeTitle = false } = {}) {
+			this.masterReveal = new MasterTimeline({
+				timeline: timeline,
+				allowMobile: true,
+				tweenArr: [
+					...(includeTitle
+						? [new FadeSplitText({ el: $(this.el).find('.home-hero-top-title .heading').get(0) })]
+						: []),
+					...$(this.el).find('.home-hero-top-info .txt').toArray().map((el) =>
+						new FadeSplitText({ el }),
+					),
+					new FadeSplitText({ el: $(this.el).find('.home-hero-top-sub .heading').get(0) }),
+					new FadeIn({ el: $(this.el).find('.home-hero-top-ic').get(0) }),
+					new FadeSplitText({ el: $(this.el).find('.home-hero-desc .txt').get(0) }),
+				]
+			});
+
+			return this.masterReveal.ready;
 		}
 
 		setupHeroTime() {
@@ -109,12 +144,17 @@ export const HomePage = {
 				second: '2-digit',
 				hourCycle: 'h23',
 			});
-			const updateTime = () => {
+			this.updateHeroTime = () => {
 				if (this.timeEl) $(this.timeEl).text(formatter.format(new Date()));
 			};
 
-			updateTime();
-			this.timeTimer = window.setInterval(updateTime, 1000);
+			this.updateHeroTime();
+		}
+
+		startHeroTime() {
+			if (!this.updateHeroTime || this.timeTimer !== null) return;
+			this.updateHeroTime();
+			this.timeTimer = window.setInterval(this.updateHeroTime, 1000);
 		}
 
 		setupHeroVideo() {
@@ -383,6 +423,7 @@ export const HomePage = {
 			if (this.tlHeroTop) this.tlHeroTop.kill();
 			if (this.tlHeroBot) this.tlHeroBot.kill();
 			if (this.tlHeroTextColor) this.tlHeroTextColor.kill();
+			this.masterReveal?.destroy();
 			const heroDescription = $(this.el).find('.home-hero-bottom-desc .txt')[0];
 			if (heroDescription && this.heroTextOriginalHTML !== null) {
 				$(heroDescription).html(this.heroTextOriginalHTML);
@@ -390,7 +431,10 @@ export const HomePage = {
 
 			this.video = null;
 			this.timeEl = null;
+			this.updateHeroTime = null;
 			this.worksEl = null;
+			this.masterReveal = null;
+			this.revealReady = null;
 		}
 	},
 

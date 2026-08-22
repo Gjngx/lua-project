@@ -114,12 +114,10 @@ export function initBarba() {
 	const wrapper = $('[data-barba="wrapper"]')[0];
 	if (!wrapper) return;
 
-	// Khai báo các Views để tự động gọi setup / destroy dựa vào data-barba-namespace
+	// View chỉ chịu trách nhiệm cleanup. Setup/play được transition điều phối
+	// riêng để initial load không chạy đồng thời cả enter và once.
 	const VIEWS = Object.keys(PageManagerRegistry).map((namespace) => ({
 		namespace,
-		beforeEnter(data) {
-			return PageManagerRegistry[namespace].initEnter(data);
-		},
 		beforeLeave(data) {
 			PageManagerRegistry[namespace].destroy(data);
 		},
@@ -189,11 +187,15 @@ export function initBarba() {
 						width: '100%',
 						zIndex: '2',
 					});
+
+					// Dựng DOM, split text và timeline khi transition vẫn đang che trang.
+					await PageManagerRegistry[data.next.namespace]?.prepareEnter(data);
 				},
 
 				async enter(data) {
 					// Cập nhật giao diện toàn cục (Header, Nav links...)
 					globalChange.update(data);
+					PageManagerRegistry[data.next.namespace]?.playEnter(data);
 
 					// Chạy animation vào trang được tách ra ở class PageTrans
 					await pageTrans.enterAnim(data);

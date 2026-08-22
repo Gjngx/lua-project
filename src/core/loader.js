@@ -16,6 +16,7 @@ class Loader {
 		this.tlLoadMaster = null;
 		this.loaderEl = null;
 		this.descSplit = null;
+		this.hasPlayedPageOnce = false;
 	}
 
 	async init(data) {
@@ -276,6 +277,7 @@ class Loader {
 				duration: 0.8,
 				ease: 'power4.inOut',
 			}, 0.35)
+				.call(() => this.playPageOnce(), null, 0.35)
 				.to(brandLogoMask, {
 				clipPath: 'inset(0% 0 0 0)',
 				duration: 0.8,
@@ -335,9 +337,15 @@ class Loader {
 		$(this.loaderEl).removeClass(['is-loading']);
 		$(this.loaderEl).addClass(['done']);
 		$(document.documentElement).addClass(['done']);
-		this.manager?.playOnce(this.data);
+		this.playPageOnce();
 
 		this.isLoaded = true;
+	}
+
+	playPageOnce() {
+		if (this.hasPlayedPageOnce) return;
+		this.hasPlayedPageOnce = true;
+		this.manager?.playOnce(this.data);
 	}
 
 	restorePage() {
