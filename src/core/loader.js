@@ -244,10 +244,10 @@ class Loader {
 							duration: 0.32,
 							ease: 'power4.inOut',
 						},
-						{
-							y: 0,
-							duration: 0.8,
-							ease: 'power3.inOut',
+							{
+								y: 0,
+								duration: 0.5,
+								ease: 'power3.inOut',
 						},
 					],
 				}, partStart);
