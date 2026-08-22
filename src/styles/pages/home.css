@@ -242,6 +242,8 @@
 .home-works--main {
 	margin-top: -100vh;
 	z-index: 4;
+	height: calc(100vh - 8.8rem);
+	top: 8.8rem;
 }
 
 .home-works-decor {
@@ -515,6 +517,10 @@
 	will-change: opacity, transform;
 }
 
+.home-works-bottom-title .heading{
+	line-height: 0.9;
+}
+
 .home-works-empty {
 	height: 250vh;
 	pointer-events: none;
@@ -524,7 +530,7 @@
 	pointer-events: none;
 }
 .home-how-wrap{
-	margin-top: -35vh;
+	margin-top: -30vh;
 }
 .home-how-intro {
 	grid-column: 8 / 12;

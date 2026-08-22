@@ -106,17 +106,12 @@ export class Header {
 
 			return {
 				clock,
-				offset: clock.parentElement?.querySelector('[data-header-location-offset]'),
 				timeFormatter: new Intl.DateTimeFormat('en-GB', {
 					timeZone,
 					hour: '2-digit',
 					minute: '2-digit',
 					second: '2-digit',
 					hourCycle: 'h23',
-				}),
-				offsetFormatter: new Intl.DateTimeFormat('en-GB', {
-					timeZone,
-					timeZoneName: 'shortOffset',
 				}),
 			};
 		}).filter(Boolean);
@@ -126,18 +121,9 @@ export class Header {
 		const updateClocks = () => {
 			const now = new Date();
 
-			clocks.forEach(({ clock, offset, timeFormatter, offsetFormatter }) => {
+			clocks.forEach(({ clock, timeFormatter }) => {
 				clock.textContent = timeFormatter.format(now);
 				clock.dateTime = now.toISOString();
-
-				const rawOffset = offsetFormatter
-					.formatToParts(now)
-					.find((part) => part.type === 'timeZoneName')?.value;
-				if (offset && rawOffset) {
-					offset.textContent = rawOffset === 'GMT'
-						? 'UTC+0'
-						: rawOffset.replace('GMT', 'UTC').replace(':00', '');
-				}
 			});
 
 			const nextSecond = 1000 - (Date.now() % 1000) + 10;
@@ -307,7 +293,7 @@ export class Header {
 		this.navCardReels.forEach((reel, index) => {
 			this.measureNavCardReel(reel);
 			reel.position = Math.random() * reel.cycleSize;
-			reel.baseSpeed = reel.stepSize / (290 + index * 22 + Math.random() * 14);
+			reel.baseSpeed = reel.stepSize / ((290 + index * 22 + Math.random() * 14) * 1.5);
 			reel.maxSpeed = reel.baseSpeed * 1.7;
 			reel.cruiseSpeed = reel.baseSpeed;
 			reel.acceleration = (reel.maxSpeed - reel.baseSpeed) / 8000;
@@ -440,12 +426,12 @@ export class Header {
 		const speedRatio = reel.baseSpeed
 			? Math.min(Math.abs(reel.currentSpeed) / reel.baseSpeed, 1.7)
 			: 0;
-		const trailStrength = speedRatio < 0.18
+		const trailStrength = speedRatio < 0.35
 			? 0
-			: Math.min((speedRatio - 0.18) / 0.82, 1);
+			: Math.min((speedRatio - 0.35) / 1.35, 1);
 		const direction = Math.sign(reel.currentSpeed) || 1;
-		const trailOffsets = [0.11, 0.24];
-		const trailOpacities = [0.26, 0.11];
+		const trailOffsets = [0.07, 0.14];
+		const trailOpacities = [0.16, 0.06];
 
 		reel.track.style.transform = `translate3d(0, ${-reel.position}px, 0)`;
 		reel.ghosts.forEach((ghost, index) => {
@@ -996,6 +982,7 @@ export class Header {
 			const updateAudioControl = (isPlaying) => {
 				audioPlayPause.setAttribute('aria-pressed', String(isPlaying));
 				audioPlayPause.setAttribute('aria-label', isPlaying ? 'Pause music' : 'Play music');
+				this.el.classList.toggle('is-pause', !isPlaying);
 			};
 
 			updateAudioControl(audioManager.isPlaying);

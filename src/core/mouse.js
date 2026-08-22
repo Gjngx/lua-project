@@ -10,20 +10,21 @@ class Mouse {
 	constructor() {
 		this.cursor = null;
 		this.cursorMain = null;
+		this.cursorVideo = null;
+		this.cursorVideoMedia = null;
 		this.mousePos = { x: 0, y: 0 };
-		this.cacheMousePos = { x: 0, y: 0 };
-		this.normalized = {
-			current: { x: 0.5, y: 0.5 },
-			target: { x: 0.5, y: 0.5 },
-		};
 		this.activeTarget = null;
 		this.hasMoved = false;
-		this.isTicking = false;
 		this.isInitialized = false;
 		this.viewportWidth = window.innerWidth;
 		this.viewportHeight = window.innerHeight;
-		this.setX = null;
-		this.setY = null;
+		this.moveCursorX = null;
+		this.moveCursorY = null;
+		this.rotateVideoX = null;
+		this.rotateVideoY = null;
+		this.scaleVideoX = null;
+		this.scaleVideoY = null;
+		this.videoResetCall = null;
 	}
 
 	init() {
@@ -32,10 +33,43 @@ class Mouse {
 		this.cursor = document.querySelector('.cursor');
 		this.cursorMain = this.cursor?.querySelector('.cursor-main');
 		if (!this.cursor || !this.cursorMain) return;
+		this.cursorVideo = this.cursor.querySelector('.cursor-video');
+		this.cursorVideoMedia = this.cursor.querySelector('.cursor-video-inner video');
 		this.cursor.classList.add('active');
 
-		this.setX = gsap.quickSetter(this.cursorMain, 'x', 'px');
-		this.setY = gsap.quickSetter(this.cursorMain, 'y', 'px');
+		this.moveCursorX = gsap.quickTo(this.cursorMain, 'x', {
+			duration: 1,
+			ease: 'power4',
+		});
+		this.moveCursorY = gsap.quickTo(this.cursorMain, 'y', {
+			duration: 1,
+			ease: 'power4',
+		});
+		if (this.cursorVideo) {
+			gsap.set(this.cursorVideo, {
+				transformPerspective: 1000,
+				transformOrigin: '50% 50%',
+			});
+			this.rotateVideoX = gsap.quickTo(this.cursorVideo, 'rotationX', {
+				duration: 1,
+				ease: 'power4',
+			});
+			this.rotateVideoY = gsap.quickTo(this.cursorVideo, 'rotationY', {
+				duration: 1,
+				ease: 'power4',
+			});
+		}
+		if (this.cursorVideoMedia) {
+			gsap.set(this.cursorVideoMedia, { scale: 1.2 });
+			this.scaleVideoX = gsap.quickTo(this.cursorVideoMedia, 'scaleX', {
+				duration: 2,
+				ease: 'power1',
+			});
+			this.scaleVideoY = gsap.quickTo(this.cursorVideoMedia, 'scaleY', {
+				duration: 2,
+				ease: 'power1',
+			});
+		}
 		this.isInitialized = true;
 
 		window.addEventListener('pointermove', this.handlePointerMove, { passive: true });
@@ -50,18 +84,36 @@ class Mouse {
 	handlePointerMove = (event) => {
 		if (event.pointerType && event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
 
+		const deltaX = this.hasMoved ? event.clientX - this.mousePos.x : 0;
+		const deltaY = this.hasMoved ? event.clientY - this.mousePos.y : 0;
 		this.mousePos.x = event.clientX;
 		this.mousePos.y = event.clientY;
 
 		if (!this.hasMoved) {
 			this.hasMoved = true;
-			this.cacheMousePos.x = event.clientX;
-			this.cacheMousePos.y = event.clientY;
+			gsap.set(this.cursorMain, { x: event.clientX, y: event.clientY });
 			this.cursor.classList.add('is-visible');
 		}
 
+		this.moveCursorX?.(event.clientX);
+		this.moveCursorY?.(event.clientY);
+		const rotationY = gsap.utils.clamp(-12, 12, deltaX * 1.2);
+		const rotationX = gsap.utils.clamp(-12, 12, -deltaY * 1.2);
+		this.rotateVideoY?.(rotationY);
+		this.rotateVideoX?.(rotationX);
+		this.scaleVideoX?.(1);
+		this.scaleVideoY?.(1);
+
+		this.videoResetCall?.kill();
+		this.videoResetCall = gsap.delayedCall(0.066, () => {
+			this.rotateVideoX?.(0);
+			this.rotateVideoY?.(0);
+			this.scaleVideoX?.(1.2);
+			this.scaleVideoY?.(1.2);
+			this.videoResetCall = null;
+		});
+
 		this.syncTargetUnderPointer();
-		this.startTicker();
 	};
 
 	handleResize = () => {
@@ -86,38 +138,6 @@ class Mouse {
 
 	handlePointerUp = () => {
 		this.cursor?.classList.remove('is-pressed');
-	};
-
-	startTicker() {
-		if (this.isTicking) return;
-		this.isTicking = true;
-		gsap.ticker.add(this.update);
-	}
-
-	update = () => {
-		this.cacheMousePos.x += (this.mousePos.x - this.cacheMousePos.x) * 0.15;
-		this.cacheMousePos.y += (this.mousePos.y - this.cacheMousePos.y) * 0.15;
-
-		const target = this.normalized.target;
-		const current = this.normalized.current;
-		target.x = this.mousePos.x / this.viewportWidth;
-		target.y = this.mousePos.y / this.viewportHeight;
-		current.x += (target.x - current.x) * 0.12;
-		current.y += (target.y - current.y) * 0.12;
-
-		this.setX(this.cacheMousePos.x);
-		this.setY(this.cacheMousePos.y);
-
-		const delta = Math.hypot(
-			this.mousePos.x - this.cacheMousePos.x,
-			this.mousePos.y - this.cacheMousePos.y,
-		);
-		if (delta < 0.1) {
-			this.setX(this.mousePos.x);
-			this.setY(this.mousePos.y);
-			this.isTicking = false;
-			gsap.ticker.remove(this.update);
-		}
 	};
 
 	syncTargetUnderPointer = () => {
@@ -164,7 +184,8 @@ class Mouse {
 
 	destroy() {
 		if (!this.isInitialized) return;
-		gsap.ticker.remove(this.update);
+		this.videoResetCall?.kill();
+		this.videoResetCall = null;
 		window.removeEventListener('pointermove', this.handlePointerMove);
 		window.removeEventListener('resize', this.handleResize);
 		window.removeEventListener('scroll', this.syncTargetUnderPointer);
@@ -180,8 +201,10 @@ class Mouse {
 			...CURSOR_STATE_CLASSES,
 		);
 		this.cursor?.removeAttribute('data-bg');
+		gsap.killTweensOf([this.cursorMain, this.cursorVideo, this.cursorVideoMedia]);
+		if (this.cursorVideo) gsap.set(this.cursorVideo, { rotationX: 0, rotationY: 0 });
+		if (this.cursorVideoMedia) gsap.set(this.cursorVideoMedia, { scale: 1.2 });
 		this.isInitialized = false;
-		this.isTicking = false;
 	}
 }
 

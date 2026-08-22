@@ -396,12 +396,22 @@ a {
 	position: absolute;
 	top: 1.6rem;
 	left: 0.8rem;
+	transform-style: preserve-3d;
+	will-change: transform;
 }
 .cursor-video-inner {
 	width: 16rem;
 	height: 24rem;
 	border-radius: 0.4rem;
 	overflow: hidden;
+	clip-path: inset(0 round 0.4rem);
+	transform: translateZ(0);
+	backface-visibility: hidden;
+}
+
+.cursor-video-inner video {
+	backface-visibility: hidden;
+	will-change: transform;
 }
 
 .cursor .cursor-video-inner{

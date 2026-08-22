@@ -1,6 +1,5 @@
 ---
-import { Image } from 'astro:assets';
-import work1 from '../assets/images/work-1.png';
+import cursorVideo from '../assets/video/cursor-video.mp4';
 ---
 <div class="cursor-wrap">
   <div class="cursor">
@@ -16,7 +15,15 @@ import work1 from '../assets/images/work-1.png';
       </div>
       <div class="cursor-video">
         <div class="cursor-video-inner">
-          <Image class="img-df img-fill" src={work1} alt="Nike au Pompidou" loading="eager" />
+          <video
+            class="img-df img-fill"
+            src={cursorVideo}
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+          ></video>
         </div>
       </div>
     </div>

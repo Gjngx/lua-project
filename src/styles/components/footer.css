@@ -89,6 +89,10 @@
 	opacity: 0;
 }
 
+.footer-sub-link-text.hover-un::after{
+	height: calc(var(--1px) * 2);
+}
+
 .footer-sub-link-ic path {
 	stroke-dasharray: 1;
 	stroke-dashoffset: 1;

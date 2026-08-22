@@ -493,7 +493,7 @@ export const HomePage = {
 			const worksTitleTop =
 				worksTitle.getBoundingClientRect().top -
 				worksSection.getBoundingClientRect().top - 
-				worksTitle.getBoundingClientRect().height - cvUnit(16, 'rem');
+				worksTitle.getBoundingClientRect().height + cvUnit(77, 'rem');
 
 			const worksDescHeight = worksDesc.getBoundingClientRect().height;
 
@@ -509,7 +509,7 @@ export const HomePage = {
 			this.tlWorksTop
 				.to(worksTitle, { y: worksDescHeight, ease: 'power3.inOut' })
 				.to(worksDesc, { y: worksDescHeight, ease: 'power3.inOut' },'<=' )
-				.to(worksSvg, { width: cvUnit(291, 'rem'), y: worksTitleTop, color: 'var(--cl-content-disable)' , ease: 'power3.inOut' }, '<=' )
+				.to(worksSvg, { width: cvUnit(291, 'rem'), y: worksTitleTop, color: 'var(--cl-content-strong)' , ease: 'power3.inOut' }, '<=' )
 
 
 			this.tlWorksScroll = gsap.timeline({
