@@ -17,7 +17,7 @@ html {
     }
   } */
 
-/* @media only screen and (max-width: 991px) {
+@media only screen and (max-width: 991px) {
   html {
     --fs-global: 1.0090817356vw;
   }
@@ -25,9 +25,9 @@ html {
 
 @media only screen and (max-width: 767px) {
   html {
-    --fs-global: 2.6666666667vw;
+		--fs-global: 2.5641025641vw;
   }
-} */
+}
 
 :root {
 	--page-padding: max((100vw - var(--container--max-width)) / 2, 0px);
