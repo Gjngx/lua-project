@@ -133,25 +133,31 @@ class Loader {
 			const totalDuration = 6;
 			const counterStartTime = 0.3;
 			const counterPauseDuration = 0.3;
+			const finalCounterPauseDuration = 0.2;
 			const fakeLoadingEase = CustomEase.create(
 				'loaderProgress',
 				'M0,0 C0.08,0.24 0.16,0.3 0.28,0.34 C0.4,0.38 0.43,0.62 0.56,0.68 C0.69,0.74 0.74,0.78 0.82,0.84 C0.9,0.9 0.93,0.98 1,1',
 			);
 
-			// Hai mốc dừng trung gian được random theo thời gian thực của counter.
+			// Mốc đầu và cuối được random; mốc giữa luôn dừng tại 50%.
 			// Tại mỗi mốc, cả progress và hai reel cùng nghỉ một nhịp.
 			const counterStopTimes = [
 				gsap.utils.random(totalDuration * 0.2, totalDuration * 0.35, 0.1),
-				gsap.utils.random(totalDuration * 0.55, totalDuration * 0.7, 0.1),
+				totalDuration * 0.5,
+				gsap.utils.random(totalDuration * 0.78, totalDuration * 0.88, 0.1),
 			];
 			let displayedCounter = 0;
-			const counterSamples = counterStopTimes.map((time) => {
-				const progressValue = fakeLoadingEase(time / totalDuration);
-				const targetCounter = Math.min(98, Math.round(progressValue * 100));
-				displayedCounter = Math.min(
-					targetCounter,
-					displayedCounter + 35,
-				);
+			const counterSamples = counterStopTimes.map((time, index) => {
+				const isMiddleStop = index === 1;
+				const progressValue = isMiddleStop
+					? 0.5
+					: fakeLoadingEase(time / totalDuration);
+				const targetCounter = isMiddleStop
+					? 50
+					: Math.min(98, Math.round(progressValue * 100));
+				displayedCounter = isMiddleStop
+					? 50
+					: Math.min(targetCounter, displayedCounter + 35);
 				return { time, value: displayedCounter, progressValue };
 			});
 			counterSamples.push({
@@ -216,10 +222,10 @@ class Loader {
 			}, firstLoadTimeline).to(logoRevealProgress, {
 				value: 1,
 				duration: 0.9,
-				ease: 'power3.inOut',
-				onUpdate: updateLogoReveal,
-				onComplete: updateLogoReveal,
-			}, '>')
+					ease: 'power3.inOut',
+					onUpdate: updateLogoReveal,
+					onComplete: updateLogoReveal,
+			}, `>+=${finalCounterPauseDuration}`)
 				.set(logos, { overflow: 'visible' }, '>')
 				.call(updateLogoOffset, null, '>');
 
