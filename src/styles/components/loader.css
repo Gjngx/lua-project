@@ -127,3 +127,22 @@
 .loader-home-logo.is-brand .loader-home-logo-ic{
   color: var(--cl-brand);
 }
+
+@media only screen and (max-width: 991px) {
+  .loader-home-logo-ic {
+    height: 18rem;
+  }
+  .loader-home-left {
+    grid-column: 2 / 7;
+  }
+  .loader-home-right{
+    grid-column: 7 / -2;
+  }
+  .loader-home-desc {
+    margin-top: 50vh;
+    transform: translateY(-50%);
+  }
+}
+
+@media only screen and (max-width: 767px) {
+}

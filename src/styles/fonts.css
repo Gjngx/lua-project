@@ -154,3 +154,23 @@ p{
 	font-size: 1rem;
 	line-height: 1.2;
 }
+
+@media only screen and (max-width: 991px) {
+	.fs-300-tb{
+		font-size: 30rem;
+	}
+	.fs-112-tb {
+		font-size: 11.2rem;
+	}
+	.fs-80-tb{
+		font-size: 8rem;
+	}
+	.fs-32-tb{
+		font-size: 3.2rem;
+	}
+	.fs-12-tb {
+		font-size: 1.2rem;
+	}
+}
+
+@media only screen and (max-width: 767px) {}

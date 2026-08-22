@@ -68,7 +68,7 @@ export class MasterTimeline {
 		this.scrollTrigger = scrollTrigger;
 		this.tweenArr = tweenArr.filter(Boolean);
 		this.stagger = stagger;
-		this.allowMobile = getScreenType().isMobile ? Boolean(allowMobile) : true;
+		this.allowMobile = getScreenType().isTablet ? Boolean(allowMobile) : true;
 		this.initTrigger = null;
 		this.ready = fontsReady().then(() => this.setup());
 	}

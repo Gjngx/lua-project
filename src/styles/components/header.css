@@ -158,13 +158,18 @@
 }
 
 .header-menu-name {
-	flex: auto;
+	flex: 1 1 auto;
+	min-width: 0;
 	text-align: center;
-	overflow: hidden;
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 1;
 	margin-left: 2.4rem;
+	overflow: hidden;
+}
+
+.header-menu-name .txt {
+	display: block;
+	width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
@@ -655,3 +660,32 @@
 .header.on-dark .header-menu-contact .btn-ic-inner{
 	background-color: var(--cl-white);
 }
+
+
+@media only screen and (max-width: 991px) {
+	.header-logo-ic-amin{
+		height: 18rem;
+	}
+	.header-menu{
+		grid-column: 7 / -2;
+	}
+	.header-nav{
+		width: calc(var(--container--one-column) * 3 + var(--container--column-gap) * 2);
+	}
+	.header-nav-card-decor-item:nth-child(2) {
+		top: 0.8rem;
+	}
+	.header-nav-card-decor-item:nth-child(3) {
+		bottom: 0.8rem;
+	}
+	.header-menu-main-inner .header-menu-dot,
+	.header-menu-main-inner .header-menu-time{
+		display: none;
+	}
+	.header-nav-links-thumb-item{
+		width: 14rem;
+		height: 22rem;
+	}
+}
+
+@media only screen and (max-width: 767px) {}

@@ -38,7 +38,7 @@
 
 
 @media only screen and (max-width: 991px) {
-	html {
+	:root {
 		--container--column: 8;
 		--container--padding: 2.4rem;
 		--container--column-gap: 2rem;
@@ -46,7 +46,7 @@
 }
 
 @media only screen and (max-width: 767px) {
-	html {
+	:root {
 		--container--column: 4;
 		--container--padding: 1.6rem;
 		--container--column-gap: 1.6rem;

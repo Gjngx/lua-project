@@ -573,6 +573,8 @@
 }
 
 .home-how-intro-desc {
+	display: flex;
+	justify-content: center;
 	margin-bottom: 4rem;
 	text-align: center;
 }
@@ -914,4 +916,85 @@
 	.home-hero-bottom-link:hover .home-hero-bottom-link-ic-inner.ic-bottom {
 		transform: translate(0, 0);
 	}
+}
+
+@media only screen and (max-width: 991px) {
+	.home-hero-top.top-left{
+		grid-column: 2 / 7;
+	}
+	.home-hero-top.top-right{
+		grid-column: 7 / -2;
+	}
+	.home-hero-bottom-desc{
+		width: 42rem;
+	}
+	.home-hero-bottom-action {
+		width: calc(var(--container--one-column) * 3 + var(--container--column-gap) * 2);
+	}
+	.home-works-item-img-inner{
+		overflow: hidden;
+	}
+
+	.home-works-item:nth-child(4n + 1) .home-works-item-img {
+		width: 27.7rem;
+		height: 31.8rem;
+	}
+
+	.home-works-item:nth-child(4n + 2) .home-works-item-img {
+		width: 38.2rem;
+		height: 45.5rem;
+	}
+
+	.home-works-item:nth-child(4n + 3) .home-works-item-img {
+		width: 32.65rem;
+		height: 37.7rem;
+	}
+
+	.home-works-item:nth-child(4n) .home-works-item-img {
+		width: 37.7rem;
+		height: 43.7rem;
+	}
+
+	.home-works-item:nth-child(4n + 3) {
+		margin-left: calc(var(--container--padding) + (var(--container--one-column) / 3) + var(--container--column-gap));
+		z-index: 5;
+	}
+	.home-works-item:nth-child(4n) {
+		margin-right: calc(var(--container--padding) + (var(--container--one-column) / 3) + var(--container--column-gap));
+		z-index: 5;
+	}
+	.home-hero-top-title {
+		margin-top: 50vh;
+		transform: translateY(-50%);
+	}
+	.home-how-intro{
+		grid-column: 4 / 8;
+	}
+	.home-how-thumb{
+		grid-column: 4 / 8;
+		padding-inline: 4rem;
+	}
+	.home-how-intro-decor {
+		width: calc(var(--container--one-column) * 4 + var(--container--column-gap) * 3);
+	}
+	.home-playground-content-left {
+		grid-column: 2 / 6;
+	}
+	.home-playground-content-right {
+		grid-column: 6 / -2;
+	}
+	.home-how-content-item-type {
+		padding: 0.8rem 1.2rem;
+	}
+	.home-playground-sphere-hitarea {
+		width: min(40vw, 40vh);
+		height: min(40vw, 40vh);
+	}
+	.home-playground-trans-inner {
+		width: calc(var(--container--one-column) * 6 + var(--container--column-gap) * 5);
+	}
+}
+
+@media only screen and (max-width: 767px) {
+	
 }

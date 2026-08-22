@@ -276,3 +276,13 @@
 	border-radius: 10vmin;
 	background-color: var(--cl-brand);
 }
+
+@media only screen and (max-width: 991px) {
+	.footer-sub {
+		grid-column: 4 / 8;
+	}
+}
+
+@media only screen and (max-width: 767px) {
+
+}
