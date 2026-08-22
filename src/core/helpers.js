@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { gsap, ScrollTrigger } from './gsap.js';
 
 export const childSelect = (parent) => {

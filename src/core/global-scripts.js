@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { gsap } from './gsap';
 import { header } from './components/header';
 import { audioManager } from './components/audio';

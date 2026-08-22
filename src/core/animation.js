@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { gsap, ScrollTrigger } from './gsap.js';
 import { useSplitPretext } from '../utils/pretext.js';
 

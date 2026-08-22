@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import barba from '@barba/core';
 import { PageManagerRegistry } from './page-managers';
 import { globalChange, pageTrans } from './global-scripts';

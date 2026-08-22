@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { gsap, ScrollTrigger } from './gsap.js';
 import Lenis from 'lenis';
 import { viewport, distance } from './helpers.js';

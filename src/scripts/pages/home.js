@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit } from '../../core/helpers.js';

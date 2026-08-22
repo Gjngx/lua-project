@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { gsap } from './gsap.js';
 import { isTouchDevice } from './helpers.js';
 

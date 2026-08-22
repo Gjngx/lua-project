@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { TriggerSetup } from "../trigger-setup";
 import { isTouchDevice } from "../helpers";
 

@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
 
 export const LetTalkPage = {

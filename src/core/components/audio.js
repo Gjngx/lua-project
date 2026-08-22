@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import niorLounge from '../../assets/audio/nior-lounge.mp3';
 import deepHouse from '../../assets/audio/deep-house.mp3';
 

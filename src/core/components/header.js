@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { smoothScroll } from '../lenis';
 import { viewport, cvUnit } from '../helpers';
 import { audioManager } from './audio';

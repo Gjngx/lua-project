@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { viewport, getAllScrollTrigger } from './helpers.js';
 import { smoothScroll } from './lenis.js';
 

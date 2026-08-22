@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { gsap, ScrollTrigger, CustomEase } from './gsap.js';
 import { smoothScroll } from './lenis.js';
 import { PageManagerRegistry } from './page-managers.js';

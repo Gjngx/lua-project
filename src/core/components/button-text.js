@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { gsap, CustomEase } from '../gsap.js';
 import { useSplitPretext } from '../../utils/pretext.js';
 import hoverSound from '../../assets/audio/hover.mp3';

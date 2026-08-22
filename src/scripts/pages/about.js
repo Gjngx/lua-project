@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { gsap } from '../../core/gsap.js';
 import { footer } from '../../core/components/footer.js';
 

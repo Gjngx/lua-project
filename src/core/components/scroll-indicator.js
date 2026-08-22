@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { ScrollTrigger } from '../gsap.js';
 import { smoothScroll } from '../lenis.js';
 

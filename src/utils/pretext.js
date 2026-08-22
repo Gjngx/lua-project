@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { prepareWithSegments, layoutWithLines, layoutNextLine } from "@chenglou/pretext";
 
 const _prepCache = new Map();
