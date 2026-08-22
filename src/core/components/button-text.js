@@ -1,5 +1,7 @@
 import { gsap, CustomEase } from '../gsap.js';
 import { useSplitPretext } from '../../utils/pretext.js';
+import hoverSound from '../../assets/audio/hover.mp3';
+import closeSound from '../../assets/audio/close.mp3';
 
 const BUTTON_SELECTOR = '[data-button-text]';
 const LABEL_SELECTOR = '[data-button-text-label]';
@@ -14,6 +16,39 @@ class ButtonText {
 	constructor() {
 		this.instances = new Map();
 		this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+		this.hoverAudios = new Map();
+		this.hasPointerMoved = false;
+
+		window.addEventListener('pointermove', (event) => {
+			if (!event.pointerType || event.pointerType === 'mouse') {
+				this.hasPointerMoved = true;
+			}
+		}, { passive: true });
+		window.addEventListener('pointerdown', () => {
+			this.hasPointerMoved = false;
+		}, { passive: true });
+		window.addEventListener('click', () => {
+			this.hasPointerMoved = false;
+		}, { capture: true, passive: true });
+	}
+
+	playHoverSound(button) {
+		const sound = button.classList.contains('header-menu-close')
+			? closeSound
+			: hoverSound;
+		let audio = this.hoverAudios.get(sound);
+
+		if (!audio) {
+			audio = new Audio(sound);
+			audio.preload = 'auto';
+			audio.volume = 1;
+			this.hoverAudios.set(sound, audio);
+		}
+
+		audio.currentTime = 0;
+		audio.play().catch(() => {
+			// Trình duyệt có thể chặn audio trước tương tác đầu tiên của người dùng.
+		});
 	}
 
 	async mount(root = document) {
@@ -78,6 +113,10 @@ class ButtonText {
 
 		const onPointerEnter = (event) => {
 			if (event.pointerType && event.pointerType !== 'mouse') return;
+			if (this.hasPointerMoved) {
+				this.playHoverSound(button);
+			}
+			this.hasPointerMoved = false;
 			animate(SHIFT);
 		};
 		const onPointerLeave = (event) => {

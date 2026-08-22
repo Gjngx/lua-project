@@ -25,7 +25,7 @@ export class AudioManager {
 
 		this.audio = new Audio(this.currentTrack.src);
 		this.audio.loop = false;
-		this.audio.volume = 0.5;
+		this.audio.volume = 0.1;
 
 		this.audio.addEventListener('timeupdate', () => {
 			this.updateTimeDisplay();
