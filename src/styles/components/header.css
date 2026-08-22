@@ -128,7 +128,6 @@
 	align-items: center;
 	aspect-ratio: 1;
 	color: var(--cl-content-strong);
-	cursor: pointer;
 	transition: color 0.3s ease;
 }
 

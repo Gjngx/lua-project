@@ -93,7 +93,8 @@ export const LetTalkPage = {
 			this.tlIntro
 			.to(this.el.querySelector('.let-talk-top .heading'), { scale: 0.68, ease: 'power3.out' })
 			.to(decorWraps[0], { x: () => getDecorTranslateX(), ease: 'power3.inOut' }, '<')
-			.to(decorWraps[1], { x: () => -getDecorTranslateX(), ease: 'power3.inOut' }, '<');
+			.to(decorWraps[1], { x: () => -getDecorTranslateX(), ease: 'power3.inOut' }, '<')
+				.to(this.el.querySelector('.let-talk-decor'), { yPercent: -15, ease: 'power3.inOut' }, '<');
 
 
 			this.tlMove
@@ -102,9 +103,6 @@ export const LetTalkPage = {
 			.to(itemEmail, { yPercent: -100, ease: 'power3.inOut', duration: 0.4 })
 			.to(itemLinks, { yPercent: -100, ease: 'power3.inOut', duration: 0.4 })
 			.to(scrollText, { yPercent: -100, ease: 'power3.inOut', duration: 0.4 }, '<');
-
-
-
 		}
 		
 		interact() {

@@ -20,11 +20,11 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    pointer-events: auto;
 }
 
 .let-talk-decor-service{
     overflow: hidden;
+    pointer-events: auto;
 }
 
 .let-talk-decor-service-inner{
@@ -83,7 +83,7 @@
 }
 
 .let-talk-scroll{
-    position: absolute;
+    position: fixed;
     bottom: 3.2rem;
     left: 50%;
     transform: translateX(-50%);
@@ -95,6 +95,7 @@
     bottom: 0;
     padding-top: 80vh;
     z-index: 11;
+    pointer-events: none;
 }
 
 .let-talk-footer-inner{
@@ -144,6 +145,7 @@
     align-items: center;
     color: var(--cl-content-strong);
     background-color: var(--cl-white);
+    pointer-events: auto;
 }
 
 .let-talk-footer-link::before {
@@ -178,5 +180,9 @@
 .let-talk-footer-links-inner{
     display: block;
     transform: translateY(100%);
-    pointer-events: none;
+    pointer-events: auto;
+}
+.let-talk-footer-email-inner.hover-un::after,
+.let-talk-footer-phone-inner.hover-un::after{
+    height: 0.2em;
 }
