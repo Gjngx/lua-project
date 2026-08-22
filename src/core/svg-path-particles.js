@@ -133,6 +133,7 @@ export class SvgPathParticles {
 
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		this.color = getComputedStyle(this.root).color;
 		ctx.fillStyle = this.color;
 
 		for (let index = 0; index < this.particles.length; index++) {
