@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { gsap, ScrollTrigger, CustomEase } from './gsap.js';
 import { smoothScroll } from './lenis.js';
 import { PageManagerRegistry } from './page-managers.js';
@@ -20,15 +21,15 @@ class Loader {
 
 	async init(data) {
 		if (this.isInitialized) return;
-		this.loaderEl = document.querySelector('.loader');
+		this.loaderEl = $('.loader')[0];
 		this.data = data;
 		this.manager = PageManagerRegistry[data.next.namespace] || null;
 		this.isInitialized = true;
 
-		document.documentElement.classList.add('is-loading');
-		document.documentElement.classList.remove('done');
-		this.loaderEl?.classList.remove('done');
-		this.loaderEl?.classList.add('is-loading');
+		$(document.documentElement).addClass(['is-loading']);
+		$(document.documentElement).removeClass(['done']);
+		$(this.loaderEl).removeClass(['done']);
+		$(this.loaderEl).addClass(['is-loading']);
 		smoothScroll.stop();
 		this.setupTimelines();
 
@@ -47,31 +48,31 @@ class Loader {
 
 		const isHome = this.data.next.namespace === 'home';
 		if (isHome && !this.isLoaded) {
-			const progress = this.loaderEl.querySelector('.loader-home-progress');
-			const percent = this.loaderEl.querySelector('.loader-home-progress-percent');
-			const percentText = percent.querySelector('.loader-home-progress-tens .txt');
+			const progress = $(this.loaderEl).find('.loader-home-progress')[0];
+			const percent = $(this.loaderEl).find('.loader-home-progress-percent')[0];
+			const percentText = $(percent).find('.loader-home-progress-tens .txt')[0];
 			const percentHeight = percentText?.getBoundingClientRect().height || 0;
-			const units = percent.querySelector('.loader-home-progress-units');
-			const tens = percent.querySelector('.loader-home-progress-tens');
-			const logos = Array.from(this.loaderEl.querySelectorAll('.loader-home-logo'));
-			const logoIcons = logos.map((item) => item.querySelector('.loader-home-logo-ic'));
-			const logo = this.loaderEl.querySelector('.loader-home-logo.is-dark');
-			const logoIcon = logo.querySelector('.loader-home-logo-ic');
-			const screenLogoIcon = document.querySelector('.header-logo-ic-amin');
-			const logoSvg = logoIcon.querySelector('svg');
+			const units = $(percent).find('.loader-home-progress-units')[0];
+			const tens = $(percent).find('.loader-home-progress-tens')[0];
+			const logos = Array.from($(this.loaderEl).find('.loader-home-logo').toArray());
+			const logoIcons = logos.map((item) => $(item).find('.loader-home-logo-ic')[0]);
+			const logo = $(this.loaderEl).find('.loader-home-logo.is-dark')[0];
+			const logoIcon = $(logo).find('.loader-home-logo-ic')[0];
+			const screenLogoIcon = $('.header-logo-ic-amin')[0];
+			const logoSvg = $(logoIcon).find('svg')[0];
 			const logoPartGroups = ['h', 'i', 'e', 'u', 'mark'].map((part) =>
 				logos
-					.map((item) => item.querySelector(`.logo-part-${part}`))
+					.map((item) => $(item).find(`.logo-part-${part}`)[0])
 					.filter(Boolean),
 			);
 			const logoPartRotations = [0, 8, -7, 5, -4];
 			const logoPartLags = [-7, -13, -10, -15, -18];
 			const logoParts = logoPartGroups.flat();
-			const screenLogoSvg = screenLogoIcon?.querySelector('svg');
-			const darkLogoMask = this.loaderEl.querySelector('.loader-home-logo-mask-dark');
-			const brandLogoMask = this.loaderEl.querySelector('.loader-home-logo-mask-brand');
-			const desc = this.loaderEl.querySelector('.loader-home-desc');
-			const loaderHomePanel = this.loaderEl.querySelector('.loader-home-panel');
+			const screenLogoSvg = $(screenLogoIcon).find('svg')[0];
+			const darkLogoMask = $(this.loaderEl).find('.loader-home-logo-mask-dark')[0];
+			const brandLogoMask = $(this.loaderEl).find('.loader-home-logo-mask-brand')[0];
+			const desc = $(this.loaderEl).find('.loader-home-desc')[0];
+			const loaderHomePanel = $(this.loaderEl).find('.loader-home-panel')[0];
 			const progressStartY = window.innerHeight - percentHeight;
 			const logoRiseStartY = Math.max(
 				0,
@@ -98,7 +99,7 @@ class Loader {
 				logoOffset.y = screenRect.top - loaderRect.top;
 			};
 			this.descSplit = useSplitPretext({
-				selector: desc.querySelector('.txt'),
+				selector: $(desc).find('.txt')[0],
 				type: 'lines',
 				isMask: true,
 			});
@@ -332,16 +333,16 @@ class Loader {
 	complete() {
 		this.restorePage();
 		gsap.set(this.loaderEl, { autoAlpha: 0, pointerEvents: 'none' });
-		this.loaderEl?.classList.remove('is-loading');
-		this.loaderEl?.classList.add('done');
-		document.documentElement.classList.add('done');
+		$(this.loaderEl).removeClass(['is-loading']);
+		$(this.loaderEl).addClass(['done']);
+		$(document.documentElement).addClass(['done']);
 		this.manager?.playOnce(this.data);
 
 		this.isLoaded = true;
 	}
 
 	restorePage() {
-		document.documentElement.classList.remove('is-loading');
+		$(document.documentElement).removeClass(['is-loading']);
 		smoothScroll.start();
 		smoothScroll.lenis?.resize();
 		ScrollTrigger.refresh();

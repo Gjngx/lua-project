@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { gsap, CustomEase } from '../gsap.js';
 import { useSplitPretext } from '../../utils/pretext.js';
 import hoverSound from '../../assets/audio/hover.mp3';
@@ -19,21 +20,21 @@ class ButtonText {
 		this.hoverAudios = new Map();
 		this.hasPointerMoved = false;
 
-		window.addEventListener('pointermove', (event) => {
+		$(window).on('pointermove', (event) => {
 			if (!event.pointerType || event.pointerType === 'mouse') {
 				this.hasPointerMoved = true;
 			}
-		}, { passive: true });
-		window.addEventListener('pointerdown', () => {
+		});
+		$(window).on('pointerdown', () => {
 			this.hasPointerMoved = false;
-		}, { passive: true });
-		window.addEventListener('click', () => {
+		});
+		$(window).on('click', () => {
 			this.hasPointerMoved = false;
-		}, { capture: true, passive: true });
+		});
 	}
 
 	playHoverSound(button) {
-		const sound = button.classList.contains('header-menu-close')
+		const sound = $(button).hasClass('header-menu-close')
 			? closeSound
 			: hoverSound;
 		let audio = this.hoverAudios.get(sound);
@@ -68,22 +69,24 @@ class ButtonText {
 	setup(button) {
 		if (this.instances.has(button)) return;
 
-		const label = button.querySelector(LABEL_SELECTOR);
+		const label = $(button).find(LABEL_SELECTOR)[0];
 		if (!label) return;
 
 		// Pretext measures text with canvas and can differ from the DOM by a few
 		// pixels (especially when letter-spacing is negative). Add a neutral
 		// measurement buffer so a one-line button label never becomes two lines.
 		const originalLabelStyles = {
-			width: label.style.width,
-			marginRight: label.style.marginRight,
+			width: $(label).css('width'),
+			marginRight: $(label).css('margin-right'),
 		};
 		const labelRect = label.getBoundingClientRect();
 		const layoutWidth = label.scrollWidth || label.offsetWidth || labelRect.width;
 		const fontSize = parseFloat(getComputedStyle(label).fontSize) || 14;
 		const measurementBuffer = Math.ceil(fontSize);
-		label.style.width = `${Math.ceil(layoutWidth + measurementBuffer)}px`;
-		label.style.marginRight = `${-measurementBuffer}px`;
+		$(label).css({
+			width: `${Math.ceil(layoutWidth + measurementBuffer)}px`,
+			marginRight: `${-measurementBuffer}px`,
+		});
 
 		const splitResult = useSplitPretext({
 			selector: label,
@@ -91,8 +94,7 @@ class ButtonText {
 			isMask: false,
 		});
 		if (!splitResult?.elements.length) {
-			label.style.width = originalLabelStyles.width;
-			label.style.marginRight = originalLabelStyles.marginRight;
+			$(label).css(originalLabelStyles);
 			return;
 		}
 
@@ -126,10 +128,10 @@ class ButtonText {
 		const onFocus = () => animate(SHIFT);
 		const onBlur = () => animate(0);
 
-		button.addEventListener('pointerenter', onPointerEnter);
-		button.addEventListener('pointerleave', onPointerLeave);
-		button.addEventListener('focus', onFocus);
-		button.addEventListener('blur', onBlur);
+		$(button).on('pointerenter', onPointerEnter);
+		$(button).on('pointerleave', onPointerLeave);
+		$(button).on('focus', onFocus);
+		$(button).on('blur', onBlur);
 
 		this.instances.set(button, {
 			chars,
@@ -165,23 +167,22 @@ class ButtonText {
 			} = instance;
 
 			gsap.killTweensOf(chars);
-			button.removeEventListener('pointerenter', onPointerEnter);
-			button.removeEventListener('pointerleave', onPointerLeave);
-			button.removeEventListener('focus', onFocus);
-			button.removeEventListener('blur', onBlur);
+			$(button).off('pointerenter', onPointerEnter);
+			$(button).off('pointerleave', onPointerLeave);
+			$(button).off('focus', onFocus);
+			$(button).off('blur', onBlur);
 			splitResult.revert();
-			label.style.width = originalLabelStyles.width;
-			label.style.marginRight = originalLabelStyles.marginRight;
+			$(label).css(originalLabelStyles);
 			this.instances.delete(button);
 		});
 	}
 
 	getButtons(root) {
 		const buttons = [];
-		if (root instanceof Element && root.matches(BUTTON_SELECTOR)) {
+		if (root instanceof Element && $(root).is(BUTTON_SELECTOR)) {
 			buttons.push(root);
 		}
-		buttons.push(...root.querySelectorAll(BUTTON_SELECTOR));
+		buttons.push(...$(root).find(BUTTON_SELECTOR).toArray());
 		return buttons;
 	}
 }

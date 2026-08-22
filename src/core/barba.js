@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import barba from '@barba/core';
 import { PageManagerRegistry } from './page-managers';
 import { globalChange, pageTrans } from './global-scripts';
@@ -28,7 +29,7 @@ function syncHead(data) {
 	// Giữ CSS của trang cũ cho tới khi leave animation kết thúc. Với sync: true,
 	// container cũ và mới cùng tồn tại trong suốt transition.
 	const previousSyncedElements = new Set(
-		currentHead.querySelectorAll('[data-barba-head]'),
+		$(currentHead).find('[data-barba-head]').toArray(),
 	);
 
 	// Các selector cần sync
@@ -41,34 +42,34 @@ function syncHead(data) {
 	const loadPromises = [];
 
 	syncSelectors.forEach((selector) => {
-		const nextEls = nextHead.querySelectorAll(selector);
+		const nextEls = $(nextHead).find(selector).toArray();
 
 		nextEls.forEach((nextEl) => {
 			let alreadyExists = false;
 
 			if (nextEl.tagName === 'LINK') {
-				const href = nextEl.getAttribute('href');
-				const existing = href && currentHead.querySelector(`link[href="${href}"]`);
+				const href = $(nextEl).attr('href');
+				const existing = href && $(currentHead).find(`link[href="${href}"]`)[0];
 				if (existing) {
 					alreadyExists = true;
 					previousSyncedElements.delete(existing);
 				}
 			} else if (nextEl.tagName === 'STYLE') {
-				const content = nextEl.textContent.trim();
-				const existingStyles = currentHead.querySelectorAll('style');
+				const content = $(nextEl).text().trim();
+				const existingStyles = $(currentHead).find('style').toArray();
 				for (const existing of existingStyles) {
-					if (existing.textContent.trim() === content) {
+					if ($(existing).text().trim() === content) {
 						alreadyExists = true;
 						previousSyncedElements.delete(existing);
 						break;
 					}
 				}
 			} else if (nextEl.tagName === 'META') {
-				const name = nextEl.getAttribute('name');
-				if (name && currentHead.querySelector(`meta[name="${name}"]`)) {
+				const name = $(nextEl).attr('name');
+				if (name && $(currentHead).find(`meta[name="${name}"]`)[0]) {
 					// Với thẻ meta, thay vì thêm mới thì cập nhật content của thẻ hiện tại
-					const existing = currentHead.querySelector(`meta[name="${name}"]`);
-					existing.setAttribute('content', nextEl.getAttribute('content'));
+					const existing = $(currentHead).find(`meta[name="${name}"]`)[0];
+					$(existing).attr('content', $(nextEl).attr('content'));
 					previousSyncedElements.delete(existing);
 					alreadyExists = true;
 				}
@@ -76,7 +77,7 @@ function syncHead(data) {
 
 			if (!alreadyExists) {
 				const cloned = nextEl.cloneNode(true);
-				cloned.setAttribute('data-barba-head', '');
+				$(cloned).attr('data-barba-head', '');
 				
 				if (cloned.tagName === 'LINK') {
 					loadPromises.push(new Promise((res) => {
@@ -85,7 +86,7 @@ function syncHead(data) {
 					}));
 				}
 				
-				currentHead.appendChild(cloned);
+				$(currentHead).append(cloned);
 			}
 		});
 	});
@@ -111,7 +112,7 @@ function cleanupStaleHead() {
  * Khởi tạo Barba.js
  */
 export function initBarba() {
-	const wrapper = document.querySelector('[data-barba="wrapper"]');
+	const wrapper = $('[data-barba="wrapper"]')[0];
 	if (!wrapper) return;
 
 	// Khai báo các Views để tự động gọi setup / destroy dựa vào data-barba-namespace
@@ -152,13 +153,13 @@ export function initBarba() {
 					// Dùng transform thay vì absolute để tránh làm vỡ layout (flex/grid) của trang cũ
 					let scrollPos = window.scrollY || document.documentElement.scrollTop;
 					if (window.innerWidth <= 767) {
-						const bodyInner = document.querySelector('.body-inner');
+						const bodyInner = $('.body-inner')[0];
 						if (bodyInner && bodyInner.scrollTop > 0) {
 							scrollPos = bodyInner.scrollTop;
 						}
 					}
 
-					data.current.container.style.transform = `translateY(-${scrollPos}px)`;
+					$(data.current.container).css('transform', `translateY(-${scrollPos}px)`);
 				},
 
 				async once(data) {

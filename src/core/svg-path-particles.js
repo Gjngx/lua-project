@@ -1,3 +1,4 @@
+import $ from 'jquery';
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
 const seededUnit = (index, salt) => {
@@ -33,7 +34,7 @@ export class SvgPathParticles {
 		this.viewBox = this.svg.viewBox.baseVal;
 		this.color = getComputedStyle(this.root).color;
 		this.createParticles();
-		this.root.classList.add('is-path-particles-active');
+		$(this.root).addClass(['is-path-particles-active']);
 		this.resize();
 
 		this.resizeObserver = new ResizeObserver(() => {
@@ -51,11 +52,11 @@ export class SvgPathParticles {
 			}
 		});
 		this.intersectionObserver.observe(this.root);
-		document.addEventListener('visibilitychange', this.handleVisibilityChange);
+		$(document).on('visibilitychange', this.handleVisibilityChange);
 	}
 
 	createParticles() {
-		const paths = this.svg.querySelectorAll('path');
+		const paths = $(this.svg).find('path').toArray();
 
 		this.particles = Array.from(paths, (path, index) => {
 			const bounds = path.getBBox();
@@ -65,7 +66,7 @@ export class SvgPathParticles {
 			const randomY = this.viewBox.y + seededUnit(index, 2) * availableY;
 
 			return {
-				shape: new Path2D(path.getAttribute('d')),
+				shape: new Path2D($(path).attr('d')),
 				offsetX: randomX - bounds.x,
 				offsetY: randomY - bounds.y,
 				idleAmplitude: 1 + seededUnit(index, 3) * 1.25,
@@ -113,7 +114,7 @@ export class SvgPathParticles {
 		this.cancelIdleMotion();
 		this.progress = clamp(progress);
 		const isAssembled = this.progress >= 0.9995;
-		this.root.classList.toggle('is-path-particles-assembled', isAssembled);
+		$(this.root).toggleClass('is-path-particles-assembled', isAssembled);
 
 		if (isAssembled) return;
 
@@ -186,12 +187,12 @@ export class SvgPathParticles {
 		const isAssembled = this.progress >= 0.9995;
 
 		if (!this.isVisible || document.hidden || isAssembled) {
-			this.root.classList.toggle('is-path-particles-assembled', isAssembled);
+			$(this.root).toggleClass('is-path-particles-assembled', isAssembled);
 			this.idleFrame = null;
 			return;
 		}
 
-		this.root.classList.remove('is-path-particles-assembled');
+		$(this.root).removeClass(['is-path-particles-assembled']);
 
 		if (!this.lastIdleFrame || timestamp - this.lastIdleFrame >= 1000 / 30) {
 			this.lastIdleFrame = timestamp;
@@ -225,11 +226,8 @@ export class SvgPathParticles {
 		this.cancelIdleMotion();
 		this.resizeObserver?.disconnect();
 		this.intersectionObserver?.disconnect();
-		document.removeEventListener('visibilitychange', this.handleVisibilityChange);
-		this.root?.classList.remove(
-			'is-path-particles-active',
-			'is-path-particles-assembled'
-		);
+		$(document).off('visibilitychange', this.handleVisibilityChange);
+		$(this.root).removeClass(['is-path-particles-active', 'is-path-particles-assembled']);
 		this.ctx?.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		this.particles = [];
 	}

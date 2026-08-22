@@ -464,6 +464,11 @@ a {
 	}
 }
 
+[data-init-hidden] {
+	opacity: 0;
+	visibility: hidden;
+}
+
 @keyframes marquee {
 	0% {
 		transform: translateX(0);

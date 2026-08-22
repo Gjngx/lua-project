@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { viewport, getAllScrollTrigger } from './helpers.js';
 import { smoothScroll } from './lenis.js';
 
@@ -7,7 +8,7 @@ export function scrollTop(onComplete) {
 	}
 	window.scrollTo(0, 0);
 	if (viewport.w <= 767) {
-		const bodyInner = document.querySelector('.body-inner');
+		const bodyInner = $('.body-inner')[0];
 		if (bodyInner) bodyInner.scrollTop = 0;
 	}
 	smoothScroll.scrollToTop({

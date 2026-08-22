@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import niorLounge from '../../assets/audio/nior-lounge.mp3';
 import deepHouse from '../../assets/audio/deep-house.mp3';
 
@@ -27,10 +28,10 @@ export class AudioManager {
 		this.audio.loop = false;
 		this.audio.volume = 0.1;
 
-		this.audio.addEventListener('timeupdate', () => {
+		$(this.audio).on('timeupdate', () => {
 			this.updateTimeDisplay();
 		});
-		this.audio.addEventListener('ended', () => this.next());
+		$(this.audio).on('ended', () => this.next());
 		this.notifyTrackChange();
 
 		// Cố gắng Autoplay ngay lập tức khi load trang
@@ -50,12 +51,12 @@ export class AudioManager {
 
 	updateTimeDisplay() {
 		const totalSeconds = Math.floor(this.audio?.currentTime || 0);
-		const textEl = document.querySelector('[data-header-time]');
+		const textEl = $('[data-header-time]')[0];
 		if (!textEl) return;
 
 		const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
 		const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-		textEl.textContent = `${minutes}:${seconds}`;
+		$(textEl).text(`${minutes}:${seconds}`);
 	}
 
 	notifyTrackChange() {
@@ -76,32 +77,32 @@ export class AudioManager {
 	showAudioPopup() {
 		const popup = document.createElement('div');
 		popup.className = 'audio-popup';
-		popup.innerHTML = `
+		$(popup).html(`
 			<p class="audio-popup-text">This website experience is best with audio.<br/> Would you like to turn on the music?</p>
 			<div class="audio-popup-btns">
 				<button class="audio-btn audio-btn-yes">Play</button>
 				<button class="audio-btn audio-btn-no">No, thanks</button>
 			</div>
-		`;
+		`);
 		
-		document.body.appendChild(popup);
+		$(document.body).append(popup);
 		
 		requestAnimationFrame(() => {
-			popup.classList.add('show');
+			$(popup).addClass(['show']);
 		});
 
 		const closePopup = () => {
-			popup.classList.remove('show');
+			$(popup).removeClass(['show']);
 			setTimeout(() => popup.remove(), 400);
 		};
 
-		popup.querySelector('.audio-btn-yes').addEventListener('click', (e) => {
+		$(popup).find('.audio-btn-yes').on('click', (e) => {
 			e.stopPropagation();
 			this.play();
 			closePopup();
 		});
 
-		popup.querySelector('.audio-btn-no').addEventListener('click', (e) => {
+		$(popup).find('.audio-btn-no').on('click', (e) => {
 			e.stopPropagation();
 			closePopup();
 		});
@@ -131,7 +132,7 @@ export class AudioManager {
 		let needsNextFrame = false;
 		
 		if (!this.rects.length || !document.body.contains(this.rects[0])) {
-			this.rects = Array.from(document.querySelectorAll('[data-header-play] rect'));
+			this.rects = Array.from($('[data-header-play] rect').toArray());
 		}
 
 		if (this.rects.length === 4) {
@@ -157,25 +158,25 @@ export class AudioManager {
 				this.rects.forEach((rect, i) => {
 					const normalized = values[i] / 255;
 					const targetH = 3 + normalized * 15;
-					const currentH = parseFloat(rect.getAttribute('height')) || 3;
+					const currentH = parseFloat($(rect).attr('height')) || 3;
 					const h = currentH + (targetH - currentH) * 0.3; 
 					const y = 10 - h / 2; 
 					
-					rect.setAttribute('height', h.toFixed(2));
-					rect.setAttribute('y', y.toFixed(2));
+					$(rect).attr('height', h.toFixed(2));
+					$(rect).attr('y', y.toFixed(2));
 				});
 			} else if (!this.isPlaying) {
 				this.rects.forEach(rect => {
-					const currentH = parseFloat(rect.getAttribute('height')) || 3;
+					const currentH = parseFloat($(rect).attr('height')) || 3;
 					if (currentH > 3.05) {
 						needsNextFrame = true;
 						const h = currentH + (3 - currentH) * 0.1;
 						const y = 10 - h / 2;
-						rect.setAttribute('height', h.toFixed(2));
-						rect.setAttribute('y', y.toFixed(2));
+						$(rect).attr('height', h.toFixed(2));
+						$(rect).attr('y', y.toFixed(2));
 					} else if (currentH !== 3) {
-						rect.setAttribute('height', 3);
-						rect.setAttribute('y', 8.5);
+						$(rect).attr('height', 3);
+						$(rect).attr('y', 8.5);
 					}
 				});
 			}

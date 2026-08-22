@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { ScrollTrigger } from '../gsap.js';
 import { smoothScroll } from '../lenis.js';
 
@@ -41,8 +42,8 @@ class ScrollIndicator {
 	init() {
 		if (this.initialized) return;
 
-		this.el = document.querySelector('[data-scroll-indicator]');
-		this.thumb = this.el?.querySelector('[data-scroll-indicator-thumb]');
+		this.el = $('[data-scroll-indicator]')[0];
+		this.thumb = $(this.el).find('[data-scroll-indicator-thumb]')[0];
 		if (!this.el || !this.thumb) return;
 
 		this.initialized = true;
@@ -51,8 +52,8 @@ class ScrollIndicator {
 
 		this.finePointerQuery.addEventListener('change', this.onCapabilityChange);
 		this.reducedMotionQuery.addEventListener('change', this.onCapabilityChange);
-		window.addEventListener('resize', this.onResize, { passive: true });
-		window.addEventListener('smooth-scroll:stop', this.onScrollStop);
+		$(window).on('resize', this.onResize);
+		$(window).on('smooth-scroll:stop', this.onScrollStop);
 		ScrollTrigger.addEventListener('refresh', this.onRefresh);
 
 		this.bindLenis(smoothScroll.lenis);
@@ -80,10 +81,10 @@ class ScrollIndicator {
 	setEnabled(enabled) {
 		if (this.enabled === enabled) return;
 		this.enabled = enabled;
-		document.documentElement.classList.toggle('has-custom-scrollbar', enabled);
+		$(document.documentElement).toggleClass('has-custom-scrollbar', enabled);
 
 		if (!enabled) {
-			this.el?.classList.remove('is-active');
+			$(this.el).removeClass(['is-active']);
 			this.stopAnimation();
 		}
 	}
@@ -156,9 +157,9 @@ class ScrollIndicator {
 
 	show() {
 		window.clearTimeout(this.hideTimer);
-		this.el.classList.add('is-active');
+		$(this.el).addClass(['is-active']);
 		this.hideTimer = window.setTimeout(() => {
-			this.el?.classList.remove('is-active');
+			$(this.el).removeClass(['is-active']);
 			this.targetStretch = 1;
 			this.startAnimation();
 		}, 900);
@@ -166,7 +167,7 @@ class ScrollIndicator {
 
 	hideImmediately() {
 		window.clearTimeout(this.hideTimer);
-		this.el?.classList.remove('is-active');
+		$(this.el).removeClass(['is-active']);
 		this.targetStretch = 1;
 		this.currentStretch = 1;
 		this.applyTransform();
@@ -179,12 +180,12 @@ class ScrollIndicator {
 
 		const probeY = window.innerHeight * 0.5;
 		let theme = 'light';
-		const sections = document.querySelectorAll('[data-section]');
+		const sections = $('[data-section]').toArray();
 
 		for (const section of sections) {
 			const rect = section.getBoundingClientRect();
 			if (rect.top <= probeY && rect.bottom >= probeY) {
-				theme = section.getAttribute('data-section') || 'light';
+				theme = $(section).attr('data-section') || 'light';
 			}
 		}
 
@@ -246,7 +247,7 @@ class ScrollIndicator {
 	reset({ immediate = true } = {}) {
 		if (!this.initialized) return;
 		window.clearTimeout(this.hideTimer);
-		this.el.classList.remove('is-active');
+		$(this.el).removeClass(['is-active']);
 		this.lastScroll = 0;
 		this.lastInputTime = 0;
 		this.targetStretch = 1;
@@ -257,15 +258,15 @@ class ScrollIndicator {
 		if (!this.initialized) return;
 		this.paused = true;
 		window.clearTimeout(this.hideTimer);
-		this.el.classList.remove('is-active');
+		$(this.el).removeClass(['is-active']);
 		this.stopAnimation();
-		document.documentElement.classList.add('is-page-transitioning');
+		$(document.documentElement).addClass(['is-page-transitioning']);
 	}
 
 	resume() {
 		if (!this.initialized) return;
 		this.paused = false;
-		document.documentElement.classList.remove('is-page-transitioning');
+		$(document.documentElement).removeClass(['is-page-transitioning']);
 		requestAnimationFrame(() => this.refresh({ immediate: true }));
 	}
 
@@ -276,10 +277,10 @@ class ScrollIndicator {
 		this.lenis?.off('scroll', this.onLenisScroll);
 		this.finePointerQuery?.removeEventListener('change', this.onCapabilityChange);
 		this.reducedMotionQuery?.removeEventListener('change', this.onCapabilityChange);
-		window.removeEventListener('resize', this.onResize);
-		window.removeEventListener('smooth-scroll:stop', this.onScrollStop);
+		$(window).off('resize', this.onResize);
+		$(window).off('smooth-scroll:stop', this.onScrollStop);
 		ScrollTrigger.removeEventListener('refresh', this.onRefresh);
-		document.documentElement.classList.remove('has-custom-scrollbar', 'is-page-transitioning');
+		$(document.documentElement).removeClass(['has-custom-scrollbar', 'is-page-transitioning']);
 		this.initialized = false;
 	}
 }

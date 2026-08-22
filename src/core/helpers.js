@@ -1,7 +1,8 @@
+import $ from 'jquery';
 import { gsap, ScrollTrigger } from './gsap.js';
 
 export const childSelect = (parent) => {
-	return (child) => child ? parent.querySelector(child) : parent;
+	return (child) => child ? $(parent).find(child)[0] : parent;
 }
 
 export const xSetter = (el) => gsap.quickSetter(el, "x", "px");
@@ -17,15 +18,22 @@ export const viewport = {
 let cachedSvh100 = null;
 export const getSvh100 = () => {
 	if (cachedSvh100 != null) return cachedSvh100;
-	const el = document.createElement("div");
-	el.style.cssText = "position:fixed;top:0;left:0;height:100svh;width:0;pointer-events:none;visibility:hidden;";
-	document.body.appendChild(el);
+	const el = $('<div>').css({
+		position: 'fixed',
+		top: 0,
+		left: 0,
+		height: '100svh',
+		width: 0,
+		pointerEvents: 'none',
+		visibility: 'hidden',
+	})[0];
+	$(document.body).append(el);
 	cachedSvh100 = el.getBoundingClientRect().height;
-	document.body.removeChild(el);
+	$(el).remove();
 	return cachedSvh100;
 };
 if (typeof window !== 'undefined') {
-	window.addEventListener("resize", () => { cachedSvh100 = null; });
+	$(window).on("resize", () => { cachedSvh100 = null; });
 }
 
 export const cvUnit = (val, unit) => {
@@ -114,7 +122,7 @@ let _heightObserver = null;
 let _heightDebounceTimer = null;
 
 export function documentHeightObserver(action, data, callback) {
-	let observerEl = viewport.w > 767 ? document.querySelector('body') : data?.next?.container || document.body;
+	let observerEl = viewport.w > 767 ? $('body')[0] : data?.next?.container || document.body;
 	let previousHeight = observerEl?.scrollHeight;
 	function onRefresh() {
 		clearTimeout(_heightDebounceTimer);
@@ -179,7 +187,7 @@ export class ParallaxImage {
         const scalePercent = 100 + (this.scaleOffset * 100);
         gsap.set(this.el, {
             width: scalePercent + '%',
-            height: this.el.classList.contains('img-fill') ? scalePercent + '%' : 'auto'
+            height: $(this.el).hasClass('img-fill') ? scalePercent + '%' : 'auto'
         });
         
         // Đảm bảo phần tử cha có overflow hidden
@@ -211,7 +219,7 @@ export class ParallaxImage {
             if (smoothScroll && smoothScroll.lenis) {
                 smoothScroll.lenis.on('scroll', this.scrollCallback);
             } else {
-                window.addEventListener('scroll', this.scrollCallback);
+                $(window).on('scroll', this.scrollCallback);
             }
         });
     }
@@ -230,7 +238,7 @@ export class ParallaxImage {
                 if (smoothScroll && smoothScroll.lenis) {
                     smoothScroll.lenis.off('scroll', this.scrollCallback);
                 } else {
-                    window.removeEventListener('scroll', this.scrollCallback);
+                    $(window).off('scroll', this.scrollCallback);
                 }
             });
         }
@@ -239,14 +247,14 @@ export class ParallaxImage {
 
 export class Marquee {
     constructor(list, duration = 40) {
-        this.list = typeof list === 'string' ? document.querySelector(list) : list;
+        this.list = typeof list === 'string' ? $(list)[0] : list;
         this.duration = duration;
     }
     
     setup(isReverse) {
         if (!this.list) return;
 
-        let originalItem = this.list.querySelector('[data-marquee="item"]');
+        let originalItem = $(this.list).find('[data-marquee="item"]')[0];
         if (!originalItem) {
             originalItem = this.list.firstElementChild;
             if (!originalItem) return;
@@ -258,16 +266,16 @@ export class Marquee {
         // Tính toán số lượng clone dựa trên chiều rộng item để đảm bảo lấp đầy màn hình
         const cloneAmount = Math.ceil(window.innerWidth / itemWidth) + 1;
 
-        this.list.innerHTML = '';
+		$(this.list).empty();
         
         new Array(cloneAmount).fill().forEach(() => {
             let html = itemClone.cloneNode(true);
-            html.style.animationDuration = `${Math.ceil(itemWidth / this.duration)}s`;
-            if (isReverse) {
-                html.style.animationDirection = 'reverse';
+			$(html).css('animation-duration', `${Math.ceil(itemWidth / this.duration)}s`);
+			if (isReverse) {
+				$(html).css('animation-direction', 'reverse');
             }
-            html.classList.add('anim-marquee');
-            this.list.appendChild(html);
+            $(html).addClass(['anim-marquee']);
+			$(this.list).append(html);
         });
     }
 }

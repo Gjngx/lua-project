@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { gsap } from './gsap';
 import { header } from './components/header';
 import { audioManager } from './components/audio';
@@ -43,7 +44,7 @@ export class GlobalChange {
 			breakpoints[breakpoints.length - 1];
 
 		let timeoutId = null;
-		window.addEventListener("resize", () => {
+		$(window).on("resize", () => {
 			clearTimeout(timeoutId);
 			timeoutId = setTimeout(() => {
 				const newViewportWidth = window.innerWidth;
@@ -69,7 +70,7 @@ export class PageTrans {
 	leaveAnim(data) {
 		return new Promise((resolve) => {
 			// Khóa click chuột trong lúc chuyển trang
-			document.body.style.pointerEvents = 'none';
+			$(document.body).css('pointer-events', 'none');
 
 			this.tlLeave = gsap.timeline({
 				onComplete: resolve
@@ -88,7 +89,7 @@ export class PageTrans {
 			this.tlEnter = gsap.timeline({
 				onComplete: () => {
 					// Mở khóa click chuột sau khi chuyển xong
-					document.body.style.pointerEvents = '';
+					$(document.body).css('pointer-events', '');
 					resolve();
 				}
 			});

@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { smoothScroll } from '../lenis';
 import { viewport, cvUnit } from '../helpers';
 import { audioManager } from './audio';
@@ -33,9 +34,9 @@ export class Header {
 	}
 
 	init(data) {
-		this.el = document.querySelector(".header");
+		this.el = $(".header")[0];
 		if (!this.el) return;
-		this.elLogoAnimated = document.querySelector('.header-logo-amin');
+		this.elLogoAnimated = $('.header-logo-amin')[0];
 
 		this.setupHeaderMetrics();
 		this.setupNavCardReels();
@@ -50,11 +51,11 @@ export class Header {
 
 	setupSocialHovers() {
 		this.socialHoverButtons = Array.from(
-			this.el.querySelectorAll('.header-nav-social')
+			$(this.el).find('.header-nav-social').toArray()
 		);
 		this.socialHoverButtons.forEach((button) => {
-			button.addEventListener('pointerenter', this.handleSocialHoverPoint, { passive: true });
-			button.addEventListener('pointerleave', this.handleSocialHoverPoint, { passive: true });
+			$(button).on('pointerenter', this.handleSocialHoverPoint);
+			$(button).on('pointerleave', this.handleSocialHoverPoint);
 		});
 	}
 
@@ -62,33 +63,35 @@ export class Header {
 		const bounds = event.currentTarget.getBoundingClientRect();
 		const x = ((event.clientX - bounds.left) / bounds.width) * 100;
 		const y = ((event.clientY - bounds.top) / bounds.height) * 100;
-		event.currentTarget.style.setProperty('--header-social-hover-x', `${x}%`);
-		event.currentTarget.style.setProperty('--header-social-hover-y', `${y}%`);
+		$(event.currentTarget).css({
+			'--header-social-hover-x': `${x}%`,
+			'--header-social-hover-y': `${y}%`,
+		});
 	};
 
 	togglePageClass(data) {
 		if (!this.el) return;
 
 		const namespace = data?.next?.namespace ||
-			document.querySelector('[data-barba="container"]')?.dataset.barbaNamespace;
+			$('[data-barba="container"]')[0]?.dataset.barbaNamespace;
 		const isHome = namespace === 'home';
-		this.el.classList.toggle('header-home', isHome);
-		this.elLogoAnimated?.classList.toggle('header-home', isHome);
+		$(this.el).toggleClass('header-home', isHome);
+		$(this.elLogoAnimated).toggleClass('header-home', isHome);
 	}
 
 	updateActiveNavLink() {
 		if (!this.el) return;
 		const pathname = window.location.pathname;
-		const navLinks = this.el.querySelectorAll('.header-nav-link');
+		const navLinks = $(this.el).find('.header-nav-link').toArray();
 		navLinks.forEach((link) => {
-			const href = link.getAttribute('href');
+			const href = $(link).attr('href');
 			if (!href) return;
 			// Bỏ qua hash (#works, #playground) khi so sánh
 			const linkPath = href.split('#')[0] || '/';
 			const isCurrent =
 				(linkPath === '/' && pathname === '/') ||
 				(linkPath !== '/' && pathname.startsWith(linkPath));
-			link.classList.toggle('link-current', isCurrent);
+			$(link).toggleClass('link-current', isCurrent);
 		});
 	}
 
@@ -99,7 +102,7 @@ export class Header {
 		this.locationClockTimer = null;
 
 		const clocks = Array.from(
-			this.el.querySelectorAll('[data-header-location-clock]'),
+			$(this.el).find('[data-header-location-clock]').toArray(),
 		).map((clock) => {
 			const timeZone = clock.dataset.timeZone;
 			if (!timeZone || timeZone === 'Europe/London') return null;
@@ -122,7 +125,7 @@ export class Header {
 			const now = new Date();
 
 			clocks.forEach(({ clock, timeFormatter }) => {
-				clock.textContent = timeFormatter.format(now);
+				$(clock).text(timeFormatter.format(now));
 				clock.dateTime = now.toISOString();
 			});
 
@@ -136,18 +139,18 @@ export class Header {
 	setupPortraitAnimation() {
 		if (this.portraitTimeline || !this.el) return;
 
-		const portrait = this.el.querySelector('[data-header-portrait]');
+		const portrait = $(this.el).find('[data-header-portrait]')[0];
 		if (!portrait) return;
 
-		this.portraitLayers = Array.from(portrait.querySelectorAll('[data-portrait-layer]'));
-		this.portraitMarker = portrait.querySelector('[data-portrait-marker]');
+		this.portraitLayers = Array.from($(portrait).find('[data-portrait-layer]').toArray());
+		this.portraitMarker = $(portrait).find('[data-portrait-marker]')[0];
 		if (this.portraitLayers.length !== 3 || !this.portraitMarker) return;
 
-		portrait.addEventListener('pointerenter', () => this.playPortraitAnimation());
-		portrait.addEventListener('pointerleave', () => this.reversePortraitAnimation());
+		$(portrait).on('pointerenter', () => this.playPortraitAnimation());
+		$(portrait).on('pointerleave', () => this.reversePortraitAnimation());
 
 		this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		const markerCircle = this.portraitMarker.querySelector('circle');
+		const markerCircle = $(this.portraitMarker).find('circle')[0];
 		const angles = this.pickPortraitAngles();
 		const [outer, middle, inner] = this.portraitLayers;
 
@@ -240,27 +243,27 @@ export class Header {
 	setupNavCardReels() {
 		if (this.navCardReels.length) return;
 
-		this.el.querySelectorAll('[data-header-reel]').forEach((reel, index) => {
+		$(this.el).find('[data-header-reel]').toArray().forEach((reel, index) => {
 			if (reel.hasAttribute('data-header-reel-ready')) return;
 
 			const icons = Array.from(reel.children).map((icon) => icon.cloneNode(true));
 			if (!icons.length) return;
 
 			const track = document.createElement('div');
-			track.setAttribute('data-header-reel-track', '');
-			track.setAttribute('aria-hidden', 'true');
+			$(track).attr('data-header-reel-track', '');
+			$(track).attr('aria-hidden', 'true');
 			for (let cycle = 0; cycle < 2; cycle += 1) {
 				icons.forEach((icon) => track.append(icon.cloneNode(true)));
 			}
 			const ghostFar = track.cloneNode(true);
-			ghostFar.removeAttribute('data-header-reel-track');
-			ghostFar.setAttribute('data-header-reel-ghost', 'far');
+			$(ghostFar).removeAttr('data-header-reel-track');
+			$(ghostFar).attr('data-header-reel-ghost', 'far');
 			const ghostNear = track.cloneNode(true);
-			ghostNear.removeAttribute('data-header-reel-track');
-			ghostNear.setAttribute('data-header-reel-ghost', 'near');
+			$(ghostNear).removeAttr('data-header-reel-track');
+			$(ghostNear).attr('data-header-reel-ghost', 'near');
 			reel.replaceChildren(ghostFar, ghostNear, track);
 
-			reel.setAttribute('data-header-reel-ready', '');
+			$(reel).attr('data-header-reel-ready', '');
 			this.navCardReels.push({
 				el: reel,
 				track,
@@ -280,11 +283,11 @@ export class Header {
 			});
 		});
 
-		const reelGroup = this.el.querySelector('[data-header-reel-group]');
+		const reelGroup = $(this.el).find('[data-header-reel-group]')[0];
 		if (reelGroup && !reelGroup.hasAttribute('data-header-reel-group-ready')) {
-			reelGroup.addEventListener('pointerenter', () => this.stopNavCardReelsRandomly());
-			reelGroup.addEventListener('pointerleave', () => this.resumeNavCardReels());
-			reelGroup.setAttribute('data-header-reel-group-ready', '');
+			$(reelGroup).on('pointerenter', () => this.stopNavCardReelsRandomly());
+			$(reelGroup).on('pointerleave', () => this.resumeNavCardReels());
+			$(reelGroup).attr('data-header-reel-group-ready', '');
 		}
 	}
 
@@ -320,7 +323,7 @@ export class Header {
 	}
 
 	updateNavCardReels(time) {
-		if (!this.isOpen && !this.el?.classList.contains('is-nav-closing')) return;
+		if (!this.isOpen && !$(this.el).hasClass('is-nav-closing')) return;
 
 		const deltaTime = Math.min(time - this.navCardReelLastTime, 50);
 		this.navCardReelLastTime = time;
@@ -552,7 +555,7 @@ export class Header {
 	}
 
 	setupHeaderMetrics() {
-		const headerInner = this.el?.querySelector('.header-inner');
+		const headerInner = $(this.el).find('.header-inner')[0];
 		if (!this.el || !headerInner) return;
 
 		const updateMetrics = () => {
@@ -608,19 +611,16 @@ export class Header {
 		const headerHeight = this.headerMetrics.outerHeight;
 		const collapseAt = headerHeight * 2;
 		const expandAt = headerHeight * 1.5;
-		const isCollapsed = this.el.classList.contains("on-scroll");
+		const isCollapsed = $(this.el).hasClass("on-scroll");
 
 		if (!isCollapsed && inst.scroll > collapseAt) {
-			this.el.classList.add("on-scroll");
-			this.elLogoAnimated?.classList.add('on-scroll');
+			$(this.el).addClass(["on-scroll"]);
+			$(this.elLogoAnimated).addClass(['on-scroll']);
 		} else if (isCollapsed && inst.scroll < expandAt) {
-			this.el.classList.remove("on-scroll");
-			this.elLogoAnimated?.classList.remove('on-scroll');
+			$(this.el).removeClass(["on-scroll"]);
+			$(this.elLogoAnimated).removeClass(['on-scroll']);
 		}
-		this.elLogoAnimated?.classList.toggle(
-			'on-scroll',
-			this.el.classList.contains('on-scroll'),
-		);
+		$(this.elLogoAnimated).toggleClass('on-scroll', $(this.el).hasClass('on-scroll'));
 	}
 
 	/**
@@ -631,21 +631,18 @@ export class Header {
 		const headerHeight = this.headerMetrics.outerHeight;
 
 		if (inst.scroll <= headerHeight * 3) {
-			this.el.classList.remove("on-hide");
-			this.elLogoAnimated?.classList.remove('on-hide');
+			$(this.el).removeClass(["on-hide"]);
+			$(this.elLogoAnimated).removeClass(['on-hide']);
 		} else if (inst.direction == 1) {
 			// Scroll xuống → ẩn header
-			this.el.classList.add("on-hide");
-			this.elLogoAnimated?.classList.add('on-hide');
+			$(this.el).addClass(["on-hide"]);
+			$(this.elLogoAnimated).addClass(['on-hide']);
 		} else if (inst.direction == -1) {
 			// Scroll lên → hiện header
-			this.el.classList.remove("on-hide");
-			this.elLogoAnimated?.classList.remove('on-hide');
+			$(this.el).removeClass(["on-hide"]);
+			$(this.elLogoAnimated).removeClass(['on-hide']);
 		}
-		this.elLogoAnimated?.classList.toggle(
-			'on-hide',
-			this.el.classList.contains('on-hide'),
-		);
+		$(this.elLogoAnimated).toggleClass('on-hide', $(this.el).hasClass('on-hide'));
 	}
 
 	/**
@@ -655,17 +652,17 @@ export class Header {
 	 */
 	toggleMode() {
 		const section = this.getCurrentSection('[data-section]');
-		const mode = section ? section.getAttribute('data-section') : null;
-		const hiddenRules = section?.getAttribute('data-hidden')?.split(/\s+/) || [];
-		this.el.classList.toggle('hidden-logo', hiddenRules.includes('logo'));
-		this.elLogoAnimated?.classList.toggle('hidden-logo', hiddenRules.includes('logo'));
+		const mode = section ? $(section).attr('data-section') : null;
+		const hiddenRules = $(section).attr('data-hidden')?.split(/\s+/) || [];
+		$(this.el).toggleClass('hidden-logo', hiddenRules.includes('logo'));
+		$(this.elLogoAnimated).toggleClass('hidden-logo', hiddenRules.includes('logo'));
 
 		if (this.currentMode === mode) return;
 
 		this.currentMode = mode;
 
 		// Xóa tất cả on-* class trừ on-scroll, on-hide, on-open-nav
-		const classes = Array.from(this.el.classList);
+		const classes = ($(this.el).attr('class') || '').split(/\s+/).filter(Boolean);
 		const modeClasses = classes.filter(cls =>
 			cls.startsWith('on-') &&
 			cls !== 'on-scroll' &&
@@ -673,9 +670,9 @@ export class Header {
 			cls !== 'on-open-nav' &&
 			cls !== 'on-loader'
 		);
-		modeClasses.forEach(cls => this.el.classList.remove(cls));
+		modeClasses.forEach(cls => $(this.el).removeClass([cls]));
 		if (this.elLogoAnimated) {
-			Array.from(this.elLogoAnimated.classList)
+			($(this.elLogoAnimated).attr('class') || '').split(/\s+/).filter(Boolean)
 				.filter((cls) =>
 					cls.startsWith('on-') &&
 					cls !== 'on-scroll' &&
@@ -683,13 +680,13 @@ export class Header {
 					cls !== 'on-open-nav' &&
 					cls !== 'on-loader'
 				)
-				.forEach((cls) => this.elLogoAnimated.classList.remove(cls));
+				.forEach((cls) => $(this.elLogoAnimated).removeClass([cls]));
 		}
 
 		// Thêm mode class mới
 		if (mode) {
-			this.el.classList.add(`on-${mode}`);
-			this.elLogoAnimated?.classList.add(`on-${mode}`);
+			$(this.el).addClass([`on-${mode}`]);
+			$(this.elLogoAnimated).addClass([`on-${mode}`]);
 		}
 	}
 
@@ -697,7 +694,7 @@ export class Header {
 	 * Tìm section hiện đang nằm ở vùng header
 	 */
 	getCurrentSection(attribute, offset = cvUnit(25, "rem")) {
-		const sections = document.querySelectorAll(attribute);
+		const sections = $(attribute).toArray();
 		let matchedSection = null;
 		const headerHeight = this.headerMetrics.innerHeight;
 
@@ -719,7 +716,7 @@ export class Header {
 
 		const heightHeader = this.headerMetrics.innerHeight;
 
-		if (!this.el.classList.contains('on-hide')) {
+		if (!$(this.el).hasClass('on-hide')) {
 			this.listDependent.forEach((entry) => {
 				const el = entry.el || entry;
 				const offset = entry.offset || 0;
@@ -752,20 +749,20 @@ export class Header {
 	}
 
 	getNavAnimationElements() {
-		const nav = this.el?.querySelector('[data-header-nav]');
-		const grid = nav?.querySelector('.header-nav-grid');
-		const lead = nav?.querySelector('.header-nav-links');
-		const socialGroup = nav?.querySelector('.header-nav-socials');
+		const nav = $(this.el).find('[data-header-nav]')[0];
+		const grid = $(nav).find('.header-nav-grid')[0];
+		const lead = $(nav).find('.header-nav-links')[0];
+		const socialGroup = $(nav).find('.header-nav-socials')[0];
 		const cards = [];
 		Array.from(grid?.children || []).forEach((item) => {
 			if (item === lead) return;
 			if (item === socialGroup) {
-				cards.push(...item.querySelectorAll('.header-nav-social'));
+				cards.push(...$(item).find('.header-nav-social').toArray());
 				return;
 			}
 			cards.push(item);
 		});
-		const overlay = this.el?.querySelector('.header-overlay');
+		const overlay = $(this.el).find('.header-overlay')[0];
 
 		return { nav, lead, cards, overlay };
 	}
@@ -789,7 +786,7 @@ export class Header {
 		if (!this.el) return;
 
 		this.stopNavCardReels();
-		this.el.classList.remove('on-open-nav', 'is-nav-closing');
+		$(this.el).removeClass(['on-open-nav', 'is-nav-closing']);
 		this.clearNavAnimationStyles(elements);
 		this.portraitTimeline?.pause(0);
 		this.navTransition = null;
@@ -946,63 +943,63 @@ export class Header {
 
 	// ─── Nav Toggle ──────────────────────────────────────────────────
 	toggleNav() {
-		const toggles = this.el.querySelectorAll('[data-header-toggle]');
+		const toggles = $(this.el).find('[data-header-toggle]').toArray();
 		toggles.forEach(btn => {
-			btn.addEventListener("click", this.handleClick.bind(this));
+			$(btn).on("click", this.handleClick.bind(this));
 		});
 
-		this.el.querySelectorAll('[data-header-nav] a').forEach(link => {
-			link.addEventListener('click', () => {
+		$(this.el).find('[data-header-nav] a').toArray().forEach(link => {
+			$(link).on('click', () => {
 				if (this.isOpen) this.close();
 			});
 		});
 
-		const audioToggle = this.el.querySelector('[data-header-next]');
+		const audioToggle = $(this.el).find('[data-header-next]')[0];
 		if (audioToggle) {
-			audioToggle.addEventListener('click', (e) => {
+			$(audioToggle).on('click', (e) => {
 				e.preventDefault();
 				e.stopPropagation();
 				audioManager.next();
 			});
 
 			this.updateTrackTitle(audioManager.currentTrack);
-			window.addEventListener('audio:track-change', (e) => {
+			$(window).on('audio:track-change', (e) => {
 				this.updateTrackTitle(e.detail.track);
 			});
 		}
 
-		const audioPlayPause = this.el.querySelector('[data-header-play]');
+		const audioPlayPause = $(this.el).find('[data-header-play]')[0];
 		if (audioPlayPause) {
-			audioPlayPause.addEventListener('click', (e) => {
+			$(audioPlayPause).on('click', (e) => {
 				e.preventDefault();
 				e.stopPropagation();
 				audioManager.toggle();
 			});
 
 			const updateAudioControl = (isPlaying) => {
-				audioPlayPause.setAttribute('aria-pressed', String(isPlaying));
-				audioPlayPause.setAttribute('aria-label', isPlaying ? 'Pause music' : 'Play music');
-				this.el.classList.toggle('is-pause', !isPlaying);
+				$(audioPlayPause).attr('aria-pressed', String(isPlaying));
+				$(audioPlayPause).attr('aria-label', isPlaying ? 'Pause music' : 'Play music');
+				$(this.el).toggleClass('is-pause', !isPlaying);
 			};
 
 			updateAudioControl(audioManager.isPlaying);
-			window.addEventListener('audio:state-change', (e) => {
+			$(window).on('audio:state-change', (e) => {
 				updateAudioControl(e.detail.isPlaying);
 			});
 		}
 
 		// Đóng khi click ra ngoài
-		document.addEventListener('click', (e) => {
+		$(document).on('click', (e) => {
 			if (!this.isOpen) return;
 			if (
-				e.target.closest('[data-header-toggle]') ||
-				e.target.closest('.header-logo') ||
-				e.target.closest('.header-inner')
+				$(e.target).closest('[data-header-toggle]')[0] || null ||
+				$(e.target).closest('.header-logo')[0] || null ||
+				$(e.target).closest('.header-inner')[0] || null
 			) return;
 			this.close();
 		});
 
-		document.addEventListener('keydown', (e) => {
+		$(document).on('keydown', (e) => {
 			if (e.key === 'Escape' && this.isOpen) this.close();
 		});
 	}
@@ -1010,8 +1007,8 @@ export class Header {
 	updateTrackTitle(track) {
 		if (!track?.title || !this.el) return;
 
-		const name = this.el.querySelector('[data-header-name-text]');
-		if (name) name.textContent = track.title;
+		const name = $(this.el).find('[data-header-name-text]')[0];
+		if (name) $(name).text(track.title);
 	}
 
 	handleClick(e) {
@@ -1034,13 +1031,13 @@ export class Header {
 		this.portraitResetCall?.kill();
 		this.portraitResetCall = null;
 		this.clearNavAnimationStyles();
-		this.el.classList.remove('is-nav-closing');
-		this.el.classList.add('on-open-nav');
-		this.el.querySelector('[data-header-nav]')?.setAttribute('aria-hidden', 'false');
-		this.el.querySelectorAll('[data-header-toggle]').forEach((el) => {
-			el.classList.add('active');
-			el.setAttribute('aria-expanded', 'true');
-			el.setAttribute('aria-label', 'Close navigation');
+		$(this.el).removeClass(['is-nav-closing']);
+		$(this.el).addClass(['on-open-nav']);
+		$(this.el).find('[data-header-nav]').attr('aria-hidden', 'false');
+		$(this.el).find('[data-header-toggle]').toArray().forEach((el) => {
+			$(el).addClass(['active']);
+			$(el).attr('aria-expanded', 'true');
+			$(el).attr('aria-label', 'Close navigation');
 		});
 		this.isOpen = true;
 		this.startNavCardReels();
@@ -1051,9 +1048,9 @@ export class Header {
 
 		this._savedScrollY = window.scrollY;
 		this._preventTouch = (e) => {
-			if (!e.target.closest('[data-header-nav]')) e.preventDefault();
+			if (!$(e.target).closest('[data-header-nav]').length) e.preventDefault();
 		};
-		document.addEventListener('touchmove', this._preventTouch, { passive: false });
+		$(document).on('touchmove', this._preventTouch);
 	}
 
 	close() {
@@ -1065,17 +1062,17 @@ export class Header {
 		this.pausePortraitAnimation(this.prefersReducedMotion ? 0 : 0.9);
 
 		if (this._preventTouch) {
-			document.removeEventListener('touchmove', this._preventTouch);
+			$(document).off('touchmove', this._preventTouch);
 			this._preventTouch = null;
 		}
 
 		if (smoothScroll) smoothScroll.start();
-		this.el.classList.add('is-nav-closing');
-		this.el.querySelector('[data-header-nav]')?.setAttribute('aria-hidden', 'true');
-		this.el.querySelectorAll('[data-header-toggle]').forEach((el) => {
-			el.classList.remove('active');
-			el.setAttribute('aria-expanded', 'false');
-			el.setAttribute('aria-label', 'Open navigation');
+		$(this.el).addClass(['is-nav-closing']);
+		$(this.el).find('[data-header-nav]').attr('aria-hidden', 'true');
+		$(this.el).find('[data-header-toggle]').toArray().forEach((el) => {
+			$(el).removeClass(['active']);
+			$(el).attr('aria-expanded', 'false');
+			$(el).attr('aria-label', 'Open navigation');
 		});
 
 		if (this.prefersReducedMotion) {

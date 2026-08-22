@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { gsap, ScrollTrigger } from './gsap.js';
 import Lenis from 'lenis';
 import { viewport, distance } from './helpers.js';
@@ -112,7 +113,7 @@ export class SmoothScroll {
 		if (this.lenis) {
 			this.lenis.start();
 		}
-		document.documentElement.classList.remove('is-scroll-locked');
+		$(document.documentElement).removeClass(['is-scroll-locked']);
 		window.dispatchEvent(new CustomEvent('smooth-scroll:start'));
 	}
 
@@ -120,7 +121,7 @@ export class SmoothScroll {
 		if (this.lenis) {
 			this.lenis.stop();
 		}
-		document.documentElement.classList.add('is-scroll-locked');
+		$(document.documentElement).addClass(['is-scroll-locked']);
 		window.dispatchEvent(new CustomEvent('smooth-scroll:stop'));
 	}
 
@@ -150,7 +151,7 @@ export class SmoothScroll {
 			this.lenis.destroy();
 			this.lenis = null;
 		}
-		document.documentElement.classList.remove('is-scroll-locked');
+		$(document.documentElement).removeClass(['is-scroll-locked']);
 	}
 }
 

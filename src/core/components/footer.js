@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { TriggerSetup } from "../trigger-setup";
 import { isTouchDevice } from "../helpers";
 
@@ -13,7 +14,7 @@ export class Footer extends TriggerSetup {
 		this.iconHoverButtons = [];
 	}
 	trigger(data) {
-		this.el = document.querySelector(".footer");
+		this.el = $(".footer")[0];
 		if (this.el) {
 			super.setTrigger(this.el, this.onTrigger.bind(this));
 		}
@@ -26,35 +27,35 @@ export class Footer extends TriggerSetup {
 		if (!this.el) return;
 		if (window.innerWidth <= 991 || isTouchDevice()) return;
 
-		this.trail = this.el.querySelector('.footer-cursor-trail');
-		this.trailSeed = this.trail?.querySelector('.footer-cursor-trail-seed');
+		this.trail = $(this.el).find('.footer-cursor-trail')[0];
+		this.trailSeed = $(this.trail).find('.footer-cursor-trail-seed')[0];
 		if (!this.trail || !this.trailSeed) return;
 
-		this.el.addEventListener('pointermove', this.handleTrailMove, { passive: true });
-		this.el.addEventListener('pointerleave', this.handleTrailLeave, { passive: true });
+		$(this.el).on('pointermove', this.handleTrailMove);
+		$(this.el).on('pointerleave', this.handleTrailLeave);
 		this.setupIconHovers();
 	}
 	setupIconHovers() {
 		this.iconHoverButtons = Array.from(
-			this.el.querySelectorAll('.footer-info-center-ic-wrap')
+			$(this.el).find('.footer-info-center-ic-wrap').toArray()
 		);
 		this.iconHoverButtons.forEach((button) => {
-			button.addEventListener('pointerenter', this.handleIconHoverPoint, { passive: true });
-			button.addEventListener('pointerleave', this.handleIconHoverPoint, { passive: true });
+			$(button).on('pointerenter', this.handleIconHoverPoint);
+			$(button).on('pointerleave', this.handleIconHoverPoint);
 		});
 	}
 	handleIconHoverPoint = (event) => {
 		const bounds = event.currentTarget.getBoundingClientRect();
 		const x = ((event.clientX - bounds.left) / bounds.width) * 100;
 		const y = ((event.clientY - bounds.top) / bounds.height) * 100;
-		event.currentTarget.style.setProperty('--footer-icon-hover-x', `${x}%`);
-		event.currentTarget.style.setProperty('--footer-icon-hover-y', `${y}%`);
+		$(event.currentTarget).css({
+			'--footer-icon-hover-x': `${x}%`,
+			'--footer-icon-hover-y': `${y}%`,
+		});
 	};
 	handleTrailMove = (event) => {
 		if (event.pointerType && event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
-		if (event.target.closest?.(
-			'.txt, .footer-sub-content, .footer-info-link, .footer-info-right-phone',
-		)) {
+		if ($(event.target).closest('.txt, .footer-sub-content, .footer-info-link, .footer-info-right-phone')[0] || null) {
 			this.lastTrailPoint = null;
 			return;
 		}
@@ -111,10 +112,12 @@ export class Footer extends TriggerSetup {
 		this.occupiedTrailCells.add(cellKey);
 
 		const item = this.trailSeed.cloneNode(true);
-		item.classList.remove('footer-cursor-trail-seed');
-		item.classList.add('footer-cursor-trail-item');
-		item.style.left = `${halfIconWidth + column * cellWidth}px`;
-		item.style.top = `${halfIconHeight + row * cellHeight}px`;
+		$(item).removeClass(['footer-cursor-trail-seed']);
+		$(item).addClass(['footer-cursor-trail-item']);
+		$(item).css({
+			left: `${halfIconWidth + column * cellWidth}px`,
+			top: `${halfIconHeight + row * cellHeight}px`,
+		});
 		item.dataset.trailCell = cellKey;
 		this.trail.append(item);
 		this.trailItems.add(item);
@@ -142,11 +145,11 @@ export class Footer extends TriggerSetup {
 		
 	}
 	destroy() {
-		this.el?.removeEventListener('pointermove', this.handleTrailMove);
-		this.el?.removeEventListener('pointerleave', this.handleTrailLeave);
+		$(this.el).off('pointermove', this.handleTrailMove);
+		$(this.el).off('pointerleave', this.handleTrailLeave);
 		this.iconHoverButtons.forEach((button) => {
-			button.removeEventListener('pointerenter', this.handleIconHoverPoint);
-			button.removeEventListener('pointerleave', this.handleIconHoverPoint);
+			$(button).off('pointerenter', this.handleIconHoverPoint);
+			$(button).off('pointerleave', this.handleIconHoverPoint);
 		});
 		this.iconHoverButtons = [];
 		this.trailItems.forEach((item) => {

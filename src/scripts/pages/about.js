@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { gsap } from '../../core/gsap.js';
 import { footer } from '../../core/components/footer.js';
 
@@ -9,7 +10,7 @@ export const AboutPage = {
 		}
 
 		setup(data, mode) {
-			this.el = data.next.container.querySelector('.about-hero-wrap');
+			this.el = $(data.next.container).find('.about-hero-wrap')[0];
 			if (!this.el) return;
 			this.interact();
 

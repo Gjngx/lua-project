@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { prepareWithSegments, layoutWithLines, layoutNextLine } from "@chenglou/pretext";
 
 const _prepCache = new Map();
@@ -47,8 +48,8 @@ function cssText(fontWeight, fontSize, extra = '') {
 function parseRichHTML(el, rootFontSize, rootFW = '400') {
 	// Sync actual computed display state of <br> tags to the offline clone
 	const clonedEl = el.cloneNode(true);
-	const originalBrs = el.querySelectorAll('br');
-	const clonedBrs = clonedEl.querySelectorAll('br');
+	const originalBrs = $(el).find('br').toArray();
+	const clonedBrs = $(clonedEl).find('br').toArray();
 	for (let i = 0; i < originalBrs.length; i++) {
 		if (window.getComputedStyle(originalBrs[i]).display === 'none') {
 			clonedBrs[i].style.display = 'none';
@@ -304,7 +305,7 @@ function buildRichLineFragments(lineText, globalOffset, charIndexMap, richSegmen
  */
 export function useSplitPretext({ selector, type = 'lines', isMask = false }) {
 	const el = typeof selector === 'string'
-		? document.querySelector(selector)
+		? $(selector)[0]
 		: selector;
 	if (!el) return null;
 
@@ -414,7 +415,7 @@ export function useSplitPretext({ selector, type = 'lines', isMask = false }) {
 					const wrapDiv = document.createElement('div');
 					wrapDiv.style.cssText = 'display:inline;';
 					if (frag.className) {
-						frag.className.split(' ').forEach(c => wrapDiv.classList.add(c));
+						frag.className.split(' ').forEach(c => $(wrapDiv).addClass([c]));
 					}
 					const span = document.createElement('span');
 					span.style.cssText = _spanStyleInline;
