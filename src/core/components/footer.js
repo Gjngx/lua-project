@@ -1,6 +1,7 @@
 import { TriggerSetup } from "../trigger-setup";
 import { isTouchDevice } from "../helpers";
-
+import { MasterTimeline, FadeIn, FadeSplitText } from '../../core/animation.js';
+import { fade } from "astro/virtual-modules/transitions.js";
 export class Footer extends TriggerSetup {
 	constructor() {
 		super();
@@ -11,6 +12,7 @@ export class Footer extends TriggerSetup {
 		this.occupiedTrailCells = new Set();
 		this.lastTrailPoint = null;
 		this.iconHoverButtons = [];
+		this.revealTimelines = [];
 	}
 	trigger(data) {
 		this.el = $(".footer")[0];
@@ -141,9 +143,50 @@ export class Footer extends TriggerSetup {
 		}, { once: true });
 	}
 	animationReveal() {
-		
+		const mainReveal = new MasterTimeline({
+			triggerInit: this.el,
+			scrollTrigger: { trigger: $(this.el).find('.footer-main-content').get(0) },
+			tweenArr: [
+				new FadeIn({ el: $(this.el).find('.footer-main-decor').get(0) }),
+				new FadeIn({ el: $(this.el).find('.footer-main-decor').get(1) }),
+				new FadeSplitText({ el: $(this.el).find('.footer-main-content .heading').get(0) }),
+				new FadeSplitText({ el: $(this.el).find('.footer-sub-label .txt').get(0), delay: 0.2 }),
+				new FadeSplitText({ el: $(this.el).find('.ooter-sub-link-text .txt').get(0), delay: 0.3 }),
+			]
+		});
+
+		const footerInfo = $(this.el).find('.footer-info').get(0);
+		const leftTextTweens = $(footerInfo).find('.footer-info-left .txt').toArray().map((el, index) =>
+			new FadeIn({ el, delay: index * 0.04 }),
+		);
+		const iconTweens = $(footerInfo).find('.footer-info-center-ic-wrap').toArray().map((el, index) =>
+			new FadeIn({
+				el,
+				type: 'bottom',
+				delay: 0.12 + index * 0.06,
+				from: { scale: 0.8 },
+				to: { scale: 1 },
+				duration: 0.6,
+			}),
+		);
+		const rightTextTweens = $(footerInfo).find('.footer-info-right .txt').toArray().map((el, index) =>
+			new FadeIn({ el, delay: 0.2 + index * 0.05 }),
+		);
+		const infoReveal = new MasterTimeline({
+			triggerInit: this.el,
+			scrollTrigger: { trigger: footerInfo, start: 'top top+=95%'},
+			tweenArr: [
+				...leftTextTweens,
+				...iconTweens,
+				...rightTextTweens,
+			]
+		});
+
+		this.revealTimelines = [mainReveal, infoReveal];
 	}
 	destroy() {
+		this.revealTimelines.forEach((timeline) => timeline.destroy());
+		this.revealTimelines = [];
 		$(this.el).off('pointermove', this.handleTrailMove);
 		$(this.el).off('pointerleave', this.handleTrailLeave);
 		this.iconHoverButtons.forEach((button) => {

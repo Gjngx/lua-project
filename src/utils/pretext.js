@@ -116,7 +116,9 @@ function parseRichHTML(el, rootFontSize, rootFW = '400') {
 
 		// Class-based overrides (fw-reg, fw-med, fw-semi, fw-bold, fs-*)
 		// Non-style classes (e.g. txt-orange) are preserved for output spans
-		const cls = node.className || '';
+		const cls = node.getAttribute?.('class')
+			|| (typeof node.className === 'string' ? node.className : node.className?.baseVal)
+			|| '';
 		let standardFS = undefined;
 		let tabletFS = undefined;
 		let mobileFS = undefined;

@@ -47,6 +47,7 @@ export const HomePage = {
 			this.tlHeroTextColor = null;
 			this.heroTextOriginalHTML = null;
 			this.masterReveal = null;
+			this.bottomDescReveal = null;
 			this.revealReady = null;
 		}
 
@@ -377,6 +378,23 @@ export const HomePage = {
 
 				const revealItems = $(heroDescription).find('.home-hero-bottom-word, svg').toArray();
 				gsap.set(revealItems, { color: 'rgba(255, 255, 255, 0.28)' });
+				this.bottomDescReveal = new MasterTimeline({
+					triggerInit: this.el,
+					scrollTrigger: { trigger: heroDescription },
+					tweenArr: [
+						new FadeIn({
+							el: revealItems,
+							from: { y: 0, yPercent: 100 },
+							to: { y: 0, yPercent: 0 },
+							duration: 0.8,
+							stagger: 0.02,
+							ease: 'power2.out',
+							isDisableRevert: true,
+						}),
+						new FadeIn({ el: $(this.el).find('.home-hero-bottom-ic').get(0), delay: 0.2 }),
+						new FadeIn({ el: $(this.el).find('.home-hero-bottom-link').get(0), delay: 0.4 }),
+					],
+				});
 				this.tlHeroTextColor = gsap.timeline({
 					scrollTrigger: {
 						trigger: $(this.el).find('.home-hero-bottom-inner')[0],
@@ -424,6 +442,7 @@ export const HomePage = {
 			if (this.tlHeroBot) this.tlHeroBot.kill();
 			if (this.tlHeroTextColor) this.tlHeroTextColor.kill();
 			this.masterReveal?.destroy();
+			this.bottomDescReveal?.destroy();
 			const heroDescription = $(this.el).find('.home-hero-bottom-desc .txt')[0];
 			if (heroDescription && this.heroTextOriginalHTML !== null) {
 				$(heroDescription).html(this.heroTextOriginalHTML);
@@ -434,6 +453,7 @@ export const HomePage = {
 			this.updateHeroTime = null;
 			this.worksEl = null;
 			this.masterReveal = null;
+			this.bottomDescReveal = null;
 			this.revealReady = null;
 		}
 	},
@@ -498,6 +518,14 @@ export const HomePage = {
 		}
 
 		animationReveal() {
+			new MasterTimeline({
+				triggerInit: this.el,
+				scrollTrigger: { trigger: $(this.el).find('.home-works-main-title') },
+				tweenArr:[
+					new FadeSplitText({ el: $(this.el).find('.home-works-main-title .heading').get(0)}),
+					new FadeIn({ el: $(this.el).find('.home-works-main-desc').get(0), delay: 0.2 }),
+				]
+			});
 		}
 
 		animationScrub() {
@@ -1327,6 +1355,14 @@ export const HomePage = {
 		}
 
 		animationReveal() {
+			new MasterTimeline({
+				triggerInit: this.el,
+				scrollTrigger: { trigger: $(this.el).find('.home-how-intro-desc').get(0), start: 'top top+=90%' },
+				tweenArr:[
+					new FadeSplitText({ el: $(this.el).find('.home-how-intro-desc .txt').get(0) }),
+					new FadeIn({ el: $(this.el).find('.home-how-intro-decor').get(0), delay: 0.2 }),
+				]
+			});
 		}
 
 		animationScrub() {
