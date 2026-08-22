@@ -5,6 +5,7 @@ import closeSound from '../../assets/audio/close.mp3';
 
 const BUTTON_SELECTOR = '[data-button-text]';
 const LABEL_SELECTOR = '[data-button-text-label]';
+const SOUND_SELECTOR = 'a, [data-sound-hover]';
 const SHIFT = '1.3em';
 
 CustomEase.create(
@@ -15,6 +16,7 @@ CustomEase.create(
 class ButtonText {
 	constructor() {
 		this.instances = new Map();
+		this.soundInstances = new Map();
 		this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 		this.hoverAudios = new Map();
 		this.hasPointerMoved = false;
@@ -63,6 +65,26 @@ class ButtonText {
 		if (root !== document && !root.isConnected) return;
 
 		this.getButtons(root).forEach((button) => this.setup(button));
+		this.getSoundTargets(root).forEach((target) => this.setupSoundHover(target));
+	}
+
+	setupSoundHover(target) {
+		// data-button-text đã phát sound trong listener animation riêng.
+		if (this.instances.has(target) || this.soundInstances.has(target)) return;
+
+		const parentLink = $(target).closest('a')[0];
+		if (parentLink && parentLink !== target) return;
+
+		const onPointerEnter = (event) => {
+			if (event.pointerType && event.pointerType !== 'mouse') return;
+			if (this.hasPointerMoved) {
+				this.playHoverSound(target);
+			}
+			this.hasPointerMoved = false;
+		};
+
+		$(target).on('pointerenter', onPointerEnter);
+		this.soundInstances.set(target, { onPointerEnter });
 	}
 
 	setup(button) {
@@ -174,6 +196,15 @@ class ButtonText {
 			$(label).css(originalLabelStyles);
 			this.instances.delete(button);
 		});
+
+		this.soundInstances.forEach(({ onPointerEnter }, target) => {
+			const belongsToRoot =
+				root === document || root === target || root.contains(target);
+			if (!belongsToRoot) return;
+
+			$(target).off('pointerenter', onPointerEnter);
+			this.soundInstances.delete(target);
+		});
 	}
 
 	getButtons(root) {
@@ -183,6 +214,15 @@ class ButtonText {
 		}
 		buttons.push(...$(root).find(BUTTON_SELECTOR).toArray());
 		return buttons;
+	}
+
+	getSoundTargets(root) {
+		const targets = [];
+		if (root instanceof Element && $(root).is(SOUND_SELECTOR)) {
+			targets.push(root);
+		}
+		targets.push(...$(root).find(SOUND_SELECTOR).toArray());
+		return [...new Set(targets)];
 	}
 }
 

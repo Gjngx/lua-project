@@ -1,12 +1,17 @@
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
+import { MasterTimeline, FadeIn, FadeSplitText } from '../../core/animation.js';
 
 export const LetTalkPage = {
 	Hero: class {
 		constructor() {
 			this.el = null;
 			this.footerLinkCleanups = [];
+			this.tlOnce = null;
+			this.tlEnter = null;
 			this.tlIntro = null;
 			this.tlMove = null;
+			this.masterReveal = null;
+			this.revealReady = null;
 		}
 
 		setup(data, mode) {
@@ -28,7 +33,7 @@ export const LetTalkPage = {
 				paused: true,
 			});
 
-			this.animationReveal(this.tlOnce);
+			this.revealReady = this.animationReveal(this.tlOnce);
 		}
 
 		setupEnter(data) {
@@ -38,23 +43,36 @@ export const LetTalkPage = {
 				paused: true,
 			});
 
-			this.animationReveal(this.tlEnter);
+			this.revealReady = this.animationReveal(this.tlEnter);
 		}
 
-		playOnce() {
-			if (this.tlOnce) {
-				this.tlOnce.play();
-			}
+		async playOnce() {
+			await this.revealReady;
+			if (this.tlOnce) this.tlOnce.play(0);
 		}
 
-		playEnter() {
-			if (this.tlEnter) {
-				this.tlEnter.play();
-			}
+		async playEnter() {
+			await this.revealReady;
+			if (this.tlEnter) this.tlEnter.play(0);
 		}
 
 		animationReveal(timeline) {
-			
+			const textItems = $(this.el)
+				.find('.let-talk-top-block, .let-talk-top > .heading > span.let-talk-top-line')
+				.toArray();
+
+			this.masterReveal = new MasterTimeline({
+				timeline,
+				allowMobile: true,
+				tweenArr: [
+					...textItems.map((el, index) =>
+						new FadeSplitText({ el, delay: index * 0.08 }),
+					),
+					new FadeIn({ el: $(this.el).find('.let-talk-img').get(0), delay: 0.08 }),
+				],
+			});
+
+			return this.masterReveal.ready;
 		}
 
 		animationScrub(){
@@ -154,8 +172,13 @@ export const LetTalkPage = {
 		destroy() {
 			this.footerLinkCleanups.forEach((cleanup) => cleanup());
 			this.footerLinkCleanups = [];
+			this.masterReveal?.destroy();
+			this.tlOnce?.kill();
+			this.tlEnter?.kill();
 			this.tlIntro?.kill();
 			this.tlMove?.kill();
+			this.masterReveal = null;
+			this.revealReady = null;
 			this.el = null;
 		}
 	},

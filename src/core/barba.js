@@ -25,8 +25,8 @@ function syncHead(data) {
 	const nextHead = nextDoc.head;
 	const currentHead = document.head;
 
-	// Giữ CSS của trang cũ cho tới khi leave animation kết thúc. Với sync: true,
-	// container cũ và mới cùng tồn tại trong suốt transition.
+	// Giữ CSS của trang cũ cho tới khi toàn bộ transition hoàn tất, sau đó
+	// cleanupStaleHead() sẽ dọn các style không còn dùng.
 	const previousSyncedElements = new Set(
 		$(currentHead).find('[data-barba-head]').toArray(),
 	);
@@ -139,7 +139,8 @@ export function initBarba() {
 		transitions: [
 			{
 				name: 'gsap-transition',
-				sync: true,
+				// Chạy tuần tự: trang cũ leave xong rồi trang mới mới enter.
+				sync: false,
 
 				beforeLeave(data) {
 					// Đóng menu và transition trang chạy đồng thời.
@@ -179,7 +180,7 @@ export function initBarba() {
 					// Chạy hàm sync thẻ <head>
 					await syncHead(data);
 
-					// Đặt trang mới đè lên trang cũ bằng absolute
+					// Giữ trang mới ổn định trong lúc chạy enter animation.
 					Object.assign(data.next.container.style, {
 						position: 'absolute',
 						top: '0',

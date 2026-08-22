@@ -1357,10 +1357,10 @@ export const HomePage = {
 		animationReveal() {
 			new MasterTimeline({
 				triggerInit: this.el,
-				scrollTrigger: { trigger: $(this.el).find('.home-how-intro-desc').get(0), start: 'top top+=90%' },
+				scrollTrigger: { trigger: $(this.el).find('.home-how-intro-desc').get(0), start: 'top top+=95%' },
 				tweenArr:[
 					new FadeSplitText({ el: $(this.el).find('.home-how-intro-desc .txt').get(0) }),
-					new FadeIn({ el: $(this.el).find('.home-how-intro-decor').get(0), delay: 0.2 }),
+					new FadeIn({ el: $(this.el).find('.home-how-intro-decor').get(0) }),
 				]
 			});
 		}

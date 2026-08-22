@@ -80,6 +80,14 @@ export class PageTrans {
 				{ autoAlpha: 1 },
 				{ duration: 0.6, autoAlpha: 0 }
 			);
+
+			if (data.current.namespace === 'home') {
+				this.tlLeave.to(
+					$('.header-logo-ic-amin')[0],
+					{ duration: 0.6, autoAlpha: 0 },
+					0,
+				);
+			}
 		});
 	}
 	
@@ -99,6 +107,19 @@ export class PageTrans {
 				{ duration: 0.6, autoAlpha: 1, clearProps: "all" },
 				0
 			);
+
+			if (data.next.namespace === 'home') {
+				this.tlEnter.fromTo(
+					$('.header-logo-ic-amin')[0],
+					{ autoAlpha: 0 },
+					{
+						duration: 0.6,
+						autoAlpha: 1,
+						clearProps: 'opacity,visibility',
+					},
+					0,
+				);
+			}
 		});
 	}
 }
