@@ -15,6 +15,7 @@ const WORKS_TRANSITION_ROTATION = 125;
 const WORKS_TRANSITION_MAX_SCALE = 16;
 const WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS = 0.283;
 const WORKS_TRANSITION_BACKGROUND_SPAN = 0.12;
+const WORKS_TRANSITION_COVER_START = 0.5;
 
 export const HomePage = {
 	Hero: class {
@@ -909,6 +910,7 @@ export const HomePage = {
 				pixelRatio,
 				innerSize,
 				innerLeft: (width - innerSize) / 2,
+				innerTop: (height - innerSize) / 2,
 				shapeSize: firstItem.offsetWidth,
 				color: getComputedStyle(canvas).color,
 			};
@@ -1050,10 +1052,23 @@ export const HomePage = {
 				pixelRatio,
 				innerSize,
 				innerLeft,
+				innerTop,
 				shapeSize,
 				color,
 			} = metrics;
-			const shapeScale = (shapeSize / 250) * state.scale;
+			const viewportScale = Math.max(1, Math.max(width, height) / innerSize);
+			const coverProgress = gsap.utils.clamp(
+				0,
+				1,
+				(state.progress - WORKS_TRANSITION_COVER_START) /
+					(1 - WORKS_TRANSITION_COVER_START),
+			);
+			const resolvedScale = state.scale * gsap.utils.interpolate(
+				1,
+				viewportScale,
+				coverProgress,
+			);
+			const shapeScale = (shapeSize / 250) * resolvedScale;
 			const halfShape = shapeSize / 2;
 			const shapeCenters = [
 				[-halfShape, -halfShape],
@@ -1070,7 +1085,10 @@ export const HomePage = {
 				const [centerX, centerY] = shapeCenters[index];
 
 				targetContext.save();
-				targetContext.translate(innerLeft + innerSize / 2, innerSize / 2);
+				targetContext.translate(
+					innerLeft + innerSize / 2,
+					innerTop + innerSize / 2,
+				);
 				targetContext.rotate((state.rotate * Math.PI) / 180);
 				targetContext.translate(-innerSize / 2, -innerSize / 2);
 				targetContext.globalCompositeOperation = compositeOperation;
@@ -1817,9 +1835,12 @@ export const HomePage = {
 
 			const onResize = () => {
 				if (!this.renderer || !this.sphereCamera) return;
-				// Renderer khởi tạo canvas ở 300x150px bằng inline style, nên phải
-				// đo viewport của scene thay vì đo chính canvas.
-				const canvasSize = Math.max(1, Math.min(window.innerHeight * 0.65, main.clientWidth));
+				// Đồng bộ với CSS: min(50vw, 65vh). Renderer ghi kích thước inline
+				// nên không thể chỉ dựa vào width/height khai báo trong stylesheet.
+				const canvasSize = Math.max(
+					1,
+					Math.min(window.innerWidth * 0.5, window.innerHeight * 0.65),
+				);
 				const width = canvasSize;
 				const height = canvasSize;
 				const aspect = width / height;

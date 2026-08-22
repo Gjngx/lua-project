@@ -779,8 +779,8 @@
 	top: 50%;
 	left: 50%;
 	z-index: 3;
-	width: 59vh;
-	height: 59vh;
+	width: min(45.5vw, 59vh);
+	height: min(45.5vw, 59vh);
 	border-radius: 50%;
 	transform: translate(-50%, -50%);
 	cursor: grab;
@@ -798,8 +798,8 @@
 	left: 50%;
 	z-index: 1;
 	display: block;
-	width: 65vh;
-	height: 65vh;
+	width: min(50vw, 65vh);
+	height: min(50vw, 65vh);
 	transform: translate(-50%, -50%);
 	outline: none;
 	cursor: grab;
