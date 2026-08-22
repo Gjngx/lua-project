@@ -146,19 +146,21 @@ class Loader {
 				totalDuration * 0.5,
 				gsap.utils.random(totalDuration * 0.78, totalDuration * 0.88, 0.1),
 			];
-			let displayedCounter = 0;
+			const counterStopValues = [
+				gsap.utils.random(20, 35, 1),
+				50,
+				gsap.utils.random(70, 85, 1),
+			];
 			const counterSamples = counterStopTimes.map((time, index) => {
 				const isMiddleStop = index === 1;
 				const progressValue = isMiddleStop
 					? 0.5
 					: fakeLoadingEase(time / totalDuration);
-				const targetCounter = isMiddleStop
-					? 50
-					: Math.min(98, Math.round(progressValue * 100));
-				displayedCounter = isMiddleStop
-					? 50
-					: Math.min(targetCounter, displayedCounter + 35);
-				return { time, value: displayedCounter, progressValue };
+				return {
+					time,
+					value: counterStopValues[index],
+					progressValue,
+				};
 			});
 			counterSamples.push({
 				time: totalDuration,
