@@ -109,7 +109,7 @@ class Loader {
 				autoAlpha: 1
 			});
 			gsap.set(percent, {
-				y: percentHeight,
+				y: percentHeight
 			});
 			const initialCounterIndex = 60;
 			gsap.set([tens, units], { y: -percentHeight * initialCounterIndex });
@@ -128,61 +128,37 @@ class Loader {
 			gsap.set(desc, { autoAlpha: 1 });
 			gsap.set(this.descSplit?.elements || [], {
 				yPercent: 110,
-				autoAlpha: 0,
 			});
-			this.tlFirstLoad.to(percent, { y: 0, duration: 0.6, ease: 'power3.inOut' });
-			this.tlFirstLoad.addLabel('counterStart');
-			this.tlFirstLoad.to(this.descSplit?.elements || [], {
-				yPercent: 0,
-				autoAlpha: 1,
-				duration: 0.9,
-				ease: 'power3.out',
-				stagger: 0.12,
-			}, 'counterStart');
-
-			const counterDuration = 8;
+			// Chỉ cần thay đổi giá trị này để chỉnh toàn bộ thời gian chạy counter.
+			const totalDuration = 6;
+			const counterStartTime = 0.3;
+			const counterPauseDuration = 0.3;
 			const fakeLoadingEase = CustomEase.create(
 				'loaderProgress',
 				'M0,0 C0.08,0.24 0.16,0.3 0.28,0.34 C0.4,0.38 0.43,0.62 0.56,0.68 C0.69,0.74 0.74,0.78 0.82,0.84 C0.9,0.9 0.93,0.98 1,1',
 			);
-			const getCounterTime = (value) => {
-				const targetProgress = value / 100;
-				let low = 0;
-				let high = 1;
-				for (let iteration = 0; iteration < 16; iteration += 1) {
-					const middle = (low + high) / 2;
-					if (fakeLoadingEase(middle) < targetProgress) low = middle;
-					else high = middle;
-				}
-				return ((low + high) / 2) * counterDuration;
-			};
 
-			this.tlFirstLoad.to(progress, {
-				y: 0,
-				duration: getCounterTime(90),
-				// Giữ chuyển động đến khi counter chạm khoảng 90 thay vì
-				// gần như hoàn tất ngay từ mốc 40 như expo.out.
-				ease: 'power2.inOut',
-			}, 'counterStart');
-
-			// Mat Voyce-style counter: lấy mẫu tiến độ theo từng nhịp thay vì
-			// cuộn qua mọi số. Hai reel luôn chạy ngược hướng và đổi hướng cho
-			// nhau ở nhịp kế tiếp, kể cả khi digit đích không thay đổi.
-			const counterStepDuration = 1.2;
-			const counterSampleTimes = [0.85, 2.3, 3.75, 5.2];
+			// Hai mốc dừng trung gian được random theo thời gian thực của counter.
+			// Tại mỗi mốc, cả progress và hai reel cùng nghỉ một nhịp.
+			const counterStopTimes = [
+				gsap.utils.random(totalDuration * 0.2, totalDuration * 0.35, 0.1),
+				gsap.utils.random(totalDuration * 0.55, totalDuration * 0.7, 0.1),
+			];
 			let displayedCounter = 0;
-			const counterSamples = counterSampleTimes.map((time) => {
-				const targetCounter = Math.min(
-					99,
-					Math.round(fakeLoadingEase(time / counterDuration) * 100),
-				);
+			const counterSamples = counterStopTimes.map((time) => {
+				const progressValue = fakeLoadingEase(time / totalDuration);
+				const targetCounter = Math.min(98, Math.round(progressValue * 100));
 				displayedCounter = Math.min(
 					targetCounter,
 					displayedCounter + 35,
 				);
-				return { time, value: displayedCounter };
+				return { time, value: displayedCounter, progressValue };
 			});
-			counterSamples.push({ time: 7.4, value: 99 });
+			counterSamples.push({
+				time: totalDuration,
+				value: 99,
+				progressValue: 1,
+			});
 			let tensReelIndex = initialCounterIndex;
 			let unitsReelIndex = initialCounterIndex;
 			const getDirectionalIndex = (currentIndex, targetDigit, direction) => {
@@ -194,97 +170,113 @@ class Loader {
 				return currentIndex + direction * distance;
 			};
 
-			counterSamples.forEach(({ time, value }, index) => {
+			const firstLoadTimeline = this.tlFirstLoad
+				.to(percent, {
+					y: 0,
+					duration: 0.4,
+					ease: 'sine.inOut',
+				})
+				.to(this.descSplit?.elements || [], {
+					yPercent: 0,
+					duration: 0.4,
+					ease: 'sine.inOut',
+					stagger: 0.02,
+				}, '<');
+
+			let previousStopTime = 0;
+			counterSamples.reduce((timeline, sample, index) => {
+				const { time, value, progressValue } = sample;
 				const digits = String(value).padStart(2, '0').split('').map(Number);
 				const tensDirection = index % 2 === 0 ? 1 : -1;
 				const unitsDirection = -tensDirection;
 				tensReelIndex = getDirectionalIndex(tensReelIndex, digits[0], tensDirection);
 				unitsReelIndex = getDirectionalIndex(unitsReelIndex, digits[1], unitsDirection);
-				const position = `counterStart+=${time}`;
+				const pauseBefore = index === 0 ? 0 : counterPauseDuration;
+				const position = counterStartTime + previousStopTime + pauseBefore;
+				const segmentDuration = time - previousStopTime - pauseBefore;
+				previousStopTime = time;
 
-				this.tlFirstLoad.to(tens, {
+				return timeline.to(progress, {
+					y: progressStartY * (1 - progressValue),
+					duration: segmentDuration,
+					ease: 'power3.inOut',
+				}, position).to(tens, {
 					y: -percentHeight * tensReelIndex,
-					duration: counterStepDuration,
+					duration: segmentDuration,
 					ease: 'power3.inOut',
 					overwrite: 'auto',
 					force3D: true,
-				}, position);
-				this.tlFirstLoad.to(units, {
+				}, position).to(units, {
 					y: -percentHeight * unitsReelIndex,
-					duration: counterStepDuration,
+					duration: segmentDuration,
 					ease: 'power3.inOut',
 					overwrite: 'auto',
 					force3D: true,
 				}, position);
-			});
-
-			this.tlFirstLoad.to(logoRevealProgress, {
+			}, firstLoadTimeline).to(logoRevealProgress, {
 				value: 1,
-				duration: 1.55,
+				duration: 0.9,
 				ease: 'power3.inOut',
 				onUpdate: updateLogoReveal,
 				onComplete: updateLogoReveal,
-			}, 'counterStart+=8.6');
-			this.tlFirstLoad.set(logos, { overflow: 'visible' }, '>');
-			this.tlFirstLoad.call(updateLogoOffset, null, '>');
+			}, '>')
+				.set(logos, { overflow: 'visible' }, '>')
+				.call(updateLogoOffset, null, '>');
 
 			// Di chuyển toàn bộ SVG bằng tọa độ màn hình để điểm đáp luôn trùng
 			// chính xác với logo trên hero. Path chỉ nhận offset cục bộ để tạo độ
 			// trễ; mọi offset phải trở về 0 trước khi đổi sang logo thật.
-			this.tlEnd.to(logos, {
+			logoPartGroups.reduce((timeline, parts, index) => {
+				const partStart = index * 0.045;
+				const partTimeline = timeline.to(parts, {
+					keyframes: [
+						{
+							y: logoPartLags[index],
+							duration: 0.32,
+							ease: 'power4.inOut',
+						},
+						{
+							y: 0,
+							duration: 0.8,
+							ease: 'power3.inOut',
+						},
+					],
+				}, partStart);
+
+				if (logoPartRotations[index] === 0) return partTimeline;
+
+				return partTimeline.to(parts, {
+					rotation: logoPartRotations[index],
+					duration: 0.7,
+					ease: 'power2.out',
+				}, partStart).to(parts, {
+					rotation: 0,
+					duration: 0.9,
+					ease: 'power2.inOut',
+				}, partStart + 0.7);
+			}, this.tlEnd.to(logos, {
 				x: () => logoOffset.x,
 				y: () => logoOffset.y,
 				duration: 1.6,
 				ease: 'power2.inOut',
 				force3D: true,
-			}, 0);
-			logoPartGroups.forEach((parts, index) => {
-				const partStart = index * 0.045;
-				this.tlEnd.to(parts, {
-					keyframes: [
-						{
-							y: logoPartLags[index],
-							duration: 0.32,
-							ease: 'power1.out',
-						},
-						{
-							y: 0,
-							duration: 1.28,
-							ease: 'power2.inOut',
-						},
-					],
-				}, partStart);
-
-				if (logoPartRotations[index] !== 0) {
-					this.tlEnd.to(parts, {
-						rotation: logoPartRotations[index],
-						duration: 0.7,
-						ease: 'power2.out',
-					}, partStart);
-					this.tlEnd.to(parts, {
-						rotation: 0,
-						duration: 0.9,
-						ease: 'power2.inOut',
-					}, partStart + 0.7);
-				}
-			});
-			this.tlEnd.addLabel('logoSwap', 1.8);
-			this.tlEnd.set([darkLogoMask, brandLogoMask], { autoAlpha: 0 }, 'logoSwap');
-			this.tlEnd.set(screenLogoIcon, { autoAlpha: 1 }, 'logoSwap');
-			this.tlEnd.to([loaderHomePanel, darkLogoMask], {
+			}, 0)).addLabel('logoSwap', 1.8)
+				.set([darkLogoMask, brandLogoMask], { autoAlpha: 0 }, 'logoSwap')
+				.set(screenLogoIcon, { autoAlpha: 1 }, 'logoSwap')
+				.to([loaderHomePanel, darkLogoMask], {
 				clipPath: 'inset(0 0 100% 0)',
-				duration: 1.6,
-				ease: 'power3.inOut',
-			}, 0.35);
-			this.tlEnd.to(brandLogoMask, {
+				duration: 0.8,
+				ease: 'power4.inOut',
+			}, 0.35)
+				.to(brandLogoMask, {
 				clipPath: 'inset(0% 0 0 0)',
-				duration: 1.6,
-				ease: 'power3.inOut',
-			}, 0.35);
-			this.tlEnd.set(this.loaderEl, {
+				duration: 0.8,
+				ease: 'power4.inOut',
+			}, 0.35)
+				.set(this.loaderEl, {
 				autoAlpha: 0,
 				pointerEvents: 'none',
-			}, '>');
+			}, 'logoSwap');
 		}
 
 		this.tlLoading = gsap.timeline({ paused: true });
