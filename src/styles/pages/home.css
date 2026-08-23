@@ -957,11 +957,9 @@
 
 	.home-works-item:nth-child(4n + 3) {
 		margin-left: calc(var(--container--padding) + (var(--container--one-column) / 3) + var(--container--column-gap));
-		z-index: 5;
 	}
 	.home-works-item:nth-child(4n) {
 		margin-right: calc(var(--container--padding) + (var(--container--one-column) / 3) + var(--container--column-gap));
-		z-index: 5;
 	}
 	.home-hero-top-title {
 		margin-top: 50vh;
