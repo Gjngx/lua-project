@@ -309,6 +309,8 @@ export const HomePage = {
 					y: 0,
 					scale: 1,
 					transformOrigin: '0 0',
+					force3D: true,
+					backfaceVisibility: 'hidden',
 				});
 			}
 
@@ -327,6 +329,7 @@ export const HomePage = {
 					y: () => getHeaderLogoTransform().y,
 					scale: () => getHeaderLogoTransform().scale,
 					ease: 'none',
+					force3D: true,
 					onComplete: () => {
 						gsap.set(headerLogoAnimated, { pointerEvents: 'auto' });
 					},
