@@ -260,7 +260,7 @@
 
 .header.on-open-nav:not(.is-nav-closing) .header-menu-main {
 	transition:
-		transform 0.78s cubic-bezier(0.4, 0, 0.2, 1),
+		transform 0.72s cubic-bezier(0.4, 0, 0.2, 1),
 		background-color 0.3s ease;
 }
 
@@ -737,7 +737,11 @@
 		flex-direction: column;
 		justify-content: space-between;
 	}
-	.header.on-scroll .header-menu-main {
+
+ .header.on-scroll .header-menu-main {
+		transform: translate3d(calc(100% - 4rem), 0, 0);
+	}
+ .header.is-nav-closing.on-scroll .header-menu-main{
 		transform: translate3d(calc(100% - 4rem), 0, 0);
 	}
 	.header.on-open-nav .header-menu-main {
