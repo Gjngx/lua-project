@@ -115,9 +115,8 @@ main,
 		display: none;
 	}
 }
-/* 
 @media only screen and (max-width: 767px) {
 	.container-column:not(:nth-child(-n + 4)) {
 		display: none;
 	}
-} */
+}

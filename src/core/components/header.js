@@ -38,10 +38,12 @@ export class Header {
 		this.elLogoAnimated = $('.header-logo-amin')[0];
 
 		this.setupHeaderMetrics();
-		this.setupNavCardReels();
-		this.setupPortraitAnimation();
+		if (viewport.w > 767) {
+			this.setupNavCardReels();
+			this.setupPortraitAnimation();
+			this.setupSocialHovers();
+		}
 		this.setupLocationClocks();
-		this.setupSocialHovers();
 		this.toggleNav();
 		this.setupScrollListener(data);
 		this.togglePageClass(data);

@@ -1,6 +1,6 @@
 import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
-import { cvUnit } from '../../core/helpers.js';
+import { cvUnit, viewport } from '../../core/helpers.js';
 import { SvgPathParticles } from '../../core/svg-path-particles.js';
 import { footer } from '../../core/components/footer.js';
 import { Renderer, Camera, Transform, Texture, Program, Mesh, Sphere, Vec3 } from 'ogl';
@@ -561,10 +561,15 @@ export const HomePage = {
 			const worksSvg = $(this.el).find('.home-works-svg')[0];
 			const worksTitle = $(this.el).find('.home-works-main-title')[0];
 			const worksDesc = $(this.el).find('.home-works-main-desc')[0];
+			const worksSvgPadding = viewport.w > 768 ? cvUnit(77, 'rem') : cvUnit(-20, 'rem');
+
 			const worksTitleTop =
 				worksTitle.getBoundingClientRect().top -
 				worksSection.getBoundingClientRect().top - 
-				worksTitle.getBoundingClientRect().height + cvUnit(77, 'rem');
+				worksTitle.getBoundingClientRect().height + worksSvgPadding;
+
+			const worksSvgWidth = viewport.w > 768 ? cvUnit(291, 'rem') : cvUnit(188, 'rem');
+				
 
 			const worksDescHeight = worksDesc.getBoundingClientRect().height;
 
@@ -580,7 +585,7 @@ export const HomePage = {
 			this.tlWorksTop
 				.to(worksTitle, { y: worksDescHeight, ease: 'power3.inOut' })
 				.to(worksDesc, { y: worksDescHeight, ease: 'power3.inOut' },'<=' )
-				.to(worksSvg, { width: cvUnit(291, 'rem'), y: worksTitleTop, color: 'var(--cl-content-strong)' , ease: 'power3.inOut' }, '<=' )
+				.to(worksSvg, { width: worksSvgWidth, y: worksTitleTop, color: 'var(--cl-content-strong)' , ease: 'power3.inOut' }, '<=' )
 
 
 			this.tlWorksScroll = gsap.timeline({

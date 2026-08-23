@@ -173,4 +173,20 @@ p{
 	}
 }
 
-@media only screen and (max-width: 767px) {}
+@media only screen and (max-width: 767px) {
+	.fs-200-mb{
+		font-size: 20rem;
+	}
+	.fs-28-mb {
+		font-size: 2.8rem;
+	}
+	.fs-20-mb {
+		font-size: 2rem;
+	}
+	.fs-12-mb{
+		font-size: 1.2rem;
+	}
+	.fs-40-mb{
+		font-size: 4rem;
+	}
+}

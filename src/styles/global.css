@@ -482,3 +482,21 @@ a {
 .anim-marquee {
 	animation: marquee 30s linear infinite;
 }
+
+@media (min-width: 768px) {
+	.hidden-dsk {
+		display: none;
+	}
+	.hidden-mb {
+		display: block;
+	}
+}
+
+@media (max-width: 767px) {
+	.hidden-mb {
+		display: none;
+	}
+	.hidden-dsk {
+		display: block;
+	}
+}
