@@ -36,6 +36,7 @@ export const HomePage = {
 			this.onVideoSeeked = null;
 			this.onVideoError = null;
 			this.onVisibilityChange = null;
+			this.onVideoUnlock = null;
 			this.timeEl = null;
 			this.timeTimer = null;
 			this.updateHeroTime = null;
@@ -159,6 +160,9 @@ export const HomePage = {
 
 		setupHeroVideo() {
 			if (!this.video) return;
+			this.video.muted = true;
+			this.video.defaultMuted = true;
+			this.video.playsInline = true;
 
 			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 			const prefersReducedData = Boolean(navigator.connection?.saveData);
@@ -182,7 +186,7 @@ export const HomePage = {
 
 				this.videoReady = true;
 				$(this.video).addClass(['is-video-ready']);
-				this.queueVideoSeek(this.videoTargetTime);
+				this.primeVideoPlayback();
 			};
 
 			this.onVideoSeeked = () => {
@@ -221,6 +225,40 @@ export const HomePage = {
 			if (this.video.readyState >= 2) {
 				this.onVideoReady();
 			}
+		}
+
+		primeVideoPlayback() {
+			if (!this.video) return;
+
+			const video = this.video;
+			const removeUnlockListeners = () => {
+				if (!this.onVideoUnlock) return;
+				document.removeEventListener('touchstart', this.onVideoUnlock);
+				document.removeEventListener('pointerdown', this.onVideoUnlock);
+				this.onVideoUnlock = null;
+			};
+			const syncScrollFrame = () => {
+				if (this.video !== video) return;
+				video.pause();
+				removeUnlockListeners();
+				this.queueVideoSeek(this.videoTargetTime);
+			};
+			const tryPlayback = () => {
+				const playPromise = video.play();
+				if (!playPromise) {
+					syncScrollFrame();
+					return;
+				}
+
+				playPromise.then(syncScrollFrame).catch(() => {
+					if (this.onVideoUnlock || this.video !== video) return;
+					this.onVideoUnlock = tryPlayback;
+					document.addEventListener('touchstart', this.onVideoUnlock, { passive: true });
+					document.addEventListener('pointerdown', this.onVideoUnlock, { passive: true });
+				});
+			};
+
+			tryPlayback();
 		}
 
 		setupVideoScrollTrigger() {
@@ -437,6 +475,11 @@ export const HomePage = {
 			}
 			if (this.onVisibilityChange) {
 				$(document).off('visibilitychange', this.onVisibilityChange);
+			}
+			if (this.onVideoUnlock) {
+				document.removeEventListener('touchstart', this.onVideoUnlock);
+				document.removeEventListener('pointerdown', this.onVideoUnlock);
+				this.onVideoUnlock = null;
 			}
 			if (this.tlOnce) this.tlOnce.kill();
 			if (this.tlEnter) this.tlEnter.kill();

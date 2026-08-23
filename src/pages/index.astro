@@ -4,7 +4,7 @@ import '../styles/pages/home.css';
 import { Image } from 'astro:assets';
 import heroPoster from '../assets/images/home-bg-poster.webp';
 import heroVideoDesktop from '../assets/video/home-bg-desktop.mp4';
-// import heroVideoMobile from '../assets/video/home-bg-mobile.mp4';
+import heroVideoMobile from '../assets/video/home-bg-mobile.mp4';
 import tesla from '../assets/images/tesla.jpg';
 import airofit from '../assets/images/airofit.jpg';
 import vietson from '../assets/images/vietson.jpg';
@@ -51,7 +51,7 @@ import Footer from '../components/Footer.astro';
 					aria-hidden="true"
 					tabindex="-1"
 				>
-					<!-- <source src={heroVideoMobile} type="video/mp4" media="(max-width: 991px)" /> -->
+					<source src={heroVideoMobile} type="video/mp4" media="(max-width: 767px)" />
 					<source src={heroVideoDesktop} type="video/mp4" />
 				</video>
 			</div>
