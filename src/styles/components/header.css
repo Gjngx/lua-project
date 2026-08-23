@@ -761,4 +761,29 @@
 	.header-logo-ic {
 		height: 2.4rem;
 	}
+	.header-nav{
+		height: 100%;
+	}
+	.header-nav-btn-mb.hidden-dsk {
+		position: absolute;
+		bottom: 2.4rem;
+		width: 100%;
+	}
+	.header-menu-contact-mb{
+		width: 100%;
+	}
+	.header-menu-contact-mb .btn-inner{
+		justify-content: center;
+		padding-block: 1.6rem;
+	}
+	.header-menu-contact-mb .btn-inner .txt {
+		font-size: 2rem;
+	}
+	.header-menu-contact-mb .btn-bg{
+		background-color: var(--cl-brand);
+	}
+	.header-menu-contact-mb .btn-ic-inner{
+		width: 0.6rem;
+		height: 0.6rem;
+	}
 }

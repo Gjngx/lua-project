@@ -763,6 +763,10 @@ export class Header {
 			}
 			cards.push(item);
 		});
+		const mobileNavButton = $(this.el).find('.header-nav-btn-mb')[0];
+		if (window.innerWidth <= 767 && mobileNavButton) {
+			cards.push(mobileNavButton);
+		}
 		const overlay = $(this.el).find('.header-overlay')[0];
 
 		return { nav, lead, cards, overlay };
@@ -893,7 +897,7 @@ export class Header {
 			backfaceVisibility: 'hidden',
 		});
 		gsap.set(overlay, { willChange: 'opacity' });
-		gsap.set([nav, overlay].filter(Boolean), { pointerEvents: 'none' });
+		gsap.set([nav, ...cards, overlay].filter(Boolean), { pointerEvents: 'none' });
 		gsap.set(nav, { overflow: 'visible' });
 
 		this.navTransition = gsap.timeline({
@@ -949,7 +953,7 @@ export class Header {
 			$(btn).on("click", this.handleClick.bind(this));
 		});
 
-		$(this.el).find('[data-header-nav] a').toArray().forEach(link => {
+		$(this.el).find('[data-header-nav] a, .header-nav-btn-mb a').toArray().forEach(link => {
 			$(link).on('click', () => {
 				if (this.isOpen) this.close();
 			});
