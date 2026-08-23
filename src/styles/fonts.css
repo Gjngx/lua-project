@@ -174,8 +174,33 @@ p{
 }
 
 @media only screen and (max-width: 767px) {
+	.fw-400-mb {
+		font-weight: 400;
+	}
+
+	.fw-500-mb {
+		font-weight: 500;
+	}
+
+	.fw-600-mb {
+		font-weight: 600;
+	}
+
+	.fw-700-mb {
+		font-weight: 700;
+	}
+
+	.fw-800-mb {
+		font-weight: 800;
+	}
 	.fs-200-mb{
 		font-size: 20rem;
+	}
+	.fs-56-mb {
+		font-size: 5.6rem;
+	}
+	.fs-40-mb {
+		font-size: 4rem;
 	}
 	.fs-28-mb {
 		font-size: 2.8rem;
@@ -183,10 +208,13 @@ p{
 	.fs-20-mb {
 		font-size: 2rem;
 	}
+	.fs-16-mb {
+		font-size: 1.6rem;
+	}
+	.fs-14-mb {
+		font-size: 1.4rem;
+	}
 	.fs-12-mb{
 		font-size: 1.2rem;
-	}
-	.fs-40-mb{
-		font-size: 4rem;
 	}
 }
