@@ -150,8 +150,8 @@ export class Footer extends TriggerSetup {
 				new FadeIn({ el: $(this.el).find('.footer-main-decor').get(0) }),
 				new FadeIn({ el: $(this.el).find('.footer-main-decor').get(1) }),
 				new FadeSplitText({ el: $(this.el).find('.footer-main-content .heading').get(0) }),
-				new FadeSplitText({ el: $(this.el).find('.footer-sub-label .txt').get(0), delay: 0.2 }),
-				new FadeSplitText({ el: $(this.el).find('.ooter-sub-link-text .txt').get(0), delay: 0.3 }),
+				new FadeSplitText({ el: $(this.el).find('.footer-sub-label .txt').get(0), delay: 0.3 }),
+				new FadeSplitText({ el: $(this.el).find('.footer-sub-link-text').get(0), delay: 0.4 }),
 			]
 		});
 
