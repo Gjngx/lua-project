@@ -48,6 +48,7 @@ class Loader {
 
 		const isHome = this.data.next.namespace === 'home';
 		if (isHome && !this.isLoaded) {
+			const isMobile = window.matchMedia('(max-width: 767px)').matches;
 			const progress = $(this.loaderEl).find('.loader-home-progress')[0];
 			const percent = $(this.loaderEl).find('.loader-home-progress-percent')[0];
 			const percentText = $(percent).find('.loader-home-progress-tens .txt')[0];
@@ -74,10 +75,9 @@ class Loader {
 			const desc = $(this.loaderEl).find('.loader-home-desc')[0];
 			const loaderHomePanel = $(this.loaderEl).find('.loader-home-panel')[0];
 			const progressStartY = window.innerHeight - percentHeight;
-			const logoRiseStartY = Math.max(
-				0,
-				percentHeight - logo.getBoundingClientRect().top,
-			);
+			const logoRiseStartY = isMobile
+				? percentHeight
+				: Math.max(0, percentHeight - logo.getBoundingClientRect().top);
 			const logoOffset = { x: 0, y: 0 };
 			const logoRevealProgress = { value: 0 };
 			const updateLogoReveal = () => {
@@ -193,7 +193,7 @@ class Loader {
 				}, '<');
 
 			let previousStopTime = 0;
-			counterSamples.reduce((timeline, sample, index) => {
+			const counterTimeline = counterSamples.reduce((timeline, sample, index) => {
 				const { time, value, progressValue } = sample;
 				const digits = String(value).padStart(2, '0').split('').map(Number);
 				const tensDirection = index % 2 === 0 ? 1 : -1;
@@ -205,11 +205,15 @@ class Loader {
 				const segmentDuration = time - previousStopTime - pauseBefore;
 				previousStopTime = time;
 
-				return timeline.to(progress, {
-					y: progressStartY * (1 - progressValue),
-					duration: segmentDuration,
-					ease: 'power3.inOut',
-				}, position).to(tens, {
+				if (!isMobile) {
+					timeline.to(progress, {
+						y: progressStartY * (1 - progressValue),
+						duration: segmentDuration,
+						ease: 'power3.inOut',
+					}, position);
+				}
+
+				return timeline.to(tens, {
 					y: -percentHeight * tensReelIndex,
 					duration: segmentDuration,
 					ease: 'power3.inOut',
@@ -222,54 +226,78 @@ class Loader {
 					overwrite: 'auto',
 					force3D: true,
 				}, position);
-			}, firstLoadTimeline).to(logoRevealProgress, {
-				value: 1,
-				duration: 0.9,
-					ease: 'power3.inOut',
-					onUpdate: updateLogoReveal,
-					onComplete: updateLogoReveal,
-			}, `>+=${finalCounterPauseDuration}`)
-				.set(logos, { overflow: 'visible' }, '>')
-				.call(updateLogoOffset, null, '>');
+			}, firstLoadTimeline);
+
+			if (isMobile) {
+				// Mobile giữ counter ở đáy khi đếm; tới 99, counter và logo
+				// nối tiếp trượt lên tại đúng vị trí bottom.
+				counterTimeline
+					.to(logoRevealProgress, {
+						value: 1,
+						duration: 0.9,
+						ease: 'power3.inOut',
+						onUpdate: updateLogoReveal,
+						onComplete: updateLogoReveal,
+					}, `>+=${finalCounterPauseDuration}`)
+					.set(logos, { overflow: 'visible' }, '>');
+			} else {
+				counterTimeline
+					.to(logoRevealProgress, {
+						value: 1,
+						duration: 0.9,
+						ease: 'power3.inOut',
+						onUpdate: updateLogoReveal,
+						onComplete: updateLogoReveal,
+					}, `>+=${finalCounterPauseDuration}`)
+					.set(logos, { overflow: 'visible' }, '>')
+					.call(updateLogoOffset, null, '>');
+			}
 
 			// Di chuyển toàn bộ SVG bằng tọa độ màn hình để điểm đáp luôn trùng
 			// chính xác với logo trên hero. Path chỉ nhận offset cục bộ để tạo độ
 			// trễ; mọi offset phải trở về 0 trước khi đổi sang logo thật.
-			logoPartGroups.reduce((timeline, parts, index) => {
-				const partStart = index * 0.045;
-				const partTimeline = timeline.to(parts, {
-					keyframes: [
-						{
-							y: logoPartLags[index],
-							duration: 0.32,
-							ease: 'power4.inOut',
-						},
+			const logoMoveTimeline = isMobile
+				? this.tlEnd
+				: this.tlEnd.to(logos, {
+					x: () => logoOffset.x,
+					y: () => logoOffset.y,
+					duration: 1.6,
+					ease: 'power2.inOut',
+					force3D: true,
+				}, 0);
+			const logoEndTimeline = isMobile
+				? logoMoveTimeline
+				: logoPartGroups.reduce((timeline, parts, index) => {
+					const partStart = index * 0.045;
+					const partTimeline = timeline.to(parts, {
+						keyframes: [
+							{
+								y: logoPartLags[index],
+								duration: 0.32,
+								ease: 'power4.inOut',
+							},
 							{
 								y: 0,
 								duration: 0.5,
 								ease: 'power3.inOut',
-						},
-					],
-				}, partStart);
+							},
+						],
+					}, partStart);
 
-				if (logoPartRotations[index] === 0) return partTimeline;
+					if (logoPartRotations[index] === 0) return partTimeline;
 
-				return partTimeline.to(parts, {
-					rotation: logoPartRotations[index],
-					duration: 0.7,
-					ease: 'power2.out',
-				}, partStart).to(parts, {
-					rotation: 0,
-					duration: 0.9,
-					ease: 'power2.inOut',
-				}, partStart + 0.7);
-			}, this.tlEnd.to(logos, {
-				x: () => logoOffset.x,
-				y: () => logoOffset.y,
-				duration: 1.6,
-				ease: 'power2.inOut',
-				force3D: true,
-			}, 0)).addLabel('logoSwap', 1.8)
+					return partTimeline.to(parts, {
+						rotation: logoPartRotations[index],
+						duration: 0.7,
+						ease: 'power2.out',
+					}, partStart).to(parts, {
+						rotation: 0,
+						duration: 0.9,
+						ease: 'power2.inOut',
+					}, partStart + 0.7);
+				}, logoMoveTimeline);
+
+			logoEndTimeline.addLabel('logoSwap', 1.8)
 				.set([darkLogoMask, brandLogoMask], { autoAlpha: 0 }, 'logoSwap')
 				.set(screenLogoIcon, { autoAlpha: 1 }, 'logoSwap')
 				.to([loaderHomePanel, darkLogoMask], {

@@ -162,4 +162,8 @@
   .loader-home-logo-ic{
     height: 14rem;
   }
+  .loader-home-logo{
+    top: auto;
+    bottom: 4.2rem;
+  }
 }
