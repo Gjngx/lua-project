@@ -28,6 +28,7 @@ export const HomePage = {
 			this.videoTargetTime = 0;
 			this.videoRaf = null;
 			this.videoReady = false;
+			this.videoPrimeStarted = false;
 			this.videoNeedsSeek = false;
 			this.videoScrollTrigger = null;
 			this.worksEl = null;
@@ -179,6 +180,7 @@ export const HomePage = {
 				this.videoDuration = Math.max(0, this.video.duration - 1 / HERO_VIDEO_FPS);
 				this.video.pause();
 				this.setupVideoScrollTrigger();
+				this.primeVideoPlayback();
 			};
 
 			this.onVideoReady = () => {
@@ -186,7 +188,7 @@ export const HomePage = {
 
 				this.videoReady = true;
 				$(this.video).addClass(['is-video-ready']);
-				this.primeVideoPlayback();
+				this.queueVideoSeek(this.videoTargetTime);
 			};
 
 			this.onVideoSeeked = () => {
@@ -228,7 +230,8 @@ export const HomePage = {
 		}
 
 		primeVideoPlayback() {
-			if (!this.video) return;
+			if (!this.video || this.videoPrimeStarted) return;
+			this.videoPrimeStarted = true;
 
 			const video = this.video;
 			const removeUnlockListeners = () => {
@@ -494,6 +497,7 @@ export const HomePage = {
 			}
 
 			this.video = null;
+			this.videoPrimeStarted = false;
 			this.timeEl = null;
 			this.updateHeroTime = null;
 			this.worksEl = null;
