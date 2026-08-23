@@ -1025,6 +1025,9 @@
 		height: 100svh;
 		align-self: end;
 	}
+	.home-hero-decor-inner {
+		width: 140rem;
+	}
 	.home-hero-desc {
 		width: 12.5rem;
 		margin-top: 0;
