@@ -295,6 +295,7 @@
 	.footer-info-left{
 		grid-column: 1 / 2;
 		grid-row: 2 / 2;
+		gap: 0.2rem;
 	}
 	.footer-info-center{
 		grid-column: 1 / -1;
@@ -306,6 +307,7 @@
 	.footer-info-right{
 		grid-column: 2 / 3;
 		grid-row: 2 / 2;
+		gap: 0.2rem;
 	}
 	.footer-main-decor{
 		display: none;

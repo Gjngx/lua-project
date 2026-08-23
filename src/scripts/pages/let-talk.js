@@ -63,7 +63,6 @@ export const LetTalkPage = {
 
 			this.masterReveal = new MasterTimeline({
 				timeline,
-				allowMobile: true,
 				tweenArr: [
 					...textItems.map((el, index) =>
 						new FadeSplitText({ el, delay: index * 0.08 }),

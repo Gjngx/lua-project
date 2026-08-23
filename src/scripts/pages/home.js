@@ -117,7 +117,6 @@ export const HomePage = {
 		animationReveal(timeline, { includeTitle = false } = {}) {
 			this.masterReveal = new MasterTimeline({
 				timeline: timeline,
-				allowMobile: false,
 				tweenArr: [
 					...(includeTitle
 						? [new FadeSplitText({ el: $(this.el).find('.home-hero-top-title .heading').get(0) })]
