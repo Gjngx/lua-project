@@ -997,11 +997,15 @@
 
 @media only screen and (max-width: 767px) {
 	.home-hero{
-		height: 200dvh;
+		height: 200svh;
+		margin-top: -100svh;
 	}
 	.home-hero .container{
 		height: 100%;
 		grid-template-rows: auto 1fr auto;
+	}
+	.home-hero-top{
+		height: 100svh;
 	}
 	.home-hero-top.top-left {
 		display: flex;
@@ -1018,7 +1022,7 @@
 		align-self: stretch;
 	}
 	.home-hero-bottom {
-		height: 100dvh;
+		height: 100svh;
 		align-self: end;
 	}
 	.home-hero-desc {
@@ -1059,6 +1063,9 @@
 	.home-hero-top-info{
 		width: 100%;
 	}
+	.home-works{
+		height: 100svh;
+	}
 	.home-works-svg {
 		margin-top: 7.2rem;
 	}
@@ -1089,7 +1096,14 @@
 		height: 100dvh;
 		top: 0;
 	}
+	.home-hero-bg {
+		height: 100svh;
+	}
 
+	.home-hero-decor {
+		height: 100svh;
+		margin-top: -100svh;
+	}
 
 	
 	.home-how-wrap,

@@ -149,7 +149,7 @@
     width: 100%;
     margin-top: min(36.3rem, 45.375dvh);
     transform: translateY(0);
-    display: none;
+    /* display: none; */
   }
   .loader-home-left{
     grid-column: 2 / -2;
