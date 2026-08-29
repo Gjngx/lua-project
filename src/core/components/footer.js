@@ -1,7 +1,7 @@
 import { TriggerSetup } from "../trigger-setup";
 import { isTouchDevice, viewport } from "../helpers";
 import { MasterTimeline, FadeIn, FadeSplitText } from '../../core/animation.js';
-import { fade } from "astro/virtual-modules/transitions.js";
+
 export class Footer extends TriggerSetup {
 	constructor() {
 		super();
@@ -22,7 +22,7 @@ export class Footer extends TriggerSetup {
 	}
 	onTrigger() {
 		this.setup();
-		if (viewport.width > 991) {
+		if (viewport.w > 991) {
 			this.animationReveal();
 		}
 	}
