@@ -34,9 +34,212 @@ import IconHowIntroShape2 from '../components/icons/IconHowIntroShape2.astro';
 import IconHowIntroShape3 from '../components/icons/IconHowIntroShape3.astro';
 import IconHowIntroShape4 from '../components/icons/IconHowIntroShape4.astro';
 import Footer from '../components/Footer.astro';
+import { stegaClean } from '@sanity/client/stega';
+import { getDraftModeProps } from '../sanity/lib/draft-mode';
+import { urlFor } from '../sanity/lib/image';
+import { loadQuery } from '../sanity/lib/load-query';
+import { HOME_PAGE_QUERY } from '../sanity/lib/queries';
+
+type SanityImage = {
+	asset?: { url?: string };
+	alt?: string;
+	crop?: unknown;
+	hotspot?: unknown;
+};
+
+type HomePageData = {
+	seo?: { title?: string; description?: string; shareImage?: SanityImage };
+	hero?: {
+		availabilityMessage?: string;
+		headline?: string;
+		role?: string;
+		location?: string;
+		introduction?: string;
+		aboutLink?: { label?: string; href?: string };
+	};
+	featuredWork?: {
+		heading?: string;
+		description?: string;
+		closingStatement?: string;
+		projects?: Array<{
+			_key?: string;
+			_id?: string;
+			title?: string;
+			url?: string;
+			coverImage?: SanityImage;
+			categories?: string[];
+		}>;
+	};
+	capabilities?: {
+		introduction?: string;
+		services?: Array<{
+			_key?: string;
+			title?: string;
+			specialties?: string[];
+			image?: SanityImage;
+		}>;
+	};
+	playground?: {
+		leadIn?: string;
+		link?: { label?: string; href?: string };
+		gallery?: Array<{ _key?: string; alt?: string; image?: SanityImage }>;
+	};
+};
+
+const { data: homePage } = await loadQuery<HomePageData | null>({
+	query: HOME_PAGE_QUERY,
+	...getDraftModeProps(Astro.cookies),
+});
+
+const hero = homePage?.hero;
+const featuredWork = homePage?.featuredWork;
+const capabilities = homePage?.capabilities;
+const playground = homePage?.playground;
+const heroHeadline =
+	hero?.headline || 'Creating websites and digital products for great experiences';
+const closingStatement = featuredWork?.closingStatement || 'Ready to help\nwith your needs';
+const closingStatementLines = closingStatement.split(/\r?\n/);
+const capabilitiesIntroduction =
+	capabilities?.introduction ||
+	"Discover the amazing features of my services that\ncan transform your workflow and boost productivity.\nHere's what I can do for you:";
+const capabilitiesIntroductionLines = capabilitiesIntroduction.split(/\r?\n/);
+
+const fallbackProjects = [
+	{
+		key: 'tesla',
+		title: 'Tesla education',
+		url: '#',
+		categories: ['Website Design'],
+		localImage: tesla,
+	},
+	{
+		key: 'airofit',
+		title: 'Airofit',
+		url: '#',
+		categories: ['Branding', 'Mobile App Design'],
+		localImage: airofit,
+	},
+	{
+		key: 'vietson',
+		title: 'Vietson logistics',
+		url: '#',
+		categories: ['Art Direction', 'Website Design'],
+		localImage: vietson,
+	},
+	{
+		key: 'moida',
+		title: 'MOIDA Brand Identity Renewal',
+		url: '#',
+		categories: ['Brand Identity'],
+		localImage: moida,
+	},
+];
+
+const projects = featuredWork?.projects?.length
+	? featuredWork.projects.map((project, index) => ({
+			key: project._key || project._id || `project-${index}`,
+			title: project.title || 'Untitled project',
+			url: stegaClean(project.url || '#'),
+			categories: project.categories || [],
+			imageUrl: project.coverImage?.asset?.url
+				? urlFor(project.coverImage).width(1600).quality(85).auto('format').url()
+				: undefined,
+			alt: stegaClean(project.coverImage?.alt || project.title || ''),
+			localImage: undefined,
+		}))
+	: fallbackProjects.map((project) => ({ ...project, imageUrl: undefined, alt: project.title }));
+
+const fallbackServices = [
+	{
+		key: 'digital-design',
+		title: 'Digital Design',
+		specialties: ['UI/UX', 'Interactive', 'Website'],
+		localImage: digitalDesign,
+	},
+	{
+		key: 'development',
+		title: 'Development',
+		specialties: ['Framer', 'Webflow'],
+		localImage: development,
+	},
+	{
+		key: 'branding',
+		title: 'Branding',
+		specialties: ['Identity', 'Visual Systems'],
+		localImage: branding,
+	},
+];
+
+const services = capabilities?.services?.length
+	? capabilities.services.map((service, index) => ({
+			key: service._key || `service-${index}`,
+			title: service.title || 'Untitled service',
+			specialties: service.specialties || [],
+			imageUrl: service.image?.asset?.url
+				? urlFor(service.image).width(1200).quality(85).auto('format').url()
+				: undefined,
+			alt: stegaClean(service.image?.alt || service.title || ''),
+			localImage: undefined,
+		}))
+	: fallbackServices.map((service) => ({ ...service, imageUrl: undefined, alt: service.title }));
+
+const cardPlacements = [
+	{ latitude: 48, longitude: -35, radius: 1.08, width: 0.15, size: 'xs' },
+	{ latitude: 56, longitude: 18, radius: 1.12, width: 0.24, size: 'md' },
+	{ latitude: 30, longitude: -12, radius: 1.06, width: 0.24, size: 'md' },
+	{ latitude: 12, longitude: -58, radius: 1.09, width: 0.2, size: 'sm' },
+	{ latitude: 12, longitude: 24, radius: 1.08, width: 0.16, size: 'xs' },
+	{ latitude: -2, longitude: 62, radius: 1.12, width: 0.15, size: 'xs' },
+	{ latitude: -20, longitude: -48, radius: 1.1, width: 0.27, size: 'md' },
+	{ latitude: -24, longitude: 22, radius: 1.13, width: 0.41, size: 'lg' },
+	{ latitude: -52, longitude: -12, radius: 1.1, width: 0.17, size: 'sm' },
+];
+
+const fallbackGallery = [
+	tesla,
+	branding,
+	digitalDesign,
+	airofit,
+	vietson,
+	development,
+	moida,
+	vietson,
+	tesla,
+];
+const gallery = playground?.gallery?.length
+	? playground.gallery.map((item, index) => ({
+			key: item._key || `gallery-${index}`,
+			imageUrl: item.image?.asset?.url
+				? urlFor(item.image).width(1000).quality(85).auto('format').url()
+				: undefined,
+			localImage: undefined,
+			alt: stegaClean(item.alt || ''),
+			placement: cardPlacements[index % cardPlacements.length],
+		}))
+	: fallbackGallery.map((localImage, index) => ({
+			key: `gallery-${index}`,
+			imageUrl: undefined,
+			localImage,
+			alt: '',
+			placement: cardPlacements[index],
+		}));
+
+const seoTitle = stegaClean(homePage?.seo?.title || 'Home');
+const seoDescription = stegaClean(
+	homePage?.seo?.description || 'Astro website built for production',
+);
+const seoImage = homePage?.seo?.shareImage?.asset?.url
+	? urlFor(homePage.seo.shareImage).width(1200).height(630).fit('crop').auto('format').url()
+	: undefined;
 ---
 
-<Layout title="Home" namespace="home">
+<Layout
+	title={seoTitle}
+	description={seoDescription}
+	image={seoImage}
+	loaderHeadline={heroHeadline}
+	namespace="home"
+>
 	<div class="home-hero-wrap" data-section="transparent">
 		<div class="home-hero-bg">
 			<div class="home-hero-bg-inner">
@@ -61,19 +264,21 @@ import Footer from '../components/Footer.astro';
 			<div class="container grid">
 				<div class="home-hero-top top-left">
 					<div class="home-hero-desc" data-init-hidden>
-						<p class="txt fs-14 fs-12-mb">Open for any collaborations & offers</p>
+						<p class="txt fs-14 fs-12-mb">
+							{hero?.availabilityMessage || 'Open for any collaborations & offers'}
+						</p>
 					</div>
 					<div class="home-hero-ic-mb hidden-dsk">
 						<IconSun />
 					</div>
 					<div class="home-hero-sub-mb hidden-dsk">
-						<p class="txt fs-14 fs-12-mb">Digital designer <br />Based in VietNam</p>
+						<p class="txt fs-14 fs-12-mb">{hero?.role || 'Digital designer based in Vietnam'}</p>
 					</div>
 				</div>
-				<div class="home-hero-top top-right"n>
+				<div class="home-hero-top top-right">
 					<div class="home-hero-top-title">
 						<h1 class="heading fs-24 fw-400 fs-20-mb">
-							Creating websites <br>and digital products for great experiences
+							{heroHeadline}
 						</h1>
 					</div>
 					<div class="home-hero-top-sub-group">
@@ -82,11 +287,11 @@ import Footer from '../components/Footer.astro';
 								<IconSun />
 							</div>
 							<h2 class="heading fs-14 fw-400">
-								Digital designer <br />Based in VietNam
+								{hero?.role || 'Digital designer based in Vietnam'}
 							</h2>
 						</div>
 						<div class="home-hero-top-info" data-init-hidden>
-							<p class="txt fs-10 fw-400 fs-12-mb">Hanoi, VietNam</p>
+							<p class="txt fs-10 fw-400 fs-12-mb">{hero?.location || 'Hanoi, Vietnam'}</p>
 							<p class="txt fs-10 fw-400 fs-12-mb" data-time>00:00:00</p>
 						</div>
 					</div>
@@ -95,31 +300,39 @@ import Footer from '../components/Footer.astro';
 					<div class="home-hero-bottom-inner">
 						<div class="home-hero-bottom-desc">
 							<p class="txt fs-40 fs-32-tb fs-28-mb">
-								I find inspiration in the simple things: rice fields <IconRiceFields />, the energy
-								of sports <IconSports1 />
-								<IconSports2 />
-								<IconSports3 />, a good cup of coffee <IconCoffee />, and a deep passion for design <IconDesign1
-								/>
-								<IconDesign2 />
+								{
+									hero?.introduction ? (
+										hero.introduction
+									) : (
+										<>
+											I find inspiration in the simple things: rice fields <IconRiceFields />, the
+											energy of sports <IconSports1 />
+											<IconSports2 />
+											<IconSports3 />, a good cup of coffee <IconCoffee />, and a deep passion for
+											design <IconDesign1 />
+											<IconDesign2 />
+										</>
+									)
+								}
 							</p>
 						</div>
 						<div class="home-hero-bottom-action">
 							<div class="home-hero-bottom-ic">
-								<div class="home-hero-bottom-ic-inner">
-								
-								</div>
+								<div class="home-hero-bottom-ic-inner"></div>
 							</div>
-							<a href="#" class="home-hero-bottom-link hover-line" data-cursor="hidden">
-								<p class="txt fs-14">More about me</p>
+							<a
+								href={stegaClean(hero?.aboutLink?.href || '/about')}
+								class="home-hero-bottom-link hover-line"
+								data-cursor="hidden"
+							>
+								<p class="txt fs-14">{hero?.aboutLink?.label || 'More about me'}</p>
 								<div class="home-hero-bottom-link-ic">
-										<div class="home-hero-bottom-link-ic-inner ic-top">
-											<IconArrowRight
-										/>
-										</div>
-										<div class="home-hero-bottom-link-ic-inner ic-bottom">
-											<IconArrowRight
-										/>
-										</div>
+									<div class="home-hero-bottom-link-ic-inner ic-top">
+										<IconArrowRight />
+									</div>
+									<div class="home-hero-bottom-link-ic-inner ic-bottom">
+										<IconArrowRight />
+									</div>
 								</div>
 							</a>
 						</div>
@@ -158,13 +371,17 @@ import Footer from '../components/Footer.astro';
 			<div class="container grid full-h">
 				<div class="home-works-main">
 					<div class="home-works-main-title">
-						<h2 class="heading fs-64 fw-700 trans-upper fs-40-mb">Works</h2>
+						<h2 class="heading fs-64 fw-700 trans-upper fs-40-mb">
+							{featuredWork?.heading || 'Works'}
+						</h2>
 					</div>
 					<div class="home-works-main-desc">
 						<div class="home-works-main-ic">
 							<IconLeafDouble mirrored />
 						</div>
-						<p class="txt fs-14 fw-500">Selection of featured <br />work, across industries</p>
+						<p class="txt fs-14 fw-500">
+							{featuredWork?.description || 'Selection of featured work, across industries'}
+						</p>
 						<div class="home-works-main-ic">
 							<IconLeafDouble />
 						</div>
@@ -173,8 +390,14 @@ import Footer from '../components/Footer.astro';
 				<div class="home-works-bottom">
 					<div class="home-works-bottom-title">
 						<h2 class="heading fs-64 fw-700 trans-upper fs-40-mb">
-							Ready to help <br />
-							with your needs
+							{
+								closingStatementLines.map((line, index) => (
+									<>
+										{line}
+										{index < closingStatementLines.length - 1 && <br />}
+									</>
+								))
+							}
 						</h2>
 					</div>
 				</div>
@@ -182,70 +405,48 @@ import Footer from '../components/Footer.astro';
 		</section>
 		<div class="home-works-list">
 			<div class="home-works-list-inner">
-				<a href="#" class="home-works-item">
-					<div class="home-works-item-img" data-cursor="ic-external">
-						<div class="home-works-item-img-inner">
-							<Image class="img-df img-fill" src={tesla} alt="Tesla education" loading="lazy" />
-						</div>
-					</div>
-					<div class="home-works-item-label">
-						<div class="home-works-item-title">
-							<p class="txt fs-20 fw-700 trans-upper">Tesla education</p>
-						</div>
-						<div class="home-works-item-categories">
-							<span class="txt fs-12 fw-500">Website Design</span>
-						</div>
-					</div>
-				</a>
-				<a href="#" class="home-works-item">
-					<div class="home-works-item-img" data-cursor="ic-external">
-						<div class="home-works-item-img-inner">
-							<Image class="img-df img-fill" src={airofit} alt="Airofit" loading="lazy" />
-						</div>
-					</div>
-					<div class="home-works-item-label">
-						<div class="home-works-item-title">
-							<p class="txt fs-20 fw-700 trans-upper">Airofit</p>
-						</div>
-						<div class="home-works-item-categories">
-							<span class="txt fs-12 fw-500">Branding</span>
-							<span class="txt fs-12 fw-500" aria-hidden="true">•</span>
-							<span class="txt fs-12 fw-500">Mobile App Design</span>
-						</div>
-					</div>
-				</a>
-				<a href="#" class="home-works-item">
-					<div class="home-works-item-img" data-cursor="ic-external">
-						<div class="home-works-item-img-inner">
-							<Image class="img-df img-fill" src={vietson} alt="vietson logistics" loading="lazy" />
-						</div>
-					</div>
-					<div class="home-works-item-label">
-						<div class="home-works-item-title">
-							<p class="txt fs-20 fw-700 trans-upper">vietson logistics</p>
-						</div>
-						<div class="home-works-item-categories">
-							<span class="txt fs-12 fw-500">Art Direction</span>
-							<span class="txt fs-12 fw-500" aria-hidden="true">•</span>
-							<span class="txt fs-12 fw-500">Website Design</span>
-						</div>
-					</div>
-				</a>
-				<a href="#" class="home-works-item">
-					<div class="home-works-item-img" data-cursor="ic-external">
-						<div class="home-works-item-img-inner">
-							<Image class="img-df img-fill" src={moida} alt="MOIDA Brand Identity Renewal" loading="lazy" />
-						</div>
-					</div>
-					<div class="home-works-item-label">
-						<div class="home-works-item-title">
-							<p class="txt fs-20 fw-700 trans-upper">MOIDA Brand Identity Renewal</p>
-						</div>
-						<div class="home-works-item-categories">
-							<span class="txt fs-12 fw-500">Brand Identity</span>
-						</div>
-					</div>
-				</a>
+				{
+					projects.map((project) => (
+						<a href={project.url} class="home-works-item">
+							<div class="home-works-item-img" data-cursor="ic-external">
+								<div class="home-works-item-img-inner">
+									{project.imageUrl ? (
+										<img
+											class="img-df img-fill"
+											src={project.imageUrl}
+											alt={project.alt}
+											loading="lazy"
+										/>
+									) : project.localImage ? (
+										<Image
+											class="img-df img-fill"
+											src={project.localImage}
+											alt={project.alt}
+											loading="lazy"
+										/>
+									) : null}
+								</div>
+							</div>
+							<div class="home-works-item-label">
+								<div class="home-works-item-title">
+									<p class="txt fs-20 fw-700 trans-upper">{project.title}</p>
+								</div>
+								<div class="home-works-item-categories">
+									{project.categories.map((category, index) => (
+										<>
+											{index > 0 && (
+												<span class="txt fs-12 fw-500" aria-hidden="true">
+													•
+												</span>
+											)}
+											<span class="txt fs-12 fw-500">{category}</span>
+										</>
+									))}
+								</div>
+							</div>
+						</a>
+					))
+				}
 			</div>
 		</div>
 		<div class="home-works-block"></div>
@@ -282,9 +483,14 @@ import Footer from '../components/Footer.astro';
 				<div class="home-how-intro">
 					<div class="home-how-intro-desc">
 						<p class="txt fs-14">
-							Discover the amazing features of our software that<br>
-							can transform your workflow and boost productivity!<br>
-							Here's what I can do for you:
+							{
+								capabilitiesIntroductionLines.map((line, index) => (
+									<>
+										{line}
+										{index < capabilitiesIntroductionLines.length - 1 && <br />}
+									</>
+								))
+							}
 						</p>
 					</div>
 				</div>
@@ -311,70 +517,34 @@ import Footer from '../components/Footer.astro';
 				<div class="home-how-content">
 					<div class="home-how-content-inner">
 						<div class="home-how-content-list">
-							<div class="home-how-content-item">
-								<div class="home-how-content-item-left">
-									<div class="home-how-content-item-title">
-										<p class="heading fs-40 fw-400 fs-32-tb">
-											Digital Design
-										</p>
-									</div>
-								</div>
-								<div class="home-how-content-item-right">
-									<div class="home-how-content-item-text">
-										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fs-12-tb">UI/UX</p>
+							{
+								services.map((service) => (
+									<div class="home-how-content-item">
+										<div class="home-how-content-item-left">
+											<div class="home-how-content-item-title">
+												<p class="heading fs-40 fw-400 fs-32-tb">{service.title}</p>
+											</div>
 										</div>
-										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fs-12-tb">Interactive</p>
-										</div>
-										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fs-12-tb">Website</p>
+										<div class="home-how-content-item-right">
+											<div class="home-how-content-item-text">
+												{service.specialties.map((specialty) => (
+													<div class="home-how-content-item-type">
+														<p class="txt fs-14 fs-12-tb">{specialty}</p>
+													</div>
+												))}
+											</div>
 										</div>
 									</div>
-								</div>
-							</div>
-							<div class="home-how-content-item">
-								<div class="home-how-content-item-left">
-									<div class="home-how-content-item-title">
-										<p class="heading fs-40 fw-400 fs-32-tb">Development</p>
-									</div>
-								</div>
-								<div class="home-how-content-item-right">
-									<div class="home-how-content-item-text">
-										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fs-12-tb">Framer</p>
-										</div>
-										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fs-12-tb">Webflow</p>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="home-how-content-item">
-								<div class="home-how-content-item-left">
-									<div class="home-how-content-item-title">
-										<p class="heading fs-40 fw-400 fs-32-tb">Branding</p>
-									</div>
-								</div>
-								<div class="home-how-content-item-right">
-									<div class="home-how-content-item-text">
-										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fs-12-tb">Identity</p>
-										</div>
-										<div class="home-how-content-item-type">
-											<p class="txt fs-14 fs-12-tb">Visual Systems</p>
-										</div>
-									</div>
-								</div>
-							</div>
+								))
+							}
 						</div>
 					</div>
 				</div>
 				<svg class="home-how-clip-defs" aria-hidden="true">
 					<defs>
 						{
-							[1, 2, 3].map((id) => (
-								<clipPath id={`home-how-clip-${id}`} clipPathUnits="objectBoundingBox">
+							services.map((_, index) => (
+								<clipPath id={`home-how-clip-${index + 1}`} clipPathUnits="objectBoundingBox">
 									<path d="M .082 .095 L .958 .004 Q 1 0 .995 .042 L .954 .958 Q .95 1 .908 .995 L .042 .886 Q 0 .88 .005 .838 L .036 .142 Q .04 .1 .082 .095 Z" />
 								</clipPath>
 							))
@@ -383,31 +553,29 @@ import Footer from '../components/Footer.astro';
 				</svg>
 				<div class="home-how-thumb">
 					<div class="home-how-thumb-inner">
-						<div class="home-how-thumb-item">
-							<div class="home-how-thumb-item-inner">
-								<div class="home-how-thumb-item-img">
-									<Image class="img-df img-fill" src={digitalDesign} alt="Digital Design" />
+						{
+							services.map((service) => (
+								<div class="home-how-thumb-item">
+									<div class="home-how-thumb-item-inner">
+										<div class="home-how-thumb-item-img">
+											{service.imageUrl ? (
+												<img
+													class="img-df img-fill"
+													src={service.imageUrl}
+													alt={service.alt}
+													loading="lazy"
+												/>
+											) : service.localImage ? (
+												<Image class="img-df img-fill" src={service.localImage} alt={service.alt} />
+											) : null}
+										</div>
+									</div>
 								</div>
-							</div>
-						</div>
-						<div class="home-how-thumb-item">
-							<div class="home-how-thumb-item-inner">
-								<div class="home-how-thumb-item-img">
-									<Image class="img-df img-fill" src={development} alt="Development" />
-								</div>
-							</div>
-						</div>
-						<div class="home-how-thumb-item">
-							<div class="home-how-thumb-item-inner">
-								<div class="home-how-thumb-item-img">
-									<Image class="img-df img-fill" src={branding} alt="Branding" />
-								</div>
-							</div>
-						</div>
+							))
+						}
 					</div>
 				</div>
-				<div class="home-how-trans">
-				</div>
+				<div class="home-how-trans"></div>
 			</div>
 		</section>
 	</div>
@@ -433,13 +601,18 @@ import Footer from '../components/Footer.astro';
 				<div class="container grid full-h">
 					<div class="home-playground-content-left">
 						<div class="home-playground-content-left-title">
-							<p class="txt fs-40 fw-400 fs-32-tb">Have fun with</p>
+							<p class="txt fs-40 fw-400 fs-32-tb">{playground?.leadIn || 'Have fun with'}</p>
 						</div>
 					</div>
 					<div class="home-playground-content-right">
 						<div class="home-playground-content-right-title">
-							<a href="#"class="home-playground-content-right-link hover-line">
-								<p class="txt fs-40 fw-400 fs-32-tb">the PLayground</p>
+							<a
+								href={stegaClean(playground?.link?.href || '#playground')}
+								class="home-playground-content-right-link hover-line"
+							>
+								<p class="txt fs-40 fw-400 fs-32-tb">
+									{playground?.link?.label || 'the Playground'}
+								</p>
 							</a>
 						</div>
 					</div>
@@ -450,37 +623,27 @@ import Footer from '../components/Footer.astro';
 					class="home-playground-sphere-canvas"
 					aria-label="Interactive patterned 3D sphere. Drag or use the arrow keys to rotate it."
 					role="img"
-					tabindex="0"
-				></canvas>
+					tabindex="0"></canvas>
 				<div class="home-playground-sphere-hitarea" aria-hidden="true"></div>
 				<div class="home-playground-card-layer" aria-hidden="true">
-					<div class="home-playground-card" data-latitude="48" data-longitude="-35" data-radius="1.08" data-width="0.15" data-size="xs">
-						<Image src={tesla} alt="" />
-					</div>
-					<div class="home-playground-card" data-latitude="56" data-longitude="18" data-radius="1.12" data-width="0.24" data-size="md">
-						<Image src={branding} alt="" />
-					</div>
-					<div class="home-playground-card" data-latitude="30" data-longitude="-12" data-radius="1.06" data-width="0.24" data-size="md">
-						<Image src={digitalDesign} alt="" />
-					</div>
-					<div class="home-playground-card" data-latitude="12" data-longitude="-58" data-radius="1.09" data-width="0.2" data-size="sm">
-						<Image src={airofit} alt="" />
-					</div>
-					<div class="home-playground-card" data-latitude="12" data-longitude="24" data-radius="1.08" data-width="0.16" data-size="xs">
-						<Image src={vietson} alt="" />
-					</div>
-					<div class="home-playground-card" data-latitude="-2" data-longitude="62" data-radius="1.12" data-width="0.15" data-size="xs">
-						<Image src={development} alt="" />
-					</div>
-					<div class="home-playground-card" data-latitude="-20" data-longitude="-48" data-radius="1.1" data-width="0.27" data-size="md">
-						<Image src={moida} alt="" />
-					</div>
-					<div class="home-playground-card" data-latitude="-24" data-longitude="22" data-radius="1.13" data-width="0.41" data-size="lg">
-						<Image src={vietson} alt="" />
-					</div>
-					<div class="home-playground-card" data-latitude="-52" data-longitude="-12" data-radius="1.1" data-width="0.17" data-size="sm">
-						<Image src={tesla} alt="" />
-					</div>
+					{
+						gallery.map((item) => (
+							<div
+								class="home-playground-card"
+								data-latitude={item.placement.latitude}
+								data-longitude={item.placement.longitude}
+								data-radius={item.placement.radius}
+								data-width={item.placement.width}
+								data-size={item.placement.size}
+							>
+								{item.imageUrl ? (
+									<img src={item.imageUrl} alt={item.alt} loading="lazy" />
+								) : item.localImage ? (
+									<Image src={item.localImage} alt={item.alt} />
+								) : null}
+							</div>
+						))
+					}
 				</div>
 			</div>
 		</section>

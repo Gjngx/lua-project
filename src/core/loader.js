@@ -36,7 +36,6 @@ class Loader {
 		// Dựng DOM state, listeners và các timeline paused của page trước khi
 		// loader được play. Không chạy reveal animation tại bước này.
 		await this.manager?.prepareOnce(data);
-
 	}
 
 	setupTimelines() {
@@ -62,9 +61,7 @@ class Loader {
 			const screenLogoIcon = $('.header-logo-ic-amin')[0];
 			const logoSvg = $(logoIcon).find('svg')[0];
 			const logoPartGroups = ['h', 'i', 'e', 'u', 'mark'].map((part) =>
-				logos
-					.map((item) => $(item).find(`.logo-part-${part}`)[0])
-					.filter(Boolean),
+				logos.map((item) => $(item).find(`.logo-part-${part}`)[0]).filter(Boolean),
 			);
 			const logoPartRotations = [0, 8, -7, 5, -4];
 			const logoPartLags = [-7, -13, -10, -15, -18];
@@ -107,16 +104,16 @@ class Loader {
 			gsap.set(progress, {
 				height: percentHeight,
 				y: progressStartY,
-				autoAlpha: 1
+				autoAlpha: 1,
 			});
 			gsap.set(percent, {
-				y: percentHeight
+				y: percentHeight,
 			});
 			const initialCounterIndex = 60;
 			gsap.set([tens, units], { y: -percentHeight * initialCounterIndex });
 			gsap.set(logoIcons, {
 				y: logoRiseStartY,
-				autoAlpha: 1
+				autoAlpha: 1,
 			});
 			gsap.set(screenLogoIcon, { autoAlpha: 0 });
 			gsap.set(logos, { x: 0, y: 0 });
@@ -147,16 +144,10 @@ class Loader {
 				totalDuration * 0.5,
 				gsap.utils.random(totalDuration * 0.78, totalDuration * 0.88, 0.1),
 			];
-			const counterStopValues = [
-				gsap.utils.random(20, 35, 1),
-				50,
-				gsap.utils.random(70, 85, 1),
-			];
+			const counterStopValues = [gsap.utils.random(20, 35, 1), 50, gsap.utils.random(70, 85, 1)];
 			const counterSamples = counterStopTimes.map((time, index) => {
 				const isMiddleStop = index === 1;
-				const progressValue = isMiddleStop
-					? 0.5
-					: fakeLoadingEase(time / totalDuration);
+				const progressValue = isMiddleStop ? 0.5 : fakeLoadingEase(time / totalDuration);
 				return {
 					time,
 					value: counterStopValues[index],
@@ -172,9 +163,10 @@ class Loader {
 			let unitsReelIndex = initialCounterIndex;
 			const getDirectionalIndex = (currentIndex, targetDigit, direction) => {
 				const currentDigit = ((currentIndex % 10) + 10) % 10;
-				let distance = direction === 1
-					? (targetDigit - currentDigit + 10) % 10
-					: (currentDigit - targetDigit + 10) % 10;
+				let distance =
+					direction === 1
+						? (targetDigit - currentDigit + 10) % 10
+						: (currentDigit - targetDigit + 10) % 10;
 				if (distance === 0) distance = 10;
 				return currentIndex + direction * distance;
 			};
@@ -185,12 +177,16 @@ class Loader {
 					duration: 0.4,
 					ease: 'sine.inOut',
 				})
-				.to(this.descSplit?.elements || [], {
-					yPercent: 0,
-					duration: 0.4,
-					ease: 'sine.inOut',
-					stagger: 0.02,
-				}, '<');
+				.to(
+					this.descSplit?.elements || [],
+					{
+						yPercent: 0,
+						duration: 0.4,
+						ease: 'sine.inOut',
+						stagger: 0.02,
+					},
+					'<',
+				);
 
 			let previousStopTime = 0;
 			const counterTimeline = counterSamples.reduce((timeline, sample, index) => {
@@ -206,49 +202,71 @@ class Loader {
 				previousStopTime = time;
 
 				if (!isMobile) {
-					timeline.to(progress, {
-						y: progressStartY * (1 - progressValue),
-						duration: segmentDuration,
-						ease: 'power3.inOut',
-					}, position);
+					timeline.to(
+						progress,
+						{
+							y: progressStartY * (1 - progressValue),
+							duration: segmentDuration,
+							ease: 'power3.inOut',
+						},
+						position,
+					);
 				}
 
-				return timeline.to(tens, {
-					y: -percentHeight * tensReelIndex,
-					duration: segmentDuration,
-					ease: 'power3.inOut',
-					overwrite: 'auto',
-					force3D: true,
-				}, position).to(units, {
-					y: -percentHeight * unitsReelIndex,
-					duration: segmentDuration,
-					ease: 'power3.inOut',
-					overwrite: 'auto',
-					force3D: true,
-				}, position);
+				return timeline
+					.to(
+						tens,
+						{
+							y: -percentHeight * tensReelIndex,
+							duration: segmentDuration,
+							ease: 'power3.inOut',
+							overwrite: 'auto',
+							force3D: true,
+						},
+						position,
+					)
+					.to(
+						units,
+						{
+							y: -percentHeight * unitsReelIndex,
+							duration: segmentDuration,
+							ease: 'power3.inOut',
+							overwrite: 'auto',
+							force3D: true,
+						},
+						position,
+					);
 			}, firstLoadTimeline);
 
 			if (isMobile) {
 				// Mobile giữ counter ở đáy khi đếm; tới 99, counter và logo
 				// nối tiếp trượt lên tại đúng vị trí bottom.
 				counterTimeline
-					.to(logoRevealProgress, {
-						value: 1,
-						duration: 0.9,
-						ease: 'power3.inOut',
-						onUpdate: updateLogoReveal,
-						onComplete: updateLogoReveal,
-					}, `>+=${finalCounterPauseDuration}`)
+					.to(
+						logoRevealProgress,
+						{
+							value: 1,
+							duration: 0.9,
+							ease: 'power3.inOut',
+							onUpdate: updateLogoReveal,
+							onComplete: updateLogoReveal,
+						},
+						`>+=${finalCounterPauseDuration}`,
+					)
 					.set(logos, { overflow: 'visible' }, '>');
 			} else {
 				counterTimeline
-					.to(logoRevealProgress, {
-						value: 1,
-						duration: 0.9,
-						ease: 'power3.inOut',
-						onUpdate: updateLogoReveal,
-						onComplete: updateLogoReveal,
-					}, `>+=${finalCounterPauseDuration}`)
+					.to(
+						logoRevealProgress,
+						{
+							value: 1,
+							duration: 0.9,
+							ease: 'power3.inOut',
+							onUpdate: updateLogoReveal,
+							onComplete: updateLogoReveal,
+						},
+						`>+=${finalCounterPauseDuration}`,
+					)
 					.set(logos, { overflow: 'visible' }, '>')
 					.call(updateLogoOffset, null, '>');
 			}
@@ -258,71 +276,98 @@ class Loader {
 			// trễ; mọi offset phải trở về 0 trước khi đổi sang logo thật.
 			const logoMoveTimeline = isMobile
 				? this.tlEnd
-				: this.tlEnd.to(logos, {
-					x: () => logoOffset.x,
-					y: () => logoOffset.y,
-					duration: 1.6,
-					ease: 'power2.inOut',
-					force3D: true,
-				}, 0);
+				: this.tlEnd.to(
+						logos,
+						{
+							x: () => logoOffset.x,
+							y: () => logoOffset.y,
+							duration: 1.6,
+							ease: 'power2.inOut',
+							force3D: true,
+						},
+						0,
+					);
 			const logoEndTimeline = isMobile
 				? logoMoveTimeline
 				: logoPartGroups.reduce((timeline, parts, index) => {
-					const partStart = index * 0.045;
-					const partTimeline = timeline.to(parts, {
-						keyframes: [
+						const partStart = index * 0.045;
+						const partTimeline = timeline.to(
+							parts,
 							{
-								y: logoPartLags[index],
-								duration: 0.32,
-								ease: 'power4.inOut',
+								keyframes: [
+									{
+										y: logoPartLags[index],
+										duration: 0.32,
+										ease: 'power4.inOut',
+									},
+									{
+										y: 0,
+										duration: 0.5,
+										ease: 'power3.inOut',
+									},
+								],
 							},
-							{
-								y: 0,
-								duration: 0.5,
-								ease: 'power3.inOut',
-							},
-						],
-					}, partStart);
+							partStart,
+						);
 
-					if (logoPartRotations[index] === 0) return partTimeline;
+						if (logoPartRotations[index] === 0) return partTimeline;
 
-					return partTimeline.to(parts, {
-						rotation: logoPartRotations[index],
-						duration: 0.7,
-						ease: 'power2.out',
-					}, partStart).to(parts, {
-						rotation: 0,
-						duration: 0.9,
-						ease: 'power2.inOut',
-					}, partStart + 0.7);
-				}, logoMoveTimeline);
+						return partTimeline
+							.to(
+								parts,
+								{
+									rotation: logoPartRotations[index],
+									duration: 0.7,
+									ease: 'power2.out',
+								},
+								partStart,
+							)
+							.to(
+								parts,
+								{
+									rotation: 0,
+									duration: 0.9,
+									ease: 'power2.inOut',
+								},
+								partStart + 0.7,
+							);
+					}, logoMoveTimeline);
 
-			logoEndTimeline.addLabel('logoSwap', 1.8)
+			logoEndTimeline
+				.addLabel('logoSwap', 1.8)
 				.set([darkLogoMask, brandLogoMask], { autoAlpha: 0 }, 'logoSwap')
 				.set(screenLogoIcon, { autoAlpha: 1 }, 'logoSwap')
-				.to([loaderHomePanel, darkLogoMask], {
-				clipPath: 'inset(0 0 100% 0)',
-				duration: 0.8,
-				ease: 'power4.inOut',
-			}, 0.35)
+				.to(
+					[loaderHomePanel, darkLogoMask],
+					{
+						clipPath: 'inset(0 0 100% 0)',
+						duration: 0.8,
+						ease: 'power4.inOut',
+					},
+					0.35,
+				)
 				.call(() => this.playPageOnce(), null, 0.35)
-				.to(brandLogoMask, {
-				clipPath: 'inset(0% 0 0 0)',
-				duration: 0.8,
-				ease: 'power4.inOut',
-			}, 0.35)
-				.set(this.loaderEl, {
-				autoAlpha: 0,
-				pointerEvents: 'none',
-			}, 'logoSwap');
+				.to(
+					brandLogoMask,
+					{
+						clipPath: 'inset(0% 0 0 0)',
+						duration: 0.8,
+						ease: 'power4.inOut',
+					},
+					0.35,
+				)
+				.set(
+					this.loaderEl,
+					{
+						autoAlpha: 0,
+						pointerEvents: 'none',
+					},
+					'logoSwap',
+				);
 		}
 
 		this.tlLoading = gsap.timeline({ paused: true });
-		[
-			this.tlFirstLoad,
-			this.tlMove,
-			this.tlEnd,
-		].forEach((timeline) => {
+		[this.tlFirstLoad, this.tlMove, this.tlEnd].forEach((timeline) => {
 			const duration = timeline.totalDuration();
 			if (duration <= 0) return;
 
@@ -339,11 +384,15 @@ class Loader {
 		});
 		const loadingDuration = this.tlLoading.totalDuration();
 		if (loadingDuration > 0) {
-			this.tlLoadMaster.to(this.tlLoading, {
-				progress: 1,
-				duration: loadingDuration,
-				ease: 'none',
-			}, 0);
+			this.tlLoadMaster.to(
+				this.tlLoading,
+				{
+					progress: 1,
+					duration: loadingDuration,
+					ease: 'none',
+				},
+				0,
+			);
 		}
 	}
 

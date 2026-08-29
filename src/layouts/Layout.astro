@@ -6,20 +6,26 @@ import LayoutGrid from '../components/LayoutGrid.astro';
 import ScrollIndicator from '../components/ScrollIndicator.astro';
 import Cursor from '../components/Cursor.astro';
 import Loader from '../components/Loader.astro';
+import SanityVisualEditing from '../components/SanityVisualEditing';
+import DisableDraftMode from '../components/DisableDraftMode';
+import { perspectiveCookieName } from '@sanity/preview-url-secret/constants';
 
 interface Props {
 	title: string;
 	namespace: string;
 	description?: string;
+	image?: string;
+	loaderHeadline?: string;
 }
 
-const { title, namespace, description } = Astro.props;
+const { title, namespace, description, image, loaderHeadline } = Astro.props;
+const draftMode = Astro.cookies.has(perspectiveCookieName);
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<SEO title={title} description={description} />
+		<SEO title={title} description={description} image={image} />
 		<script is:inline>
 			if ('scrollRestoration' in history) {
 				history.scrollRestoration = 'manual';
@@ -29,7 +35,7 @@ const { title, namespace, description } = Astro.props;
 	<body class="body">
 		<Cursor />
 		<Header />
-		<Loader />
+		<Loader headline={loaderHeadline} />
 		<div class="body-inner">
 			<!-- <LayoutGrid /> -->
 			<main class="main" data-barba="wrapper">
@@ -39,6 +45,8 @@ const { title, namespace, description } = Astro.props;
 			</main>
 		</div>
 		<ScrollIndicator />
+		{draftMode && <SanityVisualEditing client:only="react" />}
+		{draftMode && <DisableDraftMode client:only="react" />}
 		<script>
 			import '../core/bootstrap.js';
 		</script>
