@@ -7,9 +7,10 @@ export default defineCliConfig({
   },
   deployment: {
     /**
-     * Enable auto-updates for studios.
+     * Bundle the installed Studio dependencies during deploy. This avoids
+     * relying on sanity-cdn.com while the Studio is being built.
      * Learn more at https://www.sanity.io/docs/studio/latest-version-of-sanity#k47faf43faf56
      */
-    autoUpdates: true,
+    autoUpdates: false,
   },
 })
