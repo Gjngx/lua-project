@@ -3,6 +3,8 @@ interface Props {
 	title: string;
 	description?: string;
 	image?: string;
+	favicon?: string;
+	faviconType?: string;
 	canonicalURL?: string | URL;
 }
 
@@ -10,6 +12,8 @@ const {
 	title,
 	description = "Astro website built for production",
 	image = "/favicon.svg", // Thường thay bằng 1 ảnh OG có kích thước 1200x630
+	favicon = "/favicon.svg",
+	faviconType = "image/svg+xml",
 	canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url),
 } = Astro.props;
 ---
@@ -17,7 +21,7 @@ const {
 <!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" type={faviconType} href={favicon} />
 <meta name="generator" content={Astro.generator} />
 
 <!-- Canonical URL -->

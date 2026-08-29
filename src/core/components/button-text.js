@@ -8,6 +8,19 @@ const LABEL_SELECTOR = '[data-button-text-label]';
 const SOUND_SELECTOR = 'a, [data-sound-hover]';
 const SHIFT = '1.3em';
 
+const readSanitySoundEffects = () => {
+	const dataElement = document.getElementById('sanity-sound-effects');
+	if (!dataElement?.textContent) return {};
+
+	try {
+		const sounds = JSON.parse(dataElement.textContent);
+		return sounds && typeof sounds === 'object' ? sounds : {};
+	} catch (error) {
+		console.warn('Không thể đọc sound effects từ Sanity:', error);
+		return {};
+	}
+};
+
 CustomEase.create(
 	'buttonTextEase',
 	'M0,0 C0.12,0.88 0.24,1.08 0.4,1.02 0.62,0.98 0.78,1 1,1',
@@ -15,10 +28,15 @@ CustomEase.create(
 
 class ButtonText {
 	constructor() {
+		const sanitySounds = readSanitySoundEffects();
 		this.instances = new Map();
 		this.soundInstances = new Map();
 		this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 		this.hoverAudios = new Map();
+		this.sounds = {
+			hover: sanitySounds.hover?.src || hoverSound,
+			close: sanitySounds.close?.src || closeSound,
+		};
 		this.hasPointerMoved = false;
 
 		$(window).on('pointermove', (event) => {
@@ -36,8 +54,8 @@ class ButtonText {
 
 	playHoverSound(button) {
 		const sound = $(button).hasClass('header-menu-close')
-			? closeSound
-			: hoverSound;
+			? this.sounds.close
+			: this.sounds.hover;
 		let audio = this.hoverAudios.get(sound);
 
 		if (!audio) {

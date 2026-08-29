@@ -39,6 +39,12 @@ export default defineType({
           type: 'image',
           options: {hotspot: true},
         }),
+        defineField({
+          name: 'favicon',
+          title: 'Favicon',
+          type: 'image',
+          description: 'Upload a square PNG image. 32×32px or larger is recommended.',
+        }),
       ],
     }),
     defineField({
@@ -84,7 +90,27 @@ export default defineType({
           type: 'callToAction',
           validation: (rule) => rule.required(),
         }),
+        defineField({
+          name: 'cursorVideo',
+          title: 'Cursor video',
+          type: 'file',
+          description:
+            'Upload the MP4 video shown inside the custom cursor while hovering the Home hero.',
+          options: {accept: 'video/mp4,.mp4'},
+        }),
       ],
+    }),
+    defineField({
+      name: 'audioPlaylist',
+      title: 'Music playlist (deprecated)',
+      type: 'array',
+      of: [defineArrayMember({type: 'audioTrack'})],
+      deprecated: {
+        reason: 'Music is global. Manage it in Site settings instead.',
+      },
+      readOnly: true,
+      hidden: ({value}) => value === undefined,
+      initialValue: undefined,
     }),
     defineField({
       name: 'featuredWork',

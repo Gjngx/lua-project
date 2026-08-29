@@ -9,23 +9,79 @@ import Loader from '../components/Loader.astro';
 import SanityVisualEditing from '../components/SanityVisualEditing';
 import DisableDraftMode from '../components/DisableDraftMode';
 import { perspectiveCookieName } from '@sanity/preview-url-secret/constants';
+import { stegaClean } from '@sanity/client/stega';
+import { getDraftModeProps } from '../sanity/lib/draft-mode';
+import { loadQuery } from '../sanity/lib/load-query';
+import { SITE_CONFIG_QUERY } from '../sanity/lib/queries';
 
 interface Props {
 	title: string;
 	namespace: string;
 	description?: string;
 	image?: string;
+	favicon?: string;
+	faviconType?: string;
 	loaderHeadline?: string;
 }
 
-const { title, namespace, description, image, loaderHeadline } = Astro.props;
+const { title, namespace, description, image, favicon, faviconType, loaderHeadline } = Astro.props;
 const draftMode = Astro.cookies.has(perspectiveCookieName);
+
+type SiteConfigData = {
+	favicon?: {
+		asset?: {
+			url?: string;
+			mimeType?: string;
+		};
+	};
+	audioPlaylist?: Array<{
+		_key?: string;
+		title?: string;
+		src?: string;
+		mimeType?: string;
+	}>;
+	hoverSound?: {
+		src?: string;
+		mimeType?: string;
+	};
+	closeSound?: {
+		src?: string;
+		mimeType?: string;
+	};
+};
+
+const { data: siteConfig } = await loadQuery<SiteConfigData | null>({
+	query: SITE_CONFIG_QUERY,
+	...getDraftModeProps(Astro.cookies),
+});
+
+const resolvedFavicon = favicon || siteConfig?.favicon?.asset?.url;
+const resolvedFaviconType = faviconType || siteConfig?.favicon?.asset?.mimeType;
+const audioPlaylist = (siteConfig?.audioPlaylist || [])
+	.filter((track): track is typeof track & { src: string } => Boolean(track.src))
+	.map((track) => ({
+		key: track._key,
+		title: stegaClean(track.title || 'Untitled track'),
+		src: track.src,
+		mimeType: track.mimeType || 'audio/mpeg',
+	}));
+const serializedAudioPlaylist = JSON.stringify(audioPlaylist).replace(/</g, '\\u003c');
+const serializedSoundEffects = JSON.stringify({
+	hover: siteConfig?.hoverSound,
+	close: siteConfig?.closeSound,
+}).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
 <html lang="en" data-sanity-preview={draftMode ? 'true' : undefined}>
 	<head>
-		<SEO title={title} description={description} image={image} />
+		<SEO
+			title={title}
+			description={description}
+			image={image}
+			favicon={resolvedFavicon}
+			faviconType={resolvedFaviconType}
+		/>
 		<script is:inline>
 			if ('scrollRestoration' in history) {
 				history.scrollRestoration = 'manual';
@@ -47,6 +103,8 @@ const draftMode = Astro.cookies.has(perspectiveCookieName);
 		<ScrollIndicator />
 		{draftMode && <SanityVisualEditing client:only="react" />}
 		{draftMode && <DisableDraftMode client:only="react" />}
+		<script id="sanity-audio-playlist" type="application/json" set:html={serializedAudioPlaylist} />
+		<script id="sanity-sound-effects" type="application/json" set:html={serializedSoundEffects} />
 		<script>
 			import '../core/bootstrap.js';
 		</script>

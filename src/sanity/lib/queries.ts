@@ -1,5 +1,36 @@
 import { defineQuery } from 'groq';
 
+export const SITE_CONFIG_QUERY = defineQuery(`
+  {
+    "favicon": *[_id == "homePage"][0].seo.favicon{
+      asset->{_id, url, mimeType}
+    },
+    "audioPlaylist": select(
+      count(*[_id == "siteSettings"][0].audioPlaylist[defined(audio.asset)]) > 0 =>
+        *[_id == "siteSettings"][0].audioPlaylist[defined(audio.asset)]{
+          _key,
+          title,
+          "src": audio.asset->url,
+          "mimeType": audio.asset->mimeType
+        },
+      *[_id == "homePage"][0].audioPlaylist[defined(audio.asset)]{
+        _key,
+        title,
+        "src": audio.asset->url,
+        "mimeType": audio.asset->mimeType
+      }
+    ),
+    "hoverSound": *[_id == "siteSettings"][0].hoverSound{
+      "src": asset->url,
+      "mimeType": asset->mimeType
+    },
+    "closeSound": *[_id == "siteSettings"][0].closeSound{
+      "src": asset->url,
+      "mimeType": asset->mimeType
+    }
+  }
+`);
+
 export const FOOTER_QUERY = defineQuery(`
   *[_id == "footer"][0]{
     _id,
@@ -40,6 +71,10 @@ export const HOME_PAGE_QUERY = defineQuery(`
       shareImage{
         ...,
         asset->{_id, url, metadata{lqip, dimensions}}
+      },
+      favicon{
+        ...,
+        asset->{_id, url, mimeType, metadata{dimensions}}
       }
     },
     hero{
@@ -48,7 +83,10 @@ export const HOME_PAGE_QUERY = defineQuery(`
       role,
       location,
       introduction,
-      aboutLink
+      aboutLink,
+      cursorVideo{
+        asset->{_id, url, mimeType}
+      }
     },
     featuredWork{
       heading,

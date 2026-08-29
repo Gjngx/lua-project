@@ -168,12 +168,25 @@ class Mouse {
 				$(this.cursor).addClass(['has-ic-external']);
 				break;
 			case 'video':
+				this.syncCursorVideo(this.activeTarget?.dataset.cursorVideo);
 				$(this.cursor).addClass(['has-video']);
 				break;
 			case 'hidden':
 				$(this.cursor).addClass(['hidden']);
 				break;
 		}
+	}
+
+	syncCursorVideo(source) {
+		if (!this.cursorVideoMedia) return;
+		const nextSource = source || this.cursorVideoMedia.dataset.defaultSrc;
+		if (!nextSource || this.cursorVideoMedia.getAttribute('src') === nextSource) return;
+
+		this.cursorVideoMedia.src = nextSource;
+		this.cursorVideoMedia.load();
+		this.cursorVideoMedia.play().catch(() => {
+			// Muted inline playback may still be delayed until the next user gesture.
+		});
 	}
 
 	resetState() {

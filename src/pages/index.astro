@@ -43,6 +43,7 @@ import { HOME_PAGE_QUERY } from '../sanity/lib/queries';
 type SanityImage = {
 	asset?: {
 		url?: string;
+		mimeType?: string;
 		metadata?: {
 			dimensions?: {
 				width?: number;
@@ -55,8 +56,20 @@ type SanityImage = {
 	hotspot?: unknown;
 };
 
+type SanityFile = {
+	asset?: {
+		url?: string;
+		mimeType?: string;
+	};
+};
+
 type HomePageData = {
-	seo?: { title?: string; description?: string; shareImage?: SanityImage };
+	seo?: {
+		title?: string;
+		description?: string;
+		shareImage?: SanityImage;
+		favicon?: SanityImage;
+	};
 	hero?: {
 		availabilityMessage?: string;
 		headline?: string;
@@ -64,6 +77,7 @@ type HomePageData = {
 		location?: string;
 		introduction?: string;
 		aboutLink?: { label?: string; href?: string };
+		cursorVideo?: SanityFile;
 	};
 	featuredWork?: {
 		heading?: string;
@@ -119,6 +133,7 @@ const { data: homePage } = await loadQuery<HomePageData | null>({
 });
 
 const hero = homePage?.hero;
+const cursorVideoUrl = hero?.cursorVideo?.asset?.url;
 const featuredWork = homePage?.featuredWork;
 const capabilities = homePage?.capabilities;
 const playground = homePage?.playground;
@@ -282,12 +297,16 @@ const seoDescription = stegaClean(
 const seoImage = homePage?.seo?.shareImage?.asset?.url
 	? urlFor(homePage.seo.shareImage).width(1200).height(630).fit('crop').auto('format').url()
 	: undefined;
+const favicon = homePage?.seo?.favicon?.asset?.url;
+const faviconType = homePage?.seo?.favicon?.asset?.mimeType;
 ---
 
 <Layout
 	title={seoTitle}
 	description={seoDescription}
 	image={seoImage}
+	favicon={favicon}
+	faviconType={faviconType}
 	loaderHeadline={heroHeadline}
 	namespace="home"
 >
@@ -311,7 +330,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 			</div>
 			<div class="home-hero-bg-overlay"></div>
 		</div>
-		<section class="home-hero" data-cursor="video">
+		<section class="home-hero" data-cursor="video" data-cursor-video={cursorVideoUrl}>
 			<div class="container grid">
 				<div class="home-hero-top top-left">
 					<div class="home-hero-desc" data-init-hidden>
