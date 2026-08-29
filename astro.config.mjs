@@ -1,8 +1,8 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import node from '@astrojs/node';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
+import vercel from '@astrojs/vercel';
 
 import sanity from '@sanity/astro';
 import { loadEnv } from 'vite';
@@ -11,9 +11,9 @@ const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://example.com', // Thay bằng domain thật khi deploy
+	site: process.env.SITE_URL || env.SITE_URL || 'http://localhost:4321',
 	output: 'server',
-	adapter: node({ mode: 'standalone' }),
+	adapter: vercel(),
 	devToolbar: {
 		enabled: false,
 	},
