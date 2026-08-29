@@ -43,7 +43,6 @@ import { HOME_PAGE_QUERY } from '../sanity/lib/queries';
 type SanityImage = {
 	asset?: {
 		url?: string;
-		mimeType?: string;
 		metadata?: {
 			dimensions?: {
 				width?: number;
@@ -68,7 +67,6 @@ type HomePageData = {
 		title?: string;
 		description?: string;
 		shareImage?: SanityImage;
-		favicon?: SanityImage;
 	};
 	hero?: {
 		availabilityMessage?: string;
@@ -297,16 +295,12 @@ const seoDescription = stegaClean(
 const seoImage = homePage?.seo?.shareImage?.asset?.url
 	? urlFor(homePage.seo.shareImage).width(1200).height(630).fit('crop').auto('format').url()
 	: undefined;
-const favicon = homePage?.seo?.favicon?.asset?.url;
-const faviconType = homePage?.seo?.favicon?.asset?.mimeType;
 ---
 
 <Layout
 	title={seoTitle}
 	description={seoDescription}
 	image={seoImage}
-	favicon={favicon}
-	faviconType={faviconType}
 	loaderHeadline={heroHeadline}
 	namespace="home"
 >

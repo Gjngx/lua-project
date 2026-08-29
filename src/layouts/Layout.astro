@@ -19,12 +19,10 @@ interface Props {
 	namespace: string;
 	description?: string;
 	image?: string;
-	favicon?: string;
-	faviconType?: string;
 	loaderHeadline?: string;
 }
 
-const { title, namespace, description, image, favicon, faviconType, loaderHeadline } = Astro.props;
+const { title, namespace, description, image, loaderHeadline } = Astro.props;
 const draftMode = Astro.cookies.has(perspectiveCookieName);
 
 type SiteConfigData = {
@@ -55,8 +53,8 @@ const { data: siteConfig } = await loadQuery<SiteConfigData | null>({
 	...getDraftModeProps(Astro.cookies),
 });
 
-const resolvedFavicon = favicon || siteConfig?.favicon?.asset?.url;
-const resolvedFaviconType = faviconType || siteConfig?.favicon?.asset?.mimeType;
+const resolvedFavicon = siteConfig?.favicon?.asset?.url;
+const resolvedFaviconType = siteConfig?.favicon?.asset?.mimeType;
 const audioPlaylist = (siteConfig?.audioPlaylist || [])
 	.filter((track): track is typeof track & { src: string } => Boolean(track.src))
 	.map((track) => ({

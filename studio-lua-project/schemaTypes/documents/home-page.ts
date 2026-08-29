@@ -39,12 +39,6 @@ export default defineType({
           type: 'image',
           options: {hotspot: true},
         }),
-        defineField({
-          name: 'favicon',
-          title: 'Favicon',
-          type: 'image',
-          description: 'Upload a square PNG image. 32×32px or larger is recommended.',
-        }),
       ],
     }),
     defineField({

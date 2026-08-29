@@ -8,6 +8,12 @@ export default defineType({
   icon: CogIcon,
   fields: [
     defineField({
+      name: 'favicon',
+      title: 'Favicon',
+      type: 'image',
+      description: 'Global browser icon. Upload a square PNG image, at least 32×32px.',
+    }),
+    defineField({
       name: 'audioPlaylist',
       title: 'Music playlist',
       type: 'array',

@@ -2,7 +2,7 @@ import { defineQuery } from 'groq';
 
 export const SITE_CONFIG_QUERY = defineQuery(`
   {
-    "favicon": *[_id == "homePage"][0].seo.favicon{
+    "favicon": *[_id == "siteSettings"][0].favicon{
       asset->{_id, url, mimeType}
     },
     "audioPlaylist": select(
@@ -71,10 +71,6 @@ export const HOME_PAGE_QUERY = defineQuery(`
       shareImage{
         ...,
         asset->{_id, url, metadata{lqip, dimensions}}
-      },
-      favicon{
-        ...,
-        asset->{_id, url, mimeType, metadata{dimensions}}
       }
     },
     hero{
