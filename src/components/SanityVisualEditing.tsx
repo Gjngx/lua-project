@@ -31,12 +31,13 @@ function currentUrl() {
 }
 
 function applyHistoryUpdate(update: Pick<HistoryUpdate, 'type' | 'url'>, currentHref: string) {
+	const targetHref = new URL(update.url, currentHref).href;
 	switch (update.type) {
 		case 'push':
-			if (currentHref !== update.url) window.location.assign(update.url);
+			if (currentHref !== targetHref) window.location.assign(targetHref);
 			return;
 		case 'replace':
-			if (currentHref !== update.url) window.location.replace(update.url);
+			if (currentHref !== targetHref) window.location.replace(targetHref);
 			return;
 		case 'pop':
 			window.history.back();
@@ -85,9 +86,7 @@ export default function SanityVisualEditing() {
 		() => ({
 			subscribe: (navigate) => {
 				navigateRef.current = navigate;
-				const url = currentUrl();
-				lastUrlRef.current = url;
-				navigate({ type: 'push', title: document.title, url });
+				lastUrlRef.current = currentUrl();
 				return () => {
 					if (navigateRef.current === navigate) navigateRef.current = undefined;
 				};

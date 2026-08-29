@@ -397,7 +397,8 @@ export const HomePage = {
 			})
 
 			const heroDescription = $(this.el).find('.home-hero-bottom-desc .txt')[0];
-			if (heroDescription) {
+			const isSanityPreview = document.documentElement.dataset.sanityPreview === 'true';
+			if (heroDescription && !isSanityPreview) {
 				this.heroTextOriginalHTML = $(heroDescription).html();
 				const textNodes = [];
 				const walker = document.createTreeWalker(heroDescription, NodeFilter.SHOW_TEXT);
@@ -1388,6 +1389,8 @@ export const HomePage = {
 			this.tlTrans = null;
 			this.tlItemScroll = null;
 			this.hoverCleanups = [];
+			this.imageLoadCleanups = [];
+			this.imageRefreshRaf = null;
 		}
 
 		trigger(data) {
@@ -1402,10 +1405,33 @@ export const HomePage = {
 			this.animationReveal();
 			this.animationScrub();
 			this.interact();
+			this.refreshAfterImagesLoad();
 		}
 
 		setup() {
 			if (!this.el) return;
+		}
+
+		refreshAfterImagesLoad() {
+			const images = $(this.el).find('.home-how-thumb-item-img img').toArray();
+			const scheduleRefresh = () => {
+				if (this.imageRefreshRaf) cancelAnimationFrame(this.imageRefreshRaf);
+				this.imageRefreshRaf = requestAnimationFrame(() => {
+					this.imageRefreshRaf = null;
+					if (this.el?.isConnected) ScrollTrigger.refresh();
+				});
+			};
+
+			images.forEach((image) => {
+				if (image.complete) return;
+
+				image.addEventListener('load', scheduleRefresh);
+				image.addEventListener('error', scheduleRefresh);
+				this.imageLoadCleanups.push(() => {
+					image.removeEventListener('load', scheduleRefresh);
+					image.removeEventListener('error', scheduleRefresh);
+				});
+			});
 		}
 
 		animationReveal() {
@@ -1695,6 +1721,10 @@ export const HomePage = {
 
 		destroy() {
 			super.cleanTrigger();
+			if (this.imageRefreshRaf) cancelAnimationFrame(this.imageRefreshRaf);
+			this.imageRefreshRaf = null;
+			this.imageLoadCleanups.forEach(cleanup => cleanup());
+			this.imageLoadCleanups = [];
 			if (this.tlDecor) {
 				if (this.tlDecor.scrollTrigger) this.tlDecor.scrollTrigger.kill();
 				this.tlDecor.kill();
@@ -1878,29 +1908,29 @@ export const HomePage = {
 			});
 			this.sphereMesh.setParent(this.sphereTiltPivot);
 
-			const toRadians = (degrees) => degrees * (Math.PI / 180);
 			const cardLayer = $(main).find('.home-playground-card-layer')[0];
 			const baseCards = Array.from($(main).find('.home-playground-card').toArray());
-			this.sphereCardClones = baseCards.flatMap((card, index) => {
-				const offsets = [180];
-				if (index % 2 === 0) offsets.push(index % 4 === 0 ? 90 : -90);
-
-				return offsets.map((longitudeOffset) => {
-					const clone = card.cloneNode(true);
-					$(clone).addClass(['is-orbit-clone']);
-					clone.dataset.longitude = String(
-						Number(card.dataset.longitude || 0) + longitudeOffset,
-					);
-					$(cardLayer).append(clone);
-					return clone;
-				});
+			this.sphereCardClones = baseCards.map((card) => {
+				const clone = card.cloneNode(true);
+				$(clone).addClass(['is-orbit-clone']);
+				$(cardLayer).append(clone);
+				return clone;
 			});
 
-			this.sphereCards = [...baseCards, ...this.sphereCardClones].map((card) => {
-				const latitude = toRadians(Number(card.dataset.latitude || 0));
-				const longitude = toRadians(Number(card.dataset.longitude || 0));
+			const orbitCards = baseCards.flatMap((card, index) => [
+				card,
+				this.sphereCardClones[index],
+			]);
+			const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+			const orbitPhase = -0.35;
+
+			this.sphereCards = orbitCards.map((card, index) => {
+				// Fibonacci sphere: mỗi điểm chiếm một phần diện tích mặt cầu gần bằng nhau.
+				// Offset 0.5 tránh đặt card đúng hai cực, nơi hình chiếu dễ bị dồn lại.
+				const normalizedY = 1 - (2 * (index + 0.5)) / orbitCards.length;
+				const longitude = index * goldenAngle + orbitPhase;
 				const anchorRadius = Number(card.dataset.radius || 1.06);
-				const latitudeRadius = Math.cos(latitude) * anchorRadius;
+				const latitudeRadius = Math.sqrt(1 - normalizedY * normalizedY) * anchorRadius;
 
 				return {
 					el: card,
@@ -1908,7 +1938,7 @@ export const HomePage = {
 					anchorRadius,
 					anchor: new Vec3(
 						Math.sin(longitude) * latitudeRadius,
-						Math.sin(latitude) * anchorRadius,
+						normalizedY * anchorRadius,
 						Math.cos(longitude) * latitudeRadius,
 					),
 					world: new Vec3(),

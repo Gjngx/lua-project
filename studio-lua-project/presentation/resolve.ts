@@ -9,6 +9,12 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     },
   ]),
   locations: {
+    footer: defineLocations({
+      select: {},
+      resolve: () => ({
+        locations: [{title: 'Footer', href: '/'}],
+      }),
+    }),
     homePage: defineLocations({
       select: {},
       resolve: () => ({

@@ -100,6 +100,7 @@ class Loader {
 				type: 'lines',
 				isMask: true,
 			});
+			const descElements = this.descSplit?.elements || [];
 
 			gsap.set(progress, {
 				height: percentHeight,
@@ -124,9 +125,9 @@ class Loader {
 				transformOrigin: '50% 50%',
 			});
 			gsap.set(desc, { autoAlpha: 1 });
-			gsap.set(this.descSplit?.elements || [], {
-				yPercent: 110,
-			});
+			if (descElements.length) {
+				gsap.set(descElements, { yPercent: 110 });
+			}
 			// Chỉ cần thay đổi giá trị này để chỉnh toàn bộ thời gian chạy counter.
 			const totalDuration = 6;
 			const counterStartTime = 0.3;
@@ -171,14 +172,14 @@ class Loader {
 				return currentIndex + direction * distance;
 			};
 
-			const firstLoadTimeline = this.tlFirstLoad
-				.to(percent, {
+			const firstLoadTimeline = this.tlFirstLoad.to(percent, {
 					y: 0,
 					duration: 0.4,
 					ease: 'sine.inOut',
-				})
-				.to(
-					this.descSplit?.elements || [],
+				});
+			if (descElements.length) {
+				firstLoadTimeline.to(
+					descElements,
 					{
 						yPercent: 0,
 						duration: 0.4,
@@ -187,6 +188,7 @@ class Loader {
 					},
 					'<',
 				);
+			}
 
 			let previousStopTime = 0;
 			const counterTimeline = counterSamples.reduce((timeline, sample, index) => {

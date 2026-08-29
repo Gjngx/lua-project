@@ -309,6 +309,9 @@ export function useSplitPretext({ selector, type = 'lines', isMask = false }) {
 		? $(selector)[0]
 		: selector;
 	if (!el) return null;
+	// Sanity embeds source-map metadata as invisible characters. Splitting the
+	// text into DOM nodes corrupts that payload and breaks click-to-edit.
+	if (document.documentElement.dataset.sanityPreview === 'true') return null;
 
 	const originalHTML = el.innerHTML || '';
 

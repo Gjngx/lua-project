@@ -55,6 +55,10 @@
 	position: relative;
 }
 
+.footer-preserve-line-breaks {
+	white-space: pre-line;
+}
+
 .footer-main-decor{
 	width: 1rem;
 	display: flex;

@@ -41,7 +41,15 @@ import { loadQuery } from '../sanity/lib/load-query';
 import { HOME_PAGE_QUERY } from '../sanity/lib/queries';
 
 type SanityImage = {
-	asset?: { url?: string };
+	asset?: {
+		url?: string;
+		metadata?: {
+			dimensions?: {
+				width?: number;
+				height?: number;
+			};
+		};
+	};
 	alt?: string;
 	crop?: unknown;
 	hotspot?: unknown;
@@ -82,13 +90,32 @@ type HomePageData = {
 	playground?: {
 		leadIn?: string;
 		link?: { label?: string; href?: string };
-		gallery?: Array<{ _key?: string; alt?: string; image?: SanityImage }>;
+		gallery?: Array<{
+			_key?: string;
+			alt?: string;
+			prominence?: 'small' | 'medium' | 'large' | 'featured';
+			image?: SanityImage;
+		}>;
 	};
 };
 
+const getResizedImageDimensions = (image: SanityImage | undefined, targetWidth: number) => {
+	const dimensions = image?.asset?.metadata?.dimensions;
+	if (!dimensions?.width || !dimensions.height) {
+		return { imageWidth: undefined, imageHeight: undefined };
+	}
+
+	return {
+		imageWidth: targetWidth,
+		imageHeight: Math.round((targetWidth * dimensions.height) / dimensions.width),
+	};
+};
+
+const draftModeProps = getDraftModeProps(Astro.cookies);
+const isDraftMode = Boolean(draftModeProps.perspectiveCookie);
 const { data: homePage } = await loadQuery<HomePageData | null>({
 	query: HOME_PAGE_QUERY,
-	...getDraftModeProps(Astro.cookies),
+	...draftModeProps,
 });
 
 const hero = homePage?.hero;
@@ -98,11 +125,13 @@ const playground = homePage?.playground;
 const heroHeadline =
 	hero?.headline || 'Creating websites and digital products for great experiences';
 const closingStatement = featuredWork?.closingStatement || 'Ready to help\nwith your needs';
-const closingStatementLines = closingStatement.split(/\r?\n/);
+const closingStatementLines = isDraftMode ? [] : closingStatement.split(/\r?\n/);
 const capabilitiesIntroduction =
 	capabilities?.introduction ||
 	"Discover the amazing features of my services that\ncan transform your workflow and boost productivity.\nHere's what I can do for you:";
-const capabilitiesIntroductionLines = capabilitiesIntroduction.split(/\r?\n/);
+const capabilitiesIntroductionLines = isDraftMode
+	? []
+	: capabilitiesIntroduction.split(/\r?\n/);
 
 const fallbackProjects = [
 	{
@@ -178,22 +207,44 @@ const services = capabilities?.services?.length
 			imageUrl: service.image?.asset?.url
 				? urlFor(service.image).width(1200).quality(85).auto('format').url()
 				: undefined,
+			...getResizedImageDimensions(service.image, 1200),
 			alt: stegaClean(service.image?.alt || service.title || ''),
 			localImage: undefined,
 		}))
-	: fallbackServices.map((service) => ({ ...service, imageUrl: undefined, alt: service.title }));
+	: fallbackServices.map((service) => ({
+			...service,
+			imageUrl: undefined,
+			imageWidth: undefined,
+			imageHeight: undefined,
+			alt: service.title,
+		}));
 
-const cardPlacements = [
-	{ latitude: 48, longitude: -35, radius: 1.08, width: 0.15, size: 'xs' },
-	{ latitude: 56, longitude: 18, radius: 1.12, width: 0.24, size: 'md' },
-	{ latitude: 30, longitude: -12, radius: 1.06, width: 0.24, size: 'md' },
-	{ latitude: 12, longitude: -58, radius: 1.09, width: 0.2, size: 'sm' },
-	{ latitude: 12, longitude: 24, radius: 1.08, width: 0.16, size: 'xs' },
-	{ latitude: -2, longitude: 62, radius: 1.12, width: 0.15, size: 'xs' },
-	{ latitude: -20, longitude: -48, radius: 1.1, width: 0.27, size: 'md' },
-	{ latitude: -24, longitude: 22, radius: 1.13, width: 0.41, size: 'lg' },
-	{ latitude: -52, longitude: -12, radius: 1.1, width: 0.17, size: 'sm' },
+const cardStyles = [
+	{ radius: 1.08, width: 0.15, size: 'xs' },
+	{ radius: 1.12, width: 0.24, size: 'md' },
+	{ radius: 1.06, width: 0.24, size: 'md' },
+	{ radius: 1.09, width: 0.2, size: 'sm' },
+	{ radius: 1.08, width: 0.16, size: 'xs' },
+	{ radius: 1.12, width: 0.15, size: 'xs' },
+	{ radius: 1.1, width: 0.27, size: 'md' },
+	{ radius: 1.13, width: 0.41, size: 'lg' },
+	{ radius: 1.1, width: 0.17, size: 'sm' },
 ];
+
+const cardSizePresets = {
+	small: { radius: 1.08, width: 0.15, size: 'xs' },
+	medium: { radius: 1.09, width: 0.21, size: 'sm' },
+	large: { radius: 1.11, width: 0.29, size: 'md' },
+	featured: { radius: 1.13, width: 0.41, size: 'lg' },
+} as const;
+
+const getCardStyle = (
+	prominence: keyof typeof cardSizePresets | undefined,
+	index: number,
+) => {
+	const cleanProminence = stegaClean(prominence || '') as keyof typeof cardSizePresets;
+	return cardSizePresets[cleanProminence] || cardStyles[index % cardStyles.length];
+};
 
 const fallbackGallery = [
 	tesla,
@@ -214,14 +265,14 @@ const gallery = playground?.gallery?.length
 				: undefined,
 			localImage: undefined,
 			alt: stegaClean(item.alt || ''),
-			placement: cardPlacements[index % cardPlacements.length],
+			placement: getCardStyle(item.prominence, index),
 		}))
 	: fallbackGallery.map((localImage, index) => ({
 			key: `gallery-${index}`,
 			imageUrl: undefined,
 			localImage,
 			alt: '',
-			placement: cardPlacements[index],
+			placement: cardStyles[index],
 		}));
 
 const seoTitle = stegaClean(homePage?.seo?.title || 'Home');
@@ -389,9 +440,14 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 				</div>
 				<div class="home-works-bottom">
 					<div class="home-works-bottom-title">
-						<h2 class="heading fs-64 fw-700 trans-upper fs-40-mb">
+						<h2
+							class:list={[
+								'heading fs-64 fw-700 trans-upper fs-40-mb',
+								{ 'preserve-line-breaks': isDraftMode },
+							]}
+						>
 							{
-								closingStatementLines.map((line, index) => (
+								isDraftMode ? closingStatement : closingStatementLines.map((line, index) => (
 									<>
 										{line}
 										{index < closingStatementLines.length - 1 && <br />}
@@ -482,9 +538,9 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 			<div class="container grid">
 				<div class="home-how-intro">
 					<div class="home-how-intro-desc">
-						<p class="txt fs-14">
+						<p class:list={['txt fs-14', { 'preserve-line-breaks': isDraftMode }]}>
 							{
-								capabilitiesIntroductionLines.map((line, index) => (
+								isDraftMode ? capabilitiesIntroduction : capabilitiesIntroductionLines.map((line, index) => (
 									<>
 										{line}
 										{index < capabilitiesIntroductionLines.length - 1 && <br />}
@@ -563,6 +619,8 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 													class="img-df img-fill"
 													src={service.imageUrl}
 													alt={service.alt}
+													width={service.imageWidth}
+													height={service.imageHeight}
 													loading="lazy"
 												/>
 											) : service.localImage ? (
@@ -630,8 +688,6 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 						gallery.map((item) => (
 							<div
 								class="home-playground-card"
-								data-latitude={item.placement.latitude}
-								data-longitude={item.placement.longitude}
 								data-radius={item.placement.radius}
 								data-width={item.placement.width}
 								data-size={item.placement.size}

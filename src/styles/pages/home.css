@@ -665,6 +665,10 @@
 	padding: 0.8rem 1.6rem;
 }
 
+.preserve-line-breaks {
+	white-space: pre-line;
+}
+
 .home-how-thumb {
 	grid-column: 7 / 13;
 	grid-row: 3 / 3;

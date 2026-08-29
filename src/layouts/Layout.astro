@@ -23,7 +23,7 @@ const draftMode = Astro.cookies.has(perspectiveCookieName);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-sanity-preview={draftMode ? 'true' : undefined}>
 	<head>
 		<SEO title={title} description={description} image={image} />
 		<script is:inline>
