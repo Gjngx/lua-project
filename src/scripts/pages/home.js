@@ -611,7 +611,7 @@ export const HomePage = {
 			const worksSvg = $(this.el).find('.home-works-svg')[0];
 			const worksTitle = $(this.el).find('.home-works-main-title')[0];
 			const worksDesc = $(this.el).find('.home-works-main-desc')[0];
-			const worksSvgPadding = viewport.w > 767 ? cvUnit(77, 'rem') : cvUnit(-20, 'rem');
+			const worksSvgPadding = viewport.w > 767 ? cvUnit(68, 'rem') : cvUnit(-20, 'rem');
 
 			const worksTitleTop =
 				worksTitle.getBoundingClientRect().top -

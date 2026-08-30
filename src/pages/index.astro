@@ -692,10 +692,11 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 			<div class="home-playground-main">
 				<canvas
 					class="home-playground-sphere-canvas"
+					data-cursor="drag"
 					aria-label="Interactive patterned 3D sphere. Drag or use the arrow keys to rotate it."
 					role="img"
 					tabindex="0"></canvas>
-				<div class="home-playground-sphere-hitarea" aria-hidden="true"></div>
+				<div class="home-playground-sphere-hitarea" data-cursor="drag" aria-hidden="true"></div>
 				<div class="home-playground-card-layer" aria-hidden="true">
 					{
 						gallery.map((item) => (

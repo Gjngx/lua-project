@@ -23,6 +23,14 @@ input[type='radio'] {
 	cursor: url('../assets/images/cursor-pointer.svg') 12 2, pointer !important;
 }
 
+[data-cursor='drag'] {
+	cursor: url('../assets/images/cursor-drag.svg') 23 14, grab !important;
+}
+
+[data-cursor='drag'].is-dragging {
+	cursor: url('../assets/images/cursor-drag.svg') 23 14, grabbing !important;
+}
+
 .custom-scroll {
 	overflow-y: overlay;
 	scrollbar-gutter: stable;
