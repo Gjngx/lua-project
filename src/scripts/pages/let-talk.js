@@ -114,7 +114,7 @@ export const LetTalkPage = {
 					trigger: $(this.el).find('.let-talk-top')[0],
 					start: 'top top',
 					end: 'bottom top',
-					scrub: 1,
+					scrub: true,
 					onUpdate: (self) => {
 						if (self.direction > 0 && self.progress > 0) {
 							setScrollInnerHidden(true);
