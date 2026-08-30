@@ -1855,7 +1855,7 @@ export const HomePage = {
 				scrollTrigger: {
 					trigger: $(this.el).find('.home-playground-empty')[0],
 					start: 'top top+=50%',
-					end: 'bottom bottom',
+					end: 'bottom bottom+=2%',
 					scrub: true,
 				},
 			});
