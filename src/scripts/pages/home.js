@@ -1,6 +1,7 @@
 import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit, viewport } from '../../core/helpers.js';
+import { smoothScroll } from '../../core/lenis.js';
 import { SvgPathParticles } from '../../core/svg-path-particles.js';
 import { footer } from '../../core/components/footer.js';
 
@@ -1793,6 +1794,10 @@ export const HomePage = {
 			this.sphereVisible = false;
 			this.sphereDragging = false;
 			this.sphereFocused = false;
+			this.pendingSphereCard = null;
+			this.sphereTransitionScrolling = false;
+			this.sphereScrollResetting = false;
+			this.sphereShouldResumeScroll = false;
 			this.sphereDragMoved = false;
 			this.spherePointer = null;
 			this.sphereRaf = null;
@@ -1852,7 +1857,6 @@ export const HomePage = {
 					start: 'top top+=50%',
 					end: 'bottom bottom',
 					scrub: true,
-					invalidateOnRefresh: true,
 				},
 			});
 			this.tlTrans
@@ -1937,6 +1941,7 @@ export const HomePage = {
 				const clone = sourceCards[index % sourceCards.length].cloneNode(true);
 				clone.classList.add('is-sphere-clone');
 				clone.setAttribute('aria-hidden', 'true');
+				clone.setAttribute('tabindex', '-1');
 				this.sphere.appendChild(clone);
 				this.sphereClones.push(clone);
 			}
@@ -1948,10 +1953,18 @@ export const HomePage = {
 
 			const onPointerDown = (event) => {
 				if (event.button !== 0) return;
+				this.pendingSphereCard = null;
 				this.resetSphereFocus();
 				this.sphereDragging = true;
 				this.sphereDragMoved = false;
-				this.spherePointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
+				this.spherePointer = {
+					id: event.pointerId,
+					x: event.clientX,
+					y: event.clientY,
+					startX: event.clientX,
+					startY: event.clientY,
+					card: event.target.closest?.('.home-playground-card') || null,
+				};
 				this.cardLayer.classList.add('is-dragging');
 				this.cardLayer.setPointerCapture?.(event.pointerId);
 			};
@@ -1960,7 +1973,9 @@ export const HomePage = {
 				if (!this.sphereDragging || this.spherePointer?.id !== event.pointerId) return;
 				const deltaX = event.clientX - this.spherePointer.x;
 				const deltaY = event.clientY - this.spherePointer.y;
-				if (Math.abs(deltaX) + Math.abs(deltaY) > 2) this.sphereDragMoved = true;
+				const movedX = event.clientX - this.spherePointer.startX;
+				const movedY = event.clientY - this.spherePointer.startY;
+				if (Math.hypot(movedX, movedY) > 4) this.sphereDragMoved = true;
 				this.sphereRotation.y += (deltaX * 0.2) / this.sphereRotation.scale;
 				this.sphereRotation.x -= (deltaY * 0.2) / this.sphereRotation.scale;
 				this.spherePointer.x = event.clientX;
@@ -1970,10 +1985,15 @@ export const HomePage = {
 
 			const onPointerEnd = (event) => {
 				if (this.spherePointer?.id !== event.pointerId) return;
+				const selectedCard =
+					event.type === 'pointerup' && !this.sphereDragMoved
+						? this.spherePointer.card
+						: null;
 				this.sphereDragging = false;
 				this.spherePointer = null;
 				this.cardLayer.classList.remove('is-dragging');
 				this.cardLayer.releasePointerCapture?.(event.pointerId);
+				if (selectedCard) this.requestSphereCardFocus(selectedCard);
 			};
 
 			this.cardLayer.addEventListener('pointerdown', onPointerDown);
@@ -1987,16 +2007,31 @@ export const HomePage = {
 				this.cardLayer?.removeEventListener('pointercancel', onPointerEnd);
 			});
 
-			this.sphereCards.forEach((card) => {
-				const onClick = (event) => {
-					if (this.sphereDragMoved) {
-						event.preventDefault();
-						return;
-					}
-					this.focusSphereCard(card);
+			sourceCards.forEach((card) => {
+				const onKeyDown = (event) => {
+					if (event.key !== 'Enter' && event.key !== ' ') return;
+					event.preventDefault();
+					this.requestSphereCardFocus(card);
 				};
-				card.addEventListener('click', onClick);
-				this.sphereCleanups.push(() => card.removeEventListener('click', onClick));
+				card.addEventListener('keydown', onKeyDown);
+				this.sphereCleanups.push(() => card.removeEventListener('keydown', onKeyDown));
+			});
+
+			const onScrollIntent = (event) => {
+				if (!this.sphereFocused && !this.sphereScrollResetting) return;
+				event.preventDefault();
+				if (this.sphereScrollResetting) return;
+
+				this.sphereScrollResetting = true;
+				this.sphereShouldResumeScroll = smoothScroll.isRunning();
+				smoothScroll.stop();
+				this.resetSphereFocus(() => this.finishSphereScrollReset());
+			};
+			window.addEventListener('wheel', onScrollIntent, { passive: false, capture: true });
+			window.addEventListener('touchmove', onScrollIntent, { passive: false, capture: true });
+			this.sphereCleanups.push(() => {
+				window.removeEventListener('wheel', onScrollIntent, true);
+				window.removeEventListener('touchmove', onScrollIntent, true);
 			});
 
 			this.sphereObserver = new IntersectionObserver(([entry]) => {
@@ -2089,7 +2124,7 @@ export const HomePage = {
 
 		applySphereTransform() {
 			if (!this.sphere) return;
-			this.sphere.style.transform = `rotateX(${this.sphereRotation.x}deg) rotateY(${this.sphereRotation.y}deg) scale(${this.sphereRotation.scale})`;
+			this.sphere.style.transform = `scale(${this.sphereRotation.scale}) rotateX(${this.sphereRotation.x}deg) rotateY(${this.sphereRotation.y}deg)`;
 		}
 
 		closestSphereAngle(current, target) {
@@ -2099,10 +2134,81 @@ export const HomePage = {
 			return current + delta;
 		}
 
+		isSphereFocusAvailable() {
+			const transitionEnd = this.tlTrans?.scrollTrigger?.end;
+			if (!Number.isFinite(transitionEnd)) return true;
+
+			return window.scrollY <= transitionEnd + 2;
+		}
+
+		requestSphereCardFocus(card) {
+			if (!card?.isConnected) return;
+
+			const transition = this.tlTrans?.scrollTrigger;
+			if (
+				!transition ||
+				(transition.progress >= 0.999 && this.isSphereFocusAvailable())
+			) {
+				this.pendingSphereCard = null;
+				this.focusSphereCard(card);
+				return;
+			}
+
+			this.pendingSphereCard = card;
+			if (this.sphereTransitionScrolling) return;
+
+			this.sphereTransitionScrolling = true;
+			const finishFocus = () => {
+				if (!this.sphereTransitionScrolling) return;
+				ScrollTrigger.update();
+
+				const pendingCard = this.pendingSphereCard;
+				if (!this.el?.isConnected || !pendingCard?.isConnected) {
+					this.sphereTransitionScrolling = false;
+					this.pendingSphereCard = null;
+					this.tlTrans?.eventCallback('onComplete', null);
+					return;
+				}
+				if (!this.isSphereFocusAvailable()) return;
+
+				this.sphereTransitionScrolling = false;
+				this.pendingSphereCard = null;
+				this.tlTrans?.eventCallback('onComplete', null);
+				this.focusSphereCard(pendingCard);
+			};
+			this.tlTrans?.eventCallback('onComplete', finishFocus);
+
+			if (!smoothScroll.lenis) {
+				window.scrollTo({ top: transition.end, behavior: 'smooth' });
+				gsap.delayedCall(0.8, finishFocus);
+				return;
+			}
+
+			const scrollDistance = Math.abs(smoothScroll.getScroll() - transition.end);
+			const scrollDuration = Math.min(
+				2.8,
+				Math.max(1.2, (scrollDistance / window.innerHeight) * 0.8),
+			);
+			smoothScroll.scrollTo(transition.end, {
+				duration: scrollDuration,
+				easing: (progress) => progress * progress * (3 - 2 * progress),
+				lock: true,
+				force: true,
+				onComplete: finishFocus,
+			});
+		}
+
 		focusSphereCard(card) {
+			this.finishSphereScrollReset();
 			const cardRotationX = Number(card.dataset.sphereRotationX || 0);
 			const cardRotationY = Number(card.dataset.sphereRotationY || 0);
+			this.sphereCards.forEach((item) => {
+				const selected = item === card;
+				item.classList.toggle('is-focused', selected);
+				item.setAttribute('aria-pressed', String(selected));
+			});
 			this.sphereFocused = true;
+			this.el?.classList.add('is-sphere-focused');
 			this.sphereFocus?.kill();
 			this.sphereFocus = gsap.to(this.sphereRotation, {
 				x: this.closestSphereAngle(this.sphereRotation.x, -cardRotationX),
@@ -2115,8 +2221,22 @@ export const HomePage = {
 			});
 		}
 
-		resetSphereFocus() {
+		finishSphereScrollReset() {
+			if (!this.sphereScrollResetting) return;
+			this.sphereScrollResetting = false;
+			const shouldResumeScroll = this.sphereShouldResumeScroll;
+			this.sphereShouldResumeScroll = false;
+			if (shouldResumeScroll) smoothScroll.start();
+		}
+
+		resetSphereFocus(onComplete) {
 			if (!this.sphereFocused) return;
+			this.sphereFocused = false;
+			this.el?.classList.remove('is-sphere-focused');
+			this.sphereCards.forEach((card) => {
+				card.classList.remove('is-focused');
+				card.setAttribute('aria-pressed', 'false');
+			});
 			this.sphereFocus?.kill();
 			this.sphereFocus = gsap.to(this.sphereRotation, {
 				scale: 1,
@@ -2124,14 +2244,16 @@ export const HomePage = {
 				ease: 'power3.inOut',
 				overwrite: true,
 				onUpdate: () => this.applySphereTransform(),
-				onComplete: () => {
-					this.sphereFocused = false;
-				},
+				onComplete,
 			});
 		}
 
 		destroy() {
 			super.cleanTrigger();
+			this.el?.classList.remove('is-sphere-focused');
+			this.pendingSphereCard = null;
+			this.sphereTransitionScrolling = false;
+			this.finishSphereScrollReset();
 			if (this.sphereRaf) cancelAnimationFrame(this.sphereRaf);
 			this.sphereRaf = null;
 			this.sphereObserver?.disconnect();

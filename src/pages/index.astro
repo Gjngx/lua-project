@@ -663,13 +663,24 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 				</div>
 			</div>
 			<div class="home-playground-main">
-				<div class="home-playground-card-layer" data-cursor="drag" aria-hidden="true">
+				<div
+					class="home-playground-card-layer"
+					data-cursor="drag"
+					role="region"
+					aria-label="Interactive playground image globe"
+				>
 					<div class="home-playground-sphere-scale">
 						<div class="home-playground-sphere-stage">
 							<div class="home-playground-sphere">
 								{
 									gallery.map((item) => (
-										<div class="home-playground-card">
+										<div
+											class="home-playground-card"
+											role="button"
+											tabindex="0"
+											aria-label={item.alt || 'Focus playground image'}
+											aria-pressed="false"
+										>
 											<div class="home-playground-card-inner">
 												{item.imageUrl ? (
 													<img src={item.imageUrl} alt={item.alt} loading="lazy" draggable="false" />

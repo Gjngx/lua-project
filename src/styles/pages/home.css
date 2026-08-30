@@ -777,6 +777,11 @@
 	pointer-events: none;
 }
 
+.home-playground-wrap.is-sphere-focused .home-playground-trans-inner,
+.home-playground-wrap.is-sphere-focused .home-playground-content {
+	mix-blend-mode: difference;
+}
+
 .home-playground-main {
 	z-index: 2;
 	overflow: hidden;
@@ -841,6 +846,7 @@
 	transform-origin: center;
 	backface-visibility: visible;
 	will-change: transform;
+	outline: none;
 }
 
 .home-playground-card-inner {
@@ -866,6 +872,11 @@
 	.home-playground-card:hover .home-playground-card-inner {
 		transform: scale(1.05);
 	}
+}
+
+.home-playground-card:focus-visible .home-playground-card-inner {
+	transform: scale(1.05);
+	box-shadow: 0 0 0 0.2rem var(--cl-brand);
 }
 
 .home-playground-content-left-title,
@@ -914,7 +925,7 @@
 }
 
 .home-playground-empty {
-	height: 150vh;
+	height: 200vh;
 }
 
 @media (hover: hover) and (min-width: 991px) {
