@@ -61,6 +61,30 @@ export const FOOTER_QUERY = defineQuery(`
   }
 `);
 
+export const LET_TALK_PAGE_QUERY = defineQuery(`
+  *[_id == "letTalkPage"][0]{
+    _id,
+    _type,
+    heroImages[]{
+      _key,
+      _type,
+      alt,
+      crop,
+      hotspot,
+      asset->{
+        _id,
+        url,
+        metadata{lqip, dimensions}
+      }
+    },
+    services[]{
+      _key,
+      _type,
+      label
+    }
+  }
+`);
+
 export const HOME_PAGE_QUERY = defineQuery(`
   *[_id == "homePage"][0]{
     _id,

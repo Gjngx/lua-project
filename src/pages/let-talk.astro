@@ -8,8 +8,9 @@ import letTalkImg1 from '../assets/images/let-talk-1.png';
 import letTalkImg2 from '../assets/images/let-talk-2.png';
 import letTalkImg3 from '../assets/images/let-talk-3.png';
 import { getDraftModeProps } from '../sanity/lib/draft-mode';
+import { urlFor } from '../sanity/lib/image';
 import { loadQuery } from '../sanity/lib/load-query';
-import { FOOTER_QUERY } from '../sanity/lib/queries';
+import { FOOTER_QUERY, LET_TALK_PAGE_QUERY } from '../sanity/lib/queries';
 
 type FooterData = {
 	email?: string;
@@ -17,10 +18,72 @@ type FooterData = {
 	socialLinks?: Array<{ _key?: string; platform?: string; href?: string }>;
 };
 
-const { data: footer } = await loadQuery<FooterData | null>({
-	query: FOOTER_QUERY,
-	...getDraftModeProps(Astro.cookies),
-});
+type LetTalkImage = {
+	_key?: string;
+	alt?: string;
+	crop?: unknown;
+	hotspot?: unknown;
+	asset?: {
+		_id?: string;
+		url?: string;
+		metadata?: {
+			dimensions?: { width?: number; height?: number };
+		};
+	};
+};
+
+type LetTalkPageData = {
+	heroImages?: LetTalkImage[];
+	services?: Array<{ _key?: string; label?: string }>;
+};
+
+const draftModeProps = getDraftModeProps(Astro.cookies);
+const [{ data: footer }, { data: letTalkPage }] = await Promise.all([
+	loadQuery<FooterData | null>({ query: FOOTER_QUERY, ...draftModeProps }),
+	loadQuery<LetTalkPageData | null>({ query: LET_TALK_PAGE_QUERY, ...draftModeProps }),
+]);
+
+const fallbackHeroImages = [letTalkImg, letTalkImg1, letTalkImg2, letTalkImg3].map(
+	(localImage, index) => ({
+		key: `fallback-image-${index}`,
+		alt: "Let's Work Together",
+		localImage,
+		imageUrl: undefined,
+		width: undefined,
+		height: undefined,
+	}),
+);
+const heroImages =
+	letTalkPage?.heroImages?.length === 4
+		? letTalkPage.heroImages.map((image, index) => {
+				const dimensions = image.asset?.metadata?.dimensions;
+				const width = dimensions?.width ? Math.min(800, dimensions.width) : undefined;
+				const height =
+					width && dimensions?.width && dimensions.height
+						? Math.round((width * dimensions.height) / dimensions.width)
+						: undefined;
+
+				return {
+					key: image._key || `sanity-image-${index}`,
+					alt: image.alt || "Let's Work Together",
+					localImage: undefined,
+					imageUrl: image.asset?.url
+						? urlFor(image).width(width || 800).quality(85).auto('format').url()
+						: undefined,
+					width,
+					height,
+				};
+			})
+		: fallbackHeroImages;
+
+const fallbackServices = ['UI/UX Design', 'Website Design', 'Digital Design', 'Branding'];
+const services =
+	letTalkPage?.services?.length === 4
+		? letTalkPage.services.map((service, index) => ({
+				key: service._key || `service-${index}`,
+				label: service.label || fallbackServices[index],
+			}))
+		: fallbackServices.map((label, index) => ({ key: `fallback-service-${index}`, label }));
 
 const email = footer?.email || 'hi@minhhieu.design';
 const phoneNumber = footer?.phoneNumber || '+84 343 313 383';
@@ -63,26 +126,15 @@ const socialHref = (platform: string) =>
 				</div>
 			</div>
 			<div class="let-talk-decor-services">
-				<a href="#" class="let-talk-decor-service">
-					<div class="let-talk-decor-service-inner hover-un">
-						<p class="txt fs-20">UI/UX Design</p>
-					</div>
-				</a>
-				<a href="#" class="let-talk-decor-service">
-					<div class="let-talk-decor-service-inner hover-un">
-						<p class="txt fs-20">Website Design</p>
-					</div>
-				</a>
-				<a href="#" class="let-talk-decor-service">
-					<div class="let-talk-decor-service-inner hover-un">
-						<p class="txt fs-20">UI/UX Design</p>
-					</div>
-				</a>
-				<a href="#" class="let-talk-decor-service">
-					<div class="let-talk-decor-service-inner hover-un">
-						<p class="txt fs-20">Branding</p>
-					</div>
-				</a>
+				{
+					services.map((service) => (
+						<a href="#" class="let-talk-decor-service" data-service-key={service.key}>
+							<div class="let-talk-decor-service-inner hover-un">
+								<p class="txt fs-20">{service.label}</p>
+							</div>
+						</a>
+					))
+				}
 			</div>
 		</div>
 		<div class="let-talk-scroll">
@@ -97,18 +149,30 @@ const socialHref = (platform: string) =>
 						<div class="let-talk-top-line">
 							<span class="let-talk-top-block">Let's</span>
 							<div class="let-talk-img">
-								<div class="let-talk-img-inner">
-									<Image class="img-df" src={letTalkImg} alt="Let's Work Together" />
-								</div>
-								<div class="let-talk-img-inner">
-									<Image class="img-df" src={letTalkImg1} alt="Let's Work Together" />
-								</div>
-								<div class="let-talk-img-inner">
-									<Image class="img-df" src={letTalkImg2} alt="Let's Work Together" />
-								</div>
-								<div class="let-talk-img-inner">
-									<Image class="img-df" src={letTalkImg3} alt="Let's Work Together" />
-								</div>
+								{
+									heroImages.map((image) => (
+										<div class="let-talk-img-inner" data-image-key={image.key}>
+											{image.imageUrl ? (
+												<img
+													class="img-df"
+													src={image.imageUrl}
+													alt={image.alt}
+													width={image.width}
+													height={image.height}
+													loading="eager"
+													decoding="async"
+												/>
+											) : image.localImage ? (
+												<Image
+													class="img-df"
+													src={image.localImage}
+													alt={image.alt}
+													loading="eager"
+												/>
+											) : null}
+										</div>
+									))
+								}
 							</div>
 							<span class="let-talk-top-block">Work</span>
 						</div>

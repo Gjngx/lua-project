@@ -7,6 +7,10 @@ export const resolve: PresentationPluginOptions['resolve'] = {
       route: '/',
       type: 'homePage',
     },
+    {
+      route: '/let-talk',
+      type: 'letTalkPage',
+    },
   ]),
   locations: {
     footer: defineLocations({
@@ -19,6 +23,12 @@ export const resolve: PresentationPluginOptions['resolve'] = {
       select: {},
       resolve: () => ({
         locations: [{title: 'Home page', href: '/'}],
+      }),
+    }),
+    letTalkPage: defineLocations({
+      select: {},
+      resolve: () => ({
+        locations: [{title: "Let's Talk page", href: '/let-talk'}],
       }),
     }),
     project: defineLocations({

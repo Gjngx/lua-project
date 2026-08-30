@@ -6,6 +6,7 @@ import service from './objects/service'
 import category from './documents/category'
 import footer from './documents/footer'
 import homePage from './documents/home-page'
+import letTalkPage from './documents/let-talk-page'
 import project from './documents/project'
 import siteSettings from './documents/site-settings'
 
@@ -18,6 +19,7 @@ export const schemaTypes = [
   category,
   footer,
   homePage,
+  letTalkPage,
   project,
   siteSettings,
 ]

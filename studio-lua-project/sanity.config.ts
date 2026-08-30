@@ -6,7 +6,7 @@ import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
 import {resolve} from './presentation/resolve'
 
-const singletonTypes = new Set(['siteSettings', 'homePage', 'footer'])
+const singletonTypes = new Set(['siteSettings', 'homePage', 'letTalkPage', 'footer'])
 
 export default defineConfig({
   name: 'default',
