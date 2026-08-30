@@ -224,6 +224,18 @@
 	align-items: center;
 	transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
+.header-menu-menu {
+	pointer-events: auto;
+}
+.header-menu-close {
+	pointer-events: none;
+}
+.header.on-open-nav .header-menu-menu {
+	pointer-events: none;
+}
+.header.on-open-nav .header-menu-close {
+	pointer-events: auto;
+}
 .header.on-open-nav .header-menu-close{
 	opacity: 1;
 }

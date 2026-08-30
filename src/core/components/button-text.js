@@ -39,6 +39,29 @@ class ButtonText {
 			hover: sanitySounds.hover?.src || hoverSound,
 			close: sanitySounds.close?.src || closeSound,
 		};
+		this.hasPointerMoved = false;
+
+		window.addEventListener('pointermove', this.handlePointerMove, true);
+		window.addEventListener('pointerdown', this.handlePointerDown, true);
+	}
+
+	handlePointerMove = (event) => {
+		if (event.pointerType && event.pointerType !== 'mouse') return;
+		if (event.movementX !== 0 || event.movementY !== 0) {
+			this.hasPointerMoved = true;
+		}
+	};
+
+	handlePointerDown = () => {
+		// Menu và Close nằm cùng vị trí. Việc đổi nút dưới con trỏ sau click
+		// không được tính là một lần hover mới.
+		this.hasPointerMoved = false;
+	};
+
+	playHoverSound() {
+		if (!this.hasPointerMoved) return;
+		this.hasPointerMoved = false;
+		this.playSound('hover');
 	}
 
 	playSound(type) {
@@ -81,7 +104,7 @@ class ButtonText {
 
 		const onPointerEnter = (event) => {
 			if (event.pointerType && event.pointerType !== 'mouse') return;
-			this.playSound('hover');
+			this.playHoverSound();
 		};
 
 		$(target).on('pointerenter', onPointerEnter);
@@ -146,7 +169,7 @@ class ButtonText {
 		const onPointerEnter = (event) => {
 			if (event.pointerType && event.pointerType !== 'mouse') return;
 			if ($(button).is(SOUND_SELECTOR)) {
-				this.playSound('hover');
+				this.playHoverSound();
 			}
 			animate(SHIFT);
 		};
