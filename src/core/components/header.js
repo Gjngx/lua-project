@@ -30,6 +30,7 @@ export class Header {
 		this.navTransition = null;
 		this.locationClockTimer = null;
 		this.socialHoverButtons = [];
+		this.playHoverButton = null;
 	}
 
 	init(data) {
@@ -51,6 +52,12 @@ export class Header {
 	}
 
 	setupSocialHovers() {
+		this.playHoverButton = $(this.el).find('.header-menu-play')[0] || null;
+		if (this.playHoverButton) {
+			$(this.playHoverButton).on('pointerenter', this.handlePlayHoverPoint);
+			$(this.playHoverButton).on('pointerleave', this.handlePlayHoverPoint);
+		}
+
 		this.socialHoverButtons = Array.from(
 			$(this.el).find('.header-nav-social').toArray()
 		);
@@ -67,6 +74,16 @@ export class Header {
 		$(event.currentTarget).css({
 			'--header-social-hover-x': `${x}%`,
 			'--header-social-hover-y': `${y}%`,
+		});
+	};
+
+	handlePlayHoverPoint = (event) => {
+		const bounds = event.currentTarget.getBoundingClientRect();
+		const x = ((event.clientX - bounds.left) / bounds.width) * 100;
+		const y = ((event.clientY - bounds.top) / bounds.height) * 100;
+		$(event.currentTarget).css({
+			'--header-play-hover-x': `${x}%`,
+			'--header-play-hover-y': `${y}%`,
 		});
 	};
 
