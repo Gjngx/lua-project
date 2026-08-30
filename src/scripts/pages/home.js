@@ -3,11 +3,6 @@ import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit, viewport } from '../../core/helpers.js';
 import { SvgPathParticles } from '../../core/svg-path-particles.js';
 import { footer } from '../../core/components/footer.js';
-import { Renderer, Camera, Transform, Texture, Program, Mesh, Sphere, Vec3 } from 'ogl';
-import {
-	playgroundSphereVertex,
-	playgroundSphereFragment,
-} from '../../core/shaders.js';
 
 import { MasterTimeline, FadeIn, FadeSplitText } from '../../core/animation.js';
 
@@ -18,6 +13,7 @@ const WORKS_TRANSITION_MAX_SCALE = 16;
 const WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS = 0.283;
 const WORKS_TRANSITION_BACKGROUND_SPAN = 0.12;
 const WORKS_TRANSITION_COVER_START = 0.5;
+const PLAYGROUND_SPHERE_RADIUS_REM = 500;
 
 export const HomePage = {
 	Hero: class {
@@ -123,13 +119,14 @@ export const HomePage = {
 					...(includeTitle
 						? [new FadeSplitText({ el: $(this.el).find('.home-hero-top-title .heading').get(0) })]
 						: []),
-					...$(this.el).find('.home-hero-top-info .txt').toArray().map((el) =>
-						new FadeSplitText({ el }),
-					),
+					...$(this.el)
+						.find('.home-hero-top-info .txt')
+						.toArray()
+						.map((el) => new FadeSplitText({ el })),
 					new FadeSplitText({ el: $(this.el).find('.home-hero-top-sub .heading').get(0) }),
 					new FadeIn({ el: $(this.el).find('.home-hero-top-ic').get(0) }),
 					new FadeSplitText({ el: $(this.el).find('.home-hero-desc .txt').get(0) }),
-				]
+				],
 			});
 
 			return this.masterReveal.ready;
@@ -277,7 +274,7 @@ export const HomePage = {
 				},
 				onRefresh: (self) => {
 					this.queueVideoSeek(self.progress * this.videoDuration);
-				}
+				},
 			});
 
 			this.queueVideoSeek(this.videoScrollTrigger.progress * this.videoDuration);
@@ -342,7 +339,7 @@ export const HomePage = {
 			gsap.set($(this.el).find('.home-hero-decor-inner')[0], {
 				xPercent: -96,
 				yPercent: 76,
-				opacity: 1
+				opacity: 1,
 			});
 			if (headerLogoAnimated) {
 				gsap.set(headerLogoAnimated, {
@@ -362,7 +359,7 @@ export const HomePage = {
 					end: `bottom top+=${cvUnit(100, 'rem')}`,
 					scrub: true,
 					invalidateOnRefresh: true,
-				}
+				},
 			});
 			if (headerLogoAnimated && headerLogoTarget) {
 				this.tlHeroTop.to(headerLogoAnimated, {
@@ -386,15 +383,14 @@ export const HomePage = {
 					start: 'top top+=20%',
 					end: 'bottom top',
 					scrub: true,
-				}
+				},
 			});
-			this.tlHeroBot
-			.to($(this.el).find('.home-hero-decor-inner')[0], {
+			this.tlHeroBot.to($(this.el).find('.home-hero-decor-inner')[0], {
 				xPercent: 70,
 				yPercent: -175,
 				duration: 1,
-				ease: 'none'
-			})
+				ease: 'none',
+			});
 
 			const heroDescription = $(this.el).find('.home-hero-bottom-desc .txt')[0];
 			const isSanityPreview = document.documentElement.dataset.sanityPreview === 'true';
@@ -448,8 +444,7 @@ export const HomePage = {
 					},
 				});
 				this.tlHeroTextColor.to(revealItems, {
-					color: (index, element) =>
-						$(element).is('svg') ? 'var(--cl-brand)' : '#fff',
+					color: (index, element) => ($(element).is('svg') ? 'var(--cl-brand)' : '#fff'),
 					stagger: 0.06,
 					ease: 'none',
 				});
@@ -460,7 +455,7 @@ export const HomePage = {
 			// Thêm các tương tác click, hover
 		}
 
-			destroy() {
+		destroy() {
 			if (this.timeTimer !== null) {
 				window.clearInterval(this.timeTimer);
 				this.timeTimer = null;
@@ -571,10 +566,10 @@ export const HomePage = {
 			new MasterTimeline({
 				triggerInit: this.el,
 				scrollTrigger: { trigger: $(this.el).find('.home-works-main-title') },
-				tweenArr:[
-					new FadeSplitText({ el: $(this.el).find('.home-works-main-title .heading').get(0)}),
+				tweenArr: [
+					new FadeSplitText({ el: $(this.el).find('.home-works-main-title .heading').get(0) }),
 					new FadeIn({ el: $(this.el).find('.home-works-main-desc').get(0), delay: 0.2 }),
-				]
+				],
 			});
 		}
 
@@ -607,11 +602,11 @@ export const HomePage = {
 
 			const worksTitleTop =
 				worksTitle.getBoundingClientRect().top -
-				worksSection.getBoundingClientRect().top - 
-				worksTitle.getBoundingClientRect().height + worksSvgPadding;
+				worksSection.getBoundingClientRect().top -
+				worksTitle.getBoundingClientRect().height +
+				worksSvgPadding;
 
 			const worksSvgWidth = viewport.w >= 767 ? cvUnit(291, 'rem') : cvUnit(188, 'rem');
-				
 
 			const worksDescHeight = worksDesc.getBoundingClientRect().height;
 
@@ -621,14 +616,22 @@ export const HomePage = {
 					trigger: $(this.el).find('.home-works-block')[0],
 					start: 'top top',
 					end: 'bottom top',
-					scrub: true
-				}
+					scrub: true,
+				},
 			});
 			this.tlWorksTop
 				.to(worksTitle, { y: worksDescHeight, ease: 'power3.inOut' })
-				.to(worksDesc, { y: worksDescHeight, ease: 'power3.inOut' },'<=' )
-				.to(worksSvg, { width: worksSvgWidth, y: worksTitleTop, color: 'var(--cl-content-strong)' , ease: 'power3.inOut' }, '<=' )
-
+				.to(worksDesc, { y: worksDescHeight, ease: 'power3.inOut' }, '<=')
+				.to(
+					worksSvg,
+					{
+						width: worksSvgWidth,
+						y: worksTitleTop,
+						color: 'var(--cl-content-strong)',
+						ease: 'power3.inOut',
+					},
+					'<=',
+				);
 
 			this.tlWorksScroll = gsap.timeline({
 				scrollTrigger: {
@@ -636,7 +639,7 @@ export const HomePage = {
 					start: 'top bottom',
 					end: 'bottom bottom',
 					scrub: true,
-				}
+				},
 			});
 
 			const transition = $(this.el).find('.home-works-trans')[0];
@@ -663,26 +666,30 @@ export const HomePage = {
 			this.transitionSwapProgress = this.calculateTransitionSwapProgress();
 			this.updateTransitionContent(true);
 
-			this.tlWorksScroll.to(this.transitionState, {
-				progress: 1,
-				rotate: WORKS_TRANSITION_ROTATION,
-				scale: WORKS_TRANSITION_MAX_SCALE,
-				duration: 1,
-				ease: 'none',
-				onUpdate: () => {
-					if (usesCanvasMask) {
-						this.drawTransitionCanvas();
-					} else {
-						gsap.set(transitionInner, { rotate: this.transitionState.rotate });
-						gsap.set(transitionItems, {
-							scale: this.transitionState.scale,
-							force3D: false,
-						});
-					}
+			this.tlWorksScroll.to(
+				this.transitionState,
+				{
+					progress: 1,
+					rotate: WORKS_TRANSITION_ROTATION,
+					scale: WORKS_TRANSITION_MAX_SCALE,
+					duration: 1,
+					ease: 'none',
+					onUpdate: () => {
+						if (usesCanvasMask) {
+							this.drawTransitionCanvas();
+						} else {
+							gsap.set(transitionInner, { rotate: this.transitionState.rotate });
+							gsap.set(transitionItems, {
+								scale: this.transitionState.scale,
+								force3D: false,
+							});
+						}
 
-					this.updateTransitionContent();
+						this.updateTransitionContent();
+					},
 				},
-			}, 0);
+				0,
+			);
 
 			this.setupWebGL(prefersReducedMotion);
 		}
@@ -765,15 +772,18 @@ export const HomePage = {
 
 			// OPTIMIZATION 3: Intersection Observer để tạm dừng render khi không cuộn tới
 			this.isVisible = false;
-			this.observer = new IntersectionObserver((entries) => {
-				this.isVisible = entries[0].isIntersecting;
-				canvas.style.visibility = this.isVisible ? 'visible' : 'hidden';
-				if (this.isVisible && !document.hidden) {
-					this.startWorksRender?.();
-				} else {
-					this.stopWorksRender?.();
-				}
-			}, { rootMargin: '100px 0px' }); // Render trước khi vào màn hình 100px
+			this.observer = new IntersectionObserver(
+				(entries) => {
+					this.isVisible = entries[0].isIntersecting;
+					canvas.style.visibility = this.isVisible ? 'visible' : 'hidden';
+					if (this.isVisible && !document.hidden) {
+						this.startWorksRender?.();
+					} else {
+						this.stopWorksRender?.();
+					}
+				},
+				{ rootMargin: '100px 0px' },
+			); // Render trước khi vào màn hình 100px
 			this.observer.observe(this.el);
 
 			this.stopWorksRender = () => {
@@ -790,12 +800,14 @@ export const HomePage = {
 				const context = this.worksContext;
 				const scrollY = window.scrollY;
 				const now = performance.now();
-				const deltaTime = this.lastWorksFrameTime === null
-					? 1 / 60
-					: Math.max(1 / 240, Math.min((now - this.lastWorksFrameTime) / 1000, 0.1));
-				const scrollVelocity = this.lastWorksScrollY === null
-					? 0
-					: Math.abs(scrollY - this.lastWorksScrollY) / deltaTime;
+				const deltaTime =
+					this.lastWorksFrameTime === null
+						? 1 / 60
+						: Math.max(1 / 240, Math.min((now - this.lastWorksFrameTime) / 1000, 0.1));
+				const scrollVelocity =
+					this.lastWorksScrollY === null
+						? 0
+						: Math.abs(scrollY - this.lastWorksScrollY) / deltaTime;
 				const targetCurl = Math.min(1, scrollVelocity / 800) * 0.06;
 				const damping = targetCurl > this.worksCurlStrength ? 0.025 : 0.175;
 				const blend = 1 - Math.exp(-deltaTime / damping);
@@ -808,7 +820,7 @@ export const HomePage = {
 
 				context.clearRect(0, 0, w, h);
 
-				this.meshes.forEach(obj => {
+				this.meshes.forEach((obj) => {
 					if (!obj.textureReady) return;
 					const rect = obj.container.getBoundingClientRect();
 					if (rect.bottom <= 0 || rect.top >= h || rect.width <= 0 || rect.height <= 0) return;
@@ -828,17 +840,14 @@ export const HomePage = {
 						sourceY = (image.naturalHeight - sourceHeight) * 0.5;
 					}
 
-					const radius = Math.min(
-						obj.borderRadius,
-						rect.width * 0.5,
-						rect.height * 0.5,
-					);
+					const radius = Math.min(obj.borderRadius, rect.width * 0.5, rect.height * 0.5);
 					const getWarpedEdges = (screenY) => {
 						const localY = screenY - rect.top;
 						const cornerDistance = Math.max(0, Math.min(localY, rect.height - localY));
-						const cornerInset = cornerDistance < radius
-							? radius - Math.sqrt(Math.max(0, radius * radius - (radius - cornerDistance) ** 2))
-							: 0;
+						const cornerInset =
+							cornerDistance < radius
+								? radius - Math.sqrt(Math.max(0, radius * radius - (radius - cornerDistance) ** 2))
+								: 0;
 						const sourceLeft = rect.left + cornerInset;
 						const sourceRight = rect.right - cornerInset;
 						const screenUvY = 1 - screenY / h;
@@ -1011,10 +1020,7 @@ export const HomePage = {
 			const renderHeight = Math.round(height * pixelRatio);
 
 			[canvas, cutCanvas, componentCanvas].forEach((targetCanvas) => {
-				if (
-					targetCanvas.width !== renderWidth ||
-					targetCanvas.height !== renderHeight
-				) {
+				if (targetCanvas.width !== renderWidth || targetCanvas.height !== renderHeight) {
 					targetCanvas.width = renderWidth;
 					targetCanvas.height = renderHeight;
 				}
@@ -1096,11 +1102,7 @@ export const HomePage = {
 		}
 
 		updateTransitionContent(force = false) {
-			if (
-				!this.transitionState ||
-				!this.transitionCurrentContent ||
-				!this.transitionNextContent
-			) {
+			if (!this.transitionState || !this.transitionCurrentContent || !this.transitionNextContent) {
 				return;
 			}
 
@@ -1109,7 +1111,7 @@ export const HomePage = {
 				0,
 				1,
 				(this.transitionState.progress - this.transitionSwapProgress) /
-					WORKS_TRANSITION_BACKGROUND_SPAN
+					WORKS_TRANSITION_BACKGROUND_SPAN,
 			);
 
 			this.transitionBackgroundTween?.progress(backgroundProgress);
@@ -1163,28 +1165,15 @@ export const HomePage = {
 				return;
 			}
 
-			const {
-				width,
-				height,
-				pixelRatio,
-				innerSize,
-				innerLeft,
-				innerTop,
-				shapeSize,
-				color,
-			} = metrics;
+			const { width, height, pixelRatio, innerSize, innerLeft, innerTop, shapeSize, color } =
+				metrics;
 			const viewportScale = Math.max(1, Math.max(width, height) / innerSize);
 			const coverProgress = gsap.utils.clamp(
 				0,
 				1,
-				(state.progress - WORKS_TRANSITION_COVER_START) /
-					(1 - WORKS_TRANSITION_COVER_START),
+				(state.progress - WORKS_TRANSITION_COVER_START) / (1 - WORKS_TRANSITION_COVER_START),
 			);
-			const resolvedScale = state.scale * gsap.utils.interpolate(
-				1,
-				viewportScale,
-				coverProgress,
-			);
+			const resolvedScale = state.scale * gsap.utils.interpolate(1, viewportScale, coverProgress);
 			const shapeScale = (shapeSize / 250) * resolvedScale;
 			const halfShape = shapeSize / 2;
 			const shapeCenters = [
@@ -1202,10 +1191,7 @@ export const HomePage = {
 				const [centerX, centerY] = shapeCenters[index];
 
 				targetContext.save();
-				targetContext.translate(
-					innerLeft + innerSize / 2,
-					innerTop + innerSize / 2,
-				);
+				targetContext.translate(innerLeft + innerSize / 2, innerTop + innerSize / 2);
 				targetContext.rotate((state.rotate * Math.PI) / 180);
 				targetContext.translate(-innerSize / 2, -innerSize / 2);
 				targetContext.globalCompositeOperation = compositeOperation;
@@ -1261,8 +1247,7 @@ export const HomePage = {
 			context.restore();
 		}
 
-		interact() {
-		}
+		interact() {}
 
 		destroy() {
 			super.cleanTrigger();
@@ -1280,9 +1265,9 @@ export const HomePage = {
 			if (this.onTransitionResize) {
 				$(window).off('resize', this.onTransitionResize);
 			}
-			
+
 			if (this.itemTriggers) {
-				this.itemTriggers.forEach(tl => tl.kill());
+				this.itemTriggers.forEach((tl) => tl.kill());
 			}
 
 			this.transitionCanvas = null;
@@ -1319,7 +1304,7 @@ export const HomePage = {
 				$(window).off('scroll', this.onWorksScroll);
 			}
 			if (this.imageLoadCleanups) {
-				this.imageLoadCleanups.forEach(cleanup => cleanup());
+				this.imageLoadCleanups.forEach((cleanup) => cleanup());
 			}
 			if (this.meshes) {
 				this.meshes.forEach(({ imgEl }) => $(imgEl).removeClass(['is-canvas-rendered']));
@@ -1339,10 +1324,7 @@ export const HomePage = {
 						this.worksCanvasNextSibling &&
 						this.worksCanvasNextSibling.parentNode === this.worksCanvasParent
 					) {
-						this.worksCanvasParent.insertBefore(
-							this.worksCanvas,
-							this.worksCanvasNextSibling,
-						);
+						this.worksCanvasParent.insertBefore(this.worksCanvas, this.worksCanvasNextSibling);
 					} else {
 						$(this.worksCanvasParent).append(this.worksCanvas);
 					}
@@ -1426,11 +1408,14 @@ export const HomePage = {
 		animationReveal() {
 			new MasterTimeline({
 				triggerInit: this.el,
-				scrollTrigger: { trigger: $(this.el).find('.home-how-intro-desc').get(0), start: 'top top+=95%' },
-				tweenArr:[
+				scrollTrigger: {
+					trigger: $(this.el).find('.home-how-intro-desc').get(0),
+					start: 'top top+=95%',
+				},
+				tweenArr: [
 					new FadeSplitText({ el: $(this.el).find('.home-how-intro-desc .txt').get(0) }),
 					new FadeIn({ el: $(this.el).find('.home-how-intro-decor').get(0) }),
-				]
+				],
 			});
 		}
 
@@ -1447,10 +1432,7 @@ export const HomePage = {
 			const lastItemTitle = $(lastItem).find('.home-how-content-item-title')[0];
 			const lastItemText = $(lastItem).find('.home-how-content-item-text')[0];
 			const getShapeWidth = () => shapeWraps[0].getBoundingClientRect().width;
-			const getDecorDistance = () => (
-				decor.getBoundingClientRect().width / 2 - getShapeWidth() / 2
-			);
-
+			const getDecorDistance = () => decor.getBoundingClientRect().width / 2 - getShapeWidth() / 2;
 
 			this.tlDecor = gsap.timeline({
 				scrollTrigger: {
@@ -1460,7 +1442,7 @@ export const HomePage = {
 					end: 'top center-=5%',
 					scrub: true,
 					invalidateOnRefresh: true,
-				}
+				},
 			});
 
 			this.tlDecor
@@ -1468,10 +1450,14 @@ export const HomePage = {
 					x: () => -getDecorDistance(),
 					ease: 'power3.inOut',
 				})
-				.to(shapeWraps[1], {
-					x: () => getDecorDistance(),
-					ease: 'power3.inOut',
-				}, '<');
+				.to(
+					shapeWraps[1],
+					{
+						x: () => getDecorDistance(),
+						ease: 'power3.inOut',
+					},
+					'<',
+				);
 
 			this.tlTrans = gsap.timeline({
 				scrollTrigger: {
@@ -1480,81 +1466,131 @@ export const HomePage = {
 					end: 'bottom bottom',
 					scrub: true,
 					invalidateOnRefresh: true,
-				}
+				},
 			});
 			this.tlTrans
-			.to(shapeWraps[0], {
-				x: () => getShapeWidth(),
-				ease: 'power2.inOut',
-				duration: 0.7,
-			})
-			.to(lastItemLeft, {
-				x: () => lastItem.getBoundingClientRect().width / 2
-					- lastItemTitle.getBoundingClientRect().width
-					- cvUnit(100, 'rem'),
-				ease: 'power3.inOut',
-				duration: 0.7,
-			}, '<')
-			.to(lastItemRight, {
-				x: () => -(lastItem.getBoundingClientRect().width / 2
-					- lastItemText.getBoundingClientRect().width
-					- cvUnit(100, 'rem')),
-				ease: 'power3.inOut',
-				duration: 0.7,
-			}, '<')
-			.to(shapeWraps[1], {
-				x: () => getShapeWidth(),
-				ease: 'power3.inOut',
-				duration: 0.7,
-			}, '<')
-			.to(shapeDecor1, {
-				xPercent: -100,
-				yPercent: 100,
-				ease: 'power3.out',
-				duration: 0.3,
-			}, 0.4)
-			.to(shapeDecor2, {
-				xPercent: -100,
-				yPercent: -100,
-				ease: 'power3.out',
-				duration: 0.3,
-			}, '<')
-			.to(shapeDecor3, {
-				xPercent: -100,
-				yPercent: 100,
-				ease: 'power3.out',
-				duration: 0.3,
-			}, '<')
-			.to(shapeDecor4, {
-				xPercent: -100,
-				yPercent: -100,
-				ease: 'power3.out',
-				duration: 0.3,
-			}, '<')
-			.to([lastItemLeft, lastItemRight], {
-				y: () => lastItem.getBoundingClientRect().height,
-				ease: 'power3.inOut',
-				duration: 0.3,
-			}, '>')
-			.to($('.home-playground-trans-decor').toArray(), {
-				opacity: 1,
-				ease: 'power1.inOut',
-				duration: 0.01,
-			}, '<')
-			.to([shapeWraps[0], shapeWraps[1]], {
-				opacity: 0,
-				ease: 'power1.inOut',
-				duration: 0.01,
-			}, '<')
-			.fromTo([$('.home-playground-content-left-title').toArray(), $('.home-playground-content-right-title').toArray()],
-			{
-				yPercent: 100,
-			},
-			{
-				yPercent: 0,
-				ease: 'power3.inOut',
-				duration: 0.3,
-			}, 1);
+				.to(shapeWraps[0], {
+					x: () => getShapeWidth(),
+					ease: 'power2.inOut',
+					duration: 0.7,
+				})
+				.to(
+					lastItemLeft,
+					{
+						x: () =>
+							lastItem.getBoundingClientRect().width / 2 -
+							lastItemTitle.getBoundingClientRect().width -
+							cvUnit(100, 'rem'),
+						ease: 'power3.inOut',
+						duration: 0.7,
+					},
+					'<',
+				)
+				.to(
+					lastItemRight,
+					{
+						x: () =>
+							-(
+								lastItem.getBoundingClientRect().width / 2 -
+								lastItemText.getBoundingClientRect().width -
+								cvUnit(100, 'rem')
+							),
+						ease: 'power3.inOut',
+						duration: 0.7,
+					},
+					'<',
+				)
+				.to(
+					shapeWraps[1],
+					{
+						x: () => getShapeWidth(),
+						ease: 'power3.inOut',
+						duration: 0.7,
+					},
+					'<',
+				)
+				.to(
+					shapeDecor1,
+					{
+						xPercent: -100,
+						yPercent: 100,
+						ease: 'power3.out',
+						duration: 0.3,
+					},
+					0.4,
+				)
+				.to(
+					shapeDecor2,
+					{
+						xPercent: -100,
+						yPercent: -100,
+						ease: 'power3.out',
+						duration: 0.3,
+					},
+					'<',
+				)
+				.to(
+					shapeDecor3,
+					{
+						xPercent: -100,
+						yPercent: 100,
+						ease: 'power3.out',
+						duration: 0.3,
+					},
+					'<',
+				)
+				.to(
+					shapeDecor4,
+					{
+						xPercent: -100,
+						yPercent: -100,
+						ease: 'power3.out',
+						duration: 0.3,
+					},
+					'<',
+				)
+				.to(
+					[lastItemLeft, lastItemRight],
+					{
+						y: () => lastItem.getBoundingClientRect().height,
+						ease: 'power3.inOut',
+						duration: 0.3,
+					},
+					'>',
+				)
+				.to(
+					$('.home-playground-trans-decor').toArray(),
+					{
+						opacity: 1,
+						ease: 'power1.inOut',
+						duration: 0.01,
+					},
+					'<',
+				)
+				.to(
+					[shapeWraps[0], shapeWraps[1]],
+					{
+						opacity: 0,
+						ease: 'power1.inOut',
+						duration: 0.01,
+					},
+					'<',
+				)
+				.fromTo(
+					[
+						$('.home-playground-content-left-title').toArray(),
+						$('.home-playground-content-right-title').toArray(),
+					],
+					{
+						yPercent: 100,
+					},
+					{
+						yPercent: 0,
+						ease: 'power3.inOut',
+						duration: 0.3,
+					},
+					1,
+				);
 
 			this.tlItemScrolls = [];
 			const thumbItems = $(this.el).find('.home-how-thumb-item').toArray();
@@ -1587,8 +1623,10 @@ export const HomePage = {
 				const frame = $(thumb).find('.home-how-thumb-item-inner')[0];
 				const direction = index % 2 === 0 ? 1 : -1;
 				const clipPath = $(this.el).find(`#home-how-clip-${index + 1} path`)[0];
-				const shapeA = 'M .082 .095 L .958 .004 Q 1 0 .995 .042 L .954 .958 Q .95 1 .908 .995 L .042 .886 Q 0 .88 .005 .838 L .036 .142 Q .04 .1 .082 .095 Z';
-				const shapeB = 'M .042 .005 L .908 .095 Q .96 .1 .964 .142 L .995 .838 Q 1 .88 .958 .886 L .092 .995 Q .05 1 .046 .958 L .005 .042 Q 0 0 .042 .005 Z';
+				const shapeA =
+					'M .082 .095 L .958 .004 Q 1 0 .995 .042 L .954 .958 Q .95 1 .908 .995 L .042 .886 Q 0 .88 .005 .838 L .036 .142 Q .04 .1 .082 .095 Z';
+				const shapeB =
+					'M .042 .005 L .908 .095 Q .96 .1 .964 .142 L .995 .838 Q 1 .88 .958 .886 L .092 .995 Q .05 1 .046 .958 L .005 .042 Q 0 0 .042 .005 Z';
 				const fromShape = direction === 1 ? shapeA : shapeB;
 				const toShape = direction === 1 ? shapeB : shapeA;
 				gsap.set(frame, { clipPath: `url(#home-how-clip-${index + 1})` });
@@ -1598,67 +1636,71 @@ export const HomePage = {
 						start: 'top bottom',
 						end: 'bottom top',
 						scrub: true,
-					}
+					},
 				});
 
-				tl
-					.fromTo(
-						frame,
-						{ scale: 0.5 },
-						{
-							scale: 0.75,
-							duration: 0.25,
-							ease: 'none'
-						}
-					)
-					.fromTo(clipPath, { attr: { d: fromShape } }, {
-						attr: { d: toShape },
+				tl.fromTo(
+					frame,
+					{ scale: 0.5 },
+					{
+						scale: 0.75,
 						duration: 0.25,
-						ease: 'none'
-					}, 0)
+						ease: 'none',
+					},
+				)
+					.fromTo(
+						clipPath,
+						{ attr: { d: fromShape } },
+						{
+							attr: { d: toShape },
+							duration: 0.25,
+							ease: 'none',
+						},
+						0,
+					)
 					.to(frame, {
 						scale: 1,
 						duration: 0.25,
-						ease: 'none'
+						ease: 'none',
 					})
 					.to(clipPath, { attr: { d: fromShape }, duration: 0.25, ease: 'none' }, '<')
 					.to(frame, {
 						scale: 0.75,
 						duration: 0.25,
-						ease: 'none'
+						ease: 'none',
 					})
 					.to(clipPath, { attr: { d: toShape }, duration: 0.25, ease: 'none' }, '<')
 					.to(frame, {
 						scale: 0.5,
 						duration: 0.25,
-						ease: 'none'
+						ease: 'none',
 					})
 					.to(clipPath, { attr: { d: fromShape }, duration: 0.25, ease: 'none' }, '<');
 
 				this.tlItemScrolls.push(tl);
 
-					const contentTrigger = ScrollTrigger.create({
-						trigger: thumb,
-						start: `top center`,
-						end: `bottom center`,
-						onEnter: () => {
-							if (index === 0) $(contentList).addClass(['active-ic']);
-							activateContent(index, 'forward');
-						},
-						onEnterBack: () => {
-							if (index === thumbItems.length - 1) $(contentList).addClass(['active-ic']);
-							activateContent(index, 'backward');
-						},
-						onLeave: () => {
-							if (index !== thumbItems.length - 1) return;
-							$(contentList).removeClass(['active-ic']);
-							clearContent('forward', true);
-						},
-						onLeaveBack: () => {
-							if (index !== 0) return;
-							$(contentList).removeClass(['active-ic']);
-							clearContent('backward');
-						}
+				const contentTrigger = ScrollTrigger.create({
+					trigger: thumb,
+					start: `top center`,
+					end: `bottom center`,
+					onEnter: () => {
+						if (index === 0) $(contentList).addClass(['active-ic']);
+						activateContent(index, 'forward');
+					},
+					onEnterBack: () => {
+						if (index === thumbItems.length - 1) $(contentList).addClass(['active-ic']);
+						activateContent(index, 'backward');
+					},
+					onLeave: () => {
+						if (index !== thumbItems.length - 1) return;
+						$(contentList).removeClass(['active-ic']);
+						clearContent('forward', true);
+					},
+					onLeaveBack: () => {
+						if (index !== 0) return;
+						$(contentList).removeClass(['active-ic']);
+						clearContent('backward');
+					},
 				});
 				this.tlItemScrolls.push(contentTrigger);
 			});
@@ -1682,7 +1724,7 @@ export const HomePage = {
 						y: y * 8,
 						duration: 0.35,
 						ease: 'power2.out',
-						overwrite: 'auto'
+						overwrite: 'auto',
 					});
 				};
 
@@ -1694,7 +1736,7 @@ export const HomePage = {
 						y: 0,
 						duration: 0.7,
 						ease: 'elastic.out(1, 0.4)',
-						overwrite: 'auto'
+						overwrite: 'auto',
 					});
 				};
 
@@ -1712,7 +1754,7 @@ export const HomePage = {
 			super.cleanTrigger();
 			if (this.imageRefreshRaf) cancelAnimationFrame(this.imageRefreshRaf);
 			this.imageRefreshRaf = null;
-			this.imageLoadCleanups.forEach(cleanup => cleanup());
+			this.imageLoadCleanups.forEach((cleanup) => cleanup());
 			this.imageLoadCleanups = [];
 			if (this.tlDecor) {
 				if (this.tlDecor.scrollTrigger) this.tlDecor.scrollTrigger.kill();
@@ -1723,14 +1765,14 @@ export const HomePage = {
 				this.tlTrans.kill();
 			}
 			if (this.tlItemScrolls) {
-				this.tlItemScrolls.forEach(tl => {
+				this.tlItemScrolls.forEach((tl) => {
 					if (tl.scrollTrigger) tl.scrollTrigger.kill();
 					if (tl.kill) tl.kill();
 				});
 			}
 			this.tlDecor = null;
 			this.tlTrans = null;
-			this.hoverCleanups.forEach(cleanup => cleanup());
+			this.hoverCleanups.forEach((cleanup) => cleanup());
 			this.hoverCleanups = [];
 			this.el = null;
 		}
@@ -1740,22 +1782,24 @@ export const HomePage = {
 			super();
 			this.el = null;
 			this.tlTrans = null;
-			this.renderer = null;
-			this.sphereCamera = null;
-			this.sphereScene = null;
-			this.sphereTiltPivot = null;
-			this.sphereGeometry = null;
-			this.sphereProgram = null;
-			this.sphereTexture = null;
-			this.sphereMesh = null;
+			this.sphereReveal = null;
+			this.sphereFocus = null;
+			this.sphere = null;
+			this.sphereScale = null;
+			this.cardLayer = null;
 			this.sphereCards = [];
-			this.sphereCardClones = [];
-			this.sphereCanvas = null;
-			this.sphereObserver = null;
-			this.sphereRaf = null;
+			this.sphereClones = [];
+			this.sphereRotation = { x: 0, y: 0, scale: 1 };
 			this.sphereVisible = false;
+			this.sphereDragging = false;
+			this.sphereFocused = false;
+			this.sphereDragMoved = false;
+			this.spherePointer = null;
+			this.sphereRaf = null;
+			this.sphereLastTime = 0;
+			this.sphereObserver = null;
+			this.sphereResizeObserver = null;
 			this.sphereCleanups = [];
-			this.sphereState = null;
 		}
 
 		trigger(data) {
@@ -1766,340 +1810,26 @@ export const HomePage = {
 
 		onTrigger() {
 			if (!this.el) return;
-			this.setup();
 			this.animationReveal();
 			this.animationScrub();
 			this.interact();
 		}
 
-		setup(){
-			this.setupSphere();
-		}
+		animationReveal() {
+			const stage = $(this.el).find('.home-playground-sphere-stage')[0];
+			if (!stage) return;
 
-		setupSphere() {
-			if (this.renderer || !this.el) return;
-
-			const canvas = $(this.el).find('.home-playground-sphere-canvas')[0];
-			const main = $(this.el).find('.home-playground-main')[0];
-			const hitArea = $(this.el).find('.home-playground-sphere-hitarea')[0];
-			if (!canvas || !main || !hitArea) return;
-
-			this.sphereCanvas = canvas;
-			this.renderer = new Renderer({
-				canvas,
-				alpha: true,
-				antialias: true,
-				dpr: Math.min(window.devicePixelRatio || 1, 2),
-			});
-
-			const gl = this.renderer.gl;
-			gl.clearColor(0, 0, 0, 0);
-
-			this.sphereCamera = new Camera(gl, { fov: 45 });
-			this.sphereScene = new Transform();
-			this.sphereTiltPivot = new Transform();
-			this.sphereTiltPivot.rotation.z = -30 * (Math.PI / 180);
-			this.sphereTiltPivot.setParent(this.sphereScene);
-			this.sphereGeometry = new Sphere(gl, {
-				radius: 1,
-				widthSegments: 96,
-				heightSegments: 64,
-			});
-
-			const patternCanvas = document.createElement('canvas');
-			const patternSize = 2048;
-			const leafPairsPerRing = 30;
-			const patternRows = 34;
-			const pairWidth = patternSize / leafPairsPerRing;
-			const rowHeight = patternSize / patternRows;
-			const curve = 0.552284;
-			patternCanvas.width = patternSize;
-			patternCanvas.height = patternSize;
-			const patternContext = patternCanvas.getContext('2d');
-			patternContext.clearRect(0, 0, patternSize, patternSize);
-			patternContext.fillStyle = '#DEFB37';
-
-			for (let row = 0; row < patternRows; row += 1) {
-				const top = row * rowHeight;
-				const bottom = top + rowHeight;
-
-				for (let pair = 0; pair < leafPairsPerRing; pair += 1) {
-					const left = pair * pairWidth;
-					const tip = left + pairWidth * 0.5;
-					const right = left + pairWidth;
-					const leftRadius = tip - left;
-					const rightRadius = right - tip;
-
-					patternContext.beginPath();
-					patternContext.moveTo(left, top);
-					patternContext.bezierCurveTo(
-						left + leftRadius * curve,
-						top,
-						tip,
-						top + rowHeight * (1 - curve),
-						tip,
-						bottom,
-					);
-					patternContext.bezierCurveTo(
-						left + leftRadius * (1 - curve),
-						bottom,
-						left,
-						top + rowHeight * curve,
-						left,
-						top,
-					);
-					patternContext.closePath();
-					patternContext.fill();
-
-					patternContext.beginPath();
-					patternContext.moveTo(right, top);
-					patternContext.bezierCurveTo(
-						right - rightRadius * curve,
-						top,
-						tip,
-						top + rowHeight * (1 - curve),
-						tip,
-						bottom,
-					);
-					patternContext.bezierCurveTo(
-						right - rightRadius * (1 - curve),
-						bottom,
-						right,
-						top + rowHeight * curve,
-						right,
-						top,
-					);
-					patternContext.closePath();
-					patternContext.fill();
-				}
-			}
-
-			this.sphereTexture = new Texture(gl, {
-				generateMipmaps: false,
-				minFilter: gl.LINEAR,
-				magFilter: gl.LINEAR,
-				wrapS: gl.REPEAT,
-				wrapT: gl.CLAMP_TO_EDGE,
-			});
-			this.sphereTexture.image = patternCanvas;
-			this.sphereProgram = new Program(gl, {
-				vertex: playgroundSphereVertex,
-				fragment: playgroundSphereFragment,
-				uniforms: {
-					tPattern: { value: this.sphereTexture },
+			this.sphereReveal = gsap.fromTo(
+				stage,
+				{ opacity: 0, scale: 0.3 },
+				{
+					opacity: 1,
+					scale: 1,
+					duration: 3.5,
+					ease: 'power4.out',
 				},
-				cullFace: gl.BACK,
-				transparent: false,
-			});
-			this.sphereMesh = new Mesh(gl, {
-				geometry: this.sphereGeometry,
-				program: this.sphereProgram,
-			});
-			this.sphereMesh.setParent(this.sphereTiltPivot);
-
-			const cardLayer = $(main).find('.home-playground-card-layer')[0];
-			const baseCards = Array.from($(main).find('.home-playground-card').toArray());
-			this.sphereCardClones = baseCards.map((card) => {
-				const clone = card.cloneNode(true);
-				$(clone).addClass(['is-orbit-clone']);
-				$(cardLayer).append(clone);
-				return clone;
-			});
-
-			const orbitCards = baseCards.flatMap((card, index) => [
-				card,
-				this.sphereCardClones[index],
-			]);
-			const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-			const orbitPhase = -0.35;
-
-			this.sphereCards = orbitCards.map((card, index) => {
-				// Fibonacci sphere: mỗi điểm chiếm một phần diện tích mặt cầu gần bằng nhau.
-				// Offset 0.5 tránh đặt card đúng hai cực, nơi hình chiếu dễ bị dồn lại.
-				const normalizedY = 1 - (2 * (index + 0.5)) / orbitCards.length;
-				const longitude = index * goldenAngle + orbitPhase;
-				const anchorRadius = Number(card.dataset.radius || 1.06);
-				const latitudeRadius = Math.sqrt(1 - normalizedY * normalizedY) * anchorRadius;
-
-				return {
-					el: card,
-					widthRatio: Number(card.dataset.width || 0.16),
-					anchorRadius,
-					anchor: new Vec3(
-						Math.sin(longitude) * latitudeRadius,
-						normalizedY * anchorRadius,
-						Math.cos(longitude) * latitudeRadius,
-					),
-					world: new Vec3(),
-					projected: new Vec3(),
-				};
-			});
-
-			this.sphereState = {
-				isDragging: false,
-				pointerId: null,
-				lastX: 0,
-				targetX: -0.08,
-				targetY: -0.35,
-				velocityY: 0,
-			};
-			this.sphereMesh.rotation.x = this.sphereState.targetX;
-			this.sphereMesh.rotation.y = this.sphereState.targetY;
-
-			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-			const onPointerDown = (event) => {
-				if (event.pointerType === 'mouse' && event.button !== 0) return;
-				this.sphereState.isDragging = true;
-				this.sphereState.pointerId = event.pointerId;
-				this.sphereState.lastX = event.clientX;
-				this.sphereState.velocityY = 0;
-				$(hitArea).addClass(['is-dragging']);
-				$(canvas).addClass(['is-dragging']);
-				hitArea.setPointerCapture?.(event.pointerId);
-			};
-
-			const onPointerMove = (event) => {
-				if (!this.sphereState.isDragging || this.sphereState.pointerId !== event.pointerId) return;
-				const deltaX = event.clientX - this.sphereState.lastX;
-				this.sphereState.lastX = event.clientX;
-				this.sphereState.targetY += deltaX * 0.008;
-				this.sphereState.velocityY = deltaX * 0.0018;
-			};
-
-			const endPointerDrag = (event) => {
-				if (!this.sphereState.isDragging) return;
-				if (event.pointerId != null && this.sphereState.pointerId !== event.pointerId) return;
-				this.sphereState.isDragging = false;
-				this.sphereState.pointerId = null;
-				$(hitArea).removeClass(['is-dragging']);
-				$(canvas).removeClass(['is-dragging']);
-			};
-
-			const onKeyDown = (event) => {
-				const keyRotation = 0.16;
-				if (event.key === 'ArrowLeft') this.sphereState.targetY -= keyRotation;
-				else if (event.key === 'ArrowRight') this.sphereState.targetY += keyRotation;
-				else return;
-				event.preventDefault();
-			};
-
-			const onResize = () => {
-				if (!this.renderer || !this.sphereCamera) return;
-				// Đồng bộ với CSS: min(50vw, 65vh). Renderer ghi kích thước inline
-				// nên không thể chỉ dựa vào width/height khai báo trong stylesheet.
-				const canvasSize = Math.max(
-					1,
-					Math.min(window.innerWidth * 0.5, window.innerHeight * 0.65),
-				);
-				const width = canvasSize;
-				const height = canvasSize;
-				const aspect = width / height;
-				this.renderer.setSize(width, height);
-				const sphereHitSize = canvasSize * 0.91;
-				hitArea.style.width = `${sphereHitSize}px`;
-				hitArea.style.height = `${sphereHitSize}px`;
-				this.sphereCamera.position.z = aspect < 0.8 ? 3.4 : 2.85;
-				this.sphereCamera.perspective({ aspect });
-			};
-
-			const stopRender = () => {
-				if (this.sphereRaf === null) return;
-				window.cancelAnimationFrame(this.sphereRaf);
-				this.sphereRaf = null;
-			};
-
-			const updateCards = () => {
-				if (!this.sphereCards.length || !this.sphereMesh || !this.sphereCamera) return;
-				// Dùng kích thước layout chưa transform. getBoundingClientRect() đã
-				// chứa scale của playgroundMain và làm tọa độ card bị scale hai lần.
-				const canvasWidth = canvas.clientWidth;
-				const canvasHeight = canvas.clientHeight;
-				const canvasLeft = (main.clientWidth - canvasWidth) * 0.5;
-				const canvasTop = (main.clientHeight - canvasHeight) * 0.5;
-
-				this.sphereCards.forEach((card) => {
-					card.world.copy(card.anchor).applyMatrix4(this.sphereMesh.worldMatrix);
-					card.projected
-						.copy(card.world)
-						.applyMatrix4(this.sphereCamera.viewMatrix)
-						.applyMatrix4(this.sphereCamera.projectionMatrix);
-
-					const x = canvasLeft + (card.projected.x * 0.5 + 0.5) * canvasWidth;
-					const y = canvasTop + (0.5 - card.projected.y * 0.5) * canvasHeight;
-					const depthProgress = Math.max(0, Math.min(1, card.world.z / card.anchorRadius));
-					const scaleProgress = depthProgress * depthProgress * (3 - 2 * depthProgress);
-					const fadeProgress = Math.max(0, Math.min(1, depthProgress / 0.22));
-					const facing = fadeProgress * fadeProgress * (3 - 2 * fadeProgress);
-					const edgeScale = 0.55 + scaleProgress * 0.45;
-
-					card.el.style.opacity = String(facing);
-					card.el.style.visibility = facing <= 0.01 ? 'hidden' : 'visible';
-					card.el.style.zIndex = String(20 + Math.round(card.world.z * 10));
-					card.el.style.width = `${canvasWidth * card.widthRatio}px`;
-					card.el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${edgeScale})`;
-				});
-			};
-
-			const render = () => {
-				this.sphereRaf = null;
-				if (!this.renderer || !this.sphereVisible || document.hidden) return;
-
-				const state = this.sphereState;
-				if (!state.isDragging) {
-					if (!prefersReducedMotion) state.targetY += 0.0012;
-					state.targetY += state.velocityY;
-					state.velocityY *= 0.92;
-				}
-
-				this.sphereMesh.rotation.x = state.targetX;
-				this.sphereMesh.rotation.y += (state.targetY - this.sphereMesh.rotation.y) * 0.14;
-				this.renderer.render({ scene: this.sphereScene, camera: this.sphereCamera });
-				updateCards();
-				this.sphereRaf = window.requestAnimationFrame(render);
-			};
-
-			const startRender = () => {
-				if (this.sphereRaf !== null || !this.sphereVisible || document.hidden) return;
-				this.sphereRaf = window.requestAnimationFrame(render);
-			};
-
-			const onVisibilityChange = () => {
-				if (document.hidden) stopRender();
-				else startRender();
-			};
-
-			$(hitArea).on('pointerdown', onPointerDown);
-			$(hitArea).on('pointermove', onPointerMove);
-			$(hitArea).on('pointerup', endPointerDrag);
-			$(hitArea).on('pointercancel', endPointerDrag);
-			$(hitArea).on('lostpointercapture', endPointerDrag);
-			$(canvas).on('keydown', onKeyDown);
-			$(window).on('resize', onResize);
-			$(document).on('visibilitychange', onVisibilityChange);
-			onResize();
-
-			this.sphereObserver = new IntersectionObserver((entries) => {
-				this.sphereVisible = entries[0].isIntersecting;
-				if (this.sphereVisible) startRender();
-				else stopRender();
-			}, { rootMargin: '100px 0px' });
-			this.sphereObserver.observe(main);
-
-			this.sphereCleanups.push(
-				() => $(hitArea).off('pointerdown', onPointerDown),
-				() => $(hitArea).off('pointermove', onPointerMove),
-				() => $(hitArea).off('pointerup', endPointerDrag),
-				() => $(hitArea).off('pointercancel', endPointerDrag),
-				() => $(hitArea).off('lostpointercapture', endPointerDrag),
-				() => $(canvas).off('keydown', onKeyDown),
-				() => $(window).off('resize', onResize),
-				() => $(document).off('visibilitychange', onVisibilityChange),
-				stopRender,
 			);
 		}
-
-		animationReveal() {}
 
 		animationScrub() {
 			const itemLeft = $(this.el).find('.home-playground-content-left')[0];
@@ -2111,8 +1841,10 @@ export const HomePage = {
 			const playgroundContent = $(this.el).find('.home-playground-content')[0];
 			const transitionDecor = $(transInner).find('.home-playground-trans-decor').toArray();
 
-			const widthTransLeft = itemLeft.getBoundingClientRect().width - titleLeft.getBoundingClientRect().width;
-			const widthTransRight = itemRight.getBoundingClientRect().width - titleRight.getBoundingClientRect().width;
+			const widthTransLeft =
+				itemLeft.getBoundingClientRect().width - titleLeft.getBoundingClientRect().width;
+			const widthTransRight =
+				itemRight.getBoundingClientRect().width - titleRight.getBoundingClientRect().width;
 
 			this.tlTrans = gsap.timeline({
 				scrollTrigger: {
@@ -2121,7 +1853,7 @@ export const HomePage = {
 					end: 'bottom bottom',
 					scrub: true,
 					invalidateOnRefresh: true,
-				}
+				},
 			});
 			this.tlTrans
 				.to(titleLeft, {
@@ -2129,77 +1861,300 @@ export const HomePage = {
 					ease: 'power3.inOut',
 					duration: 1,
 				})
-				.to(titleRight, {
-					x: `${widthTransRight}`,
-					ease: 'power3.inOut',
-					duration: 1,
-				}, '<')
-				.to($(transInner).find('.ic-1')[0], {
-					x: () => -transInner.getBoundingClientRect().width / 2,
-					y: () => -transInner.getBoundingClientRect().height / 2,
-					ease: 'power3.inOut',
-					duration: 1,
-				}, '<')
-				.to($(transInner).find('.ic-2')[0], {
-					x: () => transInner.getBoundingClientRect().width / 2,
-					y: () => -transInner.getBoundingClientRect().height / 2,
-					ease: 'power3.inOut',
-					duration: 1,
-				}, '<')
-				.to($(transInner).find('.ic-3')[0], {
-					x: () => -transInner.getBoundingClientRect().width / 2,
-					y: () => transInner.getBoundingClientRect().height / 2,
-					ease: 'power3.inOut',
-					duration: 1,
-				}, '<')
-				.to($(transInner).find('.ic-4')[0], {
-					x: () => transInner.getBoundingClientRect().width / 2,
-					y: () => transInner.getBoundingClientRect().height / 2,
-					ease: 'power3.inOut',
-					duration: 1,
-				}, '<')
-				.to(playgroundMain, {
-					opacity: 1,
-					scale: 1,
-					pointerEvents: 'auto',
-					ease: 'power2.out',
-					duration: 0.36,
-				}, 0.46)
+				.to(
+					titleRight,
+					{
+						x: `${widthTransRight}`,
+						ease: 'power3.inOut',
+						duration: 1,
+					},
+					'<',
+				)
+				.to(
+					$(transInner).find('.ic-1')[0],
+					{
+						x: () => -transInner.getBoundingClientRect().width / 2,
+						y: () => -transInner.getBoundingClientRect().height / 2,
+						ease: 'power3.inOut',
+						duration: 1,
+					},
+					'<',
+				)
+				.to(
+					$(transInner).find('.ic-2')[0],
+					{
+						x: () => transInner.getBoundingClientRect().width / 2,
+						y: () => -transInner.getBoundingClientRect().height / 2,
+						ease: 'power3.inOut',
+						duration: 1,
+					},
+					'<',
+				)
+				.to(
+					$(transInner).find('.ic-3')[0],
+					{
+						x: () => -transInner.getBoundingClientRect().width / 2,
+						y: () => transInner.getBoundingClientRect().height / 2,
+						ease: 'power3.inOut',
+						duration: 1,
+					},
+					'<',
+				)
+				.to(
+					$(transInner).find('.ic-4')[0],
+					{
+						x: () => transInner.getBoundingClientRect().width / 2,
+						y: () => transInner.getBoundingClientRect().height / 2,
+						ease: 'power3.inOut',
+						duration: 1,
+					},
+					'<',
+				)
+				.to(
+					playgroundMain,
+					{
+						opacity: 1,
+						scale: 1,
+						pointerEvents: 'auto',
+						ease: 'power2.out',
+						duration: 0.36,
+					},
+					0.46,
+				);
 		}
 
-		interact() {}
+		interact() {
+			this.cardLayer = $(this.el).find('.home-playground-card-layer')[0];
+			this.sphereScale = $(this.el).find('.home-playground-sphere-scale')[0];
+			this.sphere = $(this.el).find('.home-playground-sphere')[0];
+			if (!this.cardLayer || !this.sphereScale || !this.sphere) return;
+
+			const sourceCards = Array.from(this.sphere.querySelectorAll('.home-playground-card'));
+			if (!sourceCards.length) return;
+
+			const targetCount = Math.max(56, sourceCards.length);
+			for (let index = sourceCards.length; index < targetCount; index++) {
+				const clone = sourceCards[index % sourceCards.length].cloneNode(true);
+				clone.classList.add('is-sphere-clone');
+				clone.setAttribute('aria-hidden', 'true');
+				this.sphere.appendChild(clone);
+				this.sphereClones.push(clone);
+			}
+
+			this.sphereCards = Array.from(this.sphere.querySelectorAll('.home-playground-card'));
+			this.layoutSphereCards();
+			this.updateSphereScale();
+			this.applySphereTransform();
+
+			const onPointerDown = (event) => {
+				if (event.button !== 0) return;
+				this.resetSphereFocus();
+				this.sphereDragging = true;
+				this.sphereDragMoved = false;
+				this.spherePointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
+				this.cardLayer.classList.add('is-dragging');
+				this.cardLayer.setPointerCapture?.(event.pointerId);
+			};
+
+			const onPointerMove = (event) => {
+				if (!this.sphereDragging || this.spherePointer?.id !== event.pointerId) return;
+				const deltaX = event.clientX - this.spherePointer.x;
+				const deltaY = event.clientY - this.spherePointer.y;
+				if (Math.abs(deltaX) + Math.abs(deltaY) > 2) this.sphereDragMoved = true;
+				this.sphereRotation.y += (deltaX * 0.2) / this.sphereRotation.scale;
+				this.sphereRotation.x -= (deltaY * 0.2) / this.sphereRotation.scale;
+				this.spherePointer.x = event.clientX;
+				this.spherePointer.y = event.clientY;
+				this.applySphereTransform();
+			};
+
+			const onPointerEnd = (event) => {
+				if (this.spherePointer?.id !== event.pointerId) return;
+				this.sphereDragging = false;
+				this.spherePointer = null;
+				this.cardLayer.classList.remove('is-dragging');
+				this.cardLayer.releasePointerCapture?.(event.pointerId);
+			};
+
+			this.cardLayer.addEventListener('pointerdown', onPointerDown);
+			this.cardLayer.addEventListener('pointermove', onPointerMove);
+			this.cardLayer.addEventListener('pointerup', onPointerEnd);
+			this.cardLayer.addEventListener('pointercancel', onPointerEnd);
+			this.sphereCleanups.push(() => {
+				this.cardLayer?.removeEventListener('pointerdown', onPointerDown);
+				this.cardLayer?.removeEventListener('pointermove', onPointerMove);
+				this.cardLayer?.removeEventListener('pointerup', onPointerEnd);
+				this.cardLayer?.removeEventListener('pointercancel', onPointerEnd);
+			});
+
+			this.sphereCards.forEach((card) => {
+				const onClick = (event) => {
+					if (this.sphereDragMoved) {
+						event.preventDefault();
+						return;
+					}
+					this.focusSphereCard(card);
+				};
+				card.addEventListener('click', onClick);
+				this.sphereCleanups.push(() => card.removeEventListener('click', onClick));
+			});
+
+			this.sphereObserver = new IntersectionObserver(([entry]) => {
+				this.sphereVisible = entry.isIntersecting;
+			});
+			this.sphereObserver.observe(this.cardLayer);
+
+			this.sphereResizeObserver = new ResizeObserver(() => this.updateSphereScale());
+			this.sphereResizeObserver.observe(this.cardLayer);
+
+			const tick = (time) => {
+				const delta = this.sphereLastTime ? Math.min(50, time - this.sphereLastTime) : 16.667;
+				this.sphereLastTime = time;
+				if (
+					this.sphereVisible &&
+					!this.sphereDragging &&
+					!this.sphereFocused &&
+					!window.matchMedia('(prefers-reduced-motion: reduce)').matches
+				) {
+					this.sphereRotation.y += (delta / 16.667) * 0.08;
+					this.applySphereTransform();
+				}
+				this.sphereRaf = requestAnimationFrame(tick);
+			};
+			this.sphereRaf = requestAnimationFrame(tick);
+		}
+
+		layoutSphereCards() {
+			const count = this.sphereCards.length;
+			const radius = cvUnit(PLAYGROUND_SPHERE_RADIUS_REM, 'rem');
+			const rows = Math.max(2, Math.round(Math.sqrt(count)));
+			const rowCounts = [];
+			let placedCount = 0;
+
+			for (let row = 0; row < rows; row++) {
+				const latitude = (1 - 2 * ((row + 0.5) / rows)) * 90;
+				const circumference = Math.cos((latitude * Math.PI) / 180);
+				const rowCount = Math.max(1, Math.round((circumference * count * (Math.PI / 2)) / rows));
+				rowCounts.push(rowCount);
+				placedCount += rowCount;
+			}
+
+			let remainder = count - placedCount;
+			while (remainder !== 0) {
+				let widestRow = 0;
+				for (let row = 1; row < rows; row++) {
+					if (rowCounts[row] > rowCounts[widestRow]) widestRow = row;
+				}
+				if (remainder > 0) {
+					rowCounts[widestRow] += 1;
+					remainder -= 1;
+				} else if (rowCounts[widestRow] > 1) {
+					rowCounts[widestRow] -= 1;
+					remainder += 1;
+				} else {
+					break;
+				}
+			}
+
+			let cardIndex = 0;
+			for (let row = 0; row < rows; row++) {
+				const latitude = (1 - 2 * ((row + 0.5) / rows)) * 90;
+				const rowCount = rowCounts[row];
+				const offset = row % 2 === 0 ? 0 : 180 / rowCount;
+
+				for (let column = 0; column < rowCount && cardIndex < count; column++) {
+					const card = this.sphereCards[cardIndex];
+					const rotationX = -latitude;
+					const rotationY = (column / rowCount) * 360 + offset;
+					card.dataset.sphereRotationX = rotationX;
+					card.dataset.sphereRotationY = rotationY;
+					card.style.transform = `rotateY(${rotationY}deg) rotateX(${rotationX}deg) translateZ(${radius}px)`;
+					cardIndex += 1;
+				}
+			}
+		}
+
+		updateSphereScale() {
+			if (!this.cardLayer || !this.sphereScale) return;
+			const radius = cvUnit(PLAYGROUND_SPHERE_RADIUS_REM, 'rem');
+			const diameterWithSpace = radius * 2.5;
+			const scale =
+				Math.min(
+					1,
+					this.sphereScale.offsetWidth / diameterWithSpace,
+					this.sphereScale.offsetHeight / diameterWithSpace,
+				) * 1.1;
+			gsap.set(this.sphereScale, { scale });
+		}
+
+		applySphereTransform() {
+			if (!this.sphere) return;
+			this.sphere.style.transform = `rotateX(${this.sphereRotation.x}deg) rotateY(${this.sphereRotation.y}deg) scale(${this.sphereRotation.scale})`;
+		}
+
+		closestSphereAngle(current, target) {
+			let delta = (target - current) % 360;
+			if (delta > 180) delta -= 360;
+			if (delta < -180) delta += 360;
+			return current + delta;
+		}
+
+		focusSphereCard(card) {
+			const cardRotationX = Number(card.dataset.sphereRotationX || 0);
+			const cardRotationY = Number(card.dataset.sphereRotationY || 0);
+			this.sphereFocused = true;
+			this.sphereFocus?.kill();
+			this.sphereFocus = gsap.to(this.sphereRotation, {
+				x: this.closestSphereAngle(this.sphereRotation.x, -cardRotationX),
+				y: this.closestSphereAngle(this.sphereRotation.y, -cardRotationY),
+				scale: 3,
+				duration: 2.2,
+				ease: 'power3.inOut',
+				overwrite: true,
+				onUpdate: () => this.applySphereTransform(),
+			});
+		}
+
+		resetSphereFocus() {
+			if (!this.sphereFocused) return;
+			this.sphereFocus?.kill();
+			this.sphereFocus = gsap.to(this.sphereRotation, {
+				scale: 1,
+				duration: 2.2,
+				ease: 'power3.inOut',
+				overwrite: true,
+				onUpdate: () => this.applySphereTransform(),
+				onComplete: () => {
+					this.sphereFocused = false;
+				},
+			});
+		}
 
 		destroy() {
 			super.cleanTrigger();
+			if (this.sphereRaf) cancelAnimationFrame(this.sphereRaf);
+			this.sphereRaf = null;
+			this.sphereObserver?.disconnect();
+			this.sphereResizeObserver?.disconnect();
+			this.sphereObserver = null;
+			this.sphereResizeObserver = null;
+			this.sphereCleanups.forEach((cleanup) => cleanup());
+			this.sphereCleanups = [];
+			this.sphereClones.forEach((card) => card.remove());
+			this.sphereClones = [];
+			this.sphereCards = [];
+			this.sphereReveal?.kill();
+			this.sphereFocus?.kill();
 			if (this.tlTrans) {
 				if (this.tlTrans.scrollTrigger) this.tlTrans.scrollTrigger.kill();
 				this.tlTrans.kill();
 			}
-			if (this.sphereObserver) this.sphereObserver.disconnect();
-			this.sphereCleanups.forEach(cleanup => cleanup());
-			this.sphereGeometry?.remove();
-			this.sphereProgram?.remove();
-			if (this.sphereTexture?.texture && this.renderer?.gl) {
-				this.renderer.gl.deleteTexture(this.sphereTexture.texture);
-			}
+			this.sphereReveal = null;
+			this.sphereFocus = null;
 			this.tlTrans = null;
-			this.renderer = null;
-			this.sphereCamera = null;
-			this.sphereScene = null;
-			this.sphereTiltPivot = null;
-			this.sphereGeometry = null;
-			this.sphereProgram = null;
-			this.sphereTexture = null;
-			this.sphereMesh = null;
-			this.sphereCards = [];
-			this.sphereCardClones.forEach((card) => card.remove());
-			this.sphereCardClones = [];
-			this.sphereCanvas = null;
-			this.sphereObserver = null;
-			this.sphereRaf = null;
-			this.sphereVisible = false;
-			this.sphereCleanups = [];
-			this.sphereState = null;
+			this.sphere = null;
+			this.sphereScale = null;
+			this.cardLayer = null;
 			this.el = null;
 		}
 	},

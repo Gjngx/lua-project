@@ -149,7 +149,6 @@ export const HOME_PAGE_QUERY = defineQuery(`
         _key,
         _type,
         alt,
-        prominence,
         image{
           ...,
           asset->{_id, url, metadata{lqip, dimensions}}

@@ -105,7 +105,6 @@ type HomePageData = {
 		gallery?: Array<{
 			_key?: string;
 			alt?: string;
-			prominence?: 'small' | 'medium' | 'large' | 'featured';
 			image?: SanityImage;
 		}>;
 	};
@@ -142,9 +141,7 @@ const closingStatementLines = isDraftMode ? [] : closingStatement.split(/\r?\n/)
 const capabilitiesIntroduction =
 	capabilities?.introduction ||
 	"Discover the amazing features of my services that\ncan transform your workflow and boost productivity.\nHere's what I can do for you:";
-const capabilitiesIntroductionLines = isDraftMode
-	? []
-	: capabilitiesIntroduction.split(/\r?\n/);
+const capabilitiesIntroductionLines = isDraftMode ? [] : capabilitiesIntroduction.split(/\r?\n/);
 
 const fallbackProjects = [
 	{
@@ -232,33 +229,6 @@ const services = capabilities?.services?.length
 			alt: service.title,
 		}));
 
-const cardStyles = [
-	{ radius: 1.08, width: 0.15, size: 'xs' },
-	{ radius: 1.12, width: 0.24, size: 'md' },
-	{ radius: 1.06, width: 0.24, size: 'md' },
-	{ radius: 1.09, width: 0.2, size: 'sm' },
-	{ radius: 1.08, width: 0.16, size: 'xs' },
-	{ radius: 1.12, width: 0.15, size: 'xs' },
-	{ radius: 1.1, width: 0.27, size: 'md' },
-	{ radius: 1.13, width: 0.41, size: 'lg' },
-	{ radius: 1.1, width: 0.17, size: 'sm' },
-];
-
-const cardSizePresets = {
-	small: { radius: 1.08, width: 0.15, size: 'xs' },
-	medium: { radius: 1.09, width: 0.21, size: 'sm' },
-	large: { radius: 1.11, width: 0.29, size: 'md' },
-	featured: { radius: 1.13, width: 0.41, size: 'lg' },
-} as const;
-
-const getCardStyle = (
-	prominence: keyof typeof cardSizePresets | undefined,
-	index: number,
-) => {
-	const cleanProminence = stegaClean(prominence || '') as keyof typeof cardSizePresets;
-	return cardSizePresets[cleanProminence] || cardStyles[index % cardStyles.length];
-};
-
 const fallbackGallery = [
 	tesla,
 	branding,
@@ -278,14 +248,12 @@ const gallery = playground?.gallery?.length
 				: undefined,
 			localImage: undefined,
 			alt: stegaClean(item.alt || ''),
-			placement: getCardStyle(item.prominence, index),
 		}))
 	: fallbackGallery.map((localImage, index) => ({
 			key: `gallery-${index}`,
 			imageUrl: undefined,
 			localImage,
 			alt: '',
-			placement: cardStyles[index],
 		}));
 
 const seoTitle = stegaClean(homePage?.seo?.title || 'Home');
@@ -460,12 +428,14 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 							]}
 						>
 							{
-								isDraftMode ? closingStatement : closingStatementLines.map((line, index) => (
-									<>
-										{line}
-										{index < closingStatementLines.length - 1 && <br />}
-									</>
-								))
+								isDraftMode
+									? closingStatement
+									: closingStatementLines.map((line, index) => (
+											<>
+												{line}
+												{index < closingStatementLines.length - 1 && <br />}
+											</>
+										))
 							}
 						</h2>
 					</div>
@@ -553,12 +523,14 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 					<div class="home-how-intro-desc">
 						<p class:list={['txt fs-14', { 'preserve-line-breaks': isDraftMode }]}>
 							{
-								isDraftMode ? capabilitiesIntroduction : capabilitiesIntroductionLines.map((line, index) => (
-									<>
-										{line}
-										{index < capabilitiesIntroductionLines.length - 1 && <br />}
-									</>
-								))
+								isDraftMode
+									? capabilitiesIntroduction
+									: capabilitiesIntroductionLines.map((line, index) => (
+											<>
+												{line}
+												{index < capabilitiesIntroductionLines.length - 1 && <br />}
+											</>
+										))
 							}
 						</p>
 					</div>
@@ -691,30 +663,26 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 				</div>
 			</div>
 			<div class="home-playground-main">
-				<canvas
-					class="home-playground-sphere-canvas"
-					data-cursor="drag"
-					aria-label="Interactive patterned 3D sphere. Drag or use the arrow keys to rotate it."
-					role="img"
-					tabindex="0"></canvas>
-				<div class="home-playground-sphere-hitarea" data-cursor="drag" aria-hidden="true"></div>
-				<div class="home-playground-card-layer" aria-hidden="true">
-					{
-						gallery.map((item) => (
-							<div
-								class="home-playground-card"
-								data-radius={item.placement.radius}
-								data-width={item.placement.width}
-								data-size={item.placement.size}
-							>
-								{item.imageUrl ? (
-									<img src={item.imageUrl} alt={item.alt} loading="lazy" />
-								) : item.localImage ? (
-									<Image src={item.localImage} alt={item.alt} />
-								) : null}
+				<div class="home-playground-card-layer" data-cursor="drag" aria-hidden="true">
+					<div class="home-playground-sphere-scale">
+						<div class="home-playground-sphere-stage">
+							<div class="home-playground-sphere">
+								{
+									gallery.map((item) => (
+										<div class="home-playground-card">
+											<div class="home-playground-card-inner">
+												{item.imageUrl ? (
+													<img src={item.imageUrl} alt={item.alt} loading="lazy" draggable="false" />
+												) : item.localImage ? (
+													<Image src={item.localImage} alt={item.alt} />
+												) : null}
+											</div>
+										</div>
+									))
+								}
 							</div>
-						))
-					}
+						</div>
+					</div>
 				</div>
 			</div>
 		</section>

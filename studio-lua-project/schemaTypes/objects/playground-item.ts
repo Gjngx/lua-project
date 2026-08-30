@@ -23,39 +23,24 @@ export default defineType({
     }),
     defineField({
       name: 'prominence',
-      title: 'Display size',
+      title: 'Display size (Deprecated)',
       type: 'string',
-      description: 'Controls how prominently this image appears on the playground sphere.',
-      initialValue: 'medium',
-      options: {
-        list: [
-          {title: 'Small', value: 'small'},
-          {title: 'Medium', value: 'medium'},
-          {title: 'Large', value: 'large'},
-          {title: 'Featured (extra large)', value: 'featured'},
-        ],
-        layout: 'radio',
+      deprecated: {
+        reason: 'The playground sphere now displays every image at the same size.',
       },
-      validation: (rule) => rule.required(),
+      readOnly: true,
+      hidden: true,
+      initialValue: undefined,
     }),
   ],
   preview: {
     select: {
       title: 'alt',
       media: 'image',
-      prominence: 'prominence',
     },
-    prepare({title, media, prominence}) {
-      const sizeLabels: Record<string, string> = {
-        small: 'Small',
-        medium: 'Medium',
-        large: 'Large',
-        featured: 'Featured',
-      }
-
+    prepare({title, media}) {
       return {
         title: title || 'Decorative image',
-        subtitle: sizeLabels[prominence] || 'Display size not selected',
         media,
       }
     },
