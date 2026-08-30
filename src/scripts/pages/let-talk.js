@@ -12,6 +12,10 @@ export const LetTalkPage = {
 			this.tlMove = null;
 			this.masterReveal = null;
 			this.revealReady = null;
+			this.footerReveal = null;
+			this.footerRevealTimeline = null;
+			this.footerRevealReady = null;
+			this.footerRevealRequested = false;
 		}
 
 		setup(data, mode) {
@@ -24,6 +28,12 @@ export const LetTalkPage = {
 			} else if (mode === 'enter') {
 				this.setupEnter(data);
 			}
+			const footerItems = [
+				$(this.el).find('.let-talk-footer-phone-inner')[0],
+				$(this.el).find('.let-talk-footer-email-inner')[0],
+				$(this.el).find('.let-talk-footer-link-inner')[0],
+			];
+			gsap.set(footerItems, { yPercent: 100});
 		}
 
 		setupOnce(data) {
@@ -76,50 +86,60 @@ export const LetTalkPage = {
 
 		animationScrub(){
 			const decorWraps = $(this.el).find('.let-talk-decor-wrap').toArray();
+			const scrollInner = $(this.el).find('.let-talk-scroll-inner')[0];
+			let isScrollInnerHidden = false;
+			const setScrollInnerHidden = (hidden) => {
+				if (hidden === isScrollInnerHidden) return;
+				isScrollInnerHidden = hidden;
+				gsap.to(scrollInner, {
+					yPercent: hidden ? 100 : 0,
+					duration: 0.3,
+					ease: 'power2.inOut',
+					overwrite: true,
+				});
+			};
 			const getWrapWidth = () => $(this.el).find('.let-talk-decor-inner')[0].getBoundingClientRect().width;
 			const getDecorTranslateX = () => (
 				getWrapWidth() / 2 - decorWraps[0].getBoundingClientRect().width
 			);
 
 			const itemServices = $(this.el).find('.let-talk-decor-service-inner').toArray();
-			const itemPhone = $(this.el).find('.let-talk-footer-phone-inner')[0];
-			const itemEmail = $(this.el).find('.let-talk-footer-email-inner')[0];
-			const itemLinks = $(this.el).find('.let-talk-footer-link-inner')[0];
-			const scrollText = $(this.el).find('.let-talk-scroll-inner')[0];
-
+			const footerItems = [
+				$(this.el).find('.let-talk-footer-phone-inner')[0],
+				$(this.el).find('.let-talk-footer-email-inner')[0],
+				$(this.el).find('.let-talk-footer-link-inner')[0],
+			].filter(Boolean);
 			this.tlIntro = gsap.timeline({
 				scrollTrigger: {
 					trigger: $(this.el).find('.let-talk-top')[0],
 					start: 'top top',
-					endTrigger: $(this.el).find('.let-talk-top .heading')[0],
 					end: 'bottom top',
 					scrub: 1,
-				},
-			});
-
-			this.tlMove = gsap.timeline({
-				scrollTrigger: {
-					trigger: $(this.el).find('.let-talk-top .heading')[0],
-					start: 'bottom top',
-					endTrigger: this.el,
-					end: 'bottom bottom',
-					scrub: 1
+					onUpdate: (self) => {
+						if (self.direction > 0 && self.progress > 0) {
+							setScrollInnerHidden(true);
+						} else if (self.direction < 0 && self.progress === 0) {
+							setScrollInnerHidden(false);
+						}
+					},
+					onLeave: () => {
+						gsap.to(footerItems, {
+							yPercent: 0,
+							duration: 0.3,
+							ease: 'power2.inOut',
+							stagger: 0.02,
+							overwrite: true,
+						});
+					},
 				},
 			});
 
 			this.tlIntro
-			.to($(this.el).find('.let-talk-top .heading')[0], { scale: 0.68, ease: 'power3.out' })
-			.to(decorWraps[0], { x: () => getDecorTranslateX(), ease: 'power3.inOut' }, '<')
-			.to(decorWraps[1], { x: () => -getDecorTranslateX(), ease: 'power3.inOut' }, '<')
-				.to($(this.el).find('.let-talk-decor')[0], { yPercent: -15, ease: 'power3.inOut' }, '<');
-
-
-			this.tlMove
-			.to(itemServices, { yPercent: -100, ease: 'power3.inOut', duration: 0.6 })
-			.to(itemPhone, { yPercent: -100, ease: 'power3.inOut', duration: 0.4 })
-			.to(itemEmail, { yPercent: -100, ease: 'power3.inOut', duration: 0.4 })
-			.to(itemLinks, { yPercent: -100, ease: 'power3.inOut', duration: 0.4 })
-			.to(scrollText, { yPercent: -100, ease: 'power3.inOut', duration: 0.4 }, '<');
+				.to($(this.el).find('.let-talk-top .heading')[0], { scale: 0.6, ease: 'none', duration: 1 })
+				.to($(this.el).find('.let-talk-decor')[0], { yPercent: -15, ease: 'none' }, '<')
+				.to(decorWraps[0], { x: () => getDecorTranslateX(), ease: 'none', duration: 1 }, '<')
+				.to(decorWraps[1], { x: () => -getDecorTranslateX(), ease: 'none', duration: 1 }, '<')
+				.to(itemServices, { yPercent: -100, ease: 'power4.inOut', duration: 0.3 },);
 		}
 		
 		interact() {
@@ -172,12 +192,18 @@ export const LetTalkPage = {
 			this.footerLinkCleanups.forEach((cleanup) => cleanup());
 			this.footerLinkCleanups = [];
 			this.masterReveal?.destroy();
+			this.footerReveal?.destroy();
 			this.tlOnce?.kill();
 			this.tlEnter?.kill();
 			this.tlIntro?.kill();
 			this.tlMove?.kill();
+			this.footerRevealTimeline?.kill();
 			this.masterReveal = null;
 			this.revealReady = null;
+			this.footerReveal = null;
+			this.footerRevealTimeline = null;
+			this.footerRevealReady = null;
+			this.footerRevealRequested = false;
 			this.el = null;
 		}
 	},

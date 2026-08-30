@@ -11,9 +11,9 @@
 	contain: layout paint style;
 }
 
-.scroll-indicator[data-theme='dark'] {
+/* .scroll-indicator[data-theme='dark'] {
 	--scroll-indicator-color: var(--cl-brand);
-}
+} */
 
 .scroll-indicator__thumb {
 	position: absolute;
