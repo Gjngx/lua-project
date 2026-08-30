@@ -297,7 +297,7 @@ export class Header {
 		this.navCardReels.forEach((reel, index) => {
 			this.measureNavCardReel(reel);
 			reel.position = Math.random() * reel.cycleSize;
-			reel.baseSpeed = reel.stepSize / ((290 + index * 22 + Math.random() * 14) * 1.5);
+			reel.baseSpeed = reel.stepSize / ((290 + index * 22 + Math.random() * 14) * 2.1);
 			reel.maxSpeed = reel.baseSpeed * 1.7;
 			reel.cruiseSpeed = reel.baseSpeed;
 			reel.acceleration = (reel.maxSpeed - reel.baseSpeed) / 8000;

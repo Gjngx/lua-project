@@ -508,7 +508,6 @@
 	grid-template-columns: repeat(2, 1fr);
 	gap: 1.6rem;
 	padding-top: 1.2rem;
-	border-top: var(--1px) solid var(--cl-border-main);
 }
 
 .header-nav-location-item {
