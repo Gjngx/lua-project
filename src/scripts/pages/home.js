@@ -514,7 +514,7 @@ export const HomePage = {
 			this.el = null;
 			this.tlWorksTop = null;
 			this.tlWorksScroll = null;
-			this.tlWorksDecorAssembly = null;
+			this.worksDecorAssemblyTrigger = null;
 			this.worksPathParticles = null;
 			this.transitionCanvas = null;
 			this.transitionContext = null;
@@ -585,25 +585,17 @@ export const HomePage = {
 
 			if (decorSvg && decorCanvas && !prefersReducedMotion) {
 				this.worksPathParticles = new SvgPathParticles(decorSvg, decorCanvas);
-				const assemblyState = { progress: 0 };
+				const renderDecorAssembly = (scrollTrigger) => {
+					this.worksPathParticles?.render(scrollTrigger.progress);
+				};
 
-				this.tlWorksDecorAssembly = gsap.timeline({
-					scrollTrigger: {
-						trigger: $(this.el).find('.home-works--decor')[0],
-						start: 'top bottom',
-						end: 'top top',
-						scrub: true,
-						invalidateOnRefresh: true,
-					}
-				});
-
-				this.tlWorksDecorAssembly.to(assemblyState, {
-					progress: 1,
-					duration: 1,
-					ease: 'none',
-					onUpdate: () => {
-						this.worksPathParticles?.render(assemblyState.progress);
-					},
+				this.worksDecorAssemblyTrigger = ScrollTrigger.create({
+					trigger: $(this.el).find('.home-works--decor')[0],
+					start: 'top bottom',
+					end: 'top top',
+					invalidateOnRefresh: true,
+					onUpdate: renderDecorAssembly,
+					onRefresh: renderDecorAssembly,
 				});
 			}
 
@@ -1283,10 +1275,7 @@ export const HomePage = {
 				if (this.tlWorksScroll.scrollTrigger) this.tlWorksScroll.scrollTrigger.kill();
 				this.tlWorksScroll.kill();
 			}
-			if (this.tlWorksDecorAssembly) {
-				if (this.tlWorksDecorAssembly.scrollTrigger) this.tlWorksDecorAssembly.scrollTrigger.kill();
-				this.tlWorksDecorAssembly.kill();
-			}
+			this.worksDecorAssemblyTrigger?.kill();
 			if (this.transitionBackgroundTween) this.transitionBackgroundTween.kill();
 			if (this.onTransitionResize) {
 				$(window).off('resize', this.onTransitionResize);
