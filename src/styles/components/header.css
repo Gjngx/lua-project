@@ -660,19 +660,6 @@
 	background-color: var(--cl-bg-main);
 }
 
-.header.on-dark .header-menu-contact .btn-bg{
-	background-color: var(--cl-sf-2);
-}
-
-.header.on-dark .header-menu-contact .btn-inner {
-	color: var(--cl-white);
-}
-
-.header.on-dark .header-menu-contact .btn-ic-inner{
-	background-color: var(--cl-white);
-}
-
-
 @media only screen and (max-width: 991px) {
 	.header-logo-ic-amin{
 		height: 18rem;
