@@ -2,39 +2,12 @@
 	position: relative;
 }
 
-.footer-cursor-trail {
-	position: absolute;
-	inset: 0;
-	z-index: 0;
-	overflow: hidden;
-	pointer-events: none;
-}
-
-.footer-cursor-trail-seed {
-	display: none;
-}
-
-.footer-cursor-trail-item {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 1.6rem;
-	height: 2.4rem;
-	color: var(--cl-brand);
-	will-change: transform, opacity, color;
-}
-
 .footer-inner{
 	position: relative;
 	z-index: 1;
 	height: 100vh;
 }
 
-@media (hover: none), (max-width: 991px), (prefers-reduced-motion: reduce) {
-	.footer-cursor-trail {
-		display: none;
-	}
-}
 .footer-inner .grid{
 	grid-template-rows: 1fr auto auto;
 }

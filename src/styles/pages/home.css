@@ -869,6 +869,11 @@
 	outline-offset: calc(var(--1px) * -4);
 }
 
+.home-playground-content-left-title,
+.home-playground-content-right-link{
+	pointer-events: auto;
+}
+
 .home-playground-content-right-link.hover-line::before,
 .home-playground-content-right-link.hover-line::after {
 	bottom: 0em;
@@ -880,7 +885,7 @@
 
 .home-playground-content-left,
 .home-playground-content-right {
-	pointer-events: auto;
+	pointer-events: none;
 }
 
 .home-playground-content-left{
