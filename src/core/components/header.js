@@ -79,8 +79,16 @@ export class Header {
 
 	handlePlayHoverPoint = (event) => {
 		const bounds = event.currentTarget.getBoundingClientRect();
-		const x = ((event.clientX - bounds.left) / bounds.width) * 100;
-		const y = ((event.clientY - bounds.top) / bounds.height) * 100;
+		const x = gsap.utils.clamp(
+			0,
+			100,
+			((event.clientX - bounds.left) / bounds.width) * 100,
+		);
+		const y = gsap.utils.clamp(
+			0,
+			100,
+			((event.clientY - bounds.top) / bounds.height) * 100,
+		);
 		$(event.currentTarget).css({
 			'--header-play-hover-x': `${x}%`,
 			'--header-play-hover-y': `${y}%`,

@@ -104,7 +104,7 @@
 .header.header.is-nav-closing.on-scroll .header-menu-play-bg-hover,
 .header.on-scroll .header-menu-play-bg-hover,
 .header.is-pause .header-menu-play-bg-hover {
-	inset: -45%;
+	inset: -50%;
 }
 
 .header.on-open-nav .header-menu-play-bg {
@@ -131,7 +131,7 @@
 	transition: clip-path 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .header-menu-play:hover .header-menu-play-bg-hover{
-	clip-path: circle(141.4% at var(--header-play-hover-x) var(--header-play-hover-y));
+	clip-path: circle(200% at var(--header-play-hover-x) var(--header-play-hover-y));
 }
 .header-menu-play-bg {
 	position: absolute;
