@@ -999,7 +999,8 @@ export class Header {
 			if (
 				$(e.target).closest('[data-header-toggle]')[0] || null ||
 				$(e.target).closest('.header-logo')[0] || null ||
-				$(e.target).closest('.header-inner')[0] || null
+				$(e.target).closest('.header-inner')[0] || null ||
+				$(e.target).closest('[data-header-nav]')[0] || null
 			) return;
 			this.close();
 		});
