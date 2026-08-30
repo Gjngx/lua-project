@@ -66,7 +66,7 @@ const pathname = Astro.url.pathname;
 					</div>
 					
 				</div>
-				<Button href="/let-talk" class="header-menu-contact">Let's talk</Button>
+				<Button href="/let-talk" class="header-menu-contact" data-sound-hover>Let's talk</Button>
 
 				<div
 					class="header-menu-toggle"
@@ -74,8 +74,8 @@ const pathname = Astro.url.pathname;
 					aria-label="Open navigation"
 					aria-expanded="false"
 				>
-				<Button href="#" class="header-menu-menu btn-sc">Menu</Button>
-				<Button href="#" class="header-menu-close btn-sc">Close</Button>
+				<Button href="#" class="header-menu-menu btn-sc" data-sound-hover>Menu</Button>
+				<Button href="#" class="header-menu-close btn-sc" data-sound-hover data-click-close>Close</Button>
 				</div>
 			</div>
 		</div>
@@ -119,7 +119,7 @@ const pathname = Astro.url.pathname;
 							</div>
 							<span class="txt fs-32 fw-600 fs-28-mb">Works</span>
 						</a>
-						<a href="/#playground" class="header-nav-link">
+						<a href="/playground" class="header-nav-link">
 							<div class="header-nav-link-ic">
 								<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20 21" fill="none">
 									<path d="M10 21C10 15.3289 5.52285 10.7316 0 10.7316C0 16.4027 4.47715 21 10 21Z" fill="currentColor"/>
@@ -141,7 +141,7 @@ const pathname = Astro.url.pathname;
 				</div>
 			</div>
 
-			<a href="/about" class="header-nav-card header-nav-brand" aria-label="Read my story">
+			<div class="header-nav-card header-nav-brand" aria-label="Read my story">
 				<div class="header-nav-card-inner" data-header-reel-group>
 					<div class="header-nav-card-item" data-header-reel>
 						<div class="item-ic">
@@ -208,7 +208,7 @@ const pathname = Astro.url.pathname;
 					</svg>
 				</div>
 				<div class="header-nav-card-overlay"></div>
-			</a>
+			</div>
 
 			<a href="/#works" class="header-nav-card header-nav-work" aria-label="View selected works">
 				<Image class="img-df img-fill" src={navWork} alt="MedExpress project" loading="lazy" />
@@ -277,10 +277,8 @@ const pathname = Astro.url.pathname;
 				</div>
 			</div>
 
-			<a
-				href="/about"
+			<div
 				class="header-nav-circle header-nav-portrait"
-				aria-label="About me"
 				data-header-portrait
 			>
 				<div class="header-nav-portrait-layers" aria-hidden="true">
@@ -299,7 +297,7 @@ const pathname = Astro.url.pathname;
 						<circle cx="66" cy="66" r="63" stroke="currentColor" stroke-width="6" stroke-dasharray="0.5 8"/>
 					</svg>
 				</div>
-			</a>
+			</div>
 		</nav>
 		<div class="header-nav-btn-mb hidden-dsk">
 			<Button href="/let-talk" class="header-menu-contact-mb">Let's talk</Button>

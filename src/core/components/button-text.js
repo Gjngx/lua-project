@@ -5,7 +5,8 @@ import closeSound from '../../assets/audio/close.mp3';
 
 const BUTTON_SELECTOR = '[data-button-text]';
 const LABEL_SELECTOR = '[data-button-text-label]';
-const SOUND_SELECTOR = 'a, [data-sound-hover]';
+const SOUND_SELECTOR = '[data-sound-hover]';
+const CLOSE_SOUND_SELECTOR = '[data-click-close]';
 const SHIFT = '1.3em';
 
 const readSanitySoundEffects = () => {
@@ -31,38 +32,25 @@ class ButtonText {
 		const sanitySounds = readSanitySoundEffects();
 		this.instances = new Map();
 		this.soundInstances = new Map();
+		this.closeSoundInstances = new Map();
 		this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-		this.hoverAudios = new Map();
+		this.soundAudios = new Map();
 		this.sounds = {
 			hover: sanitySounds.hover?.src || hoverSound,
 			close: sanitySounds.close?.src || closeSound,
 		};
-		this.hasPointerMoved = false;
-
-		$(window).on('pointermove', (event) => {
-			if (!event.pointerType || event.pointerType === 'mouse') {
-				this.hasPointerMoved = true;
-			}
-		});
-		$(window).on('pointerdown', () => {
-			this.hasPointerMoved = false;
-		});
-		$(window).on('click', () => {
-			this.hasPointerMoved = false;
-		});
 	}
 
-	playHoverSound(button) {
-		const sound = $(button).hasClass('header-menu-close')
-			? this.sounds.close
-			: this.sounds.hover;
-		let audio = this.hoverAudios.get(sound);
+	playSound(type) {
+		const sound = this.sounds[type];
+		if (!sound) return;
+		let audio = this.soundAudios.get(sound);
 
 		if (!audio) {
 			audio = new Audio(sound);
 			audio.preload = 'auto';
 			audio.volume = 1;
-			this.hoverAudios.set(sound, audio);
+			this.soundAudios.set(sound, audio);
 		}
 
 		audio.currentTime = 0;
@@ -84,25 +72,28 @@ class ButtonText {
 
 		this.getButtons(root).forEach((button) => this.setup(button));
 		this.getSoundTargets(root).forEach((target) => this.setupSoundHover(target));
+		this.getCloseSoundTargets(root).forEach((target) => this.setupCloseSoundClick(target));
 	}
 
 	setupSoundHover(target) {
-		// data-button-text đã phát sound trong listener animation riêng.
+		// data-button-text tự xử lý hover sound khi chính button được opt-in.
 		if (this.instances.has(target) || this.soundInstances.has(target)) return;
-
-		const parentLink = $(target).closest('a')[0];
-		if (parentLink && parentLink !== target) return;
 
 		const onPointerEnter = (event) => {
 			if (event.pointerType && event.pointerType !== 'mouse') return;
-			if (this.hasPointerMoved) {
-				this.playHoverSound(target);
-			}
-			this.hasPointerMoved = false;
+			this.playSound('hover');
 		};
 
 		$(target).on('pointerenter', onPointerEnter);
 		this.soundInstances.set(target, { onPointerEnter });
+	}
+
+	setupCloseSoundClick(target) {
+		if (this.closeSoundInstances.has(target)) return;
+
+		const onClick = () => this.playSound('close');
+		$(target).on('click', onClick);
+		this.closeSoundInstances.set(target, { onClick });
 	}
 
 	setup(button) {
@@ -154,10 +145,9 @@ class ButtonText {
 
 		const onPointerEnter = (event) => {
 			if (event.pointerType && event.pointerType !== 'mouse') return;
-			if (this.hasPointerMoved) {
-				this.playHoverSound(button);
+			if ($(button).is(SOUND_SELECTOR)) {
+				this.playSound('hover');
 			}
-			this.hasPointerMoved = false;
 			animate(SHIFT);
 		};
 		const onPointerLeave = (event) => {
@@ -223,6 +213,14 @@ class ButtonText {
 			$(target).off('pointerenter', onPointerEnter);
 			this.soundInstances.delete(target);
 		});
+
+		this.closeSoundInstances.forEach(({ onClick }, target) => {
+			const belongsToRoot = root === document || root === target || root.contains(target);
+			if (!belongsToRoot) return;
+
+			$(target).off('click', onClick);
+			this.closeSoundInstances.delete(target);
+		});
 	}
 
 	getButtons(root) {
@@ -240,6 +238,15 @@ class ButtonText {
 			targets.push(root);
 		}
 		targets.push(...$(root).find(SOUND_SELECTOR).toArray());
+		return [...new Set(targets)];
+	}
+
+	getCloseSoundTargets(root) {
+		const targets = [];
+		if (root instanceof Element && $(root).is(CLOSE_SOUND_SELECTOR)) {
+			targets.push(root);
+		}
+		targets.push(...$(root).find(CLOSE_SOUND_SELECTOR).toArray());
 		return [...new Set(targets)];
 	}
 }

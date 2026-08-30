@@ -2,11 +2,24 @@
 export interface Props {
 	href?: string;
 	class?: string;
+	'data-sound-hover'?: boolean;
+	'data-click-close'?: boolean;
 }
 
-const { href = "#", class: className = "" } = Astro.props;
+const {
+	href = "#",
+	class: className = "",
+	'data-sound-hover': dataSoundHover = false,
+	'data-click-close': dataClickClose = false,
+} = Astro.props;
 ---
-<a href={href} class={`btn ${className}`.trim()} data-button-text>
+<a
+	href={href}
+	class={`btn ${className}`.trim()}
+	data-button-text
+	data-sound-hover={dataSoundHover ? '' : undefined}
+	data-click-close={dataClickClose ? '' : undefined}
+>
 	<div class="btn-inner">
 		<div class="btn-ic ic-left">
 			<div class="btn-ic-inner"></div>
