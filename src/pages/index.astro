@@ -296,7 +296,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 			<div class="container grid">
 				<div class="home-hero-top top-left">
 					<div class="home-hero-desc" data-init-hidden>
-						<p class="txt fs-14 fs-12-mb">
+						<p class="label">
 							{hero?.availabilityMessage || 'Open for any collaborations & offers'}
 						</p>
 					</div>
@@ -304,12 +304,12 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 						<IconSun />
 					</div>
 					<div class="home-hero-sub-mb hidden-dsk">
-						<p class="txt fs-14 fs-12-mb">{hero?.role || 'Digital designer based in Vietnam'}</p>
+						<p class="desc">{hero?.role || 'Digital designer based in Vietnam'}</p>
 					</div>
 				</div>
 				<div class="home-hero-top top-right">
 					<div class="home-hero-top-title">
-						<h1 class="heading fs-24 fw-400 fs-20-mb">
+						<h1 class="h4">
 							{heroHeadline}
 						</h1>
 					</div>
@@ -318,20 +318,20 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 							<div class="home-hero-top-ic">
 								<IconSun />
 							</div>
-							<h2 class="heading fs-14 fw-400">
+							<h2 class="desc">
 								{hero?.role || 'Digital designer based in Vietnam'}
 							</h2>
 						</div>
 						<div class="home-hero-top-info" data-init-hidden>
-							<p class="txt fs-10 fw-400 fs-12-mb">{hero?.location || 'Hanoi, Vietnam'}</p>
-							<p class="txt fs-10 fw-400 fs-12-mb" data-time>00:00:00</p>
+							<p class="label">{hero?.location || 'Hanoi, Vietnam'}</p>
+							<p class="label" data-time>00:00:00</p>
 						</div>
 					</div>
 				</div>
 				<div class="home-hero-bottom">
 					<div class="home-hero-bottom-inner">
 						<div class="home-hero-bottom-desc">
-							<p class="txt fs-40 fs-32-tb fs-28-mb">
+							<p class="h2">
 								{
 									hero?.introduction ? (
 										hero.introduction
@@ -357,7 +357,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 								class="home-hero-bottom-link hover-line"
 								data-cursor="hidden"
 							>
-								<p class="txt fs-14">{hero?.aboutLink?.label || 'More about me'}</p>
+								<p class="p">{hero?.aboutLink?.label || 'More about me'}</p>
 								<div class="home-hero-bottom-link-ic">
 									<div class="home-hero-bottom-link-ic-inner ic-top">
 										<IconArrowRight />
@@ -403,7 +403,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 			<div class="container grid full-h">
 				<div class="home-works-main">
 					<div class="home-works-main-title">
-						<h2 class="heading fs-64 fw-700 trans-upper fs-40-mb">
+						<h2 class="h1">
 							{featuredWork?.heading || 'Works'}
 						</h2>
 					</div>
@@ -411,7 +411,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 						<div class="home-works-main-ic">
 							<IconLeafDouble mirrored />
 						</div>
-						<p class="txt fs-14 fw-500">
+						<p class="p">
 							{featuredWork?.description || 'Selection of featured work, across industries'}
 						</p>
 						<div class="home-works-main-ic">
@@ -423,7 +423,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 					<div class="home-works-bottom-title">
 						<h2
 							class:list={[
-								'heading fs-64 fw-700 trans-upper fs-40-mb',
+								'h1',
 								{ 'preserve-line-breaks': isDraftMode },
 							]}
 						>
@@ -468,17 +468,19 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 							</div>
 							<div class="home-works-item-label">
 								<div class="home-works-item-title">
-									<p class="txt fs-20 fw-700 trans-upper">{project.title}</p>
+									<p class="h4">{project.title}</p>
 								</div>
 								<div class="home-works-item-categories">
 									{project.categories.map((category, index) => (
 										<>
 											{index > 0 && (
-												<span class="txt fs-12 fw-500" aria-hidden="true">
-													•
-												</span>
+												<div class="home-works-item-category-dot" aria-hidden="true">
+													<svg width="100%" viewBox="0 0 12 4" fill="none" xmlns="http://www.w3.org/2000/svg">
+														<path d="M0 2C3.31371 4.66667 8.68629 4.66667 12 2C8.68629 -0.666667 3.31371 -0.666666 0 2Z" fill="currentColor"/>
+													</svg>
+												</div>
 											)}
-											<span class="txt fs-12 fw-500">{category}</span>
+											<span class="desc">{category}</span>
 										</>
 									))}
 								</div>
@@ -521,7 +523,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 			<div class="container grid">
 				<div class="home-how-intro">
 					<div class="home-how-intro-desc">
-						<p class:list={['txt fs-14', { 'preserve-line-breaks': isDraftMode }]}>
+						<p class:list={['p', { 'preserve-line-breaks': isDraftMode }]}>
 							{
 								isDraftMode
 									? capabilitiesIntroduction
@@ -563,14 +565,14 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 									<div class="home-how-content-item">
 										<div class="home-how-content-item-left">
 											<div class="home-how-content-item-title">
-												<p class="heading fs-40 fw-400 fs-32-tb">{service.title}</p>
+												<p class="h2">{service.title}</p>
 											</div>
 										</div>
 										<div class="home-how-content-item-right">
 											<div class="home-how-content-item-text">
 												{service.specialties.map((specialty) => (
 													<div class="home-how-content-item-type">
-														<p class="txt fs-14 fs-12-tb">{specialty}</p>
+														<p class="desc">{specialty}</p>
 													</div>
 												))}
 											</div>
@@ -644,7 +646,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 				<div class="container grid full-h">
 					<div class="home-playground-content-left">
 						<div class="home-playground-content-left-title">
-							<p class="txt fs-40 fw-400 fs-32-tb">{playground?.leadIn || 'Have fun with'}</p>
+							<p class="h2">{playground?.leadIn || 'Have fun with'}</p>
 						</div>
 					</div>
 					<div class="home-playground-content-right">
@@ -654,7 +656,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 								class="home-playground-content-right-link hover-line"
 								data-cursor="ic-external"
 							>
-								<p class="txt fs-40 fw-400 fs-32-tb">
+								<p class="h2">
 									{playground?.link?.label || 'the Playground'}
 								</p>
 							</a>

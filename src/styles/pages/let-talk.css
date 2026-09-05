@@ -1,5 +1,5 @@
 .let-talk-wrap{
-    background-color: var(--cl-brand-main);
+    background-color: var(--cln-brand-gray);
 }
 
 .let-talk-decor{
@@ -187,8 +187,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--cl-content-strong);
-    background-color: var(--cl-white);
+    color: var(--cln-content-strong);
+    background-color: var(--cln-white);
     pointer-events: auto;
 }
 
@@ -196,7 +196,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background-color: var(--cl-brand);
+    background-color: var(--cln-brand);
     clip-path: circle(0% at var(--footer-icon-hover-x) var(--footer-icon-hover-y));
     transition: clip-path 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }

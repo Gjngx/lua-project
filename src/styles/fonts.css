@@ -30,191 +30,156 @@
 	font-display: swap;
 }
 
+@font-face {
+	font-family: 'Host Grotesk';
+	src: url('../assets/fonts/HostGrotesk-ExtraBold.ttf') format('truetype');
+	font-weight: 800;
+	font-style: normal;
+	font-display: swap;
+}
+
 html, body {
 	font-family: 'Host Grotesk', sans-serif;
 	font-size: 1.6rem;
 	line-height: 1.5;
-	color: var(--cl-content-strong);
+	color: var(--cln-content-strong);
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
-	font-weight: 700;
-	line-height: 1;
-	margin: 0;
-}
-
-p{
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+div,
+a,
+span {
 	margin: 0;
 }
 
 .fw-400 {
-	font-weight: 400;
+	font-weight: 400 !important;
 }
 
 .fw-500 {
-	font-weight: 500;
+	font-weight: 500!important;
 }
 
 .fw-600 {
-	font-weight: 600;
+	font-weight: 600 !important;
 }
 
 .fw-700 {
-	font-weight: 700;
+	font-weight: 700 !important;
 }
 
 .fw-800 {
-	font-weight: 800;
+	font-weight: 800 !important;
 }
 
-.trans-upper{
+.upper {
 	text-transform: uppercase;
 }
 
-.fs-400 {
-	font-size: 40rem;
-	line-height: 1;
-}
-
-.fs-180 {
-	font-size: 18rem;
-	line-height: 0.9;
-}
-
-.fs-112 {
+.h0{
 	font-size: 11.2rem;
-	line-height: 0.9;
+	font-weight: 800;
+	line-height: 0.8;
+	letter-spacing: 0;
+	text-transform: uppercase;
 }
 
-.fs-90 {
-	font-size: 9rem;
-	line-height: 1;
-}
-
-.fs-96 {
-	font-size: 9.6rem;
-	line-height: 1;
-}
-
-.fs-80 {
-	font-size: 8rem;
-	line-height: 1.2;
-}
-
-.fs-64 {
+.h1{
 	font-size: 6.4rem;
-	line-height: 1.1;
-}
-.fs-56 {
-	font-size: 5.6rem;
-	line-height: 1.1;
-}
-.fs-48 {
-	font-size: 4.8rem;
-	line-height: 1.1;
+	font-weight: 600;
+	line-height: 0.9;
 	letter-spacing: -0.02em;
+	text-transform: uppercase;
 }
 
-.fs-40 {
+.h2{
 	font-size: 4rem;
-	line-height: 1.2;
-	letter-spacing: -0.02em;
-}
-
-.fs-32 {
-	font-size: 3.2rem;
-	line-height: 1.2;
-}
-
-.fs-24 {
-	font-size: 2.4rem;
-	line-height: 1.2;
-}
-
-.fs-16 {
-	font-size: 1.6rem;
+	font-weight: 400;
 	line-height: 1.1;
 	letter-spacing: -0.02em;
 }
 
-.fs-14 {
-	font-size: 1.4rem;
-	line-height: 1;
+.h3 {
+	font-size: 3.2rem;
+	font-weight: 400;
+	line-height: 1.2;
 	letter-spacing: -0.02em;
 }
 
-.fs-12 {
-	font-size: 1.2rem;
-	line-height: 1;
+.h4 {
+	font-size: 2.4rem;
+	font-weight: 400;
+	line-height: 1.2;
+	letter-spacing: -0.01em;
 }
 
-.fs-10 {
-	font-size: 1rem;
+
+.p {
+	font-size: 1.6rem;
+	font-weight: 400;
 	line-height: 1.2;
+	letter-spacing: -0.01em;
 }
+
+.desc {
+	font-size: 1.4rem;
+	font-weight: 400;
+	line-height: 1.2;
+	letter-spacing: -0.01em;
+}
+
+.label {
+	font-size: 1.2rem;
+	font-weight: 500;
+	line-height: 1.2;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+
+
 
 @media only screen and (max-width: 991px) {
-	.fs-300-tb{
-		font-size: 30rem;
-	}
-	.fs-112-tb {
-		font-size: 11.2rem;
-	}
-	.fs-80-tb{
-		font-size: 8rem;
-	}
-	.fs-32-tb{
-		font-size: 3.2rem;
-	}
-	.fs-12-tb {
-		font-size: 1.2rem;
-	}
+	
 }
 
 @media only screen and (max-width: 767px) {
-	.fw-400-mb {
-		font-weight: 400;
-	}
-
-	.fw-500-mb {
-		font-weight: 500;
-	}
-
-	.fw-600-mb {
-		font-weight: 600;
-	}
-
-	.fw-700-mb {
-		font-weight: 700;
-	}
-
-	.fw-800-mb {
-		font-weight: 800;
-	}
-	.fs-200-mb{
-		font-size: 20rem;
-	}
-	.fs-56-mb {
+	.h0 {
 		font-size: 5.6rem;
 	}
-	.fs-40-mb {
+
+	.h1 {
 		font-size: 4rem;
 	}
-	.fs-28-mb {
-		font-size: 2.8rem;
+
+	.h2 {
+		font-size: 3.2rem;
 	}
-	.fs-20-mb {
+
+	.h3 {
+		font-size: 2.4rem;
+	}
+
+	.h4 {
 		font-size: 2rem;
 	}
-	.fs-16-mb {
-		font-size: 1.6rem;
-	}
-	.fs-14-mb {
+
+	.p {
 		font-size: 1.4rem;
 	}
-	.fs-12-mb{
+
+	.desc {
 		font-size: 1.2rem;
+	}
+
+	.label {
+		font-size: 1rem;
 	}
 }

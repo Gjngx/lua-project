@@ -118,15 +118,15 @@ export const HomePage = {
 				timeline: timeline,
 				tweenArr: [
 					...(includeTitle
-						? [new FadeSplitText({ el: $(this.el).find('.home-hero-top-title .heading').get(0) })]
+						? [new FadeSplitText({ el: $(this.el).find('.home-hero-top-title .h4').get(0) })]
 						: []),
 					...$(this.el)
-						.find('.home-hero-top-info .txt')
+						.find('.home-hero-top-info .label')
 						.toArray()
 						.map((el) => new FadeSplitText({ el })),
-					new FadeSplitText({ el: $(this.el).find('.home-hero-top-sub .heading').get(0) }),
+					new FadeSplitText({ el: $(this.el).find('.home-hero-top-sub .desc').get(0) }),
 					new FadeIn({ el: $(this.el).find('.home-hero-top-ic').get(0) }),
-					new FadeSplitText({ el: $(this.el).find('.home-hero-desc .txt').get(0) }),
+					new FadeSplitText({ el: $(this.el).find('.home-hero-desc .label').get(0) }),
 				],
 			});
 
@@ -393,7 +393,7 @@ export const HomePage = {
 				ease: 'none',
 			});
 
-			const heroDescription = $(this.el).find('.home-hero-bottom-desc .txt')[0];
+			const heroDescription = $(this.el).find('.home-hero-bottom-desc .h2')[0];
 			const isSanityPreview = document.documentElement.dataset.sanityPreview === 'true';
 			if (heroDescription && !isSanityPreview) {
 				this.heroTextOriginalHTML = $(heroDescription).html();
@@ -445,7 +445,7 @@ export const HomePage = {
 					},
 				});
 				this.tlHeroTextColor.to(revealItems, {
-					color: (index, element) => ($(element).is('svg') ? 'var(--cl-brand)' : '#fff'),
+					color: (index, element) => ($(element).is('svg') ? 'var(--cln-brand)' : 'var(--cln-white)'),
 					stagger: 0.06,
 					ease: 'none',
 				});
@@ -488,7 +488,7 @@ export const HomePage = {
 			if (this.tlHeroTextColor) this.tlHeroTextColor.kill();
 			this.masterReveal?.destroy();
 			this.bottomDescReveal?.destroy();
-			const heroDescription = $(this.el).find('.home-hero-bottom-desc .txt')[0];
+			const heroDescription = $(this.el).find('.home-hero-bottom-desc .h2')[0];
 			if (heroDescription && this.heroTextOriginalHTML !== null) {
 				$(heroDescription).html(this.heroTextOriginalHTML);
 			}
@@ -568,7 +568,7 @@ export const HomePage = {
 				triggerInit: this.el,
 				scrollTrigger: { trigger: $(this.el).find('.home-works-main-title') },
 				tweenArr: [
-					new FadeSplitText({ el: $(this.el).find('.home-works-main-title .heading').get(0) }),
+					new FadeSplitText({ el: $(this.el).find('.home-works-main-title .h1').get(0) }),
 					new FadeIn({ el: $(this.el).find('.home-works-main-desc').get(0), delay: 0.2 }),
 				],
 			});
@@ -628,7 +628,7 @@ export const HomePage = {
 					{
 						width: worksSvgWidth,
 						y: worksTitleTop,
-						color: 'var(--cl-content-strong)',
+						color: 'var(--cln-content-strong)',
 						ease: 'power3.inOut',
 					},
 					'<=',
@@ -658,7 +658,7 @@ export const HomePage = {
 				scale: 1,
 			};
 			this.transitionBackgroundTween = gsap.to(this.el, {
-				backgroundColor: 'var(--cl-bg-main)',
+				backgroundColor: 'var(--cln-bg-gray)',
 				duration: 1,
 				ease: 'none',
 				paused: true,
@@ -1414,7 +1414,7 @@ export const HomePage = {
 					start: 'top top+=95%',
 				},
 				tweenArr: [
-					new FadeSplitText({ el: $(this.el).find('.home-how-intro-desc .txt').get(0) }),
+					new FadeSplitText({ el: $(this.el).find('.home-how-intro-desc .p').get(0) }),
 					new FadeIn({ el: $(this.el).find('.home-how-intro-decor').get(0) }),
 				],
 			});

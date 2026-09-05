@@ -82,7 +82,7 @@ const phoneHref = `tel:${stegaClean(phoneNumber).replace(/[^\d+]/g, '')}`;
 				<div class="footer-main-content" data-sound-hover>
 					<h2
 						class:list={[
-							'heading fs-112 trans-upper fw-600 fs-80-tb fs-56-mb',
+							'h0',
 							{ 'footer-preserve-line-breaks': isDraftMode },
 						]}
 					>
@@ -110,7 +110,7 @@ const phoneHref = `tel:${stegaClean(phoneNumber).replace(/[^\d+]/g, '')}`;
 						</div>
 						<div class="footer-main-say-hello-btn">
 							<div class="footer-main-say-hello-btn-inner">
-								<p class="txt fs-24 fw-500">{primaryActionLabel}</p>
+								<p class="h3">{primaryActionLabel}</p>
 							</div>
 						</div>
 					</div>
@@ -126,17 +126,19 @@ const phoneHref = `tel:${stegaClean(phoneNumber).replace(/[^\d+]/g, '')}`;
 			</div>
 			<div class="footer-sub">
 				<div class="footer-sub-label">
-					<p class="txt fs-20 fw-500 fs-14-mb">{conversationLabel}</p>
+					<p class="h4">{conversationLabel}</p>
 				</div>
 				<div class="footer-sub-content">
 					<a href={emailHref} class="footer-sub-link">
-						<span class="footer-sub-link-ic" aria-hidden="true">
+						<div class="footer-sub-link-ic" aria-hidden="true">
 							<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 33 31" fill="none">
 								<path pathLength="1" d="M30.8333 20.168H5.5C4.43913 20.168 3.42172 19.7465 2.67157 18.9964C1.92143 18.2463 1.5 17.2288 1.5 16.168V1.5013" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 								<path pathLength="1" d="M21.5 10.8333L30.8333 20.1667L21.5 29.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 							</svg>
-						</span>
-						<span class="footer-sub-link-text hover-un txt fs-32 fw-500 fs-20-mb">{email}</span>
+						</div>
+						<div class="footer-sub-link-text hover-un ">
+							<p class="h2">{email}</p>
+						</div>
 					</a>
 				</div>
 			</div>
@@ -145,7 +147,7 @@ const phoneHref = `tel:${stegaClean(phoneNumber).replace(/[^\d+]/g, '')}`;
 					{
 						creditGroups.map((group) => (
 							<div class="footer-info-left-content">
-								<p class="txt fs-16 fs-14-mb">
+								<p class="desc">
 									{group.label}<span aria-hidden="true">:</span>
 								</p>
 								{group.contributors?.map((contributor, index) => (
@@ -156,10 +158,10 @@ const phoneHref = `tel:${stegaClean(phoneNumber).replace(/[^\d+]/g, '')}`;
 											target="_blank"
 											rel="noreferrer"
 										>
-											<p class="txt fs-16 fw-500 fs-14-mb">{contributor.name}</p>
+											<p class="desc">{contributor.name}</p>
 										</a>
 										{index < (group.contributors?.length || 0) - 1 && (
-											<span class="txt fs-16 fw-500 fs-14-mb" aria-hidden="true">,</span>
+											<span class="desc" aria-hidden="true">,</span>
 										)}
 									</>
 								))}
@@ -204,10 +206,10 @@ const phoneHref = `tel:${stegaClean(phoneNumber).replace(/[^\d+]/g, '')}`;
 				</div>
 				<div class="footer-info-right">
 					<div class="footer-info-right-label">
-						<p class="txt fs-16 fs-14-mb">{phoneLabel}</p>
+						<p class="desc">{phoneLabel}</p>
 					</div>
 					<a href={phoneHref} class="footer-info-right-phone hover-un">
-						<p class="txt fs-16 fw-500 fs-14-mb">{phoneNumber}</p>
+						<p class="desc">{phoneNumber}</p>
 					</a>
 				</div>
 			</div>

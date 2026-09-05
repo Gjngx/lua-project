@@ -68,7 +68,7 @@ export const LetTalkPage = {
 
 		animationReveal(timeline) {
 			const textItems = $(this.el)
-				.find('.let-talk-top-block, .let-talk-top > .heading > span.let-talk-top-line')
+				.find('.let-talk-top-block, .let-talk-top > .h0 > span.let-talk-top-line')
 				.toArray();
 
 			this.masterReveal = new MasterTimeline({
@@ -135,7 +135,7 @@ export const LetTalkPage = {
 			});
 
 			this.tlIntro
-				.to($(this.el).find('.let-talk-top .heading')[0], { scale: 0.6, ease: 'none', duration: 1 })
+				.to($(this.el).find('.let-talk-top .h0')[0], { scale: 0.6, ease: 'none', duration: 1 })
 				.to($(this.el).find('.let-talk-decor')[0], { yPercent: -15, ease: 'none' }, '<')
 				.to(decorWraps[0], { x: () => getDecorTranslateX(), ease: 'none', duration: 1 }, '<')
 				.to(decorWraps[1], { x: () => -getDecorTranslateX(), ease: 'none', duration: 1 }, '<')

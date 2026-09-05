@@ -44,7 +44,7 @@
   position: absolute;
   inset: 0%;
   z-index: 0;
-  background-color: var(--cl-brand);
+  background-color: var(--cln-brand);
 }
 
 .loader-home-left{
@@ -84,12 +84,12 @@
 	backface-visibility: hidden;
 }
 
-.loader-home-progress-reel .txt{
+.loader-home-progress-reel .h1{
   flex: none;
 }
 
 .loader-home-desc{
-  width: 27.1rem;
+  width: 27.8rem;
   margin-top: min(44rem, 44.8065173116vh);
   opacity: 0;
 }
@@ -120,12 +120,12 @@
 }
 .loader-home-logo-ic{
   height: 28rem;
-  color: var(--cl-content-strong);
+  color: var(--cln-content-strong);
   opacity: 0;
 }
 
 .loader-home-logo.is-brand .loader-home-logo-ic{
-  color: var(--cl-brand);
+  color: var(--cln-brand);
 }
 
 @media only screen and (max-width: 991px) {

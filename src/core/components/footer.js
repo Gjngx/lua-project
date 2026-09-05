@@ -52,14 +52,14 @@ export class Footer extends TriggerSetup {
 			tweenArr: [
 				new FadeIn({ el: $(this.el).find('.footer-main-decor').get(0) }),
 				new FadeIn({ el: $(this.el).find('.footer-main-decor').get(1) }),
-				new FadeSplitText({ el: $(this.el).find('.footer-main-content .heading').get(0) }),
-				new FadeSplitText({ el: $(this.el).find('.footer-sub-label .txt').get(0), delay: 0.3 }),
+				new FadeSplitText({ el: $(this.el).find('.footer-main-content .h0').get(0) }),
+				new FadeSplitText({ el: $(this.el).find('.footer-sub-label .h4').get(0), delay: 0.3 }),
 				new FadeSplitText({ el: $(this.el).find('.footer-sub-link-text').get(0), delay: 0.4 }),
 			]
 		});
 
 		const footerInfo = $(this.el).find('.footer-info').get(0);
-		const leftTextTweens = $(footerInfo).find('.footer-info-left .txt').toArray().map((el, index) =>
+		const leftTextTweens = $(footerInfo).find('.footer-info-left .desc').toArray().map((el, index) =>
 			new FadeIn({ el, delay: index * 0.04 }),
 		);
 		const iconTweens = $(footerInfo).find('.footer-info-center-ic-wrap').toArray().map((el, index) =>
@@ -72,7 +72,7 @@ export class Footer extends TriggerSetup {
 				duration: 0.6,
 			}),
 		);
-		const rightTextTweens = $(footerInfo).find('.footer-info-right .txt').toArray().map((el, index) =>
+		const rightTextTweens = $(footerInfo).find('.footer-info-right .desc').toArray().map((el, index) =>
 			new FadeIn({ el, delay: 0.2 + index * 0.05 }),
 		);
 		const infoReveal = new MasterTimeline({

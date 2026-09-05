@@ -130,7 +130,7 @@ const socialHref = (platform: string) =>
 					services.map((service) => (
 						<a href="#" class="let-talk-decor-service" data-service-key={service.key}>
 							<div class="let-talk-decor-service-inner hover-un">
-								<p class="txt fs-20">{service.label}</p>
+								<p class="p">{service.label}</p>
 							</div>
 						</a>
 					))
@@ -139,13 +139,13 @@ const socialHref = (platform: string) =>
 		</div>
 		<div class="let-talk-scroll">
 			<div class="let-talk-scroll-inner">
-				<p class="txt fs-12 trans-upper">Scroll down</p>
+				<p class="label">Scroll down</p>
 			</div>
 		</div>
 		<section class="let-talk-main">
 			<div class="container grid full-h">
 				<div class="let-talk-top">
-					<h1 class="heading fs-180 fw-600 trans-upper fs-112-tb">
+					<h1 class="h0">
 						<div class="let-talk-top-line">
 							<span class="let-talk-top-block">Let's</span>
 							<div class="let-talk-img">
@@ -187,12 +187,12 @@ const socialHref = (platform: string) =>
 					<div class="let-talk-footer-info">
 						<div class="let-talk-footer-phone">
 							<a href={phoneHref} class="let-talk-footer-phone-inner hover-un">
-								<p class="txt fs-80">{phoneNumber}</p>
+								<p class="h2">{phoneNumber}</p>
 							</a>
 						</div>
 						<div class="let-talk-footer-email">
 							<a href={emailHref} class="let-talk-footer-email-inner hover-un">
-								<p class="txt fs-80">{email}</p>
+								<p class="h2">{email}</p>
 							</a>
 						</div>
 						<div class="let-talk-footer-links">

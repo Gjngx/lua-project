@@ -31,6 +31,7 @@ class Loader {
 		$(this.loaderEl).removeClass(['done']);
 		$(this.loaderEl).addClass(['is-loading']);
 		smoothScroll.stop();
+		// Tạm tắt animation loader; play() sẽ gọi complete() để hiển thị trang.
 		this.setupTimelines();
 
 		// Dựng DOM state, listeners và các timeline paused của page trước khi
@@ -50,7 +51,7 @@ class Loader {
 			const isMobile = window.matchMedia('(max-width: 767px)').matches;
 			const progress = $(this.loaderEl).find('.loader-home-progress')[0];
 			const percent = $(this.loaderEl).find('.loader-home-progress-percent')[0];
-			const percentText = $(percent).find('.loader-home-progress-tens .txt')[0];
+			const percentText = $(percent).find('.loader-home-progress-tens .h1')[0];
 			const percentHeight = percentText?.getBoundingClientRect().height || 0;
 			const units = $(percent).find('.loader-home-progress-units')[0];
 			const tens = $(percent).find('.loader-home-progress-tens')[0];
@@ -72,16 +73,14 @@ class Loader {
 			const desc = $(this.loaderEl).find('.loader-home-desc')[0];
 			const loaderHomePanel = $(this.loaderEl).find('.loader-home-panel')[0];
 			const progressStartY = window.innerHeight - percentHeight;
-			const logoRiseStartY = isMobile
-				? percentHeight
-				: Math.max(0, percentHeight - logo.getBoundingClientRect().top);
+			const logoRiseStartY = logoIcon.getBoundingClientRect().height;
 			const logoOffset = { x: 0, y: 0 };
 			const logoRevealProgress = { value: 0 };
 			const updateLogoReveal = () => {
 				const travelled = percentHeight * logoRevealProgress.value;
 				gsap.set(percent, { y: -travelled });
 				gsap.set(logoIcons, {
-					y: Math.max(0, logoRiseStartY - travelled),
+					y: logoRiseStartY * (1 - logoRevealProgress.value),
 				});
 			};
 			const updateLogoOffset = () => {
@@ -96,7 +95,7 @@ class Loader {
 				logoOffset.y = screenRect.top - loaderRect.top;
 			};
 			this.descSplit = useSplitPretext({
-				selector: $(desc).find('.txt')[0],
+				selector: $(desc).find('.h4')[0],
 				type: 'lines',
 				isMask: true,
 			});

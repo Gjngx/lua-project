@@ -72,14 +72,14 @@
 }
 
 .home-hero-desc {
-	width: 16.5rem;
-	color: var(--cl-white);
+	width: 18rem;
+	color: var(--cln-white);
 	margin-top: 3.2rem;
 }
 
 .home-hero-top-title {
 	width: 27.1rem;
-	color: var(--cl-white);
+	color: var(--cln-white);
 	margin-top: min(44rem, 44.8065173116vh);
 }
 
@@ -98,7 +98,7 @@
 
 .home-hero-top-sub {
 	width: 12rem;
-	color: var(--cl-white);
+	color: var(--cln-white);
 }
 
 .home-hero-top-info {
@@ -106,7 +106,7 @@
 	justify-content: space-between;
 	align-items: center;
 	width: 24.6rem;
-	color: var(--cl-white);
+	color: var(--cln-white);
 }
 
 .home-hero-bottom {
@@ -129,7 +129,6 @@
 
 .home-hero-bottom-desc {
 	width: 55.8rem;
-	color: var(--cl-white);
 }
 
 .home-hero-bottom-word,
@@ -140,7 +139,7 @@
 
 .home-hero-bottom-desc svg {
 	width: 3.2rem;
-	color: var(--cl-brand);
+	color: var(--cln-brand);
 }
 .home-hero-bottom-action {
 	width: calc(var(--container--one-column) * 5 + var(--container--column-gap) * 4);
@@ -158,14 +157,14 @@
 	width: 7.4rem;
 	height: 7.4rem;
 	border-radius: 99%;
-	background-color: var(--cl-white);
+	background-color: var(--cln-white);
 }
 .home-hero-bottom-link {
 	position: relative;
 	display: flex;
 	align-items: center;
 	gap: 0.4rem;
-	color: var(--cl-white);
+	color: var(--cln-white);
 }
 .home-hero-bottom-link-ic {
 	position: relative;
@@ -198,7 +197,7 @@
 
 .home-hero-decor-inner {
 	width: 290.7rem;
-	color: var(--cl-brand);
+	color: var(--cln-brand);
 	opacity: 0;
 }
 
@@ -213,7 +212,7 @@
 
 .home-works-wrap {
 	position: relative;
-	background-color: var(--cl-white);
+	background-color: var(--cln-white);
 	pointer-events: none;
 }
 
@@ -259,7 +258,7 @@
 	position: relative;
 	margin-top: 8.8rem;
 	width: 100%;
-	color: var(--cl-brand-soft-light);
+	color: var(--cln-content-soft);
 	transition: color 0.4s ease;
 }
 
@@ -339,7 +338,8 @@
 }
 
 .home-works-main-ic {
-	width: 0.6rem;
+	display: flex;
+	width: 2rem;
 }
 
 .home-works-list {
@@ -375,16 +375,18 @@
 	text-align: center;
 }
 
-.home-works-item-title {
-	color: var(--cl-content-strong);
-}
-
 .home-works-item-categories {
 	display: flex;
 	justify-content: center;
 	gap: 0.8rem;
 	margin-top: 0.8rem;
-	color: var(--cl-content-note);
+	color: var(--cln-content-base);
+}
+
+.home-works-item-category-dot{
+	display: flex;
+	width: 1.2rem;
+	color: var(--cln-content-label);
 }
 
 .home-works-item:nth-child(4n + 1) {
@@ -460,7 +462,7 @@
 	display: block;
 	width: 100%;
 	height: 100%;
-	color: var(--cl-brand-100);
+	color: var(--cln-brand);
 }
 
 .home-works-trans.is-canvas-active .home-works-trans-inner {
@@ -494,7 +496,7 @@
 .home-works-trans-item-inner {
 	position: relative;
 	width: 25rem;
-	color: var(--cl-brand-100);
+	color: var(--cln-brand);
 }
 
 .home-works-trans-item:nth-child(1) .home-works-trans-item-inner {
@@ -516,12 +518,7 @@
 .home-works-bottom-title {
 	text-align: center;
 	opacity: 0;
-	color: var(--cl-content-strong);
 	will-change: opacity, transform;
-}
-
-.home-works-bottom-title .heading {
-	line-height: 0.9;
 }
 
 .home-works-empty {
@@ -536,7 +533,7 @@
 	margin-top: -30vh;
 }
 .home-how-intro {
-	grid-column: 8 / 12;
+	grid-column: 7 / 13;
 	grid-row: 1 / 1;
 }
 
@@ -664,7 +661,7 @@
 
 .home-how-content-item-type {
 	width: fit-content;
-	background-color: var(--cl-white);
+	background-color: var(--cln-white);
 	border-radius: 10vmin;
 	padding: 0.8rem 1.6rem;
 }
@@ -870,7 +867,7 @@
 
 .home-playground-card:focus-visible .home-playground-card-inner {
 	transform: scale(1.05);
-	box-shadow: 0 0 0 0.2rem var(--cl-brand);
+	box-shadow: 0 0 0 0.2rem var(--cln-brand);
 }
 
 .home-playground-content-left-title,
@@ -878,12 +875,12 @@
 	pointer-events: auto;
 }
 .home-playground-wrap .home-playground-content-right-link,
-.home-playground-wrap .home-playground-content-left-title .txt {
+.home-playground-wrap .home-playground-content-left-title .h2 {
 	transition: transform 0.4s ease-in-out;
 }
 
 .home-playground-wrap.is-sphere-focused .home-playground-content-right-link,
-.home-playground-wrap.is-sphere-focused .home-playground-content-left-title .txt {
+.home-playground-wrap.is-sphere-focused .home-playground-content-left-title .h2 {
 	transform: translateY(100%);
 }
 .home-playground-trans-decor svg{
@@ -909,7 +906,7 @@
 	bottom: 0em;
 }
 
-.home-playground-content-right-link .txt {
+.home-playground-content-right-link .h2 {
 	line-height: 1.3;
 }
 
@@ -1072,13 +1069,13 @@
 	}
 	.home-hero-ic-mb {
 		width: 2rem;
-		color: var(--cl-white);
+		color: var(--cln-white);
 	}
 
 	.home-hero-sub-mb {
 		text-align: end;
 		width: 12.5rem;
-		color: var(--cl-white);
+		color: var(--cln-white);
 	}
 	.home-hero-top-sub {
 		display: none;
@@ -1127,7 +1124,6 @@
 	.home-works-item-label {
 		padding-block: 1.2rem;
 		border-radius: 0.8rem;
-		background-color: var(--cl-bg-main);
 	}
 	.home-works-main-desc {
 		padding-top: 0.8rem;

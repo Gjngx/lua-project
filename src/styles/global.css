@@ -148,7 +148,6 @@ a {
 	justify-content: flex-start;
 	align-items: center;
 	height: 100%;
-	color: var(--cl-content-strong);
 	position: relative;
 	z-index: 2;
 	padding-inline: 1.6rem 2.4rem;
@@ -173,7 +172,7 @@ a {
 	width: 0.4rem;
 	height: 0.4rem;
 	border-radius: 99%;
-	background-color: var(--cl-content-strong);
+	background-color: var(--cln-content-strong);
 	transition:
 		opacity 0.25s ease,
 		transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -203,7 +202,7 @@ a {
 	position: absolute;
 	inset: 0;
 	z-index: 1;
-	background-color: var(--cl-white);
+	background-color: var(--cln-white);
 	border-radius: 10vmin;
 	pointer-events: none;
 	transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1),
@@ -338,7 +337,7 @@ a {
 .audio-btn-yes {
 	font-size: 1.2rem;
 	line-height: 1.1;
-	background: var(--cl-brand, #fff);
+	background: var(--cln-brand, #fff);
 	color: #000;
 	border: none;
 }
@@ -354,7 +353,7 @@ a {
 .line {
 	width: 100%;
 	height: var(--1px);
-	background-color: var(--cl-border-main);
+	background-color: var(--cln-bg-gray);
 	pointer-events: none;
 }
 .cursor-wrap {
@@ -402,7 +401,7 @@ a {
 	justify-content: center;
 	transform: scale(0);
 	transition: transform 0.4s ease;
-	background-color: var(--cl-brand);
+	background-color: var(--cln-brand);
 	border-radius: 50%;
 }
 .cursor.has-ic-external .cursor-ic-link{
