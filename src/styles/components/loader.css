@@ -53,9 +53,6 @@
   display: grid;
 }
 
-.loader-home-right{
-  grid-column: -7 / -2;
-}
 
 .loader-home-progress{
   grid-column: 1 / 1;
@@ -88,11 +85,6 @@
   flex: none;
 }
 
-.loader-home-desc{
-  width: 27.8rem;
-  margin-top: min(44rem, 44.8065173116vh);
-  opacity: 0;
-}
 
 .loader-home-logo-mask{
   position: absolute;
@@ -126,44 +118,4 @@
 
 .loader-home-logo.is-brand .loader-home-logo-ic{
   color: var(--cln-brand);
-}
-
-@media only screen and (max-width: 991px) {
-  .loader-home-logo-ic {
-    height: 18rem;
-  }
-  .loader-home-left {
-    grid-column: 2 / 7;
-  }
-  .loader-home-right{
-    grid-column: 7 / -2;
-  }
-  .loader-home-desc {
-    margin-top: 50vh;
-    transform: translateY(-50%);
-  }
-}
-
-@media only screen and (max-width: 767px) {
-  .loader-home-desc{
-    width: 100%;
-    margin-top: min(36.3rem, 45.375dvh);
-    transform: translateY(0);
-    /* display: none; */
-  }
-  .loader-home-left{
-    grid-column: 2 / -2;
-    grid-row: 1 / 1;
-  }
-  .loader-home-right {
-    grid-column: 2 / -2;
-    grid-row: 1 / 1;
-  }
-  .loader-home-logo-ic{
-    height: 14rem;
-  }
-  .loader-home-logo{
-    top: auto;
-    bottom: 4.2rem;
-  }
 }

@@ -19,10 +19,9 @@ interface Props {
 	namespace: string;
 	description?: string;
 	image?: string;
-	loaderHeadline?: string;
 }
 
-const { title, namespace, description, image, loaderHeadline } = Astro.props;
+const { title, namespace, description, image } = Astro.props;
 const draftMode = Astro.cookies.has(perspectiveCookieName);
 
 type SiteConfigData = {
@@ -89,7 +88,7 @@ const serializedSoundEffects = JSON.stringify({
 	<body class="body">
 		<Cursor />
 		<Header />
-		<Loader headline={loaderHeadline} />
+		<Loader />
 		<div class="body-inner">
 			<!-- <LayoutGrid /> -->
 			<main class="main" data-barba="wrapper">

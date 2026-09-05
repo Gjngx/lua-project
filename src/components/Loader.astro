@@ -2,11 +2,6 @@
 import '../styles/components/loader.css';
 import IconLogo from '../components/icons/IconLogo.astro';
 
-interface Props {
-	headline?: string;
-}
-
-const { headline = 'Creating websites and digital products for great experiences' } = Astro.props;
 const counterDigits = Array.from({ length: 130 }, (_, index) => index % 10);
 ---
 
@@ -40,11 +35,7 @@ const counterDigits = Array.from({ length: 130 }, (_, index) => index % 10);
 							</div>
 						</div>
 					</div>
-					<div class="loader-home-right">
-						<div class="loader-home-desc">
-							<p class="h4">{headline}</p>
-						</div>
-					</div>
+
 				</div>
 			</div>
 		</div>

@@ -1,7 +1,6 @@
 import { gsap, ScrollTrigger, CustomEase } from './gsap.js';
 import { smoothScroll } from './lenis.js';
 import { PageManagerRegistry } from './page-managers.js';
-import { useSplitPretext } from '../utils/pretext.js';
 
 class Loader {
 	constructor() {
@@ -15,7 +14,6 @@ class Loader {
 		this.tlLoading = null;
 		this.tlLoadMaster = null;
 		this.loaderEl = null;
-		this.descSplit = null;
 		this.hasPlayedPageOnce = false;
 	}
 
@@ -31,11 +29,7 @@ class Loader {
 		$(this.loaderEl).removeClass(['done']);
 		$(this.loaderEl).addClass(['is-loading']);
 		smoothScroll.stop();
-		// Tạm tắt animation loader; play() sẽ gọi complete() để hiển thị trang.
 		this.setupTimelines();
-
-		// Dựng DOM state, listeners và các timeline paused của page trước khi
-		// loader được play. Không chạy reveal animation tại bước này.
 		await this.manager?.prepareOnce(data);
 	}
 
@@ -70,7 +64,6 @@ class Loader {
 			const screenLogoSvg = $(screenLogoIcon).find('svg')[0];
 			const darkLogoMask = $(this.loaderEl).find('.loader-home-logo-mask-dark')[0];
 			const brandLogoMask = $(this.loaderEl).find('.loader-home-logo-mask-brand')[0];
-			const desc = $(this.loaderEl).find('.loader-home-desc')[0];
 			const loaderHomePanel = $(this.loaderEl).find('.loader-home-panel')[0];
 			const progressStartY = window.innerHeight - percentHeight;
 			const logoRiseStartY = logoIcon.getBoundingClientRect().height;
@@ -94,13 +87,6 @@ class Loader {
 				logoOffset.x = screenRect.left - loaderRect.left;
 				logoOffset.y = screenRect.top - loaderRect.top;
 			};
-			this.descSplit = useSplitPretext({
-				selector: $(desc).find('.h4')[0],
-				type: 'lines',
-				isMask: true,
-			});
-			const descElements = this.descSplit?.elements || [];
-
 			gsap.set(progress, {
 				height: percentHeight,
 				y: progressStartY,
@@ -123,10 +109,6 @@ class Loader {
 				rotation: 0,
 				transformOrigin: '50% 50%',
 			});
-			gsap.set(desc, { autoAlpha: 1 });
-			if (descElements.length) {
-				gsap.set(descElements, { yPercent: 110 });
-			}
 			// Chỉ cần thay đổi giá trị này để chỉnh toàn bộ thời gian chạy counter.
 			const totalDuration = 6;
 			const counterStartTime = 0.3;
@@ -176,18 +158,6 @@ class Loader {
 					duration: 0.4,
 					ease: 'sine.inOut',
 				});
-			if (descElements.length) {
-				firstLoadTimeline.to(
-					descElements,
-					{
-						yPercent: 0,
-						duration: 0.4,
-						ease: 'sine.inOut',
-						stagger: 0.02,
-					},
-					'<',
-				);
-			}
 
 			let previousStopTime = 0;
 			const counterTimeline = counterSamples.reduce((timeline, sample, index) => {

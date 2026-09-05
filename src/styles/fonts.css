@@ -144,12 +144,6 @@ span {
 	text-transform: uppercase;
 }
 
-
-
-@media only screen and (max-width: 991px) {
-	
-}
-
 @media only screen and (max-width: 767px) {
 	.h0 {
 		font-size: 5.6rem;
