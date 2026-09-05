@@ -10,49 +10,54 @@ const counterDigits = Array.from({ length: 130 }, (_, index) => index % 10);
 		<div class="loader-home">
 			<div class="loader-home-panel">
 				<div class="loader-home-bg"></div>
-				<div class="container grid full-h">
+				<div class="container grid full-h" data-loader-hidden>
 					<div class="loader-home-left">
 						<div class="loader-home-progress">
 							<div class="loader-home-progress-percent">
 								<div class="loader-home-progress-digit">
 									<div class="loader-home-progress-reel loader-home-progress-tens">
-										{
-											counterDigits.map((digit) => (
-												<p class="h1">{digit}</p>
-											))
-										}
+										{counterDigits.map((digit) => <p class="h1">{digit}</p>)}
 									</div>
 								</div>
 								<div class="loader-home-progress-digit">
 									<div class="loader-home-progress-reel loader-home-progress-units">
-										{
-											counterDigits.map((digit) => (
-												<p class="h1">{digit}</p>
-											))
-										}
+										{counterDigits.map((digit) => <p class="h1">{digit}</p>)}
 									</div>
 								</div>
 							</div>
+							<div class="loader-home-progress-unit">
+								<p class="h1">%</p>
+							</div>
 						</div>
 					</div>
-
+					<div class="loader-home-right">
+						<div class="loader-home-loading">
+							<p class="label">Loading</p>
+							<p class="label loader-home-dot dot-1">.</p>
+							<p class="label loader-home-dot dot-2">.</p>
+							<p class="label loader-home-dot dot-3">.</p>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
-		<div class="loader-home-logo-mask loader-home-logo-mask-dark">
+		<div class="loader-home-logo-mask loader-home-logo-mask-dark" data-loader-hidden>
 			<div class="loader-home-logo is-dark">
 				<div class="loader-home-logo-ic">
 					<IconLogo />
 				</div>
+				<div class="loader-home-logo-ic mask-loading">
+					<IconLogo />
+				</div>
 			</div>
 		</div>
-		<div class="loader-home-logo-mask loader-home-logo-mask-brand">
+		<div class="loader-home-logo-mask loader-home-logo-mask-brand" data-loader-hidden>
 			<div class="loader-home-logo is-brand">
 				<div class="loader-home-logo-ic">
 					<IconLogo />
 				</div>
 			</div>
 		</div>
-		<div class="loader-page"></div>
+		<div class="loader-page" data-loader-hidden></div>
 	</div>
 </div>

@@ -1,4 +1,4 @@
-.loader{
+.loader {
   z-index: 999;
   opacity: 1;
   /* pointer-events: none; */
@@ -9,14 +9,14 @@
   inset: 0%;
 }
 
-.loader-inner{
+.loader-inner {
   width: 100%;
   height: 100%;
   position: relative;
   display: block;
 }
 
-.loader-home{
+.loader-home {
   width: 100%;
   height: 100%;
   position: relative;
@@ -24,7 +24,7 @@
   display: block;
 }
 
-.loader-home-panel{
+.loader-home-panel {
   overflow: hidden;
   width: 100%;
   height: 100%;
@@ -35,58 +35,66 @@
   will-change: clip-path;
 }
 
-.loader-home-panel > .container{
-  position: relative;
-  z-index: 1;
-}
-
-.loader-home-bg{
+.loader-home-bg {
   position: absolute;
   inset: 0%;
   z-index: 0;
   background-color: var(--cln-brand);
 }
 
-.loader-home-left{
-  grid-column: 2 / 12;
-  position: relative;
+.loader-home-left {
+  grid-column: 2 / 4;
+  grid-row: 1 / 1;
   display: grid;
+  overflow: hidden;
+  margin-bottom: 2.4rem;
+  align-self: end;
 }
 
-
-.loader-home-progress{
-  grid-column: 1 / 1;
+.loader-home-right {
+  grid-column: 13 / 14;
   grid-row: 1 / 1;
-  opacity: 0;
+  margin-bottom: 2.4rem;
+  align-self: end;
   overflow: hidden;
 }
 
-.loader-home-progress-percent{
+.loader-home-loading{
   display: flex;
-	flex-direction: row;
-	position: relative;
-	height: 100%;
 }
 
-.loader-home-progress-digit{
-	overflow: hidden;
-	height: 100%;
+.loader-home-progress {
+  grid-column: 1 / 1;
+  grid-row: 1 / 1;
+  display: flex;
+  flex-direction: row;
+  height: 5.6rem;
 }
 
-.loader-home-progress-reel{
-	display: flex;
-	flex-direction: column;
-	will-change: transform;
-	transform: translateZ(0);
-	backface-visibility: hidden;
+.loader-home-progress-percent {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  height: 100%;
 }
 
-.loader-home-progress-reel .h1{
+.loader-home-progress-digit {
+  height: 100%;
+  overflow: hidden;
+}
+
+.loader-home-progress-reel {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.loader-home-progress-reel .h1 {
   flex: none;
 }
 
-
-.loader-home-logo-mask{
+.loader-home-logo-mask {
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -94,28 +102,44 @@
   will-change: clip-path;
 }
 
-.loader-home-logo-mask-dark{
+.loader-home-logo-mask-dark {
   clip-path: inset(0 0 0% 0);
 }
 
-.loader-home-logo-mask-brand{
+.loader-home-logo-mask-brand {
   z-index: 3;
   clip-path: inset(100% 0 0 0);
 }
 
-.loader-home-logo{
-  overflow: hidden;
+.loader-home-logo {
   position: absolute;
   top: 4rem;
   left: var(--container--padding);
   will-change: transform;
 }
-.loader-home-logo-ic{
-  height: 28rem;
-  color: var(--cln-content-strong);
-  opacity: 0;
+.loader-home-logo.is-dark{
+  overflow: hidden;
 }
 
-.loader-home-logo.is-brand .loader-home-logo-ic{
+.loader-home-logo-ic {
+  height: 28rem;
+  color: var(--cln-content-strong);
+  overflow: hidden;
+}
+
+.loader-home-logo-ic.mask-loading {
+  position: absolute;
+  inset: 0;
+  color: #D0DF6A;
+  clip-path: inset(0 0 0 0);
+  z-index: 3;
+}
+
+.loader-home-logo.is-brand .loader-home-logo-ic {
   color: var(--cln-brand);
+}
+
+.loader-home-dot{
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
