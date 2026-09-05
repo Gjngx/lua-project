@@ -1843,8 +1843,6 @@ export const HomePage = {
 			const titleRight = $(this.el).find('.home-playground-content-right-title')[0];
 			const transInner = $(this.el).find('.home-playground-trans-inner')[0];
 			const playgroundMain = $(this.el).find('.home-playground-main')[0];
-			const playgroundContent = $(this.el).find('.home-playground-content')[0];
-			const transitionDecor = $(transInner).find('.home-playground-trans-decor').toArray();
 
 			const widthTransLeft =
 				itemLeft.getBoundingClientRect().width - titleLeft.getBoundingClientRect().width;
@@ -1920,10 +1918,10 @@ export const HomePage = {
 						opacity: 1,
 						scale: 1,
 						pointerEvents: 'auto',
-						ease: 'power2.out',
-						duration: 0.36,
+						ease: 'power1.inOut',
+						duration: 0.85,
 					},
-					0.46,
+					'<=0.15',
 				);
 		}
 

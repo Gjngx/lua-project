@@ -777,16 +777,10 @@
 	pointer-events: none;
 }
 
-.home-playground-wrap.is-sphere-focused .home-playground-trans-inner,
-.home-playground-wrap.is-sphere-focused .home-playground-content {
-	mix-blend-mode: difference;
-}
-
 .home-playground-main {
 	z-index: 2;
 	overflow: hidden;
-	opacity: 0;
-	transform: scale(0.4);
+	transform: scale(0);
 	pointer-events: none;
 }
 
@@ -883,7 +877,33 @@
 .home-playground-content-right-link {
 	pointer-events: auto;
 }
+.home-playground-wrap .home-playground-content-right-link,
+.home-playground-wrap .home-playground-content-left-title .txt {
+	transition: transform 0.4s ease-in-out;
+}
 
+.home-playground-wrap.is-sphere-focused .home-playground-content-right-link,
+.home-playground-wrap.is-sphere-focused .home-playground-content-left-title .txt {
+	transform: translateY(100%);
+}
+.home-playground-trans-decor svg{
+    transition: all 0.4s ease-in-out;
+}
+.home-playground-wrap.is-sphere-focused .ic-1 svg{
+    transform: translate(-2rem, -2rem);
+}
+.home-playground-wrap.is-sphere-focused .ic-2 svg{
+    transform: translate(2rem, -2rem);
+}
+.home-playground-wrap.is-sphere-focused .ic-3 svg{
+    transform: translate(-2rem, 2rem);
+}
+.home-playground-wrap.is-sphere-focused .ic-4 svg{
+    transform: translate(2rem, 2rem);
+}
+.home-playground-wrap.is-sphere-focused .home-playground-trans-decor svg{
+    opacity: 0;
+}
 .home-playground-content-right-link.hover-line::before,
 .home-playground-content-right-link.hover-line::after {
 	bottom: 0em;
