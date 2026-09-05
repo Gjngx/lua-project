@@ -97,7 +97,7 @@ export const HomePage = {
 				},
 			});
 
-			this.revealReady = this.animationReveal(this.tlEnter, { includeTitle: true });
+			this.revealReady = this.animationReveal(this.tlEnter);
 			this.tlEnter.to({}, { duration: 0.001 });
 		}
 
@@ -113,13 +113,11 @@ export const HomePage = {
 			this.tlEnter.play(0);
 		}
 
-		animationReveal(timeline, { includeTitle = false } = {}) {
+		animationReveal(timeline) {
 			this.masterReveal = new MasterTimeline({
 				timeline: timeline,
 				tweenArr: [
-					...(includeTitle
-						? [new FadeSplitText({ el: $(this.el).find('.home-hero-top-title .h4').get(0) })]
-						: []),
+					new FadeSplitText({ el: $(this.el).find('.home-hero-top-title .h4').get(0) }),
 					...$(this.el)
 						.find('.home-hero-top-info .label')
 						.toArray()

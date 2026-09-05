@@ -2,6 +2,25 @@ import { gsap, ScrollTrigger, CustomEase } from './gsap.js';
 import { smoothScroll } from './lenis.js';
 import { PageManagerRegistry } from './page-managers.js';
 
+// Chỉnh nhịp loader tại đây. Tất cả thời gian tính bằng giây.
+const LOADER_TIMING = {
+	introDuration: 0.3, // Logo và bộ đếm xuất hiện.
+	countStepDuration: 1.2, // Thời gian chạy mỗi mốc đếm.
+	countPauseDuration: 0.1, // Nghỉ giữa các mốc đếm.
+	panelDuration: 1.2, // Panel và hai mask màu vuốt cùng nhau.
+	tiltDuration: 0.3, // Thời gian nghiêng chữ.
+	slideStart: 0.3, // Bắt đầu trượt, tính từ lúc panel bắt đầu vuốt.
+	straightenDuration: 0.4, // Thẳng lại trong 0.3 giây cuối của mỗi chữ trước khi chạm điểm đáp.
+	// delay cộng vào slideStart; duration là thời gian trượt.
+	// Dấu và chữ e dùng chung nhịp; rotation tính bằng độ.
+	letters: [
+		{ names: ['h'], rotation: 0, delay: 0, duration: 0.4 },
+		{ names: ['i'], rotation: 8, delay: 0.06, duration: 0.68 },
+		{ names: ['e', 'mark'], rotation: -8, delay: 0.12, duration: 0.76 },
+		{ names: ['u'], rotation: 4, delay: 0.18, duration: 0.8 },
+	],
+};
+
 class Loader {
 	constructor() {
 		this.isLoaded = false;
@@ -10,7 +29,6 @@ class Loader {
 		this.isInitialized = false;
 		this.tlFirstLoad = null;
 		this.tlMove = null;
-		this.tlEnd = null;
 		this.tlLoading = null;
 		this.tlLoadMaster = null;
 		this.loaderEl = null;
@@ -43,12 +61,10 @@ class Loader {
 			},
 		});
 		this.tlMove = gsap.timeline({ paused: true });
-		this.tlEnd = gsap.timeline({ paused: true });
 
 		// Viết animation mới vào các timeline trước khi ghép bên dưới.
 		// this.tlFirstLoad: animation mở đầu.
 		// this.tlMove: animation di chuyển.
-		// this.tlEnd: animation kết thúc.
 
 		const isHome = this.data.next.namespace === 'home';
 		if (isHome && !this.isLoaded) {
@@ -61,8 +77,8 @@ class Loader {
 			const units = $(progress).find('.loader-home-progress-units')[0];
 			const digitEase = CustomEase.create('loaderDigit', '0.76,0,0.24,1');
 			const countStops = [36, 69, 99];
-			const digitDuration = 1.2;
-			const pauseDuration = 0.15;
+			const digitDuration = LOADER_TIMING.countStepDuration;
+			const pauseDuration = LOADER_TIMING.countPauseDuration;
 			const countDuration = countStops.length * digitDuration + (countStops.length - 1) * pauseDuration;
 			const maskEase = (progress) => {
 				const time = progress * countDuration;
@@ -92,7 +108,7 @@ class Loader {
 
 			this.tlFirstLoad.to([progress, maskLoading, textLoading], {
 				yPercent: 0,
-				duration: 0.3,
+				duration: LOADER_TIMING.introDuration,
 				ease: 'power1.out',
 			});
 
@@ -126,17 +142,75 @@ class Loader {
 			}, countStart);
 			this.tlFirstLoad.set(progressMask, { opacity: 0 }, countStart + countDuration);
 
-			this.tlMove.to($(this.loaderEl).find('.loader-home-panel'), {
+			const darkMask = $(this.loaderEl).find('.loader-home-logo-mask-dark');
+			const brandMask = $(this.loaderEl).find('.loader-home-logo-mask-brand');
+			const logos = $(this.loaderEl).find('.loader-home-logo');
+			const headerLogo = document.querySelector('.header-logo-ic-amin');
+			if (headerLogo) {
+				gsap.set(logos.find('.loader-home-logo-ic'), { height: getComputedStyle(headerLogo).height });
+				gsap.set(headerLogo, { visibility: 'hidden' });
+			}
+			const logoParts = logos.find('.logo-part');
+			gsap.set(logoParts, { y: 0, rotation: 0, transformOrigin: '50% 50%' });
+			gsap.set(darkMask, { clipPath: 'inset(0 0 0% 0)' });
+			gsap.set(brandMask, { clipPath: 'inset(100% 0 0 0)' });
+
+			// Cho từng chữ đi ra ngoài khung logo; hai mask vẫn cắt theo mép panel.
+			this.tlMove.set([logos, logos.find('.loader-home-logo-ic'), logos.find('svg')], {
+				overflow: 'visible',
+			}, 0);
+			this.tlMove.to([$(this.loaderEl).find('.loader-home-panel'), darkMask], {
 				clipPath: 'inset(0 0 100% 0)',
-				duration: 1.2,
+				duration: LOADER_TIMING.panelDuration,
 				ease: 'power3.inOut',
+			}, 0);
+			this.tlMove.to(brandMask, {
+				clipPath: 'inset(0% 0 0 0)',
+				duration: LOADER_TIMING.panelDuration,
+				ease: 'power3.inOut',
+			}, 0);
+
+			// SVG dùng đơn vị viewBox: đổi quãng đường xuống đáy từ px sang SVG.
+			const slideDistance = (_, part) => {
+				const svg = part.ownerSVGElement;
+				const logo = part.closest('.loader-home-logo');
+				const bottomGap = parseFloat(getComputedStyle(document.documentElement).fontSize) * 2.4;
+				// Khung cố định không chịu transform của animation cuộn trên logo header.
+				const landingBottom = headerLogo?.closest('.header-logo-amin')?.getBoundingClientRect().bottom
+					?? this.loaderEl.getBoundingClientRect().bottom - bottomGap;
+				const distance = Math.max(0, landingBottom - logo.getBoundingClientRect().top - svg.clientHeight);
+				return distance * svg.viewBox.baseVal.height / svg.clientHeight;
+			};
+			LOADER_TIMING.letters.forEach(({ names, rotation, delay, duration }) => {
+				const parts = logos.find(names.map((name) => `.logo-part-${name}`).join(', '));
+				const slideStart = LOADER_TIMING.slideStart + delay;
+				const straightenDuration = Math.min(LOADER_TIMING.straightenDuration, duration);
+				const straightenStart = slideStart + duration - straightenDuration;
+				this.tlMove.to(parts, { rotation, duration: LOADER_TIMING.tiltDuration, ease: 'power1.in' }, 0);
+				this.tlMove.fromTo(parts, { y: 0 }, {
+					y: slideDistance,
+					duration,
+					ease: 'power1.inOut',
+					immediateRender: false,
+				}, slideStart);
+				this.tlMove.to(parts, {
+					rotation: 0,
+					duration: straightenDuration,
+					ease: 'power2.inOut',
+				}, straightenStart);
 			});
+			if (headerLogo) {
+				// Chờ cả panel và tất cả chữ hoàn tất, kể cả khi tăng duration ở trên.
+				const moveEnd = this.tlMove.duration();
+				this.tlMove.set(headerLogo, { clearProps: 'visibility' }, moveEnd);
+				this.tlMove.set(this.loaderEl, { opacity: 0, pointerEvents: 'none' }, moveEnd);
+			}
 
 		}
 
 
 		this.tlLoading = gsap.timeline({ paused: true });
-		[this.tlFirstLoad, this.tlMove, this.tlEnd].forEach((timeline) => {
+		[this.tlFirstLoad, this.tlMove].forEach((timeline) => {
 			const duration = timeline.totalDuration();
 			if (duration <= 0) return;
 
@@ -206,7 +280,6 @@ class Loader {
 		this.tlLoading?.kill();
 		this.tlFirstLoad?.kill();
 		this.tlMove?.kill();
-		this.tlEnd?.kill();
 	}
 }
 
