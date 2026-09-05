@@ -1,4 +1,4 @@
-import { gsap, ScrollTrigger } from './gsap.js';
+import { gsap, ScrollTrigger, SplitText } from './gsap.js';
 import { useSplitPretext } from '../utils/pretext.js';
 
 const fontsReady = () => document.fonts?.ready || Promise.resolve();
@@ -338,9 +338,18 @@ export class FadeSplitText {
 	setup(props) {
 		const el = this.DOM.el;
 		if (!el?.isConnected) return this;
-		gsap.set(el, { width: el.offsetWidth + 5 });
-		this.textSplit = splitText(el, this.splitType, true);
-		if (!this.textSplit) return this;
+		if (document.documentElement.dataset.sanityPreview === 'true') return this;
+		// Đo dòng trực tiếp trên DOM, giữ nguyên chiều rộng và nội dung khi revert.
+		this.textSplit = SplitText.create(el, {
+			type: this.splitType === 'lines' ? 'lines' : `lines,${this.splitType}`,
+			mask: 'lines',
+			linesClass: 'split-line',
+			wordsClass: 'split-word',
+			charsClass: 'split-char',
+			// Giữ khoảng trắng và điểm ngắt sau dấu '-' như text gốc.
+			wordDelimiter: { delimiter: /(?=\s)|(?<=\s)|(?<=-)/, replaceWith: '' },
+			ignore: 'svg',
+		});
 		const targets = this.textSplit[this.splitType];
 		gsap.set(targets, { autoAlpha: 0, yPercent: 100 });
 		this.animation = gsap.to(targets, {
@@ -360,10 +369,9 @@ export class FadeSplitText {
 			onComplete: () => {
 				if (!this.isDisableRevert) {
 					this.textSplit?.revert();
-					convertHyphen(el);
 				} else {
-					gsap.set($(el).find('[aria-hidden="true"]').toArray(), {
-						clearProps: 'overflow',
+					gsap.set(this.textSplit.masks, {
+						overflow: 'visible',
 					});
 				}
 			},

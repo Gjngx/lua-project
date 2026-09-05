@@ -6,6 +6,10 @@
 	z-index: 100;
 	pointer-events: none;
 }
+.header-logo-amin.header-home,
+.header.header-home .header-logo{
+	pointer-events: none;
+}
 
 .header-inner {
 	position: relative;
@@ -20,7 +24,7 @@
 	right: 0;
 	bottom: 0;
 	z-index: 99;
-	background-color: var(--cln-bg-overlay);
+	background-color: var(--cln-bg-overlay-10);
 	-webkit-backdrop-filter: blur(20px);
 	backdrop-filter: blur(20px);
 	transform: translateZ(0);
@@ -136,7 +140,8 @@
 	transition: clip-path 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.header-menu-play:hover .header-menu-play-bg-hover {
+.header-menu-play:hover .header-menu-play-bg-hover,
+.header-menu-skip:hover .header-menu-play-bg-hover {
 	clip-path: circle(200% at var(--header-play-hover-x) var(--header-play-hover-y));
 }
 
@@ -145,7 +150,7 @@
 	inset: -35%;
 	border-radius: 99%;
 	z-index: -1;
-	background-color: var(--cln-bg-transparent);
+	background-color: rgba(20, 21, 15, 0.05);
 	transform-origin: center center;
 	transition: all 0.3s ease-out;
 }
@@ -184,7 +189,6 @@
 	justify-content: space-between;
 	gap: 0.4rem;
 	color: var(--cln-content-strong);
-	overflow: hidden;
 	transition:
 		opacity 0.64s cubic-bezier(0.22, 0.61, 0.36, 1),
 		color 0.3s ease;
@@ -224,6 +228,9 @@
 }
 
 .header-menu-skip {
+	--header-play-hover-x: 50%;
+	--header-play-hover-y: 50%;
+	position: relative;
 	margin-left: 2.4rem;
 }
 
@@ -302,7 +309,7 @@
 }
 
 .header.on-scroll .header-menu-main {
-	transform: translate3d(calc(100% - 3.2rem), 0, 0);
+	transform: translate3d(calc(100% - 3.25rem), 0, 0);
 }
 
 .header.on-open-nav .header-menu-main {
@@ -378,7 +385,7 @@
 }
 
 .header.is-nav-closing.on-scroll .header-menu-main {
-	transform: translate3d(calc(100% - 3.2rem), 0, 0);
+	transform: translate3d(calc(100% - 3.25rem), 0, 0);
 	transition:
 		transform 0.78s cubic-bezier(0.45, 0, 0.55, 1),
 		background-color 0.3s ease;
@@ -739,12 +746,13 @@
 	color: var(--cln-brand);
 }
 
-.header.on-transparent .header-menu-play-ic:hover {
+.header.on-transparent .header-menu-play-ic:hover,
+.header.on-transparent .header-menu-skip-ic:hover {
 	color: var(--cln-content-strong);
 }
 
 .header.on-transparent .header-menu-play-bg {
-	background-color: #FFFFFF0D;
+	background-color: var(--cln-bg-transparent);
 }
 
 .header.on-light .header-menu-main {

@@ -13,7 +13,9 @@
 
 	--cln-bg-gray: #F4F3F0;
 	--cln-bg-transparent: rgba(255, 255, 255, 0.1);
-	--cln-bg-overlay: rgba(28, 30, 21, 0.1);
+	--cln-bg-overlay: rgba(28, 30, 21);
+	--cln-bg-overlay-10: rgba(28, 30, 21, 0.1);
+	
 
 	--cln-content-strong: rgba(28, 30, 21, 1);
 	--cln-content-base: rgba(28, 30, 21, 0.7);

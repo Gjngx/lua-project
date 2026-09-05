@@ -43,6 +43,7 @@ export const HomePage = {
 			this.tlHeroTop = null;
 			this.tlHeroBot = null;
 			this.tlHeroBotEnd = null;
+			this.tlHeroOverlay = null;
 			this.tlHeroTextColor = null;
 			this.heroTextOriginalHTML = null;
 			this.masterReveal = null;
@@ -361,20 +362,34 @@ export const HomePage = {
 				},
 			});
 			if (headerLogoAnimated && headerLogoTarget) {
-				this.tlHeroTop.to(headerLogoAnimated, {
+				this.tlHeroTop
+				.to(headerLogoAnimated, {
 					x: () => getHeaderLogoTransform().x,
 					y: () => getHeaderLogoTransform().y,
 					scale: () => getHeaderLogoTransform().scale,
 					ease: 'none',
 					force3D: true,
-					onComplete: () => {
-						gsap.set(headerLogoAnimated, { pointerEvents: 'auto' });
-					},
-					onReverseComplete: () => {
-						gsap.set(headerLogoAnimated, { pointerEvents: 'none' });
-					},
-				});
+					// onComplete: () => {
+					// 	gsap.set(headerLogoAnimated, { pointerEvents: 'auto' });
+					// },
+					// onReverseComplete: () => {
+					// 	gsap.set(headerLogoAnimated, { pointerEvents: 'none' });
+					// },
+				})
 			}
+
+			this.tlHeroOverlay = gsap.timeline({
+				scrollTrigger: {
+					trigger: $(this.el).find('.home-hero')[0],
+					start: 'top top',
+					end: `bottom top`,
+					scrub: true,
+				},
+			});
+			this.tlHeroOverlay.to($(this.el).find('.home-hero-bg-overlay-main')[0], {
+				opacity: 0.5,
+				ease: 'power2.out',
+			}, 0);
 
 			this.tlHeroBot = gsap.timeline({
 				scrollTrigger: {
@@ -484,6 +499,7 @@ export const HomePage = {
 			if (this.tlHeroTop) this.tlHeroTop.kill();
 			if (this.tlHeroBot) this.tlHeroBot.kill();
 			if (this.tlHeroTextColor) this.tlHeroTextColor.kill();
+			if (this.tlHeroOverlay) this.tlHeroOverlay.kill();
 			this.masterReveal?.destroy();
 			this.bottomDescReveal?.destroy();
 			const heroDescription = $(this.el).find('.home-hero-bottom-desc .h2')[0];
