@@ -868,10 +868,13 @@
 }
 
 .home-playground-card-inner {
-	width: 100%;
-	height: 100%;
+	/* Render a larger image layer, then shrink it for sharper 3D focus zoom. */
+	width: 400%;
+	height: 400%;
+	flex-shrink: 0;
+	transform: scale(0.25);
 	overflow: hidden;
-	border-radius: 0.8rem;
+	border-radius: 3.2rem;
 	background: transparent;
 	transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 	will-change: transform;
@@ -888,26 +891,26 @@
 
 @media (hover: hover) and (pointer: fine) {
 	.home-playground-card:hover .home-playground-card-inner {
-		transform: scale(1.05);
+		transform: scale(0.2625);
 	}
 }
 
 .home-playground-card:focus-visible .home-playground-card-inner {
-	transform: scale(1.05);
-	box-shadow: 0 0 0 0.2rem var(--cln-brand);
+	transform: scale(0.2625);
+	box-shadow: 0 0 0 0.8rem var(--cln-brand);
 }
 
 .home-playground-content-left-title,
-.home-playground-content-right-link {
+.home-playground-content-right-title-inner {
 	pointer-events: auto;
 }
-.home-playground-wrap .home-playground-content-right-link,
+.home-playground-wrap .home-playground-content-right-title-inner,
 .home-playground-wrap .home-playground-content-left-title .h2 {
 	transition: transform 0.4s ease-in-out;
 }
 
-.home-playground-wrap.is-sphere-focused .home-playground-content-right-link,
-.home-playground-wrap.is-sphere-focused .home-playground-content-left-title .h2 {
+.home-playground-wrap.is-sphere-focused .home-playground-content-right-title-inner,
+.home-playground-wrap.is-sphere-focused .home-playground-content-left-title .h2{
 	transform: translateY(100%);
 }
 .home-playground-trans-decor svg{
@@ -963,9 +966,13 @@
 	margin-left: auto;
 	padding-right: 11rem;
 }
+
 .home-playground-content-right-title {
 	width: fit-content;
 	padding-left: 11rem;
+}
+
+.home-playground-content-right-title-inner {
 	display: flex;
 	gap: 0.8rem;
 }

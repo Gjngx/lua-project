@@ -16,6 +16,7 @@ const WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS = 0.283;
 const WORKS_TRANSITION_BACKGROUND_SPAN = 0.12;
 const WORKS_TRANSITION_COVER_START = 0.5;
 const PLAYGROUND_SPHERE_RADIUS_REM = 500;
+const PLAYGROUND_SPHERE_HOVER_TILT = 10;
 
 export const HomePage = {
 	Hero: class {
@@ -1856,6 +1857,7 @@ export const HomePage = {
 			this.sphereCards = [];
 			this.sphereClones = [];
 			this.sphereRotation = { x: 0, y: 0, scale: 1 };
+			this.sphereHover = { x: 0, y: 0 };
 			this.sphereVisible = false;
 			this.sphereDragging = false;
 			this.sphereFocused = false;
@@ -2016,6 +2018,12 @@ export const HomePage = {
 
 			const onPointerDown = (event) => {
 				if (event.button !== 0) return;
+				// Preserve the visible angle when hover becomes a drag.
+				gsap.killTweensOf(this.sphereHover);
+				this.sphereRotation.x += this.sphereHover.x;
+				this.sphereRotation.y += this.sphereHover.y;
+				this.sphereHover.x = 0;
+				this.sphereHover.y = 0;
 				this.pendingSphereCard = null;
 				this.resetSphereFocus();
 				this.sphereDragging = true;
@@ -2033,6 +2041,25 @@ export const HomePage = {
 			};
 
 			const onPointerMove = (event) => {
+				if (!this.sphereDragging) {
+					if (
+						event.pointerType !== 'mouse' || this.sphereFocused ||
+						window.matchMedia('(prefers-reduced-motion: reduce)').matches
+					) return;
+					const bounds = this.cardLayer.getBoundingClientRect();
+					if (!bounds.width || !bounds.height) return;
+					const x = gsap.utils.clamp(-1, 1, ((event.clientX - bounds.left) / bounds.width - 0.5) * 2);
+					const y = gsap.utils.clamp(-1, 1, ((event.clientY - bounds.top) / bounds.height - 0.5) * 2);
+					gsap.to(this.sphereHover, {
+						x: -y * PLAYGROUND_SPHERE_HOVER_TILT,
+						y: x * PLAYGROUND_SPHERE_HOVER_TILT,
+						duration: 0.65,
+						ease: 'power2.out',
+						overwrite: true,
+						onUpdate: () => this.applySphereTransform(),
+					});
+					return;
+				}
 				if (!this.sphereDragging || this.spherePointer?.id !== event.pointerId) return;
 				const deltaX = event.clientX - this.spherePointer.x;
 				const deltaY = event.clientY - this.spherePointer.y;
@@ -2060,11 +2087,15 @@ export const HomePage = {
 			};
 
 			this.cardLayer.addEventListener('pointerdown', onPointerDown);
+			const onPointerLeave = () => this.resetSphereHover();
+			this.cardLayer.addEventListener('pointerleave', onPointerLeave);
 			this.cardLayer.addEventListener('pointermove', onPointerMove);
 			this.cardLayer.addEventListener('pointerup', onPointerEnd);
 			this.cardLayer.addEventListener('pointercancel', onPointerEnd);
 			this.sphereCleanups.push(() => {
 				this.cardLayer?.removeEventListener('pointerdown', onPointerDown);
+				this.cardLayer?.removeEventListener('pointerleave', onPointerLeave);
+				gsap.killTweensOf(this.sphereHover);
 				this.cardLayer?.removeEventListener('pointermove', onPointerMove);
 				this.cardLayer?.removeEventListener('pointerup', onPointerEnd);
 				this.cardLayer?.removeEventListener('pointercancel', onPointerEnd);
@@ -2187,7 +2218,18 @@ export const HomePage = {
 
 		applySphereTransform() {
 			if (!this.sphere) return;
-			this.sphere.style.transform = `scale(${this.sphereRotation.scale}) rotateX(${this.sphereRotation.x}deg) rotateY(${this.sphereRotation.y}deg)`;
+			this.sphere.style.transform = `scale(${this.sphereRotation.scale}) rotateX(${this.sphereRotation.x + this.sphereHover.x}deg) rotateY(${this.sphereRotation.y + this.sphereHover.y}deg)`;
+		}
+
+		resetSphereHover() {
+			gsap.to(this.sphereHover, {
+				x: 0,
+				y: 0,
+				duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.8,
+				ease: 'power2.out',
+				overwrite: true,
+				onUpdate: () => this.applySphereTransform(),
+			});
 		}
 
 		closestSphereAngle(current, target) {
@@ -2262,6 +2304,7 @@ export const HomePage = {
 		}
 
 		focusSphereCard(card) {
+			this.resetSphereHover();
 			this.finishSphereScrollReset();
 			const cardRotationX = Number(card.dataset.sphereRotationX || 0);
 			const cardRotationY = Number(card.dataset.sphereRotationY || 0);

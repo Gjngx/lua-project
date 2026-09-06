@@ -217,7 +217,7 @@ const gallery = playground?.gallery?.length
 	? playground.gallery.map((item, index) => ({
 			key: item._key || `gallery-${index}`,
 			imageUrl: item.image?.asset?.url
-				? urlFor(item.image).width(1000).quality(85).auto('format').url()
+				? urlFor(item.image).width(1600).quality(90).auto('format').url()
 				: undefined,
 			localImage: undefined,
 			alt: stegaClean(item.alt || ''),
@@ -615,18 +615,20 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 					</div>
 					<div class="home-playground-content-right">
 						<div class="home-playground-content-right-title">
-							<p class="h2">
-								the
-							</p>
-							<a
-								href="#playground"
-								class="home-playground-content-right-link hover-line"
-								data-cursor="ic-external"
-							>
+							<div class="home-playground-content-right-title-inner">
 								<p class="h2">
-									Playground
+									the
 								</p>
-							</a>
+								<a
+									href="#playground"
+									class="home-playground-content-right-link hover-line"
+									data-cursor="ic-external"
+								>
+									<p class="h2">
+										Playground
+									</p>
+								</a>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -654,7 +656,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 												{item.imageUrl ? (
 													<img src={item.imageUrl} alt={item.alt} loading="lazy" draggable="false" />
 												) : item.localImage ? (
-													<Image src={item.localImage} alt={item.alt} />
+													<Image src={item.localImage} alt={item.alt} quality={90} />
 												) : null}
 											</div>
 										</div>
