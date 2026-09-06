@@ -6,6 +6,9 @@ const SCROLL_ROTATION_FACTOR = 0.0076; // Radians per pixel scrolled (1.9×).
 const MAX_ROTATION_SPEED = 9.5;
 const SUPERSAMPLE_FACTOR = 1.5;
 const MAX_RENDER_SIZE = 2048;
+const DRAG_SENSITIVITY = 0.008; // Radians per pixel dragged.
+const DRAG_MOMENTUM_DECAY = 0.88; // Velocity multiplier per frame (~60fps).
+const DRAG_MOMENTUM_STOP = 0.0005; // Stop momentum below this velocity.
 
 export class HowModels {
 	constructor(root) {
@@ -56,50 +59,47 @@ export class HowModels {
 			this.scene.add(key, rim);
 			this.keyLight = key;
 			this.rimLight = rim;
-			this.material = new T.MeshPhysicalMaterial({
-				color: 0xd7ed58,
-				metalness: 0.1,
-				roughness: 0.26,
-				clearcoat: 0.35,
-				clearcoatRoughness: 0.2,
-			});
 
 			const canvases = [...this.root.querySelectorAll('.home-how-model')];
+			// Cache to avoid loading the same URL multiple times
+			const gltfCache = {};
 			for (let index = 0; index < canvases.length; index++) {
 				const canvas = canvases[index];
 				const context = canvas.getContext('2d');
 				if (!context) continue;
 				const model = new T.Group();
-				const add = (geometry) => {
-					const mesh = new T.Mesh(geometry, this.material);
-					model.add(mesh);
-					return mesh;
-				};
-				if (canvas.dataset.model === 'digital-design') {
-					const gltf = await gltfLoader.loadAsync('/assets/3d/pillow-flower.glb');
-					model.add(gltf.scene);
-				} else switch (index % 3) {
-					case 0:
-						add(new T.TorusKnotGeometry(0.95, 0.32, 256, 64));
+				
+				// Map each section to its respective 3D model file.
+				// Change the URLs for 'development' and 'branding' when you have new models!
+				let modelUrl = null;
+				switch (canvas.dataset.model) {
+					case 'digital-design':
+						modelUrl = '/assets/3d/pillow-flower.glb';
 						break;
-					case 1:
-						for (let ring = 0; ring < 3; ring++) {
-							const mesh = add(new T.TorusGeometry(1.15, 0.16, 48, 160));
-							mesh.rotation.set(ring * Math.PI / 3, ring * Math.PI / 3, 0);
-						}
-						add(new T.IcosahedronGeometry(0.48, 1));
+					case 'development':
+						modelUrl = '/assets/3d/pillow-flower.glb'; // TODO: replace later
 						break;
-					default:
-						add(new T.IcosahedronGeometry(1.15, 0));
-						for (let orb = 0; orb < 6; orb++) {
-							const angle = orb * Math.PI / 3;
-							const mesh = add(new T.SphereGeometry(0.2, 48, 32));
-							mesh.position.set(Math.cos(angle) * 1.55, Math.sin(angle) * 1.55, 0);
-						}
+					case 'branding':
+						modelUrl = '/assets/3d/pillow-flower.glb'; // TODO: replace later
+						break;
+				}
+
+				if (modelUrl) {
+					if (!gltfCache[modelUrl]) {
+						gltfCache[modelUrl] = await gltfLoader.loadAsync(modelUrl);
+					}
+					model.add(gltfCache[modelUrl].scene.clone());
 				}
 				model.visible = false;
 				this.scene.add(model);
-				this.items.push({ canvas, context, model, index, visible: false, width: 1, height: 1 });
+				const item = { canvas, context, model, index, visible: false, width: 1, height: 1,
+					// Per-item drag state
+					dragOffsetX: 0, dragOffsetY: 0,
+					dragVelX: 0, dragVelY: 0,
+					pointerActive: false, lastPointerX: 0, lastPointerY: 0,
+				};
+				this.items.push(item);
+				this._attachDragListeners(item);
 			}
 
 			this.resizeObserver = new ResizeObserver(() => {
@@ -127,6 +127,48 @@ export class HowModels {
 			console.warn('[HowModels] 3D preview unavailable:', error);
 			this.destroy();
 		}
+	}
+
+	_attachDragListeners(item) {
+		const { canvas } = item;
+		canvas.dataset.cursor = 'drag';
+		const onPointerDown = (e) => {
+			e.preventDefault();
+			item.pointerActive = true;
+			item.lastPointerX = e.clientX;
+			item.lastPointerY = e.clientY;
+			item.dragVelX = 0;
+			item.dragVelY = 0;
+			canvas.classList.add('is-dragging');
+			canvas.setPointerCapture(e.pointerId);
+		};
+		const onPointerMove = (e) => {
+			if (!item.pointerActive) return;
+			const dx = e.clientX - item.lastPointerX;
+			const dy = e.clientY - item.lastPointerY;
+			item.dragOffsetX += dx * DRAG_SENSITIVITY;
+			item.dragOffsetY += dy * DRAG_SENSITIVITY;
+			item.dragVelX = dx * DRAG_SENSITIVITY;
+			item.dragVelY = dy * DRAG_SENSITIVITY;
+			item.lastPointerX = e.clientX;
+			item.lastPointerY = e.clientY;
+			this.schedule();
+		};
+		const onPointerUp = () => {
+			item.pointerActive = false;
+			canvas.classList.remove('is-dragging');
+		};
+		canvas.addEventListener('pointerdown', onPointerDown);
+		canvas.addEventListener('pointermove', onPointerMove);
+		canvas.addEventListener('pointerup', onPointerUp);
+		canvas.addEventListener('pointercancel', onPointerUp);
+		// Store cleanup refs
+		item._cleanupDrag = () => {
+			canvas.removeEventListener('pointerdown', onPointerDown);
+			canvas.removeEventListener('pointermove', onPointerMove);
+			canvas.removeEventListener('pointerup', onPointerUp);
+			canvas.removeEventListener('pointercancel', onPointerUp);
+		};
 	}
 
 	schedule() {
@@ -168,7 +210,8 @@ export class HowModels {
 		}
 		this.lastTime = now;
 		this.lastScrollY = window.scrollY;
-		visible.forEach(({ canvas, context, model, index, width, height }) => {
+		visible.forEach((item) => {
+			const { canvas, context, model, index, width, height } = item;
 			if (canvas.width !== width || canvas.height !== height) {
 				canvas.width = width;
 				canvas.height = height;
@@ -184,16 +227,32 @@ export class HowModels {
 			// Keep the entire model in frame even in short, wide viewports.
 			this.camera.position.z = 7.5 / Math.min(1, this.camera.aspect);
 			this.camera.updateProjectionMatrix();
-			model.rotation.set(0.35, this.angle + index * 0.8, -0.2);
+			// Apply momentum decay when not dragging
+			if (!item.pointerActive) {
+				item.dragVelX *= DRAG_MOMENTUM_DECAY;
+				item.dragVelY *= DRAG_MOMENTUM_DECAY;
+				if (Math.abs(item.dragVelX) > DRAG_MOMENTUM_STOP || Math.abs(item.dragVelY) > DRAG_MOMENTUM_STOP) {
+					item.dragOffsetX += item.dragVelX;
+					item.dragOffsetY += item.dragVelY;
+				} else {
+					item.dragVelX = 0;
+					item.dragVelY = 0;
+				}
+			}
+			// Clamp vertical drag to avoid flipping upside down
+			item.dragOffsetY = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, item.dragOffsetY));
+			model.rotation.set(
+				0.35 + item.dragOffsetY,
+				this.angle + index * 0.8 + item.dragOffsetX,
+				-0.2,
+			);
 			model.visible = true;
-			// Fabric needs softer fill than the glossy lime sculptures; the shared
-			// high exposure was washing the yellow petals and cream center to white.
-			const isFlower = canvas.dataset.model === 'digital-design';
-			this.renderer.toneMappingExposure = isFlower ? 0.95 : 1.25;
-			this.scene.environmentIntensity = isFlower ? 0.25 : 1;
-			this.fillLight.intensity = isFlower ? 0.65 : 2.5;
-			this.keyLight.intensity = isFlower ? 3 : 4;
-			this.rimLight.intensity = isFlower ? 1 : 3;
+			// Fabric lighting setup
+			this.renderer.toneMappingExposure = 0.95;
+			this.scene.environmentIntensity = 0.25;
+			this.fillLight.intensity = 0.65;
+			this.keyLight.intensity = 3;
+			this.rimLight.intensity = 1;
 			this.renderer.render(this.scene, this.camera);
 			context.clearRect(0, 0, width, height);
 			context.imageSmoothingEnabled = true;
@@ -213,9 +272,10 @@ export class HowModels {
 		this.resizeObserver?.disconnect();
 		this.motion.removeEventListener('change', this.schedule);
 		document.removeEventListener('visibilitychange', this.schedule);
-		const resources = new Set([this.material]);
-		this.items.forEach(({ canvas, model }) => {
-			model.traverse((object) => {
+		const resources = new Set();
+		this.items.forEach((item) => {
+			item._cleanupDrag?.();
+			item.model.traverse((object) => {
 				if (object.geometry) resources.add(object.geometry);
 				const materials = Array.isArray(object.material) ? object.material : [object.material];
 				materials.filter(Boolean).forEach((material) => {
@@ -223,7 +283,7 @@ export class HowModels {
 					if (material.map) resources.add(material.map);
 				});
 			});
-			canvas.classList.remove('is-ready');
+			item.canvas.classList.remove('is-ready');
 		});
 		resources.forEach((resource) => resource?.dispose());
 		this.environmentTarget?.dispose();
