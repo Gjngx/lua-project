@@ -252,13 +252,15 @@ class Loader {
 		}
 	}
 
-	complete() {
-		this.restorePage();
+	async complete() {
 		// gsap.set(this.loaderEl, { autoAlpha: 0, pointerEvents: 'none' });
 		// $(this.loaderEl).removeClass(['is-loading']);
 		// $(this.loaderEl).addClass(['done']);
 		// $(document.documentElement).addClass(['done']);
-		this.playPageOnce();
+		await this.playPageOnce();
+		// Let the newly installed scroll effects settle before measuring/unlocking.
+		await new Promise((resolve) => requestAnimationFrame(resolve));
+		this.restorePage();
 
 		this.isLoaded = true;
 	}
@@ -266,14 +268,14 @@ class Loader {
 	playPageOnce() {
 		if (this.hasPlayedPageOnce) return;
 		this.hasPlayedPageOnce = true;
-		this.manager?.playOnce(this.data);
+		return this.manager?.playOnce(this.data);
 	}
 
 	restorePage() {
 		$(document.documentElement).removeClass(['is-loading']);
-		smoothScroll.start();
 		smoothScroll.lenis?.resize();
 		ScrollTrigger.refresh();
+		smoothScroll.start();
 	}
 
 	killTimelines() {

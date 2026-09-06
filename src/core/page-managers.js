@@ -43,9 +43,9 @@ export class PageManager {
 	}
 
 	playOnce(data) {
-		this._sections?.forEach((section) => {
-			if (section.playOnce) section.playOnce(data);
-		});
+		return Promise.all(
+			(this._sections || []).map((section) => section.playOnce?.(data)),
+		);
 	}
 
 	initOnce(data) {

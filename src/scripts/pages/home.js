@@ -109,7 +109,8 @@ export const HomePage = {
 		async playOnce() {
 			await this.revealReady;
 			if (!this.el?.isConnected || !this.tlOnce?.duration()) return;
-			this.tlOnce.play(0);
+			// Scroll effects are installed by this timeline's onComplete callback.
+			await this.tlOnce.play(0).then(() => {});
 		}
 
 		async playEnter() {
