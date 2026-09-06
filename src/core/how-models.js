@@ -1,4 +1,4 @@
-import { createPillowFlower } from './pillow-flower.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // One WebGL context serves all thumbnails; only visible models are rendered.
 const IDLE_ROTATION_SPEED = 0.24; // Radians per second.
@@ -28,6 +28,7 @@ export class HowModels {
 				import('three'),
 				import('three/addons/environments/RoomEnvironment.js'),
 			]);
+			const gltfLoader = new GLTFLoader();
 			if (this.disposed) return;
 			this.renderer = new T.WebGLRenderer({ alpha: true, antialias: true });
 			this.renderer.setClearColor(0x000000, 0);
@@ -63,9 +64,11 @@ export class HowModels {
 				clearcoatRoughness: 0.2,
 			});
 
-			this.root.querySelectorAll('.home-how-model').forEach((canvas, index) => {
+			const canvases = [...this.root.querySelectorAll('.home-how-model')];
+			for (let index = 0; index < canvases.length; index++) {
+				const canvas = canvases[index];
 				const context = canvas.getContext('2d');
-				if (!context) return;
+				if (!context) continue;
 				const model = new T.Group();
 				const add = (geometry) => {
 					const mesh = new T.Mesh(geometry, this.material);
@@ -73,7 +76,8 @@ export class HowModels {
 					return mesh;
 				};
 				if (canvas.dataset.model === 'digital-design') {
-					model.add(createPillowFlower(T));
+					const gltf = await gltfLoader.loadAsync('/assets/3d/pillow-flower.glb');
+					model.add(gltf.scene);
 				} else switch (index % 3) {
 					case 0:
 						add(new T.TorusKnotGeometry(0.95, 0.32, 256, 64));
@@ -96,7 +100,7 @@ export class HowModels {
 				model.visible = false;
 				this.scene.add(model);
 				this.items.push({ canvas, context, model, index, visible: false, width: 1, height: 1 });
-			});
+			}
 
 			this.resizeObserver = new ResizeObserver(() => {
 				const dpr = Math.min(window.devicePixelRatio || 1, 2);

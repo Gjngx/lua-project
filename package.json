@@ -36,6 +36,11 @@
   },
   "devDependencies": {
     "@astrojs/sitemap": "^3.7.3",
+    "@gltf-transform/core": "^4.5.0",
+    "@gltf-transform/extensions": "^4.5.0",
+    "@gltf-transform/functions": "^4.5.0",
+    "canvas": "^3.2.3",
+    "meshoptimizer": "^1.2.0",
     "prettier": "^3.9.5",
     "prettier-plugin-astro": "^0.14.1"
   }
