@@ -558,17 +558,6 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 						</div>
 					</div>
 				</div>
-				<svg class="home-how-clip-defs" aria-hidden="true">
-					<defs>
-						{
-							services.map((_, index) => (
-								<clipPath id={`home-how-clip-${index + 1}`} clipPathUnits="objectBoundingBox">
-									<path d="M .082 .095 L .958 .004 Q 1 0 .995 .042 L .954 .958 Q .95 1 .908 .995 L .042 .886 Q 0 .88 .005 .838 L .036 .142 Q .04 .1 .082 .095 Z" />
-								</clipPath>
-							))
-						}
-					</defs>
-				</svg>
 				<div class="home-how-thumb">
 					<div class="home-how-thumb-inner">
 						{
@@ -576,7 +565,8 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 								<div class="home-how-thumb-item">
 									<div class="home-how-thumb-item-inner">
 										<div class="home-how-thumb-item-img">
-											<Image class="img-df img-fill" src={service.localImage} alt={service.title} />
+											<canvas class="home-how-model" data-model={service.key} role="img" aria-label={`3D sculpture — ${service.title}`} />
+											<span class="home-how-model-fallback" aria-hidden="true"></span>
 										</div>
 									</div>
 								</div>

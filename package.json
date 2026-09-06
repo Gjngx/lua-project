@@ -31,7 +31,8 @@
     "react-dom": "^19.2.7",
     "react-is": "^19.2.7",
     "sanity": "^6.5.0",
-    "styled-components": "^6.4.3"
+    "styled-components": "^6.4.3",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@astrojs/sitemap": "^3.7.3",

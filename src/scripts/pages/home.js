@@ -1,3 +1,4 @@
+import { HowModels } from '../../core/how-models.js';
 import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit, viewport } from '../../core/helpers.js';
@@ -1427,9 +1428,7 @@ export const HomePage = {
 			this.tlDecor = null;
 			this.tlTrans = null;
 			this.tlItemScroll = null;
-			this.hoverCleanups = [];
-			this.imageLoadCleanups = [];
-			this.imageRefreshRaf = null;
+			this.models = null;
 		}
 
 		trigger(data) {
@@ -1443,34 +1442,12 @@ export const HomePage = {
 			this.setup();
 			this.animationReveal();
 			this.animationScrub();
-			this.interact();
-			this.refreshAfterImagesLoad();
 		}
 
 		setup() {
-			if (!this.el) return;
-		}
-
-		refreshAfterImagesLoad() {
-			const images = $(this.el).find('.home-how-thumb-item-img img').toArray();
-			const scheduleRefresh = () => {
-				if (this.imageRefreshRaf) cancelAnimationFrame(this.imageRefreshRaf);
-				this.imageRefreshRaf = requestAnimationFrame(() => {
-					this.imageRefreshRaf = null;
-					if (this.el?.isConnected) ScrollTrigger.refresh();
-				});
-			};
-
-			images.forEach((image) => {
-				if (image.complete) return;
-
-				image.addEventListener('load', scheduleRefresh);
-				image.addEventListener('error', scheduleRefresh);
-				this.imageLoadCleanups.push(() => {
-					image.removeEventListener('load', scheduleRefresh);
-					image.removeEventListener('error', scheduleRefresh);
-				});
-			});
+			if (!this.el || this.models) return;
+			this.models = new HowModels(this.el);
+			this.models.init();
 		}
 
 		animationReveal() {
@@ -1689,15 +1666,6 @@ export const HomePage = {
 
 			thumbItems.forEach((thumb, index) => {
 				const frame = $(thumb).find('.home-how-thumb-item-inner')[0];
-				const direction = index % 2 === 0 ? 1 : -1;
-				const clipPath = $(this.el).find(`#home-how-clip-${index + 1} path`)[0];
-				const shapeA =
-					'M .082 .095 L .958 .004 Q 1 0 .995 .042 L .954 .958 Q .95 1 .908 .995 L .042 .886 Q 0 .88 .005 .838 L .036 .142 Q .04 .1 .082 .095 Z';
-				const shapeB =
-					'M .042 .005 L .908 .095 Q .96 .1 .964 .142 L .995 .838 Q 1 .88 .958 .886 L .092 .995 Q .05 1 .046 .958 L .005 .042 Q 0 0 .042 .005 Z';
-				const fromShape = direction === 1 ? shapeA : shapeB;
-				const toShape = direction === 1 ? shapeB : shapeA;
-				gsap.set(frame, { clipPath: `url(#home-how-clip-${index + 1})` });
 				const tl = gsap.timeline({
 					scrollTrigger: {
 						trigger: thumb,
@@ -1716,34 +1684,21 @@ export const HomePage = {
 						ease: 'none',
 					},
 				)
-					.fromTo(
-						clipPath,
-						{ attr: { d: fromShape } },
-						{
-							attr: { d: toShape },
-							duration: 0.25,
-							ease: 'none',
-						},
-						0,
-					)
 					.to(frame, {
 						scale: 1,
 						duration: 0.25,
 						ease: 'none',
 					})
-					.to(clipPath, { attr: { d: fromShape }, duration: 0.25, ease: 'none' }, '<')
 					.to(frame, {
 						scale: 0.75,
 						duration: 0.25,
 						ease: 'none',
 					})
-					.to(clipPath, { attr: { d: toShape }, duration: 0.25, ease: 'none' }, '<')
 					.to(frame, {
 						scale: 0.5,
 						duration: 0.25,
 						ease: 'none',
-					})
-					.to(clipPath, { attr: { d: fromShape }, duration: 0.25, ease: 'none' }, '<');
+					});
 
 				this.tlItemScrolls.push(tl);
 
@@ -1774,56 +1729,11 @@ export const HomePage = {
 			});
 		}
 
-		interact() {
-			const cards = $(this.el).find('.home-how-thumb-item').toArray();
-
-			cards.forEach((card) => {
-				const frame = $(card).find('.home-how-thumb-item-inner')[0];
-
-				const onPointerMove = (event) => {
-					const rect = card.getBoundingClientRect();
-					const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-					const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
-
-					gsap.to(frame, {
-						rotationX: -y * 10,
-						rotationY: x * 12,
-						x: x * 8,
-						y: y * 8,
-						duration: 0.35,
-						ease: 'power2.out',
-						overwrite: 'auto',
-					});
-				};
-
-				const onPointerLeave = () => {
-					gsap.to(frame, {
-						rotationX: 0,
-						rotationY: 0,
-						x: 0,
-						y: 0,
-						duration: 0.7,
-						ease: 'elastic.out(1, 0.4)',
-						overwrite: 'auto',
-					});
-				};
-
-				$(card).on('pointermove', onPointerMove);
-				$(card).on('pointerleave', onPointerLeave);
-				this.hoverCleanups.push(() => {
-					$(card).off('pointermove', onPointerMove);
-					$(card).off('pointerleave', onPointerLeave);
-					gsap.killTweensOf(frame);
-				});
-			});
-		}
 
 		destroy() {
 			super.cleanTrigger();
-			if (this.imageRefreshRaf) cancelAnimationFrame(this.imageRefreshRaf);
-			this.imageRefreshRaf = null;
-			this.imageLoadCleanups.forEach((cleanup) => cleanup());
-			this.imageLoadCleanups = [];
+			this.models?.destroy();
+			this.models = null;
 			if (this.tlDecor) {
 				if (this.tlDecor.scrollTrigger) this.tlDecor.scrollTrigger.kill();
 				this.tlDecor.kill();
@@ -1840,8 +1750,6 @@ export const HomePage = {
 			}
 			this.tlDecor = null;
 			this.tlTrans = null;
-			this.hoverCleanups.forEach((cleanup) => cleanup());
-			this.hoverCleanups = [];
 			this.el = null;
 		}
 	},
