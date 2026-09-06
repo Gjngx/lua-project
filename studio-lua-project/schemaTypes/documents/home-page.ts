@@ -166,6 +166,11 @@ export default defineType({
       title: 'Services and capabilities',
       type: 'object',
       group: 'services',
+      fieldsets: [
+        {name: 'digitalDesign', title: 'Item 1 — Digital Design'},
+        {name: 'development', title: 'Item 2 — Development'},
+        {name: 'branding', title: 'Item 3 — Branding'},
+      ],
       fields: [
         defineField({
           name: 'introduction',
@@ -175,6 +180,44 @@ export default defineType({
           description: 'Press Enter where the paragraph should break onto a new line.',
           validation: (rule) => rule.required(),
         }),
+        ...[
+          {name: 'digitalDesign', title: 'Digital Design', tags: ['UI/UX', 'Interactive', 'Website']},
+          {name: 'development', title: 'Development', tags: ['Framer', 'Webflow']},
+          {name: 'branding', title: 'Branding', tags: ['Identity', 'Visual Systems']},
+        ].flatMap(({name, title, tags}) => [
+          defineField({
+            name: `${name}Title`,
+            title: 'Title',
+            type: 'string',
+            fieldset: name,
+            initialValue: title,
+            description: `Leave empty to use "${title}".`,
+          }),
+          defineField({
+            name: `${name}Tags`,
+            title: 'Tags',
+            type: 'array',
+            fieldset: name,
+            of: [defineArrayMember({type: 'string', validation: (rule) => rule.required()})],
+            initialValue: tags,
+            description: 'Add, edit, remove, or drag tags to change their order.',
+            validation: (rule) => rule.unique(),
+          }),
+          defineField({
+            name: `${name}Model`,
+            title: '3D model',
+            type: 'file',
+            fieldset: name,
+            description:
+              'Upload a GLB with embedded textures, without Draco/Meshopt compression. Leave empty to use the default flower model.',
+            options: {accept: '.glb,model/gltf-binary'},
+            validation: (rule) =>
+              rule.custom((value) => {
+                const ref = value?.asset?._ref
+                return !ref || ref.endsWith('-glb') || 'Please upload a .glb file.'
+              }),
+          }),
+        ]),
       ],
     }),
     defineField({

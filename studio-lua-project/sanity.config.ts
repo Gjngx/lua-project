@@ -5,6 +5,7 @@ import {visionTool} from '@sanity/vision'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
 import {resolve} from './presentation/resolve'
+import {UploadLimitLayout} from './uploads/UploadLimitLayout'
 
 const singletonTypes = new Set(['siteSettings', 'homePage', 'letTalkPage', 'footer'])
 
@@ -14,6 +15,10 @@ export default defineConfig({
 
   projectId: 'bw57chik',
   dataset: 'production',
+
+  studio: {
+    components: {layout: UploadLimitLayout},
+  },
 
   plugins: [
     structureTool({structure}),

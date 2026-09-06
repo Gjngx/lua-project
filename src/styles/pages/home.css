@@ -731,6 +731,18 @@
 	aspect-ratio: 1;
 	max-height: 75vh;
 	transform-origin: center;
+	transform: scale(1);
+	transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.home-how-thumb-item.active .home-how-thumb-item-img {
+	transform: scale(1.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.home-how-thumb-item-img {
+		transition: none;
+	}
 }
 
 .home-how-model {

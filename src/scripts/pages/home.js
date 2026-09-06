@@ -1642,6 +1642,9 @@ export const HomePage = {
 			const contentItems = $(this.el).find('.home-how-content-item').toArray();
 			const contentList = $(this.el).find('.home-how-content-list')[0];
 			const activateContent = (activeIndex, direction) => {
+				thumbItems.forEach((thumb, index) => {
+					thumb.classList.toggle('active', index === activeIndex);
+				});
 				contentItems.forEach((item, itemIndex) => {
 					if (itemIndex === activeIndex) {
 						$(item).removeClass(['is-static-exit']);
@@ -1656,6 +1659,7 @@ export const HomePage = {
 				});
 			};
 			const clearContent = (direction, staticExit = false) => {
+				thumbItems.forEach((thumb) => thumb.classList.remove('active'));
 				contentItems.forEach((item) => {
 					if (!$(item).hasClass('active')) return;
 					$(item).toggleClass('is-static-exit', staticExit);

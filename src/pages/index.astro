@@ -92,6 +92,15 @@ type HomePageData = {
 	};
 	capabilities?: {
 		introduction?: string;
+		digitalDesignModelUrl?: string;
+		digitalDesignTitle?: string;
+		digitalDesignTags?: string[];
+		developmentModelUrl?: string;
+		developmentTitle?: string;
+		developmentTags?: string[];
+		brandingModelUrl?: string;
+		brandingTitle?: string;
+		brandingTags?: string[];
 	};
 	playground?: {
 		leadIn?: string;
@@ -184,20 +193,23 @@ const projects = featuredWork?.projects?.length
 const services = [
 	{
 		key: 'digital-design',
-		title: 'Digital Design',
-		specialties: ['UI/UX', 'Interactive', 'Website'],
+		modelUrl: stegaClean(capabilities?.digitalDesignModelUrl || ''),
+		title: capabilities?.digitalDesignTitle || 'Digital Design',
+		specialties: capabilities?.digitalDesignTags ?? ['UI/UX', 'Interactive', 'Website'],
 		localImage: digitalDesign,
 	},
 	{
 		key: 'development',
-		title: 'Development',
-		specialties: ['Framer', 'Webflow'],
+		modelUrl: stegaClean(capabilities?.developmentModelUrl || ''),
+		title: capabilities?.developmentTitle || 'Development',
+		specialties: capabilities?.developmentTags ?? ['Framer', 'Webflow'],
 		localImage: development,
 	},
 	{
 		key: 'branding',
-		title: 'Branding',
-		specialties: ['Identity', 'Visual Systems'],
+		modelUrl: stegaClean(capabilities?.brandingModelUrl || ''),
+		title: capabilities?.brandingTitle || 'Branding',
+		specialties: capabilities?.brandingTags ?? ['Identity', 'Visual Systems'],
 		localImage: branding,
 	},
 ];
@@ -565,7 +577,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 								<div class="home-how-thumb-item">
 									<div class="home-how-thumb-item-inner">
 										<div class="home-how-thumb-item-img">
-											<canvas class="home-how-model" data-model={service.key} role="img" aria-label={`3D sculpture — ${service.title}`} />
+											<canvas class="home-how-model" data-model={service.key} data-model-url={service.modelUrl} role="img" aria-label={`3D sculpture — ${stegaClean(service.title)}`} />
 											<span class="home-how-model-fallback" aria-hidden="true"></span>
 										</div>
 									</div>

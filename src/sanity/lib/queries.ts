@@ -113,7 +113,16 @@ export const HOME_PAGE_QUERY = defineQuery(`
       }
     },
     capabilities{
-      introduction
+      introduction,
+      digitalDesignTitle,
+      digitalDesignTags,
+      developmentTitle,
+      developmentTags,
+      brandingTitle,
+      brandingTags,
+      "digitalDesignModelUrl": digitalDesignModel.asset->url,
+      "developmentModelUrl": developmentModel.asset->url,
+      "brandingModelUrl": brandingModel.asset->url
     },
     playground{
       leadIn,

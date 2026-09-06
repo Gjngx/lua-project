@@ -1,6 +1,7 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // One WebGL context serves all thumbnails; only visible models are rendered.
+const DEFAULT_MODEL_URL = '/assets/3d/pillow-flower.glb';
 const IDLE_ROTATION_SPEED = 0.24; // Radians per second.
 const SCROLL_ROTATION_FACTOR = 0.0076; // Radians per pixel scrolled (1.9×).
 const MAX_ROTATION_SPEED = 9.5;
@@ -62,33 +63,44 @@ export class HowModels {
 
 			const canvases = [...this.root.querySelectorAll('.home-how-model')];
 			// Cache to avoid loading the same URL multiple times
-			const gltfCache = {};
+			const gltfCache = new Map();
+			const loadModel = (url) => {
+				if (!gltfCache.has(url)) gltfCache.set(url, gltfLoader.loadAsync(url));
+				return gltfCache.get(url);
+			};
 			for (let index = 0; index < canvases.length; index++) {
 				const canvas = canvases[index];
 				const context = canvas.getContext('2d');
 				if (!context) continue;
 				const model = new T.Group();
-				
-				// Map each section to its respective 3D model file.
-				// Change the URLs for 'development' and 'branding' when you have new models!
-				let modelUrl = null;
-				switch (canvas.dataset.model) {
-					case 'digital-design':
-						modelUrl = '/assets/3d/pillow-flower.glb';
-						break;
-					case 'development':
-						modelUrl = '/assets/3d/pillow-flower.glb'; // TODO: replace later
-						break;
-					case 'branding':
-						modelUrl = '/assets/3d/pillow-flower.glb'; // TODO: replace later
-						break;
-				}
 
-				if (modelUrl) {
-					if (!gltfCache[modelUrl]) {
-						gltfCache[modelUrl] = await gltfLoader.loadAsync(modelUrl);
+				let modelUrl = canvas.dataset.modelUrl?.trim() || DEFAULT_MODEL_URL;
+				let gltf;
+				try {
+					gltf = await loadModel(modelUrl);
+				} catch (error) {
+					console.warn('[HowModels] Could not load model:', modelUrl, error);
+					if (this.disposed) return;
+					if (modelUrl === DEFAULT_MODEL_URL) continue;
+					modelUrl = DEFAULT_MODEL_URL;
+					try {
+						gltf = await loadModel(modelUrl);
+					} catch (fallbackError) {
+						console.warn('[HowModels] Default model unavailable:', fallbackError);
+						continue;
 					}
-					model.add(gltfCache[modelUrl].scene.clone());
+				}
+				if (this.disposed) return;
+				const content = gltf.scene.clone();
+				model.add(content);
+				if (modelUrl !== DEFAULT_MODEL_URL) {
+					// Center uploaded models and fit different export units into the preview.
+					const bounds = new T.Box3().setFromObject(content);
+					const size = bounds.getSize(new T.Vector3()).length();
+					if (Number.isFinite(size) && size > 0) {
+						content.position.sub(bounds.getCenter(new T.Vector3()));
+						model.scale.setScalar(3.5 / size);
+					}
 				}
 				model.visible = false;
 				this.scene.add(model);
