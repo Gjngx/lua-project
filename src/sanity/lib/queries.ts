@@ -41,17 +41,6 @@ export const FOOTER_QUERY = defineQuery(`
     email,
     phoneLabel,
     phoneNumber,
-    creditGroups[]{
-      _key,
-      _type,
-      label,
-      contributors[]{
-        _key,
-        _type,
-        name,
-        href
-      }
-    },
     socialLinks[]{
       _key,
       _type,
@@ -130,21 +119,10 @@ export const HOME_PAGE_QUERY = defineQuery(`
       }
     },
     capabilities{
-      introduction,
-      services[]{
-        _key,
-        _type,
-        title,
-        specialties,
-        image{
-          ...,
-          asset->{_id, url, metadata{lqip, dimensions}}
-        }
-      }
+      introduction
     },
     playground{
       leadIn,
-      link,
       gallery[]{
         _key,
         _type,

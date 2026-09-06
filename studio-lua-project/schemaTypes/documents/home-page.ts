@@ -175,13 +175,6 @@ export default defineType({
           description: 'Press Enter where the paragraph should break onto a new line.',
           validation: (rule) => rule.required(),
         }),
-        defineField({
-          name: 'services',
-          title: 'Services',
-          type: 'array',
-          of: [defineArrayMember({type: 'service'})],
-          validation: (rule) => rule.required().min(1),
-        }),
       ],
     }),
     defineField({
@@ -194,12 +187,6 @@ export default defineType({
           name: 'leadIn',
           title: 'Lead-in text',
           type: 'string',
-          validation: (rule) => rule.required(),
-        }),
-        defineField({
-          name: 'link',
-          title: 'Playground link',
-          type: 'callToAction',
           validation: (rule) => rule.required(),
         }),
         defineField({
@@ -239,34 +226,9 @@ export default defineType({
     capabilities: {
       introduction:
         "Discover the amazing features of my services that\ncan transform your workflow and boost productivity.\nHere's what I can do for you:",
-      services: [
-        {
-          _key: 'digital-design',
-          _type: 'service',
-          title: 'Digital Design',
-          specialties: ['UI/UX', 'Interactive', 'Website'],
-        },
-        {
-          _key: 'development',
-          _type: 'service',
-          title: 'Development',
-          specialties: ['Framer', 'Webflow'],
-        },
-        {
-          _key: 'branding',
-          _type: 'service',
-          title: 'Branding',
-          specialties: ['Identity', 'Visual Systems'],
-        },
-      ],
     },
     playground: {
       leadIn: 'Have fun with',
-      link: {
-        _type: 'callToAction',
-        label: 'the Playground',
-        href: '#playground',
-      },
     },
   },
   preview: {

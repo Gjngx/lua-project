@@ -154,6 +154,10 @@
 	color: var(--cln-content-label);
 }
 
+.footer-info-left-content:nth-child(2) .desc{
+	color: var(--cln-content-strong);
+}
+
 .footer-main-content:hover .footer-main-say-hello{
 	opacity: 1;
 	transform: translate(-50%, -50%) scale(1);

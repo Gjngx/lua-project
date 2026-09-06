@@ -12,29 +12,8 @@ type FooterData = {
 	email?: string;
 	phoneLabel?: string;
 	phoneNumber?: string;
-	creditGroups?: Array<{
-		_key?: string;
-		label?: string;
-		contributors?: Array<{ _key?: string; name?: string; href?: string }>;
-	}>;
 	socialLinks?: Array<{ _key?: string; platform?: string; href?: string }>;
 };
-
-const fallbackCreditGroups = [
-	{
-		_key: 'design',
-		label: 'Design',
-		contributors: [
-			{ _key: 'minh-hieu', name: 'Minh Hieu', href: '#' },
-			{ _key: 'divo', name: 'Divo', href: 'https://www.linkedin.com/in/befidie/' },
-		],
-	},
-	{
-		_key: 'development',
-		label: 'Development',
-		contributors: [{ _key: 'giang-dang', name: 'Giang Dang', href: '#' }],
-	},
-];
 
 const fallbackSocialLinks = [
 	{ _key: 'linkedin', platform: 'linkedin', href: '#' },
@@ -57,7 +36,6 @@ const conversationLabel = footer?.conversationLabel || 'Start a conversation';
 const email = footer?.email || 'hi@minhhieu.design';
 const phoneLabel = footer?.phoneLabel || 'Call anytime';
 const phoneNumber = footer?.phoneNumber || '(+84) 343 313 383';
-const creditGroups = footer?.creditGroups?.length ? footer.creditGroups : fallbackCreditGroups;
 const socialLinks = footer?.socialLinks?.length ? footer.socialLinks : fallbackSocialLinks;
 const socialHref = (platform: string) =>
 	stegaClean(
@@ -144,30 +122,12 @@ const phoneHref = `tel:${stegaClean(phoneNumber).replace(/[^\d+]/g, '')}`;
 			</div>
 			<div class="footer-info">
 				<div class="footer-info-left">
-					{
-						creditGroups.map((group) => (
-							<div class="footer-info-left-content">
-								<p class="desc">
-									{group.label}<span aria-hidden="true">:</span>
-								</p>
-								{group.contributors?.map((contributor, index) => (
-									<>
-										<a
-											href={stegaClean(contributor.href || '#')}
-											class="footer-info-link hover-un"
-											target="_blank"
-											rel="noreferrer"
-										>
-											<p class="desc">{contributor.name}</p>
-										</a>
-										{index < (group.contributors?.length || 0) - 1 && (
-											<span class="desc" aria-hidden="true">,</span>
-										)}
-									</>
-								))}
-							</div>
-						))
-					}
+					<div class="footer-info-left-content">
+						<p class="desc">Minh Hieu</p>
+					</div>
+					<div class="footer-info-left-content">
+						<p class="desc">©2026</p>
+					</div>
 				</div>
 				<div class="footer-info-center">
 					<div class="footer-info-center-inner">

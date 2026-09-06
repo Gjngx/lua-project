@@ -92,16 +92,9 @@ type HomePageData = {
 	};
 	capabilities?: {
 		introduction?: string;
-		services?: Array<{
-			_key?: string;
-			title?: string;
-			specialties?: string[];
-			image?: SanityImage;
-		}>;
 	};
 	playground?: {
 		leadIn?: string;
-		link?: { label?: string; href?: string };
 		gallery?: Array<{
 			_key?: string;
 			alt?: string;
@@ -188,7 +181,7 @@ const projects = featuredWork?.projects?.length
 		}))
 	: fallbackProjects.map((project) => ({ ...project, imageUrl: undefined, alt: project.title }));
 
-const fallbackServices = [
+const services = [
 	{
 		key: 'digital-design',
 		title: 'Digital Design',
@@ -208,26 +201,6 @@ const fallbackServices = [
 		localImage: branding,
 	},
 ];
-
-const services = capabilities?.services?.length
-	? capabilities.services.map((service, index) => ({
-			key: service._key || `service-${index}`,
-			title: service.title || 'Untitled service',
-			specialties: service.specialties || [],
-			imageUrl: service.image?.asset?.url
-				? urlFor(service.image).width(1200).quality(85).auto('format').url()
-				: undefined,
-			...getResizedImageDimensions(service.image, 1200),
-			alt: stegaClean(service.image?.alt || service.title || ''),
-			localImage: undefined,
-		}))
-	: fallbackServices.map((service) => ({
-			...service,
-			imageUrl: undefined,
-			imageWidth: undefined,
-			imageHeight: undefined,
-			alt: service.title,
-		}));
 
 const fallbackGallery = [
 	tesla,
@@ -603,18 +576,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 								<div class="home-how-thumb-item">
 									<div class="home-how-thumb-item-inner">
 										<div class="home-how-thumb-item-img">
-											{service.imageUrl ? (
-												<img
-													class="img-df img-fill"
-													src={service.imageUrl}
-													alt={service.alt}
-													width={service.imageWidth}
-													height={service.imageHeight}
-													loading="lazy"
-												/>
-											) : service.localImage ? (
-												<Image class="img-df img-fill" src={service.localImage} alt={service.alt} />
-											) : null}
+											<Image class="img-df img-fill" src={service.localImage} alt={service.title} />
 										</div>
 									</div>
 								</div>
@@ -653,13 +615,16 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 					</div>
 					<div class="home-playground-content-right">
 						<div class="home-playground-content-right-title">
+							<p class="h2">
+								the
+							</p>
 							<a
-								href={stegaClean(playground?.link?.href || '#playground')}
+								href="#playground"
 								class="home-playground-content-right-link hover-line"
 								data-cursor="ic-external"
 							>
 								<p class="h2">
-									{playground?.link?.label || 'the Playground'}
+									Playground
 								</p>
 							</a>
 						</div>

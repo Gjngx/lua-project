@@ -645,6 +645,7 @@
 .home-how-content-item-left,
 .home-how-content-item-right {
 	width: 50%;
+	padding-block: 0.4rem;
 	overflow: hidden;
 }
 
@@ -712,6 +713,7 @@
 	padding-bottom: 6rem;
 	pointer-events: auto;
 	perspective: 100rem;
+	height: 100vh;
 }
 
 .home-how-thumb-item:last-child {
@@ -964,6 +966,8 @@
 .home-playground-content-right-title {
 	width: fit-content;
 	padding-left: 11rem;
+	display: flex;
+	gap: 0.8rem;
 }
 
 .home-playground-empty {

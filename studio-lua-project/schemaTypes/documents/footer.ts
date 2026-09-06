@@ -16,7 +16,6 @@ export default defineType({
   icon: EarthGlobeIcon,
   groups: [
     {name: 'contact', title: 'Contact', default: true},
-    {name: 'credits', title: 'Credits'},
     {name: 'social', title: 'Social links'},
   ],
   fields: [
@@ -66,66 +65,6 @@ export default defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: 'creditGroups',
-      title: 'Credits',
-      type: 'array',
-      group: 'credits',
-      of: [
-        defineArrayMember({
-          name: 'creditGroup',
-          title: 'Credit group',
-          type: 'object',
-          fields: [
-            defineField({
-              name: 'label',
-              title: 'Label',
-              type: 'string',
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: 'contributors',
-              title: 'Contributors',
-              type: 'array',
-              of: [
-                defineArrayMember({
-                  name: 'contributor',
-                  title: 'Contributor',
-                  type: 'object',
-                  fields: [
-                    defineField({
-                      name: 'name',
-                      title: 'Name',
-                      type: 'string',
-                      validation: (rule) => rule.required(),
-                    }),
-                    defineField({
-                      name: 'href',
-                      title: 'Profile link',
-                      type: 'string',
-                      description: 'Optional. Use # while the profile is unavailable.',
-                      validation: (rule) => rule.custom(linkValidation),
-                    }),
-                  ],
-                  preview: {
-                    select: {title: 'name', subtitle: 'href'},
-                  },
-                }),
-              ],
-              validation: (rule) => rule.required().min(1),
-            }),
-          ],
-          preview: {
-            select: {title: 'label', contributors: 'contributors'},
-            prepare({title, contributors}) {
-              const count = Array.isArray(contributors) ? contributors.length : 0
-              return {title, subtitle: `${count} contributor${count === 1 ? '' : 's'}`}
-            },
-          },
-        }),
-      ],
-      validation: (rule) => rule.required().min(1),
-    }),
-    defineField({
       name: 'socialLinks',
       title: 'Social links',
       type: 'array',
@@ -173,28 +112,6 @@ export default defineType({
     email: 'hi@minhhieu.design',
     phoneLabel: 'Call anytime',
     phoneNumber: '(+84) 343 313 383',
-    creditGroups: [
-      {
-        _key: 'design',
-        _type: 'creditGroup',
-        label: 'Design',
-        contributors: [
-          {_key: 'minh-hieu', _type: 'contributor', name: 'Minh Hieu', href: '#'},
-          {
-            _key: 'divo',
-            _type: 'contributor',
-            name: 'Divo',
-            href: 'https://www.linkedin.com/in/befidie/',
-          },
-        ],
-      },
-      {
-        _key: 'development',
-        _type: 'creditGroup',
-        label: 'Development',
-        contributors: [{_key: 'giang-dang', _type: 'contributor', name: 'Giang Dang', href: '#'}],
-      },
-    ],
     socialLinks: [
       {_key: 'linkedin', _type: 'socialLink', platform: 'linkedin', href: '#'},
       {_key: 'dribbble', _type: 'socialLink', platform: 'dribbble', href: '#'},
