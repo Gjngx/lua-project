@@ -7,17 +7,17 @@ const LOADER_TIMING = {
 	introDuration: 0.3, // Logo và bộ đếm xuất hiện.
 	countStepDuration: 1.2, // Thời gian chạy mỗi mốc đếm.
 	countPauseDuration: 0.1, // Nghỉ giữa các mốc đếm.
-	panelDuration: 1.2, // Panel và hai mask màu vuốt cùng nhau.
-	tiltDuration: 0.3, // Nghiêng trong lúc trượt; tối đa nửa thời gian trượt mỗi chữ.
+	panelDuration: 1, // Panel và hai mask màu vuốt cùng nhau.
+	tiltDuration: 0.375, // Nghiêng trong lúc trượt; tối đa nửa thời gian trượt mỗi chữ.
 	slideStart: 0, // Bắt đầu nghiêng và trượt, tính từ lúc panel bắt đầu vuốt.
-	straightenDuration: 0.4, // Thẳng dần ở đoạn cuối, hoàn tất khi chạm điểm đáp.
+	straightenDuration: 0.5, // Thẳng dần ở đoạn cuối, hoàn tất khi chạm điểm đáp.
 	// delay cộng vào slideStart; duration là thời gian trượt.
 	// Dấu và chữ e dùng chung nhịp; rotation tính bằng độ.
 	letters: [
-		{ names: ['h'], rotation: 4, delay: 0, duration: 0.4 },
-		{ names: ['i'], rotation: 8, delay: 0.06, duration: 0.68 },
-		{ names: ['e', 'mark'], rotation: -8, delay: 0.12, duration: 0.76 },
-		{ names: ['u'], rotation: 4, delay: 0.18, duration: 0.8 },
+		{ names: ['h'], rotation: 4, delay: 0, duration: 0.5 },
+		{ names: ['i'], rotation: 8, delay: 0.075, duration: 0.85 },
+		{ names: ['e', 'mark'], rotation: -8, delay: 0.15, duration: 0.95 },
+		{ names: ['u'], rotation: 4, delay: 0.225, duration: 1 },
 	],
 };
 

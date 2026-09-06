@@ -9,6 +9,7 @@ import { MasterTimeline, FadeIn, FadeSplitText } from '../../core/animation.js';
 
 const HERO_VIDEO_FPS = 24;
 const HERO_VIDEO_SEEK_THRESHOLD = 1 / (HERO_VIDEO_FPS * 2);
+const HERO_ICON_DEGREES_PER_PIXEL = 2;
 const WORKS_TRANSITION_ROTATION = 125;
 const WORKS_TRANSITION_MAX_SCALE = 16;
 const WORKS_TRANSITION_FALLBACK_SWAP_PROGRESS = 0.283;
@@ -28,6 +29,7 @@ export const HomePage = {
 			this.videoPrimeStarted = false;
 			this.videoNeedsSeek = false;
 			this.videoScrollTrigger = null;
+			this.heroTopIcon = null;
 			this.worksEl = null;
 			this.onVideoMetadata = null;
 			this.onVideoReady = null;
@@ -56,6 +58,7 @@ export const HomePage = {
 			if (!this.el) return;
 
 			this.video = $(this.el).find('.home-hero-video')[0];
+			this.heroTopIcon = $(this.el).find('.home-hero-top-ic')[0];
 			this.worksEl = $(data.next.container).find('.home-works-wrap')[0];
 			this.setupHeroTime();
 			this.setupHeroVideo();
@@ -136,6 +139,8 @@ export const HomePage = {
 			this.timeEl = $(this.el).find('[data-time]')[0];
 			if (!this.timeEl) return;
 
+			const statusDot = this.timeEl.closest('.home-hero-top-info-inner')
+				?.querySelector('.home-hero-top-info-dot');
 			const formatter = new Intl.DateTimeFormat('en-GB', {
 				timeZone: 'Asia/Ho_Chi_Minh',
 				hour: '2-digit',
@@ -144,7 +149,15 @@ export const HomePage = {
 				hourCycle: 'h23',
 			});
 			this.updateHeroTime = () => {
-				if (this.timeEl) $(this.timeEl).text(formatter.format(new Date()));
+				if (!this.timeEl) return;
+				const time = formatter.format(new Date());
+				$(this.timeEl).text(time);
+				const hour = Number(time.split(':')[0]);
+				if (statusDot) {
+					statusDot.style.backgroundColor = hour >= 10 && hour < 18
+						? 'var(--cln-status-green)'
+						: 'var(--cln-status-red)';
+				}
 			};
 
 			this.updateHeroTime();
@@ -264,20 +277,26 @@ export const HomePage = {
 		setupVideoScrollTrigger() {
 			if (!this.video || !this.videoDuration || this.videoScrollTrigger) return;
 
+			const syncScroll = (self) => {
+				this.queueVideoSeek(self.progress * this.videoDuration);
+				if (this.heroTopIcon) {
+					// Linear scroll mapping preserves both direction and scroll speed.
+					// Use rotate separately from the reveal animation's transform.
+					const scrollDistance = self.progress * (self.end - self.start);
+					this.heroTopIcon.style.rotate = `${scrollDistance * HERO_ICON_DEGREES_PER_PIXEL}deg`;
+				}
+			};
+
 			this.videoScrollTrigger = ScrollTrigger.create({
 				trigger: $(this.el).find('.home-hero-top.top-left')[0],
 				start: 'top top',
 				end: 'bottom top',
 				invalidateOnRefresh: true,
-				onUpdate: (self) => {
-					this.queueVideoSeek(self.progress * this.videoDuration);
-				},
-				onRefresh: (self) => {
-					this.queueVideoSeek(self.progress * this.videoDuration);
-				},
+				onUpdate: syncScroll,
+				onRefresh: syncScroll,
 			});
 
-			this.queueVideoSeek(this.videoScrollTrigger.progress * this.videoDuration);
+			syncScroll(this.videoScrollTrigger);
 		}
 
 		queueVideoSeek(time) {
@@ -354,7 +373,7 @@ export const HomePage = {
 
 			this.tlHeroTop = gsap.timeline({
 				scrollTrigger: {
-					trigger: $(this.el).find('.home-hero-top.top-right')[0],
+					trigger: $(this.el).find('.home-hero-top.top-left')[0],
 					start: 'top top',
 					end: `bottom top+=${cvUnit(100, 'rem')}`,
 					scrub: true,
@@ -378,6 +397,12 @@ export const HomePage = {
 				})
 			}
 
+			this.tlHeroTop.to($(this.el).find('.home-hero-desc')[0], {
+				yPercent: -100,
+				duration: 0.3,
+				ease: 'power3.inOut'
+			}, 0.3);
+
 			this.tlHeroOverlay = gsap.timeline({
 				scrollTrigger: {
 					trigger: $(this.el).find('.home-hero')[0],
@@ -394,7 +419,7 @@ export const HomePage = {
 			this.tlHeroBot = gsap.timeline({
 				scrollTrigger: {
 					trigger: $(this.el).find('.home-hero-bottom')[0],
-					start: 'top top+=20%',
+					start: 'top center',
 					end: 'bottom top',
 					scrub: true,
 				},
@@ -403,7 +428,7 @@ export const HomePage = {
 				xPercent: 70,
 				yPercent: -175,
 				duration: 1,
-				ease: 'none',
+				ease: 'power2.inOut',
 			});
 
 			const heroDescription = $(this.el).find('.home-hero-bottom-desc .h2')[0];
@@ -479,6 +504,9 @@ export const HomePage = {
 				this.videoRaf = null;
 			}
 			if (this.videoScrollTrigger) this.videoScrollTrigger.kill();
+			this.videoScrollTrigger = null;
+			this.heroTopIcon?.style.removeProperty('rotate');
+			this.heroTopIcon = null;
 			if (this.video) {
 				this.video.pause();
 				if (this.onVideoMetadata) $(this.video).off('loadedmetadata', this.onVideoMetadata);
@@ -524,6 +552,7 @@ export const HomePage = {
 			this.el = null;
 			this.tlWorksTop = null;
 			this.tlWorksScroll = null;
+			this.tlWorkslist = null
 			this.worksDecorAssemblyTrigger = null;
 			this.worksPathParticles = null;
 			this.transitionCanvas = null;
@@ -625,7 +654,6 @@ export const HomePage = {
 
 			const worksDescHeight = worksDesc.getBoundingClientRect().height;
 
-			console.log(worksTitleTop);
 			this.tlWorksTop = gsap.timeline({
 				scrollTrigger: {
 					trigger: $(this.el).find('.home-works-block')[0],
@@ -656,6 +684,25 @@ export const HomePage = {
 					scrub: true,
 				},
 			});
+
+			this.tlWorksList = gsap.timeline({
+				scrollTrigger: {
+					trigger: $(this.el).find('.home-works-list')[0],
+					start: 'top bottom',
+					end: 'bottom top',
+					scrub: true
+				},
+			});
+
+			this.tlWorksList
+			.to($(this.el).find('.home-works-main-ic')[0], {
+				x: cvUnit(120, 'rem'),
+				ease: 'power1.inOut',
+			})
+			.to($(this.el).find('.home-works-main-ic')[1], {
+				x: cvUnit(-120, 'rem'),
+				ease: 'power1.inOut',
+			},'<');
 
 			const transition = $(this.el).find('.home-works-trans')[0];
 			const transitionInner = $(this.el).find('.home-works-trans-inner')[0];
@@ -1274,6 +1321,10 @@ export const HomePage = {
 			if (this.tlWorksScroll) {
 				if (this.tlWorksScroll.scrollTrigger) this.tlWorksScroll.scrollTrigger.kill();
 				this.tlWorksScroll.kill();
+			}
+			if (this.tlWorksList) {
+				if (this.tlWorksList.scrollTrigger) this.tlWorksList.scrollTrigger.kill();
+				this.tlWorksList.kill();
 			}
 			this.worksDecorAssemblyTrigger?.kill();
 			if (this.transitionBackgroundTween) this.transitionBackgroundTween.kill();

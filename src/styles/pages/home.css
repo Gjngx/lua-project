@@ -74,7 +74,9 @@
 .home-hero-desc {
 	width: 18rem;
 	color: var(--cln-white);
-	margin-top: 3.2rem;
+	padding-top: 3.2rem;
+	position: sticky;
+	top: 0;
 }
 
 .home-hero-top-title {
@@ -84,6 +86,7 @@
 }
 
 .home-hero-top-ic {
+	display: flex;
 	width: 2rem;
 	margin-bottom: min(5.6rem, 5.7026476578vh);
 }
@@ -93,7 +96,7 @@
 	flex-direction: column;
 	justify-content: space-between;
 	height: min(31.9rem, 32.4847250509vh);
-	padding-bottom: 3.2rem;
+	padding-bottom: 2.4rem;
 }
 
 .home-hero-top-sub {
@@ -107,6 +110,21 @@
 	align-items: center;
 	width: 24.6rem;
 	color: var(--cln-white);
+}
+
+.home-hero-top-info-inner{
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	gap: 0.7rem;
+}
+
+.home-hero-top-info-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background-color: var(--cln-status-green);
 }
 
 .home-hero-bottom {
@@ -123,8 +141,7 @@
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
-	margin-bottom: 50vh;
-	transform: translateY(50%);
+	margin-bottom: min(18rem, 21.1764705882vh);
 }
 
 .home-hero-bottom-desc {
@@ -237,6 +254,7 @@
 .home-works--decor {
 	z-index: 2;
 	contain: paint;
+	top: 4.8rem;
 }
 
 .home-works--main {
@@ -256,7 +274,7 @@
 
 .home-works-svg {
 	position: relative;
-	margin-top: 8.8rem;
+	margin-top: 4rem;
 	width: 100%;
 	color: var(--cln-content-soft);
 	transition: color 0.4s ease;
@@ -329,17 +347,21 @@
 .home-works-main-desc {
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-between;
 	gap: 1.2rem;
-	width: 21.3rem;
+	width: 58.8rem;
 	pointer-events: auto;
 	text-align: center;
 	padding-top: 1.6rem;
 }
 
+.home-works-main-desc .p{
+	width: 20.1rem;
+}
+
 .home-works-main-ic {
 	display: flex;
-	width: 2rem;
+	width: 1rem;
 }
 
 .home-works-list {
