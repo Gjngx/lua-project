@@ -3,7 +3,7 @@ import '../styles/components/header.css';
 import { Image } from 'astro:assets';
 import navFeature from '../assets/images/item-3.png';
 import navBrand from '../assets/images/item-1.png';
-import navWork from '../assets/images/work-4.png';
+import navWork from '../assets/images/project.png';
 import navPortrait from '../assets/images/header-avt.png';
 import headerBg from '../assets/images/header-1.png';
 import Button from './Button.astro';
@@ -211,9 +211,9 @@ const pathname = Astro.url.pathname;
 				<div class="header-nav-card-overlay"></div>
 			</div>
 
-			<a href="/#works" class="header-nav-card header-nav-work" aria-label="View selected works">
+			<div class="header-nav-card header-nav-work" aria-label="View selected works">
 				<Image class="img-df img-fill" src={navWork} alt="MedExpress project" loading="lazy" />
-			</a>
+			</div>
 
 			<div class="header-nav-socials" aria-label="Social links">
 				<a class="header-nav-social" target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/minhhieu-design/" aria-label="LinkedIn">

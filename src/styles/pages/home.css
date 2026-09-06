@@ -393,8 +393,11 @@
 }
 
 .home-works-item-label {
-	margin-top: 3.2rem;
 	text-align: center;
+	padding: 1.6rem 2rem;
+	border-radius: 1.6rem;
+	background-color: var(--cln-transprent);
+	backdrop-filter: blur(20px);
 }
 
 .home-works-item-categories {
