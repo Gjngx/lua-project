@@ -1,12 +1,68 @@
 import {CogIcon} from '@sanity/icons/Cog'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
+const linkValidation = (value: string | undefined) => {
+  if (!value || value === '#' || value.startsWith('/') || /^https?:\/\//.test(value)) {
+    return true
+  }
+
+  return 'Use #, an internal path starting with /, or a full http(s) URL.'
+}
+
 export default defineType({
   name: 'siteSettings',
   title: 'Site settings',
   type: 'document',
   icon: CogIcon,
   fields: [
+    defineField({
+      name: 'socialProfiles',
+      title: 'Social links',
+      description: 'Shared profile links used by both the footer and navigation menu.',
+      type: 'object',
+      options: {collapsible: false},
+      fields: [
+        defineField({
+          name: 'linkedin',
+          title: 'LinkedIn',
+          type: 'string',
+          validation: (rule) => rule.custom(linkValidation),
+        }),
+        defineField({
+          name: 'instagram',
+          title: 'Instagram',
+          type: 'string',
+          validation: (rule) => rule.custom(linkValidation),
+        }),
+        defineField({
+          name: 'facebook',
+          title: 'Facebook',
+          type: 'string',
+          validation: (rule) => rule.custom(linkValidation),
+        }),
+        defineField({
+          name: 'dribbble',
+          title: 'Dribbble',
+          type: 'string',
+          validation: (rule) => rule.custom(linkValidation),
+        }),
+      ],
+    }),
+    // Preserve the previous array format while editing moves to four fixed fields.
+    defineField({
+      name: 'socialLinks',
+      type: 'array',
+      hidden: true,
+      readOnly: true,
+      of: [defineArrayMember({
+        name: 'socialLink',
+        type: 'object',
+        fields: [
+          defineField({name: 'platform', type: 'string'}),
+          defineField({name: 'href', type: 'string'}),
+        ],
+      })],
+    }),
     defineField({
       name: 'favicon',
       title: 'Favicon',

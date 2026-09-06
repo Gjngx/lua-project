@@ -4,6 +4,7 @@ import { stegaClean } from '@sanity/client/stega';
 import { getDraftModeProps } from '../sanity/lib/draft-mode';
 import { loadQuery } from '../sanity/lib/load-query';
 import { FOOTER_QUERY } from '../sanity/lib/queries';
+import { loadSocialLinks } from '../sanity/lib/social-links';
 
 type FooterData = {
 	headline?: string;
@@ -12,15 +13,7 @@ type FooterData = {
 	email?: string;
 	phoneLabel?: string;
 	phoneNumber?: string;
-	socialLinks?: Array<{ _key?: string; platform?: string; href?: string }>;
 };
-
-const fallbackSocialLinks = [
-	{ _key: 'linkedin', platform: 'linkedin', href: '#' },
-	{ _key: 'dribbble', platform: 'dribbble', href: '#' },
-	{ _key: 'instagram', platform: 'instagram', href: '#' },
-	{ _key: 'facebook', platform: 'facebook', href: '#' },
-];
 
 const draftModeProps = getDraftModeProps(Astro.cookies);
 const isDraftMode = Boolean(draftModeProps.perspectiveCookie);
@@ -36,11 +29,7 @@ const conversationLabel = footer?.conversationLabel || 'Start a conversation';
 const email = footer?.email || 'hi@minhhieu.design';
 const phoneLabel = footer?.phoneLabel || 'Call anytime';
 const phoneNumber = footer?.phoneNumber || '(+84) 343 313 383';
-const socialLinks = footer?.socialLinks?.length ? footer.socialLinks : fallbackSocialLinks;
-const socialHref = (platform: string) =>
-	stegaClean(
-		socialLinks.find((item) => stegaClean(item.platform || '') === platform)?.href || '#',
-	);
+const socialHref = await loadSocialLinks(draftModeProps);
 const emailHref = `mailto:${stegaClean(email)}`;
 const phoneHref = `tel:${stegaClean(phoneNumber).replace(/[^\d+]/g, '')}`;
 ---

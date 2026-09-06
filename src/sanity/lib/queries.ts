@@ -40,13 +40,7 @@ export const FOOTER_QUERY = defineQuery(`
     conversationLabel,
     email,
     phoneLabel,
-    phoneNumber,
-    socialLinks[]{
-      _key,
-      _type,
-      platform,
-      href
-    }
+    phoneNumber
   }
 `);
 
@@ -133,5 +127,31 @@ export const HOME_PAGE_QUERY = defineQuery(`
         }
       }
     }
+  }
+`);
+
+// Fixed fields take priority; preserve previously published links during migration.
+export const SITE_SOCIAL_LINKS_QUERY = defineQuery(`
+  {
+    "linkedin": coalesce(
+      *[_id == "siteSettings"][0].socialProfiles.linkedin,
+      *[_id == "siteSettings"][0].socialLinks[platform == "linkedin"][0].href,
+      *[_id == "footer"][0].socialLinks[platform == "linkedin"][0].href
+    ),
+    "instagram": coalesce(
+      *[_id == "siteSettings"][0].socialProfiles.instagram,
+      *[_id == "siteSettings"][0].socialLinks[platform == "instagram"][0].href,
+      *[_id == "footer"][0].socialLinks[platform == "instagram"][0].href
+    ),
+    "facebook": coalesce(
+      *[_id == "siteSettings"][0].socialProfiles.facebook,
+      *[_id == "siteSettings"][0].socialLinks[platform == "facebook"][0].href,
+      *[_id == "footer"][0].socialLinks[platform == "facebook"][0].href
+    ),
+    "dribbble": coalesce(
+      *[_id == "siteSettings"][0].socialProfiles.dribbble,
+      *[_id == "siteSettings"][0].socialLinks[platform == "dribbble"][0].href,
+      *[_id == "footer"][0].socialLinks[platform == "dribbble"][0].href
+    )
   }
 `);
