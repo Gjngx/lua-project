@@ -112,7 +112,7 @@
 .home-hero-bottom {
 	grid-column: 2 / -2;
 	grid-row: 2 / 2;
-	height: 150vh;
+	height: 100vh;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;

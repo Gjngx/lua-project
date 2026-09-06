@@ -309,7 +309,7 @@
 }
 
 .header.on-scroll .header-menu-main {
-	transform: translate3d(calc(100% - 3.25rem), 0, 0);
+	transform: translate3d(calc(100% - 3.2rem), 0, 0);
 }
 
 .header.on-open-nav .header-menu-main {
@@ -385,7 +385,7 @@
 }
 
 .header.is-nav-closing.on-scroll .header-menu-main {
-	transform: translate3d(calc(100% - 3.25rem), 0, 0);
+	transform: translate3d(calc(100% - 3.2rem), 0, 0);
 	transition:
 		transform 0.78s cubic-bezier(0.45, 0, 0.55, 1),
 		background-color 0.3s ease;
@@ -734,7 +734,7 @@
 
 .header.on-transparent .header-menu-main {
 	background-color: var(--cln-bg-transparent);
-	backdrop-filter: blur(20px);
+	/* backdrop-filter: blur(20px); */
 }
 
 .header.on-transparent .header-menu-main-inner {
