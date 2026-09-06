@@ -862,6 +862,9 @@
 	align-items: center;
 	justify-content: center;
 	transform-origin: center;
+	/* Keep the oversized image in the sphere's 3D context. Flattening it here
+	   rasterizes it at the small card size before the sphere zooms in. */
+	transform-style: preserve-3d;
 	backface-visibility: visible;
 	will-change: transform;
 	outline: none;
