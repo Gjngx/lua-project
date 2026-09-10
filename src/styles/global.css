@@ -425,10 +425,10 @@ a {
 
 .cursor-video{
 	position: absolute;
-	top: 1.4rem;
-	left: 0.8rem;
+	top: 1.6rem;
+	left: 1rem;
 	opacity: 0;
-	transition: opacity 0.8s cubic-bezier(0.215, 0.61, 0.355, 1);
+	transition: opacity 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
 	transform-style: preserve-3d;
 	will-change: transform;
 }

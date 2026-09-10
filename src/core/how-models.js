@@ -2,6 +2,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // One WebGL context serves all thumbnails; only visible models are rendered.
 const DEFAULT_MODEL_URL = '/assets/3d/pillow-flower.glb';
+const MODEL_SCALE = 1.44; // Tăng kích thước model 44% so với ban đầu trong khung canvas.
 const IDLE_ROTATION_SPEED = 0.24; // Radians per second.
 const SCROLL_ROTATION_FACTOR = 0.0076; // Radians per pixel scrolled (1.9×).
 const MAX_ROTATION_SPEED = 9.5;
@@ -102,6 +103,7 @@ export class HowModels {
 						model.scale.setScalar(3.5 / size);
 					}
 				}
+				model.scale.multiplyScalar(MODEL_SCALE);
 				model.visible = false;
 				this.scene.add(model);
 				const item = { canvas, context, model, index, visible: false, width: 1, height: 1,
