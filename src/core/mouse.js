@@ -6,11 +6,16 @@ const CURSOR_STATE_CLASSES = [
 	'has-video',
 ];
 
+const VIDEO_MAX_TILT = 170;
+// Giữ độ nhạy khi rê chậm, giảm dần biên độ khi tiến đến góc nghiêng tối đa.
+const videoTilt = (delta) => VIDEO_MAX_TILT * Math.tanh(delta * 2 / VIDEO_MAX_TILT);
+
 class Mouse {
 	constructor() {
 		this.cursor = null;
 		this.cursorMain = null;
 		this.cursorVideo = null;
+		this.cursorVideoInner = null;
 		this.cursorVideoMedia = null;
 		this.mousePos = { x: 0, y: 0 };
 		this.activeTarget = null;
@@ -34,6 +39,7 @@ class Mouse {
 		this.cursorMain = $(this.cursor).find('.cursor-main')[0];
 		if (!this.cursor || !this.cursorMain) return;
 		this.cursorVideo = $(this.cursor).find('.cursor-video')[0];
+		this.cursorVideoInner = $(this.cursor).find('.cursor-video-inner')[0];
 		this.cursorVideoMedia = $(this.cursor).find('.cursor-video-inner video')[0];
 		$(this.cursor).addClass(['active']);
 
@@ -47,7 +53,6 @@ class Mouse {
 		});
 		if (this.cursorVideo) {
 			gsap.set(this.cursorVideo, {
-				transformPerspective: 1000,
 				transformOrigin: '50% 50%',
 			});
 			this.rotateVideoX = gsap.quickTo(this.cursorVideo, 'rotationX', {
@@ -59,13 +64,14 @@ class Mouse {
 				ease: 'power4',
 			});
 		}
-		if (this.cursorVideoMedia) {
-			gsap.set(this.cursorVideoMedia, { scale: 1.2 });
-			this.scaleVideoX = gsap.quickTo(this.cursorVideoMedia, 'scaleX', {
+		if (this.cursorVideoInner) {
+			// Scale the complete card, including its clipped edges, as in the reference.
+			gsap.set(this.cursorVideoInner, { x: 40, y: 40, scale: 1.2 });
+			this.scaleVideoX = gsap.quickTo(this.cursorVideoInner, 'scaleX', {
 				duration: 2,
 				ease: 'power1',
 			});
-			this.scaleVideoY = gsap.quickTo(this.cursorVideoMedia, 'scaleY', {
+			this.scaleVideoY = gsap.quickTo(this.cursorVideoInner, 'scaleY', {
 				duration: 2,
 				ease: 'power1',
 			});
@@ -97,8 +103,8 @@ class Mouse {
 
 		this.moveCursorX?.(event.clientX);
 		this.moveCursorY?.(event.clientY);
-		const rotationY = gsap.utils.clamp(-12, 12, deltaX * 1.2);
-		const rotationX = gsap.utils.clamp(-12, 12, -deltaY * 1.2);
+		const rotationY = videoTilt(deltaX);
+		const rotationX = videoTilt(-deltaY);
 		this.rotateVideoY?.(rotationY);
 		this.rotateVideoX?.(rotationX);
 		this.scaleVideoX?.(1);
@@ -207,9 +213,10 @@ class Mouse {
 		document.removeEventListener('pointerup', this.handlePointerUp, true);
 		$(this.cursor).removeClass(['active', 'is-visible', 'is-pressed', 'hidden', ...CURSOR_STATE_CLASSES]);
 		$(this.cursor).removeAttr('data-bg');
-		gsap.killTweensOf([this.cursorMain, this.cursorVideo, this.cursorVideoMedia]);
+		gsap.killTweensOf([this.cursorMain, this.cursorVideo, this.cursorVideoInner, this.cursorVideoMedia]);
 		if (this.cursorVideo) gsap.set(this.cursorVideo, { rotationX: 0, rotationY: 0 });
-		if (this.cursorVideoMedia) gsap.set(this.cursorVideoMedia, { scale: 1.2 });
+		if (this.cursorVideoInner) gsap.set(this.cursorVideoInner, { scale: 1.2 });
+		this.hasMoved = false;
 		this.isInitialized = false;
 	}
 }

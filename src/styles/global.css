@@ -357,6 +357,7 @@ a {
 	pointer-events: none;
 }
 .cursor-wrap {
+	perspective: 100vw;
 	z-index: 100000;
 	pointer-events: none;
 	width: 100%;
@@ -367,6 +368,7 @@ a {
 }
 
 .cursor {
+	transform-style: preserve-3d;
 	opacity: 0;
 	justify-content: center;
 	align-items: center;
@@ -383,6 +385,7 @@ a {
 }
 
 .cursor-main {
+	transform-style: preserve-3d;
 	z-index: 1;
 	border-radius: 50%;
 	flex: none;
@@ -422,8 +425,10 @@ a {
 
 .cursor-video{
 	position: absolute;
-	top: 2.4rem;
-	left: 1.8rem;
+	top: 0;
+	left: 0;
+	opacity: 0;
+	transition: opacity 0.8s cubic-bezier(0.215, 0.61, 0.355, 1);
 	transform-style: preserve-3d;
 	will-change: transform;
 }
@@ -434,22 +439,16 @@ a {
 	overflow: hidden;
 	clip-path: inset(0 round 0.4rem);
 	transform: translateZ(0);
-	backface-visibility: hidden;
-}
-
-.cursor-video-inner video {
-	backface-visibility: hidden;
+	backface-visibility: visible;
 	will-change: transform;
 }
 
-.cursor .cursor-video-inner{
-	transform: scale(0);
-	transform-origin: top left;
-	transition: transform 0.4s ease;
+.cursor-video-inner video {
+	backface-visibility: visible;
 }
 
-.cursor.has-video .cursor-video-inner {
-	transform: scale(1);
+.cursor.is-visible.has-video .cursor-video {
+	opacity: 1;
 }
 
 @media (hover: hover) and (min-width: 991px) {
