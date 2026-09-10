@@ -590,13 +590,13 @@
 
 .header-nav-location-item {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	gap: 0.8rem;
 }
 
 .header-nav-location-item .header-nav-location-item-img {
-	width: 2.8rem;
-	height: 2.8rem;
+	width: 1.6rem;
+	height: 1.6rem;
 	border-radius: 50%;
 	overflow: hidden;
 }
@@ -606,6 +606,7 @@
 	height: 1rem;
 	border-radius: 50%;
 	background-color: var(--cln-status-green);
+	margin: 0.6rem;
 }
 
 .header-nav-location-item-local .label:last-child {

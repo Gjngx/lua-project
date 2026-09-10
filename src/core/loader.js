@@ -72,7 +72,6 @@ class Loader {
 			const maskLoading = $(this.loaderEl).find('.loader-home-logo-mask-dark .loader-home-logo-ic');
 			const progressMask = $(this.loaderEl).find('.loader-home-logo-ic.mask-loading');
 			const textLoading = $(this.loaderEl).find('.loader-home-loading');
-			const loadingDots = textLoading.find('.loader-home-dot').toArray();
 			const tens = $(progress).find('.loader-home-progress-tens')[0];
 			const units = $(progress).find('.loader-home-progress-units')[0];
 			const digitEase = CustomEase.create('loaderDigit', '0.76,0,0.24,1');
@@ -104,7 +103,6 @@ class Loader {
 			gsap.set(units, { yPercent: -unitsIndex * 100 / units.children.length });
 			gsap.set([progress, maskLoading, textLoading], { yPercent: 100 });
 			gsap.set(progressMask, { clipPath: 'inset(0 0 0 0%)', opacity: 1 });
-			gsap.set(loadingDots, { opacity: 0 });
 
 			this.tlFirstLoad.to([progress, maskLoading, textLoading], {
 				yPercent: 0,
@@ -131,9 +129,6 @@ class Loader {
 						duration: digitDuration,
 						ease: digitEase,
 					}, position);
-				if (loadingDots[index]) {
-					this.tlFirstLoad.set(loadingDots[index], { opacity: 1 }, position + digitDuration);
-				}
 			});
 			this.tlFirstLoad.to(progressMask, {
 				clipPath: 'inset(0 0 0 100%)',

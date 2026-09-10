@@ -422,13 +422,13 @@ a {
 
 .cursor-video{
 	position: absolute;
-	top: 2rem;
-	left: 1.6rem;
+	top: 2.4rem;
+	left: 1.8rem;
 	transform-style: preserve-3d;
 	will-change: transform;
 }
 .cursor-video-inner {
-	width: 16rem;
+	width: 18rem;
 	height: 24rem;
 	border-radius: 0.4rem;
 	overflow: hidden;
