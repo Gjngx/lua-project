@@ -938,25 +938,32 @@
 }
 
 .home-playground-wrap.is-sphere-focused .home-playground-content-right-title-inner,
-.home-playground-wrap.is-sphere-focused .home-playground-content-left-title .h2{
+.home-playground-wrap.is-sphere-focused .home-playground-content-left-title .h2,
+.home-playground-wrap.is-sphere-unfocusing .home-playground-content-right-title-inner,
+.home-playground-wrap.is-sphere-unfocusing .home-playground-content-left-title .h2{
 	transform: translateY(100%);
 }
 .home-playground-trans-decor svg{
     transition: all 0.4s ease-in-out;
 }
-.home-playground-wrap.is-sphere-focused .ic-1 svg{
+.home-playground-wrap.is-sphere-focused .ic-1 svg,
+.home-playground-wrap.is-sphere-unfocusing .ic-1 svg{
     transform: translate(-2rem, -2rem);
 }
-.home-playground-wrap.is-sphere-focused .ic-2 svg{
+.home-playground-wrap.is-sphere-focused .ic-2 svg,
+.home-playground-wrap.is-sphere-unfocusing .ic-2 svg{
     transform: translate(2rem, -2rem);
 }
-.home-playground-wrap.is-sphere-focused .ic-3 svg{
+.home-playground-wrap.is-sphere-focused .ic-3 svg,
+.home-playground-wrap.is-sphere-unfocusing .ic-3 svg{
     transform: translate(-2rem, 2rem);
 }
-.home-playground-wrap.is-sphere-focused .ic-4 svg{
+.home-playground-wrap.is-sphere-focused .ic-4 svg,
+.home-playground-wrap.is-sphere-unfocusing .ic-4 svg{
     transform: translate(2rem, 2rem);
 }
-.home-playground-wrap.is-sphere-focused .home-playground-trans-decor svg{
+.home-playground-wrap.is-sphere-focused .home-playground-trans-decor svg,
+.home-playground-wrap.is-sphere-unfocusing .home-playground-trans-decor svg{
     opacity: 0;
 }
 .home-playground-content-right-link.hover-line::before,

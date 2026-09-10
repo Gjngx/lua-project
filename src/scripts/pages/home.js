@@ -690,9 +690,9 @@ export const HomePage = {
 
 			this.tlWorksList = gsap.timeline({
 				scrollTrigger: {
-					trigger: $(this.el).find('.home-works-list')[0],
-					start: 'top bottom',
-					end: 'bottom top',
+					trigger: $(this.el).find('.home-works--main')[0],
+					start: 'top top+=50%',
+					end: 'top top',
 					scrub: true
 				},
 			});
@@ -2227,6 +2227,7 @@ export const HomePage = {
 				item.setAttribute('aria-pressed', String(selected));
 			});
 			this.sphereFocused = true;
+			this.el?.classList.remove('is-sphere-unfocusing');
 			this.el?.classList.add('is-sphere-focused');
 			this.sphereFocus?.kill();
 			this.sphereFocus = gsap.to(this.sphereRotation, {
@@ -2251,6 +2252,7 @@ export const HomePage = {
 		resetSphereFocus(onComplete) {
 			if (!this.sphereFocused) return;
 			this.sphereFocused = false;
+			this.el?.classList.add('is-sphere-unfocusing');
 			this.el?.classList.remove('is-sphere-focused');
 			this.sphereCards.forEach((card) => {
 				card.classList.remove('is-focused');
@@ -2263,13 +2265,16 @@ export const HomePage = {
 				ease: 'power3.inOut',
 				overwrite: true,
 				onUpdate: () => this.applySphereTransform(),
-				onComplete,
+				onComplete: () => {
+					this.el?.classList.remove('is-sphere-unfocusing');
+					onComplete?.();
+				},
 			});
 		}
 
 		destroy() {
 			super.cleanTrigger();
-			this.el?.classList.remove('is-sphere-focused');
+			this.el?.classList.remove('is-sphere-focused', 'is-sphere-unfocusing');
 			this.pendingSphereCard = null;
 			this.sphereTransitionScrolling = false;
 			this.finishSphereScrollReset();
