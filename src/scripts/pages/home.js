@@ -1428,6 +1428,7 @@ export const HomePage = {
 			this.tlTrans = null;
 			this.tlItemScroll = null;
 			this.models = null;
+			this.tlHowThumb = null;
 		}
 
 		trigger(data) {
@@ -1483,7 +1484,7 @@ export const HomePage = {
 					trigger: decor,
 					start: 'top center',
 					endTrigger: $(this.el).find('.home-how-thumb-inner')[0],
-					end: 'top center-=5%',
+					end: viewport.w > 991 ? 'top center-=5%' : 'top+=50% top',
 					scrub: true,
 					invalidateOnRefresh: true,
 				},
@@ -1491,13 +1492,13 @@ export const HomePage = {
 
 			this.tlDecor
 				.to(shapeWraps[0], {
-					x: () => -getDecorDistance(),
+					x: () => viewport.w > 991 ? -getDecorDistance() : -getDecorDistance() * 1.5,
 					ease: 'none',
 				})
 				.to(
 					shapeWraps[1],
 					{
-						x: () => getDecorDistance(),
+						x: () => viewport.w > 991 ? getDecorDistance() : getDecorDistance() * 1.5,
 						ease: 'none',
 					},
 					'<',
@@ -1506,7 +1507,7 @@ export const HomePage = {
 			this.tlTrans = gsap.timeline({
 				scrollTrigger: {
 					trigger: $(this.el).find('.home-how-trans')[0],
-					start: 'top top+=50%',
+					start: viewport.w > 991 ? 'top top+=50%' : 'top bottom+=50%',
 					end: 'bottom bottom',
 					scrub: true,
 					invalidateOnRefresh: true,
@@ -1514,10 +1515,19 @@ export const HomePage = {
 			});
 			this.tlTrans
 				.to(shapeWraps[0], {
-					x: () => getShapeWidth(),
+					x: () => viewport.w > 991 ? getShapeWidth() : getShapeWidth() - shapeWraps[0].getBoundingClientRect().height,
 					ease: 'none',
 					duration: 0.7,
 				})
+				.to(
+					shapeWraps[1],
+					{
+						x: () => viewport.w > 991 ? getShapeWidth() : getShapeWidth() - shapeWraps[0].getBoundingClientRect().height,
+						ease: 'none',
+						duration: 0.7,
+					},
+					'<',
+				)
 				.to(
 					lastItemLeft,
 					{
@@ -1531,15 +1541,6 @@ export const HomePage = {
 					lastItemRight,
 					{
 						x: () => viewport.w > 991 ? -(lastItem.getBoundingClientRect().width / 2 - lastItemText.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
-						ease: 'none',
-						duration: 0.7,
-					},
-					'<',
-				)
-				.to(
-					shapeWraps[1],
-					{
-						x: () => getShapeWidth(),
 						ease: 'none',
 						duration: 0.7,
 					},
@@ -1591,6 +1592,9 @@ export const HomePage = {
 						y: -$(lastItemLeft).find('.home-how-content-item-title').innerHeight() * 1.8,
 						ease: 'none',
 						duration: 0.3,
+						onReverseComplete: function () {
+							gsap.set(this.targets(), { clearProps: 'transform' });
+						},
 					},
 					'>',
 				)
@@ -1657,27 +1661,27 @@ export const HomePage = {
 					$(item).removeClass(['active']);
 				});
 			};
+			if (viewport.w > 991) {
+				thumbItems.forEach((thumb, index) => {
+					const frame = $(thumb).find('.home-how-thumb-item-inner')[0];
+					const tl = gsap.timeline({
+						scrollTrigger: {
+							trigger: thumb,
+							start: 'top bottom',
+							end: 'bottom top',
+							scrub: true,
+						},
+					});
 
-			thumbItems.forEach((thumb, index) => {
-				const frame = $(thumb).find('.home-how-thumb-item-inner')[0];
-				const tl = gsap.timeline({
-					scrollTrigger: {
-						trigger: thumb,
-						start: 'top bottom',
-						end: 'bottom top',
-						scrub: true,
-					},
-				});
-
-				tl.fromTo(
-					frame,
-					{ scale: 0.5 },
-					{
-						scale: 0.75,
-						duration: 0.25,
-						ease: 'none',
-					},
-				)
+					tl.fromTo(
+						frame,
+						{ scale: 0.5 },
+						{
+							scale: 0.75,
+							duration: 0.25,
+							ease: 'none',
+						},
+					)
 					.to(frame, {
 						scale: 1,
 						duration: 0.25,
@@ -1694,33 +1698,94 @@ export const HomePage = {
 						ease: 'none',
 					});
 
-				this.tlItemScrolls.push(tl);
+					this.tlItemScrolls.push(tl);
 
-				const contentTrigger = ScrollTrigger.create({
-					trigger: thumb,
-					start: `top center`,
-					end: `bottom center`,
-					onEnter: () => {
-						if (index === 0) $(contentList).addClass(['active-ic']);
-						activateContent(index, 'forward');
-					},
-					onEnterBack: () => {
-						if (index === thumbItems.length - 1) $(contentList).addClass(['active-ic']);
-						activateContent(index, 'backward');
-					},
-					onLeave: () => {
-						if (index !== thumbItems.length - 1) return;
-						$(contentList).removeClass(['active-ic']);
-						clearContent('forward', true);
-					},
-					onLeaveBack: () => {
-						if (index !== 0) return;
-						$(contentList).removeClass(['active-ic']);
-						clearContent('backward');
+					const contentTrigger = ScrollTrigger.create({
+						trigger: thumb,
+						start: `top center`,
+						end: `bottom center`,
+						onEnter: () => {
+							if (index === 0) $(contentList).addClass(['active-ic']);
+							activateContent(index, 'forward');
+						},
+						onEnterBack: () => {
+							if (index === thumbItems.length - 1) $(contentList).addClass(['active-ic']);
+							activateContent(index, 'backward');
+						},
+						onLeave: () => {
+							if (index !== thumbItems.length - 1) return;
+							$(contentList).removeClass(['active-ic']);
+							clearContent('forward', true);
+						},
+						onLeaveBack: () => {
+							if (index !== 0) return;
+							$(contentList).removeClass(['active-ic']);
+							clearContent('backward');
+						},
+					});
+					this.tlItemScrolls.push(contentTrigger);
+				});
+			} else{
+
+				this.tlHowThumb = gsap.timeline({
+					scrollTrigger: {
+						trigger: $(this.el).find('.home-how-thumb')[0],
+						start: 'top top',
+						endTrigger: $(this.el).find('.home-how-thumb-block')[0],
+						end: 'bottom bottom',
+						scrub: true,
 					},
 				});
-				this.tlItemScrolls.push(contentTrigger);
-			});
+				this.tlHowThumb.to($(this.el).find('.home-how-thumb-inner')[0], {
+					xPercent: -100,
+					duration: 1,
+					ease: 'none',
+				});
+
+				thumbItems.forEach((thumb, index) => {
+					const frame = $(thumb).find('.home-how-thumb-item-inner')[0];
+					const scaleTimeline = gsap.timeline({
+						scrollTrigger: {
+							trigger: thumb,
+							containerAnimation: this.tlHowThumb,
+							start: 'left right',
+							end: 'right left',
+							scrub: true
+						},
+					});
+					scaleTimeline
+						.fromTo(frame, { scale: 0.5 }, { scale: 1, duration: 0.4, ease: 'none' })
+						.to(frame, { scale: 0.5, duration: 0.6, ease: 'none' });
+					this.tlItemScrolls.push(scaleTimeline);
+
+					const contentTrigger = ScrollTrigger.create({
+						trigger: thumb,
+						containerAnimation: this.tlHowThumb,
+						start: 'left center',
+						end: 'right left',
+						onEnter: () => {
+							$(contentList).addClass(['active-ic']);
+							activateContent(index, 'forward');
+						},
+						onEnterBack: () => {
+							$(contentList).addClass(['active-ic']);
+							activateContent(index, 'backward');
+						},
+						onLeave: () => {
+							if (index !== thumbItems.length - 1) return;
+							$(contentList).removeClass(['active-ic']);
+							clearContent('forward', true);
+						},
+						onLeaveBack: () => {
+							if (index !== 0) return;
+							$(contentList).removeClass(['active-ic']);
+							clearContent('backward');
+						},
+					});
+					this.tlItemScrolls.push(contentTrigger);
+				});
+
+			}
 		}
 
 
@@ -1742,6 +1807,11 @@ export const HomePage = {
 					if (tl.kill) tl.kill();
 				});
 			}
+			if (this.tlHowThumb) {
+				this.tlHowThumb.scrollTrigger?.kill();
+				this.tlHowThumb.kill();
+			}
+			this.tlHowThumb = null;
 			this.tlDecor = null;
 			this.tlTrans = null;
 			this.el = null;
@@ -1829,14 +1899,14 @@ export const HomePage = {
 			});
 			this.tlTrans
 				.to(titleLeft, {
-					x: `-${widthTransLeft}`,
+					x: () => viewport.w > 991 ? `-${widthTransLeft}` : 0,
 					ease: 'power3.inOut',
 					duration: 1,
 				})
 				.to(
 					titleRight,
 					{
-						x: `${widthTransRight}`,
+						x: () => viewport.w > 991 ? `${widthTransRight}` : 0,
 						ease: 'power3.inOut',
 						duration: 1,
 					},
