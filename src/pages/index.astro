@@ -334,26 +334,21 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 								}
 							</p>
 						</div>
-						<div class="home-hero-bottom-action">
-							<div class="home-hero-bottom-ic">
-								<div class="home-hero-bottom-ic-inner"></div>
-							</div>
-							<a
-								href={stegaClean(hero?.aboutLink?.href || '/about')}
-								class="home-hero-bottom-link hover-line"
-								data-cursor="hidden"
-							>
-								<p class="p">{hero?.aboutLink?.label || 'More about me'}</p>
-								<div class="home-hero-bottom-link-ic">
-									<div class="home-hero-bottom-link-ic-inner ic-top">
-										<IconArrowRight />
-									</div>
-									<div class="home-hero-bottom-link-ic-inner ic-bottom">
-										<IconArrowRight />
-									</div>
+						<a
+							href={stegaClean(hero?.aboutLink?.href || '/about')}
+							class="home-hero-bottom-link hover-line"
+							data-cursor="hidden"
+						>
+							<p class="p">{hero?.aboutLink?.label || 'More about me'}</p>
+							<div class="home-hero-bottom-link-ic">
+								<div class="home-hero-bottom-link-ic-inner ic-top">
+									<IconArrowRight />
 								</div>
-							</a>
-						</div>
+								<div class="home-hero-bottom-link-ic-inner ic-bottom">
+									<IconArrowRight />
+								</div>
+							</div>
+						</a>
 					</div>
 					<div class="home-hero-empty"></div>
 				</div>

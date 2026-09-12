@@ -473,7 +473,6 @@ export const HomePage = {
 							ease: 'power2.out',
 							isDisableRevert: true,
 						}),
-						new FadeIn({ el: $(this.el).find('.home-hero-bottom-ic').get(0), delay: 0.2 }),
 						new FadeIn({ el: $(this.el).find('.home-hero-bottom-link').get(0), delay: 0.4 }),
 					],
 				});
