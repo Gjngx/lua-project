@@ -1479,6 +1479,9 @@ export const HomePage = {
 			const getShapeWidth = () => shapeWraps[0].getBoundingClientRect().width;
 			const getDecorDistance = () => decor.getBoundingClientRect().width / 2 - getShapeWidth() / 2;
 
+			// const gapLastItem = lastItem.querySelector('.home-how-content-item-right').getBoundingClientRect().bottom
+			// 	- lastItem.querySelector('.home-how-content-item-left').getBoundingClientRect().top;
+
 			this.tlDecor = gsap.timeline({
 				scrollTrigger: {
 					trigger: decor,
@@ -1532,7 +1535,7 @@ export const HomePage = {
 					lastItemLeft,
 					{
 						x: () => viewport.w > 991 ? (lastItem.getBoundingClientRect().width / 2 - lastItemTitle.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
-						// y: () => viewport.w > 991 ? 0 : - (lastItemTitle.getBoundingClientRect().height * 2),
+						y: () => viewport.w > 991 ? 0 : cvUnit(400, 'rem'),
 						ease: 'none',
 						duration: 0.7,
 					},
@@ -1542,6 +1545,7 @@ export const HomePage = {
 					lastItemRight,
 					{
 						x: () => viewport.w > 991 ? -(lastItem.getBoundingClientRect().width / 2 - lastItemText.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
+						y: () => viewport.w > 991 ? 0 : cvUnit(-400, 'rem'),
 						ease: 'none',
 						duration: 0.7,
 					},
@@ -1591,7 +1595,7 @@ export const HomePage = {
 					[$(lastItemLeft).find('.home-how-content-item-title'), $(lastItemRight).find('.home-how-content-item-text')],
 					{
 						y: -$(lastItemLeft).find('.home-how-content-item-title').innerHeight() * 1.8,
-						ease: 'none',
+						ease: 'power3.inOut',
 						duration: 0.3,
 						onReverseComplete: function () {
 							gsap.set(this.targets(), { clearProps: 'transform' });
@@ -1609,7 +1613,7 @@ export const HomePage = {
 					},
 					{
 						y: 0,
-						ease: 'none',
+						ease: 'power3.inOut',
 						duration: 0.3,
 					}, '>',
 				)
@@ -1879,15 +1883,15 @@ export const HomePage = {
 		animationScrub() {
 			const itemLeft = $(this.el).find('.home-playground-content-left')[0];
 			const itemRight = $(this.el).find('.home-playground-content-right')[0];
-			const titleLeft = $(this.el).find('.home-playground-content-left-title')[0];
-			const titleRight = $(this.el).find('.home-playground-content-right-title')[0];
+			const titleLeft = $(this.el).find('.home-playground-content-left-inner')[0];
+			const titleRight = $(this.el).find('.home-playground-content-right-inner')[0];
 			const transInner = $(this.el).find('.home-playground-trans-inner')[0];
 			const playgroundMain = $(this.el).find('.home-playground-main')[0];
 
 			const widthTransLeft =
-				itemLeft.getBoundingClientRect().width - titleLeft.getBoundingClientRect().width;
+				itemLeft.getBoundingClientRect().width - $(titleLeft).find('.home-playground-content-left-title')[0].getBoundingClientRect().width;
 			const widthTransRight =
-				itemRight.getBoundingClientRect().width - titleRight.getBoundingClientRect().width;
+				itemRight.getBoundingClientRect().width - $(titleRight).find('.home-playground-content-right-title')[0].getBoundingClientRect().width;
 
 			this.tlTrans = gsap.timeline({
 				scrollTrigger: {
@@ -1899,7 +1903,8 @@ export const HomePage = {
 			});
 			this.tlTrans
 				.to(titleLeft, {
-					x: () => viewport.w > 991 ? `-${widthTransLeft}` : 0,
+					x: () => viewport.w > 991 ?`-${widthTransLeft}` : 0,
+					y: () => viewport.w > 991 ? 0 : cvUnit(-400, 'rem'),
 					ease: 'power3.inOut',
 					duration: 1,
 				})
@@ -1907,6 +1912,7 @@ export const HomePage = {
 					titleRight,
 					{
 						x: () => viewport.w > 991 ? `${widthTransRight}` : 0,
+						y: () => viewport.w > 991 ? 0 : cvUnit(400, 'rem'),
 						ease: 'power3.inOut',
 						duration: 1,
 					},
