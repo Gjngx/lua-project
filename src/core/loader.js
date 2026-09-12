@@ -248,10 +248,10 @@ class Loader {
 	}
 
 	async complete() {
-		// gsap.set(this.loaderEl, { autoAlpha: 0, pointerEvents: 'none' });
-		// $(this.loaderEl).removeClass(['is-loading']);
-		// $(this.loaderEl).addClass(['done']);
-		// $(document.documentElement).addClass(['done']);
+		gsap.set(this.loaderEl, { autoAlpha: 0, pointerEvents: 'none' });
+		$(this.loaderEl).removeClass(['is-loading']);
+		$(this.loaderEl).addClass(['done']);
+		$(document.documentElement).addClass(['done']);
 		await this.playPageOnce();
 		// Let the newly installed scroll effects settle before measuring/unlocking.
 		await new Promise((resolve) => requestAnimationFrame(resolve));

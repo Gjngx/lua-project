@@ -699,11 +699,11 @@ export const HomePage = {
 			this.tlWorksList
 			.to($(this.el).find('.home-works-main-ic')[0], {
 				x: cvUnit(120, 'rem'),
-				ease: 'power1.inOut',
+				ease: 'none',
 			})
 			.to($(this.el).find('.home-works-main-ic')[1], {
 				x: cvUnit(-120, 'rem'),
-				ease: 'power1.inOut',
+				ease: 'none',
 			},'<');
 
 			const transition = $(this.el).find('.home-works-trans')[0];
@@ -1492,13 +1492,13 @@ export const HomePage = {
 			this.tlDecor
 				.to(shapeWraps[0], {
 					x: () => -getDecorDistance(),
-					ease: 'power3.inOut',
+					ease: 'none',
 				})
 				.to(
 					shapeWraps[1],
 					{
 						x: () => getDecorDistance(),
-						ease: 'power3.inOut',
+						ease: 'none',
 					},
 					'<',
 				);
@@ -1515,17 +1515,14 @@ export const HomePage = {
 			this.tlTrans
 				.to(shapeWraps[0], {
 					x: () => getShapeWidth(),
-					ease: 'power2.inOut',
+					ease: 'none',
 					duration: 0.7,
 				})
 				.to(
 					lastItemLeft,
 					{
-						x: () =>
-							lastItem.getBoundingClientRect().width / 2 -
-							lastItemTitle.getBoundingClientRect().width -
-							cvUnit(100, 'rem'),
-						ease: 'power3.inOut',
+						x: () => viewport.w > 991 ? (lastItem.getBoundingClientRect().width / 2 - lastItemTitle.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
+						ease: 'none',
 						duration: 0.7,
 					},
 					'<',
@@ -1533,13 +1530,8 @@ export const HomePage = {
 				.to(
 					lastItemRight,
 					{
-						x: () =>
-							-(
-								lastItem.getBoundingClientRect().width / 2 -
-								lastItemText.getBoundingClientRect().width -
-								cvUnit(100, 'rem')
-							),
-						ease: 'power3.inOut',
+						x: () => viewport.w > 991 ? -(lastItem.getBoundingClientRect().width / 2 - lastItemText.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
+						ease: 'none',
 						duration: 0.7,
 					},
 					'<',
@@ -1548,7 +1540,7 @@ export const HomePage = {
 					shapeWraps[1],
 					{
 						x: () => getShapeWidth(),
-						ease: 'power3.inOut',
+						ease: 'none',
 						duration: 0.7,
 					},
 					'<',
@@ -1558,7 +1550,7 @@ export const HomePage = {
 					{
 						xPercent: -100,
 						yPercent: 100,
-						ease: 'power3.out',
+						ease: 'none',
 						duration: 0.3,
 					},
 					0.4,
@@ -1568,7 +1560,7 @@ export const HomePage = {
 					{
 						xPercent: -100,
 						yPercent: -100,
-						ease: 'power3.out',
+						ease: 'none',
 						duration: 0.3,
 					},
 					'<',
@@ -1578,7 +1570,7 @@ export const HomePage = {
 					{
 						xPercent: -100,
 						yPercent: 100,
-						ease: 'power3.out',
+						ease: 'none',
 						duration: 0.3,
 					},
 					'<',
@@ -1588,25 +1580,39 @@ export const HomePage = {
 					{
 						xPercent: -100,
 						yPercent: -100,
-						ease: 'power3.out',
+						ease: 'none',
 						duration: 0.3,
 					},
 					'<',
 				)
 				.to(
-					[lastItemLeft, lastItemRight],
+					[$(lastItemLeft).find('.home-how-content-item-title'), $(lastItemRight).find('.home-how-content-item-text')],
 					{
-						y: () => lastItem.getBoundingClientRect().height,
-						ease: 'power3.inOut',
+						y: -$(lastItemLeft).find('.home-how-content-item-title').innerHeight() * 1.8,
+						ease: 'none',
 						duration: 0.3,
 					},
 					'>',
+				)
+				.fromTo(
+					[
+						$('.home-playground-content-left-title').toArray(),
+						$('.home-playground-content-right-title').toArray(),
+					],
+					{
+						y: $(lastItemLeft).find('.home-how-content-item-title').innerHeight() * 1.8,
+					},
+					{
+						y: 0,
+						ease: 'none',
+						duration: 0.3,
+					}, '>',
 				)
 				.to(
 					$('.home-playground-trans-decor').toArray(),
 					{
 						opacity: 1,
-						ease: 'power1.inOut',
+						ease: 'power3.inOut',
 						duration: 0.01,
 					},
 					'<',
@@ -1615,26 +1621,11 @@ export const HomePage = {
 					[shapeWraps[0], shapeWraps[1]],
 					{
 						opacity: 0,
-						ease: 'power1.inOut',
+						ease: 'power3.inOut',
 						duration: 0.01,
 					},
 					'<',
 				)
-				.fromTo(
-					[
-						$('.home-playground-content-left-title').toArray(),
-						$('.home-playground-content-right-title').toArray(),
-					],
-					{
-						yPercent: 100,
-					},
-					{
-						yPercent: 0,
-						ease: 'power3.inOut',
-						duration: 0.3,
-					},
-					1,
-				);
 
 			this.tlItemScrolls = [];
 			const thumbItems = $(this.el).find('.home-how-thumb-item').toArray();

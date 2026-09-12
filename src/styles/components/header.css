@@ -772,8 +772,11 @@
 }
 
 @media only screen and (max-width: 991px) {
+	.header-nav-location {
+		padding: 1.4rem;
+	}
 	.header-logo-ic-amin {
-		height: 18rem;
+		height: 22.5rem;
 	}
 
 	.header-menu {
