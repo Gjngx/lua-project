@@ -1532,6 +1532,7 @@ export const HomePage = {
 					lastItemLeft,
 					{
 						x: () => viewport.w > 991 ? (lastItem.getBoundingClientRect().width / 2 - lastItemTitle.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
+						// y: () => viewport.w > 991 ? 0 : - (lastItemTitle.getBoundingClientRect().height * 2),
 						ease: 'none',
 						duration: 0.7,
 					},
@@ -1725,7 +1726,28 @@ export const HomePage = {
 					});
 					this.tlItemScrolls.push(contentTrigger);
 				});
-			} else{
+			} else {
+				// Derive one current item from geometry, even when scrolling skips items.
+				const syncHorizontalContent = () => {
+					const bounds = thumbItems.map((thumb) => thumb.getBoundingClientRect());
+					const lastIndex = bounds.length - 1;
+					const hasExited = lastIndex >= 0 && bounds[lastIndex].right <= 0;
+					let activeIndex = -1;
+					bounds.forEach((rect, index) => {
+						if (rect.left <= window.innerWidth / 2) activeIndex = index;
+					});
+					if (hasExited) activeIndex = -1;
+
+					thumbItems.forEach((thumb, index) => {
+						thumb.classList.toggle('active', index === activeIndex);
+					});
+					contentItems.forEach((item, index) => {
+						item.classList.toggle('active', index === activeIndex);
+						item.classList.toggle('is-static-exit', hasExited && index === lastIndex);
+						item.classList.toggle('is-above', hasExited ? index < lastIndex : index < activeIndex);
+					});
+					contentList.classList.toggle('active-ic', activeIndex !== -1);
+				};
 
 				this.tlHowThumb = gsap.timeline({
 					scrollTrigger: {
@@ -1734,12 +1756,14 @@ export const HomePage = {
 						endTrigger: $(this.el).find('.home-how-thumb-block')[0],
 						end: 'bottom bottom',
 						scrub: true,
+						onRefresh: syncHorizontalContent,
 					},
 				});
 				this.tlHowThumb.to($(this.el).find('.home-how-thumb-inner')[0], {
 					xPercent: -100,
 					duration: 1,
 					ease: 'none',
+					onUpdate: syncHorizontalContent,
 				});
 
 				thumbItems.forEach((thumb, index) => {
@@ -1758,32 +1782,8 @@ export const HomePage = {
 						.to(frame, { scale: 0.5, duration: 0.6, ease: 'none' });
 					this.tlItemScrolls.push(scaleTimeline);
 
-					const contentTrigger = ScrollTrigger.create({
-						trigger: thumb,
-						containerAnimation: this.tlHowThumb,
-						start: 'left center',
-						end: 'right left',
-						onEnter: () => {
-							$(contentList).addClass(['active-ic']);
-							activateContent(index, 'forward');
-						},
-						onEnterBack: () => {
-							$(contentList).addClass(['active-ic']);
-							activateContent(index, 'backward');
-						},
-						onLeave: () => {
-							if (index !== thumbItems.length - 1) return;
-							$(contentList).removeClass(['active-ic']);
-							clearContent('forward', true);
-						},
-						onLeaveBack: () => {
-							if (index !== 0) return;
-							$(contentList).removeClass(['active-ic']);
-							clearContent('backward');
-						},
-					});
-					this.tlItemScrolls.push(contentTrigger);
 				});
+				syncHorizontalContent();
 
 			}
 		}
