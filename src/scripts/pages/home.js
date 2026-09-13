@@ -2103,7 +2103,9 @@ export const HomePage = {
 				const movedY = event.clientY - this.spherePointer.startY;
 				if (Math.hypot(movedX, movedY) > 4) this.sphereDragMoved = true;
 				this.sphereRotation.y += (deltaX * 0.2) / this.sphereRotation.scale;
-				this.sphereRotation.x -= (deltaY * 0.2) / this.sphereRotation.scale;
+				if (viewport.w > 991) {
+					this.sphereRotation.x -= (deltaY * 0.2) / this.sphereRotation.scale;
+				}
 				this.spherePointer.x = event.clientX;
 				this.spherePointer.y = event.clientY;
 				this.applySphereTransform();
