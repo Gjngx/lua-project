@@ -9,11 +9,15 @@ export class SmoothScroll {
 		this._onModeChange = () => this.reInit();
 		this._nativeOverflow = null;
 		this._nativeTween = null;
+		this._nativeFrame = null;
 		this._onNativeScroll = () => {
 			if (this.lenis) return;
-			const delta = window.scrollY - this.scroller.scrollY;
-			this.updateOnScroll({ scroll: window.scrollY, velocity: delta, direction: Math.sign(delta) });
-			ScrollTrigger.update();
+			if (this._nativeFrame !== null) return;
+			this._nativeFrame = requestAnimationFrame(() => {
+				this._nativeFrame = null;
+				const delta = window.scrollY - this.scroller.scrollY;
+				this.updateOnScroll({ scroll: window.scrollY, velocity: delta, direction: Math.sign(delta) });
+			});
 		};
 		this._tickerCallback = null;
 		this._refreshCallback = null;
@@ -43,6 +47,8 @@ export class SmoothScroll {
 	}
 
 	reInit() {
+		if (this._nativeFrame !== null) cancelAnimationFrame(this._nativeFrame);
+		this._nativeFrame = null;
 		this._nativeTween?.kill();
 		if (this._tickerCallback) gsap.ticker.remove(this._tickerCallback);
 		this._tickerCallback = null;
@@ -109,7 +115,7 @@ export class SmoothScroll {
 		this.scroller.velocity = Number.isFinite(e?.velocity) ? e.velocity : 0;
 		this.scroller.direction = Number.isFinite(e?.direction) ? e.direction : 0;
 		window.dispatchEvent(new CustomEvent('smooth-scroll:update', {
-			detail: { ...this.scroller, scroll, limit: this.getLimit() },
+			detail: { ...this.scroller, scroll },
 		}));
 	}
 
@@ -193,6 +199,8 @@ export class SmoothScroll {
 	}
 
 	destroy() {
+		if (this._nativeFrame !== null) cancelAnimationFrame(this._nativeFrame);
+		this._nativeFrame = null;
 		this._nativeTween?.kill();
 		this.restoreNativeOverflow();
 		this.mobile.removeEventListener('change', this._onModeChange);

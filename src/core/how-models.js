@@ -38,7 +38,7 @@ export class HowModels {
 			]);
 			const gltfLoader = new GLTFLoader();
 			if (this.disposed) return;
-			this.renderer = new T.WebGLRenderer({ alpha: true, antialias: true });
+			this.renderer = new T.WebGLRenderer({ alpha: true, antialias: this.desktop.matches });
 			this.renderer.setClearColor(0x000000, 0);
 			this.renderer.toneMapping = T.ACESFilmicToneMapping;
 			this.renderer.toneMappingExposure = 1.25;
@@ -124,6 +124,12 @@ export class HowModels {
 				this.items.push(item);
 			}
 
+			// Compile materials before the first visible scroll frame. The async path
+			// uses parallel shader compilation where the GPU supports it.
+			this.items.forEach(({ model }) => { model.visible = true; });
+			await this.renderer.compileAsync(this.scene, this.camera);
+			if (this.disposed) return;
+			this.items.forEach(({ model }) => { model.visible = false; });
 			this.resizeObserver = new ResizeObserver(this.updateViewport);
 			this.observer = new IntersectionObserver((entries) => {
 				entries.forEach((entry) => {

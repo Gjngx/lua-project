@@ -314,7 +314,10 @@ export const HomePage = {
 		queueVideoSeek(time) {
 			if (!this.video || !this.videoDuration) return;
 
-			this.videoTargetTime = Math.min(this.videoDuration, Math.max(0, time));
+			// Both source videos are scrubbed at 24fps. Avoid decoding the same
+			// frame repeatedly for sub-frame scroll changes on high-refresh screens.
+			this.videoTargetTime = Math.min(this.videoDuration,
+				Math.max(0, Math.round(time * HERO_VIDEO_FPS) / HERO_VIDEO_FPS));
 
 			if (!this.videoReady || document.hidden || this.videoRaf !== null) return;
 
@@ -2140,8 +2143,7 @@ export const HomePage = {
 				smoothScroll.stop();
 				this.resetSphereFocus(() => this.finishSphereScrollReset());
 			};
-			window.addEventListener('wheel', onScrollIntent, { passive: false, capture: true });
-			window.addEventListener('touchmove', onScrollIntent, { passive: false, capture: true });
+			this.sphereScrollIntent = onScrollIntent;
 			this.sphereCleanups.push(() => {
 				window.removeEventListener('wheel', onScrollIntent, true);
 				window.removeEventListener('touchmove', onScrollIntent, true);
@@ -2364,6 +2366,8 @@ export const HomePage = {
 				item.focused = item === card;
 			});
 			this.sphereFocused = true;
+			window.addEventListener('wheel', this.sphereScrollIntent, { passive: false, capture: true });
+			window.addEventListener('touchmove', this.sphereScrollIntent, { passive: false, capture: true });
 			this.el?.classList.remove('is-sphere-unfocusing');
 			this.el?.classList.add('is-sphere-focused');
 			this.sphereFocus?.kill();
@@ -2403,6 +2407,10 @@ export const HomePage = {
 				onUpdate: () => this.applySphereTransform(),
 				onComplete: () => {
 					this.el?.classList.remove('is-sphere-unfocusing');
+					if (!this.sphereFocused) {
+						window.removeEventListener('wheel', this.sphereScrollIntent, true);
+						window.removeEventListener('touchmove', this.sphereScrollIntent, true);
+					}
 					onComplete?.();
 				},
 			});

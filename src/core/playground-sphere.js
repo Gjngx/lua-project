@@ -56,7 +56,8 @@ export class PlaygroundSphere {
 			})));
 			if (this.disposed) return;
 			const limit = Math.min(4096, this.renderer.capabilities.maxTextureSize);
-			const cellWidth = Math.min(1024, limit);
+			const compact = window.matchMedia('(max-width: 991px)').matches;
+			const cellWidth = Math.min(compact ? 512 : 1024, limit);
 			const cellHeight = Math.round(cellWidth * 0.625);
 			const columns = Math.floor(limit / cellWidth);
 			const perPage = columns * Math.floor(limit / cellHeight);
@@ -66,7 +67,7 @@ export class PlaygroundSphere {
 				atlas.width = Math.min(columns, page.length) * cellWidth;
 				atlas.height = Math.ceil(page.length / columns) * cellHeight;
 				const ctx = atlas.getContext('2d');
-				page.forEach((img, index) => {
+				for (const [index, img] of page.entries()) {
 					const x = (index % columns) * cellWidth;
 					const y = Math.floor(index / columns) * cellHeight;
 					const ratio = Math.max(cellWidth / img.naturalWidth, cellHeight / img.naturalHeight);
@@ -74,7 +75,10 @@ export class PlaygroundSphere {
 					const sh = cellHeight / ratio;
 					ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2,
 						sw, sh, x, y, cellWidth, cellHeight);
-				});
+					// Let input/scroll run between image resampling operations.
+					if (compact) await new Promise((resolve) => setTimeout(resolve, 0));
+					if (this.disposed) return;
+				}
 				// Reject cross-origin images that cannot be uploaded to WebGL.
 				ctx.getImageData(0, 0, 1, 1);
 				const texture = new T.CanvasTexture(atlas);
@@ -126,7 +130,10 @@ export class PlaygroundSphere {
 			this.host.appendChild(this.canvas);
 			this.ready = true;
 			this.resize();
-			this.renderer.compile(this.scene, this.camera);
+			this.ready = false;
+			await this.renderer.compileAsync(this.scene, this.camera);
+			if (this.disposed) return;
+			this.ready = true;
 			this.onReady();
 		} catch (error) {
 			console.warn('[Playground] WebGL globe unavailable:', error);
@@ -148,7 +155,8 @@ export class PlaygroundSphere {
 		this.camera.position.z = perspective;
 		this.camera.updateProjectionMatrix();
 		// The drawing surface covers the section even when a focused card overflows.
-		this.renderer.setPixelRatio(window.devicePixelRatio || 1);
+		this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1,
+			window.matchMedia('(max-width: 991px)').matches ? 1.5 : 2));
 		this.renderer.setSize(width, height, false);
 		const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
 		this.cardWidth = 16 * rem;
