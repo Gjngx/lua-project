@@ -1130,14 +1130,14 @@
 	}
 
 	.home-playground-content-left {
-		margin-top: 14rem;
+		margin-top: 12rem;
 		padding-top: 40rem;
 		grid-column: 1 / -1;
 		align-self: self-start;
 	}
 
 	.home-playground-content-right {
-		margin-bottom: 14rem;
+		margin-bottom: 12rem;
 		padding-bottom: 40rem;
 		grid-column: 1 / -1;
 		align-self: end;
@@ -1178,7 +1178,7 @@
 
 	.home-how-content-item {
 		height: auto;
-		padding-block: 14rem;
+		padding-block: 12rem;
 	}
 
 	.home-how-content-item-title,
@@ -1374,15 +1374,20 @@
 	}
 
 	.home-playground-content-left {
-		padding-top: 14rem;
+		padding-top: 10rem;
 	}
 
 	.home-playground-content-right{
-		padding-bottom: 14rem;
+		padding-bottom: 10rem;
 	}
 
 	.home-playground-trans-inner {
 		width: calc(var(--container--one-column) * 4 + var(--container--column-gap) * 3);
+	}
+
+	.home-how-thumb-item-img {
+		width: 100vw;
+		height: 100vw;
 	}
 
 }
