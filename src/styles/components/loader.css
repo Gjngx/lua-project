@@ -166,6 +166,9 @@ html.is-loading .loader-home-dot.dot-3 {
   .loader-home-logo {
     top: 1.6rem;
   }
+  .loader-home-loading {
+    align-items: flex-end;
+  }
 }
 
 @keyframes loader-dot-blink {
