@@ -8,6 +8,7 @@ const SCROLL_ROTATION_FACTOR = 0.0076; // Radians per pixel scrolled (1.9×).
 const MAX_ROTATION_SPEED = 9.5;
 const SUPERSAMPLE_FACTOR = 1.5;
 const MAX_RENDER_SIZE = 2048;
+const DESKTOP_INTERACTION = '(min-width: 992px) and (hover: hover) and (pointer: fine)';
 const DRAG_SENSITIVITY = 0.008; // Radians per pixel dragged.
 const DRAG_MOMENTUM_DECAY = 0.88; // Velocity multiplier per frame (~60fps).
 const DRAG_MOMENTUM_STOP = 0.0005; // Stop momentum below this velocity.
@@ -23,6 +24,8 @@ export class HowModels {
 		this.lastScrollY = null;
 		this.lastTime = null;
 		this.motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+		this.desktop = window.matchMedia(DESKTOP_INTERACTION);
+		this.updateViewport = this.updateViewport.bind(this);
 		this.schedule = this.schedule.bind(this);
 		this.render = this.render.bind(this);
 	}
@@ -61,6 +64,12 @@ export class HowModels {
 			this.scene.add(key, rim);
 			this.keyLight = key;
 			this.rimLight = rim;
+			// Static fabric lighting does not need to be assigned for every thumbnail/frame.
+			this.renderer.toneMappingExposure = 0.95;
+			this.scene.environmentIntensity = 0.25;
+			this.fillLight.intensity = 0.65;
+			this.keyLight.intensity = 3;
+			this.rimLight.intensity = 1;
 
 			const canvases = [...this.root.querySelectorAll('.home-how-model')];
 			// Cache to avoid loading the same URL multiple times
@@ -113,17 +122,9 @@ export class HowModels {
 					pointerActive: false, lastPointerX: 0, lastPointerY: 0,
 				};
 				this.items.push(item);
-				this._attachDragListeners(item);
 			}
 
-			this.resizeObserver = new ResizeObserver(() => {
-				const dpr = Math.min(window.devicePixelRatio || 1, 2);
-				this.items.forEach((item) => {
-					item.width = Math.max(1, Math.round(item.canvas.clientWidth * dpr));
-					item.height = Math.max(1, Math.round(item.canvas.clientHeight * dpr));
-				});
-				this.schedule();
-			});
+			this.resizeObserver = new ResizeObserver(this.updateViewport);
 			this.observer = new IntersectionObserver((entries) => {
 				entries.forEach((entry) => {
 					const item = this.items.find((item) => item.canvas === entry.target);
@@ -136,18 +137,35 @@ export class HowModels {
 				this.observer.observe(canvas);
 			});
 			this.motion.addEventListener('change', this.schedule);
+			this.desktop.addEventListener('change', this.updateViewport);
 			document.addEventListener('visibilitychange', this.schedule);
+			this.updateViewport();
 		} catch (error) {
 			console.warn('[HowModels] 3D preview unavailable:', error);
 			this.destroy();
 		}
 	}
 
+	updateViewport() {
+		if (this.disposed) return;
+		const desktop = this.desktop.matches;
+		const dpr = Math.min(window.devicePixelRatio || 1, desktop ? 2 : 1.5);
+		this.items.forEach((item) => {
+			item.width = Math.max(1, Math.round(item.canvas.clientWidth * dpr));
+			item.height = Math.max(1, Math.round(item.canvas.clientHeight * dpr));
+			if (desktop && !item._cleanupDrag) this._attachDragListeners(item);
+			if (!desktop) item._cleanupDrag?.();
+		});
+		this.schedule();
+	}
+
 	_attachDragListeners(item) {
 		const { canvas } = item;
 		canvas.dataset.cursor = 'drag';
 		const onPointerDown = (e) => {
+			if (!this.desktop.matches || e.pointerType !== 'mouse' || e.button !== 0) return;
 			e.preventDefault();
+			item.pointerId = e.pointerId;
 			item.pointerActive = true;
 			item.lastPointerX = e.clientX;
 			item.lastPointerY = e.clientY;
@@ -170,23 +188,39 @@ export class HowModels {
 		};
 		const onPointerUp = () => {
 			item.pointerActive = false;
+			if (item.pointerId != null && canvas.hasPointerCapture(item.pointerId)) canvas.releasePointerCapture(item.pointerId);
+			item.pointerId = null;
 			canvas.classList.remove('is-dragging');
 		};
 		canvas.addEventListener('pointerdown', onPointerDown);
 		canvas.addEventListener('pointermove', onPointerMove);
 		canvas.addEventListener('pointerup', onPointerUp);
 		canvas.addEventListener('pointercancel', onPointerUp);
+		canvas.addEventListener('lostpointercapture', onPointerUp);
 		// Store cleanup refs
 		item._cleanupDrag = () => {
 			canvas.removeEventListener('pointerdown', onPointerDown);
 			canvas.removeEventListener('pointermove', onPointerMove);
 			canvas.removeEventListener('pointerup', onPointerUp);
 			canvas.removeEventListener('pointercancel', onPointerUp);
+			canvas.removeEventListener('lostpointercapture', onPointerUp);
+			onPointerUp();
+			item.dragVelX = 0;
+			item.dragVelY = 0;
+			delete canvas.dataset.cursor;
+			item._cleanupDrag = null;
 		};
 	}
 
 	schedule() {
-		if (this.disposed || this.raf !== null || document.hidden) return;
+		if (this.disposed || document.hidden || !this.items.some((item) => item.visible)) {
+			if (this.raf !== null) cancelAnimationFrame(this.raf);
+			this.raf = null;
+			this.lastTime = null;
+			this.lastScrollY = null;
+			return;
+		}
+		if (this.raf !== null) return;
 		this.raf = requestAnimationFrame(this.render);
 	}
 
@@ -231,16 +265,19 @@ export class HowModels {
 				canvas.height = height;
 			}
 			// Render above the output resolution, then filter down to soften silhouettes.
-			const sampleScale = Math.min(SUPERSAMPLE_FACTOR, MAX_RENDER_SIZE / Math.max(width, height));
+			const sampleScale = Math.min(this.desktop.matches ? SUPERSAMPLE_FACTOR : 1,
+				(this.desktop.matches ? MAX_RENDER_SIZE : 1536) / Math.max(width, height));
 			const renderWidth = Math.max(1, Math.round(width * sampleScale));
 			const renderHeight = Math.max(1, Math.round(height * sampleScale));
 			if (this.renderer.domElement.width !== renderWidth || this.renderer.domElement.height !== renderHeight) {
 				this.renderer.setSize(renderWidth, renderHeight, false);
 			}
-			this.camera.aspect = width / height;
-			// Keep the entire model in frame even in short, wide viewports.
-			this.camera.position.z = 7.5 / Math.min(1, this.camera.aspect);
-			this.camera.updateProjectionMatrix();
+			if (this.camera.aspect !== width / height) {
+				this.camera.aspect = width / height;
+				// Keep the entire model in frame even in short, wide viewports.
+				this.camera.position.z = 7.5 / Math.min(1, this.camera.aspect);
+				this.camera.updateProjectionMatrix();
+			}
 			// Apply momentum decay when not dragging
 			if (!item.pointerActive) {
 				item.dragVelX *= DRAG_MOMENTUM_DECAY;
@@ -261,12 +298,6 @@ export class HowModels {
 				-0.2,
 			);
 			model.visible = true;
-			// Fabric lighting setup
-			this.renderer.toneMappingExposure = 0.95;
-			this.scene.environmentIntensity = 0.25;
-			this.fillLight.intensity = 0.65;
-			this.keyLight.intensity = 3;
-			this.rimLight.intensity = 1;
 			this.renderer.render(this.scene, this.camera);
 			context.clearRect(0, 0, width, height);
 			context.imageSmoothingEnabled = true;
@@ -285,6 +316,7 @@ export class HowModels {
 		this.observer?.disconnect();
 		this.resizeObserver?.disconnect();
 		this.motion.removeEventListener('change', this.schedule);
+		this.desktop.removeEventListener('change', this.updateViewport);
 		document.removeEventListener('visibilitychange', this.schedule);
 		const resources = new Set();
 		this.items.forEach((item) => {
@@ -294,7 +326,9 @@ export class HowModels {
 				const materials = Array.isArray(object.material) ? object.material : [object.material];
 				materials.filter(Boolean).forEach((material) => {
 					resources.add(material);
-					if (material.map) resources.add(material.map);
+					Object.values(material).forEach((value) => {
+						if (value?.isTexture) resources.add(value);
+					});
 				});
 			});
 			item.canvas.classList.remove('is-ready');

@@ -1,4 +1,5 @@
 import { HowModels } from '../../core/how-models.js';
+import { PlaygroundSphere } from '../../core/playground-sphere.js';
 import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
 import { cvUnit, viewport } from '../../core/helpers.js';
@@ -1833,11 +1834,10 @@ export const HomePage = {
 			this.tlTrans = null;
 			this.sphereReveal = null;
 			this.sphereFocus = null;
-			this.sphere = null;
+			this.sphereStage = null;
 			this.sphereScale = null;
 			this.cardLayer = null;
 			this.sphereCards = [];
-			this.sphereClones = [];
 			this.sphereRotation = { x: 0, y: 0, scale: 1 };
 			this.sphereHover = { x: 0, y: 0 };
 			this.sphereVisible = false;
@@ -1854,6 +1854,7 @@ export const HomePage = {
 			this.sphereObserver = null;
 			this.sphereResizeObserver = null;
 			this.sphereCleanups = [];
+			this.sphereRenderer = null;
 		}
 
 		trigger(data) {
@@ -1870,7 +1871,7 @@ export const HomePage = {
 		}
 
 		animationReveal() {
-			const stage = $(this.el).find('.home-playground-sphere-stage')[0];
+			const stage = $(this.el).find('.home-playground-webgl-stage')[0];
 			if (!stage) return;
 
 			this.sphereReveal = gsap.fromTo(
@@ -1987,27 +1988,25 @@ export const HomePage = {
 
 		interact() {
 			this.cardLayer = $(this.el).find('.home-playground-card-layer')[0];
-			this.sphereScale = $(this.el).find('.home-playground-sphere-scale')[0];
-			this.sphere = $(this.el).find('.home-playground-sphere')[0];
-			if (!this.cardLayer || !this.sphereScale || !this.sphere) return;
+			this.sphereScale = $(this.el).find('.home-playground-webgl-scale')[0];
+			this.sphereStage = $(this.el).find('.home-playground-webgl-stage')[0];
+			if (!this.cardLayer || !this.sphereScale || !this.sphereStage) return;
 
-			const sourceCards = Array.from(this.sphere.querySelectorAll('.home-playground-card'));
+			const sourceCards = JSON.parse(this.cardLayer.dataset.gallery || '[]');
 			if (!sourceCards.length) return;
 
 			const targetCount = Math.max(56, sourceCards.length);
-			for (let index = sourceCards.length; index < targetCount; index++) {
-				const clone = sourceCards[index % sourceCards.length].cloneNode(true);
-				clone.classList.add('is-sphere-clone');
-				clone.setAttribute('aria-hidden', 'true');
-				clone.setAttribute('tabindex', '-1');
-				this.sphere.appendChild(clone);
-				this.sphereClones.push(clone);
-			}
-
-			this.sphereCards = Array.from(this.sphere.querySelectorAll('.home-playground-card'));
+			this.sphereCards = Array.from({ length: targetCount }, (_, index) => ({
+				...sourceCards[index % sourceCards.length], rotationX: 0, rotationY: 0, focused: false,
+			}));
 			this.layoutSphereCards();
 			this.updateSphereScale();
 			this.applySphereTransform();
+
+			this.sphereRenderer = new PlaygroundSphere(
+				this.sphereStage, this.sphereCards, () => this.applySphereTransform(),
+			);
+			void this.sphereRenderer.init();
 
 			const onPointerDown = (event) => {
 				if (event.button !== 0) return;
@@ -2027,13 +2026,16 @@ export const HomePage = {
 					y: event.clientY,
 					startX: event.clientX,
 					startY: event.clientY,
-					card: event.target.closest?.('.home-playground-card') || null,
+					card: this.sphereRenderer?.pick(event) || null,
 				};
 				this.cardLayer.classList.add('is-dragging');
 				this.cardLayer.setPointerCapture?.(event.pointerId);
 			};
 
 			const onPointerMove = (event) => {
+				if (event.pointerType === 'mouse' && this.sphereRenderer?.ready) {
+					this.sphereRenderer.setHover(this.sphereRenderer.pick(event));
+				}
 				if (!this.sphereDragging) {
 					if (
 						event.pointerType !== 'mouse' || this.sphereFocused ||
@@ -2080,7 +2082,10 @@ export const HomePage = {
 			};
 
 			this.cardLayer.addEventListener('pointerdown', onPointerDown);
-			const onPointerLeave = () => this.resetSphereHover();
+			const onPointerLeave = () => {
+				this.resetSphereHover();
+				this.sphereRenderer?.setHover(null);
+			};
 			this.cardLayer.addEventListener('pointerleave', onPointerLeave);
 			this.cardLayer.addEventListener('pointermove', onPointerMove);
 			this.cardLayer.addEventListener('pointerup', onPointerEnd);
@@ -2094,14 +2099,25 @@ export const HomePage = {
 				this.cardLayer?.removeEventListener('pointercancel', onPointerEnd);
 			});
 
-			sourceCards.forEach((card) => {
-				const onKeyDown = (event) => {
-					if (event.key !== 'Enter' && event.key !== ' ') return;
-					event.preventDefault();
-					this.requestSphereCardFocus(card);
-				};
-				card.addEventListener('keydown', onKeyDown);
-				this.sphereCleanups.push(() => card.removeEventListener('keydown', onKeyDown));
+			let keyboardIndex = 0;
+			const onKeyDown = (event) => {
+				if (!['ArrowLeft', 'ArrowRight', 'Enter', ' ', 'Escape'].includes(event.key)) return;
+				event.preventDefault();
+				if (event.key === 'Escape') { this.resetSphereFocus(); return; }
+				if (event.key.startsWith('Arrow')) {
+					keyboardIndex = (keyboardIndex + (event.key === 'ArrowRight' ? 1 : -1) + this.sphereCards.length) % this.sphereCards.length;
+				}
+				const card = this.sphereCards[keyboardIndex];
+				this.sphereRenderer?.setHover(card, true);
+				this.cardLayer.setAttribute('aria-label', `Playground: ${card.alt || 'Image'} ${keyboardIndex + 1}/${this.sphereCards.length}. Use arrow keys to browse, Escape to close.`);
+				this.requestSphereCardFocus(card);
+			};
+			const onBlur = () => this.sphereRenderer?.setHover(null);
+			this.cardLayer.addEventListener('keydown', onKeyDown);
+			this.cardLayer.addEventListener('blur', onBlur);
+			this.sphereCleanups.push(() => {
+				this.cardLayer?.removeEventListener('keydown', onKeyDown);
+				this.cardLayer?.removeEventListener('blur', onBlur);
 			});
 
 			const onScrollIntent = (event) => {
@@ -2123,13 +2139,20 @@ export const HomePage = {
 
 			this.sphereObserver = new IntersectionObserver(([entry]) => {
 				this.sphereVisible = entry.isIntersecting;
+				schedule();
 			});
 			this.sphereObserver.observe(this.cardLayer);
 
-			this.sphereResizeObserver = new ResizeObserver(() => this.updateSphereScale());
+			this.sphereResizeObserver = new ResizeObserver(() => {
+				this.layoutSphereCards();
+				this.updateSphereScale();
+				this.sphereRenderer?.resize();
+				this.applySphereTransform();
+			});
 			this.sphereResizeObserver.observe(this.cardLayer);
 
 			const tick = (time) => {
+				this.sphereRaf = null;
 				const delta = this.sphereLastTime ? Math.min(50, time - this.sphereLastTime) : 16.667;
 				this.sphereLastTime = time;
 				if (
@@ -2139,16 +2162,26 @@ export const HomePage = {
 					!window.matchMedia('(prefers-reduced-motion: reduce)').matches
 				) {
 					this.sphereRotation.y += (delta / 16.667) * 0.08;
-					this.applySphereTransform();
 				}
-				this.sphereRaf = requestAnimationFrame(tick);
+				this.applySphereTransform(delta);
+				schedule();
 			};
-			this.sphereRaf = requestAnimationFrame(tick);
+			const schedule = () => {
+				if (!this.sphereVisible || document.hidden) {
+					if (this.sphereRaf) cancelAnimationFrame(this.sphereRaf);
+					this.sphereRaf = null;
+					this.sphereLastTime = 0;
+					return;
+				}
+				if (!this.sphereRaf) this.sphereRaf = requestAnimationFrame(tick);
+			};
+			document.addEventListener('visibilitychange', schedule);
+			this.sphereCleanups.push(() => document.removeEventListener('visibilitychange', schedule));
+			schedule();
 		}
 
 		layoutSphereCards() {
 			const count = this.sphereCards.length;
-			const radius = cvUnit(PLAYGROUND_SPHERE_RADIUS_REM, 'rem');
 			const rows = Math.max(2, Math.round(Math.sqrt(count)));
 			const rowCounts = [];
 			let placedCount = 0;
@@ -2188,9 +2221,8 @@ export const HomePage = {
 					const card = this.sphereCards[cardIndex];
 					const rotationX = -latitude;
 					const rotationY = (column / rowCount) * 360 + offset;
-					card.dataset.sphereRotationX = rotationX;
-					card.dataset.sphereRotationY = rotationY;
-					card.style.transform = `rotateY(${rotationY}deg) rotateX(${rotationX}deg) translateZ(${radius}px)`;
+					card.rotationX = rotationX;
+					card.rotationY = rotationY;
 					cardIndex += 1;
 				}
 			}
@@ -2207,11 +2239,20 @@ export const HomePage = {
 					this.sphereScale.offsetHeight / diameterWithSpace,
 				) * 1.1;
 			gsap.set(this.sphereScale, { scale });
+			const focusedCard = this.sphereCards.find((card) => card.focused);
+			if (this.sphereFocused && focusedCard) {
+				const focusScale = this.getSphereFocusScale();
+				if (this.sphereFocus?.isActive()) this.sphereFocus.resetTo('scale', focusScale);
+				else this.sphereRotation.scale = focusScale;
+			}
 		}
 
-		applySphereTransform() {
-			if (!this.sphere) return;
-			this.sphere.style.transform = `scale(${this.sphereRotation.scale}) rotateX(${this.sphereRotation.x + this.sphereHover.x}deg) rotateY(${this.sphereRotation.y + this.sphereHover.y}deg)`;
+		applySphereTransform(delta = 0) {
+			if (this.sphereRenderer?.ready) {
+				// GSAP/pointer callbacks update state; draw once in the animation frame.
+				if (this.sphereVisible && (delta || !this.sphereRaf)) this.sphereRenderer.render(this.sphereRotation, this.sphereHover, delta);
+				return;
+			}
 		}
 
 		resetSphereHover() {
@@ -2240,7 +2281,7 @@ export const HomePage = {
 		}
 
 		requestSphereCardFocus(card) {
-			if (!card?.isConnected) return;
+			if (!this.el?.isConnected || !this.sphereCards.includes(card) || !this.sphereRenderer?.ready) return;
 
 			const transition = this.tlTrans?.scrollTrigger;
 			if (
@@ -2261,7 +2302,7 @@ export const HomePage = {
 				ScrollTrigger.update();
 
 				const pendingCard = this.pendingSphereCard;
-				if (!this.el?.isConnected || !pendingCard?.isConnected) {
+				if (!this.el?.isConnected || !this.sphereCards.includes(pendingCard)) {
 					this.sphereTransitionScrolling = false;
 					this.pendingSphereCard = null;
 					this.tlTrans?.eventCallback('onComplete', null);
@@ -2296,15 +2337,27 @@ export const HomePage = {
 			});
 		}
 
+		getSphereFocusScale() {
+			const perspective = parseFloat(getComputedStyle(this.sphereStage).perspective);
+			const radius = cvUnit(PLAYGROUND_SPHERE_RADIUS_REM, 'rem');
+			const outerScale = Number(gsap.getProperty(this.sphereScale, 'scaleX'));
+			// Reserve breathing room and the existing 5% card hover enlargement.
+			const fit = Math.min(
+				(this.cardLayer.clientWidth * 0.72) / (cvUnit(160, 'rem') * 1.05),
+				(this.cardLayer.clientHeight * 0.65) / (cvUnit(100, 'rem') * 1.05),
+			);
+			// Projected size = cardSize * outerScale * s * p / (p - radius * s).
+			// Solve for s instead of treating the 3D scale as a flat image zoom.
+			return Math.max(1, Math.min(3, (fit * perspective) / (outerScale * perspective + fit * radius)));
+		}
+
 		focusSphereCard(card) {
 			this.resetSphereHover();
 			this.finishSphereScrollReset();
-			const cardRotationX = Number(card.dataset.sphereRotationX || 0);
-			const cardRotationY = Number(card.dataset.sphereRotationY || 0);
+			const cardRotationX = card.rotationX;
+			const cardRotationY = card.rotationY;
 			this.sphereCards.forEach((item) => {
-				const selected = item === card;
-				item.classList.toggle('is-focused', selected);
-				item.setAttribute('aria-pressed', String(selected));
+				item.focused = item === card;
 			});
 			this.sphereFocused = true;
 			this.el?.classList.remove('is-sphere-unfocusing');
@@ -2313,7 +2366,7 @@ export const HomePage = {
 			this.sphereFocus = gsap.to(this.sphereRotation, {
 				x: this.closestSphereAngle(this.sphereRotation.x, -cardRotationX),
 				y: this.closestSphereAngle(this.sphereRotation.y, -cardRotationY),
-				scale: 3,
+				scale: this.getSphereFocusScale(),
 				duration: 2.2,
 				ease: 'power3.inOut',
 				overwrite: true,
@@ -2335,8 +2388,7 @@ export const HomePage = {
 			this.el?.classList.add('is-sphere-unfocusing');
 			this.el?.classList.remove('is-sphere-focused');
 			this.sphereCards.forEach((card) => {
-				card.classList.remove('is-focused');
-				card.setAttribute('aria-pressed', 'false');
+				card.focused = false;
 			});
 			this.sphereFocus?.kill();
 			this.sphereFocus = gsap.to(this.sphereRotation, {
@@ -2366,8 +2418,8 @@ export const HomePage = {
 			this.sphereResizeObserver = null;
 			this.sphereCleanups.forEach((cleanup) => cleanup());
 			this.sphereCleanups = [];
-			this.sphereClones.forEach((card) => card.remove());
-			this.sphereClones = [];
+			this.sphereRenderer?.destroy();
+			this.sphereRenderer = null;
 			this.sphereCards = [];
 			this.sphereReveal?.kill();
 			this.sphereFocus?.kill();
@@ -2378,7 +2430,7 @@ export const HomePage = {
 			this.sphereReveal = null;
 			this.sphereFocus = null;
 			this.tlTrans = null;
-			this.sphere = null;
+			this.sphereStage = null;
 			this.sphereScale = null;
 			this.cardLayer = null;
 			this.el = null;

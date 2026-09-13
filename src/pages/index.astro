@@ -660,31 +660,11 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 					data-cursor="drag"
 					role="region"
 					aria-label="Interactive playground image globe"
+					tabindex="0"
+					data-gallery={JSON.stringify(gallery.map((item) => ({ src: item.imageUrl || item.localImage?.src, alt: item.alt })))}
 				>
-					<div class="home-playground-sphere-scale">
-						<div class="home-playground-sphere-stage">
-							<div class="home-playground-sphere">
-								{
-									gallery.map((item) => (
-										<div
-											class="home-playground-card"
-											role="button"
-											tabindex="0"
-											aria-label={item.alt || 'Focus playground image'}
-											aria-pressed="false"
-										>
-											<div class="home-playground-card-inner">
-												{item.imageUrl ? (
-													<img src={item.imageUrl} alt={item.alt} loading="lazy" draggable="false" />
-												) : item.localImage ? (
-													<Image src={item.localImage} alt={item.alt} quality={90} />
-												) : null}
-											</div>
-										</div>
-									))
-								}
-							</div>
-						</div>
+					<div class="home-playground-webgl-scale" aria-hidden="true">
+						<div class="home-playground-webgl-stage"></div>
 					</div>
 				</div>
 			</div>

@@ -735,7 +735,13 @@
 	height: 100%;
 	opacity: 0;
 	pointer-events: auto;
-	touch-action: none;
+	touch-action: auto;
+}
+
+@media (min-width: 992px) and (hover: hover) and (pointer: fine) {
+	.home-how-model {
+		touch-action: none;
+	}
 }
 
 .home-how-model.is-ready {
@@ -840,8 +846,9 @@
 	-webkit-tap-highlight-color: transparent;
 }
 
-.home-playground-sphere-scale,
-.home-playground-sphere-stage {
+.home-playground-webgl-scale,
+.home-playground-webgl-stage {
+	position: relative;
 	width: 100%;
 	height: 100%;
 	display: flex;
@@ -849,75 +856,23 @@
 	justify-content: center;
 }
 
-.home-playground-sphere-scale {
+.home-playground-webgl-scale {
 	width: min(100%, 120rem);
 	height: min(100%, 80rem);
 	will-change: transform;
 }
 
-.home-playground-sphere-stage {
+.home-playground-webgl-stage {
 	opacity: 0;
 	transform: scale(0.3);
 	perspective: 225rem;
 }
 
-.home-playground-sphere {
-	position: relative;
-	width: 0;
-	height: 0;
-	transform-style: preserve-3d;
-	will-change: transform;
-}
-
-.home-playground-card {
+.home-playground-webgl {
 	position: absolute;
-	top: -5rem;
-	left: -8rem;
-	width: 16rem;
-	height: 10rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transform-origin: center;
-	/* Keep the oversized image in the sphere's 3D context. Flattening it here
-	   rasterizes it at the small card size before the sphere zooms in. */
-	transform-style: preserve-3d;
-	backface-visibility: visible;
-	will-change: transform;
-	outline: none;
-}
-
-.home-playground-card-inner {
-	/* Render a larger image layer, then shrink it for sharper 3D focus zoom. */
-	width: 400%;
-	height: 400%;
-	flex-shrink: 0;
-	transform: scale(0.25);
-	overflow: hidden;
-	border-radius: 3.2rem;
-	background: transparent;
-	transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-	will-change: transform;
-}
-
-.home-playground-card img {
-	display: block;
+	inset: 0;
 	width: 100%;
 	height: 100%;
-	object-fit: cover;
-	pointer-events: none;
-	-webkit-user-drag: none;
-}
-
-@media (hover: hover) and (pointer: fine) {
-	.home-playground-card:hover .home-playground-card-inner {
-		transform: scale(0.2625);
-	}
-}
-
-.home-playground-card:focus-visible .home-playground-card-inner {
-	transform: scale(0.2625);
-	box-shadow: 0 0 0 0.8rem var(--cln-brand);
 }
 
 .home-playground-content-left-title,
