@@ -535,7 +535,7 @@
 }
 
 .home-how-wrap {
-	margin-top: -30vh;
+	margin-top: -30svh;
 }
 
 .home-how-intro {
@@ -1178,7 +1178,7 @@
 
 	.home-how-content-item {
 		height: auto;
-		padding-block: 12rem;
+		padding-block: 10rem;
 	}
 
 	.home-how-content-item-title,
