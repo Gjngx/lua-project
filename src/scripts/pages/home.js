@@ -199,7 +199,7 @@ export const HomePage = {
 			};
 
 			this.onVideoReady = () => {
-				if (!this.video) return;
+				if (!this.video || this.video.readyState < 2) return;
 
 				this.videoReady = true;
 				$(this.video).addClass(['is-video-ready']);
@@ -208,6 +208,7 @@ export const HomePage = {
 
 			this.onVideoSeeked = () => {
 				this.videoNeedsSeek = false;
+				if (!this.videoReady) this.onVideoReady();
 
 				if (
 					this.video &&
@@ -232,6 +233,7 @@ export const HomePage = {
 
 			$(this.video).on('loadedmetadata', this.onVideoMetadata);
 			$(this.video).on('loadeddata', this.onVideoReady);
+			$(this.video).on('canplay', this.onVideoReady);
 			$(this.video).on('seeked', this.onVideoSeeked);
 			$(this.video).on('error', this.onVideoError);
 			$(document).on('visibilitychange', this.onVisibilityChange);
@@ -242,16 +244,38 @@ export const HomePage = {
 			if (this.video.readyState >= 2) {
 				this.onVideoReady();
 			}
+			this.primeVideoPlayback();
 		}
 
 		primeVideoPlayback() {
 			if (!this.video || this.videoPrimeStarted) return;
 			this.videoPrimeStarted = true;
-			// On mobile, play() can advance visible frames before its promise settles.
-			// Keep the preloaded video paused and drive currentTime only from scroll.
+			// WebKit may need a gesture to unlock decoding. Pause in the SAME task,
+			// rather than after play() resolves, so priming cannot visibly autoplay.
 			if (window.matchMedia('(max-width: 767px)').matches) {
-				this.video.pause();
-				this.queueVideoSeek(this.videoTargetTime);
+				const video = this.video;
+				const unlock = () => {
+					if (this.video !== video) return;
+					try {
+						const pendingPlay = video.play();
+						video.pause();
+						// An immediate pause can reject play() with AbortError; that is expected.
+						pendingPlay?.catch(() => {});
+					} catch {
+						video.pause();
+					}
+					this.queueVideoSeek(this.videoTargetTime);
+					if (video.readyState >= 2) {
+						for (const type of ['touchstart', 'touchend', 'pointerdown', 'keydown']) {
+							document.removeEventListener(type, unlock);
+						}
+						this.onVideoUnlock = null;
+					}
+				};
+				this.onVideoUnlock = unlock;
+				for (const type of ['touchstart', 'touchend', 'pointerdown', 'keydown']) {
+					document.addEventListener(type, unlock, { passive: true });
+				}
 				return;
 			}
 
@@ -319,7 +343,8 @@ export const HomePage = {
 			this.videoTargetTime = Math.min(this.videoDuration,
 				Math.max(0, Math.round(time * HERO_VIDEO_FPS) / HERO_VIDEO_FPS));
 
-			if (!this.videoReady || document.hidden || this.videoRaf !== null) return;
+			// Seeking is allowed after metadata, even if Safari has not fired loadeddata.
+			if (this.video.readyState < 1 || document.hidden || this.videoRaf !== null) return;
 
 			this.videoRaf = window.requestAnimationFrame(() => {
 				this.videoRaf = null;
@@ -328,7 +353,7 @@ export const HomePage = {
 		}
 
 		flushVideoSeek() {
-			if (!this.video || !this.videoReady || document.hidden) return;
+			if (!this.video || this.video.readyState < 1 || document.hidden) return;
 			if (!this.video.paused) this.video.pause();
 
 			if (Math.abs(this.video.currentTime - this.videoTargetTime) < HERO_VIDEO_SEEK_THRESHOLD) {
@@ -526,6 +551,7 @@ export const HomePage = {
 				this.video.pause();
 				if (this.onVideoMetadata) $(this.video).off('loadedmetadata', this.onVideoMetadata);
 				if (this.onVideoReady) $(this.video).off('loadeddata', this.onVideoReady);
+				if (this.onVideoReady) $(this.video).off('canplay', this.onVideoReady);
 				if (this.onVideoSeeked) $(this.video).off('seeked', this.onVideoSeeked);
 				if (this.onVideoError) $(this.video).off('error', this.onVideoError);
 			}
@@ -534,6 +560,8 @@ export const HomePage = {
 			}
 			if (this.onVideoUnlock) {
 				document.removeEventListener('touchstart', this.onVideoUnlock);
+				document.removeEventListener('touchend', this.onVideoUnlock);
+				document.removeEventListener('keydown', this.onVideoUnlock);
 				document.removeEventListener('pointerdown', this.onVideoUnlock);
 				this.onVideoUnlock = null;
 			}
