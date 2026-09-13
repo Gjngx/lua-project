@@ -817,8 +817,16 @@
 
 	.header-nav {
 		width: auto;
-		top: 6.8rem;
+		top: 6.2rem;
 		left: var(--container--padding);
+	}
+	.header-nav-card-item{
+		width: 2.2rem;
+	}
+
+	.header-nav-card-item .item-ic{
+		width: 2.2rem;
+		height: 2.2rem;
 	}
 
 	.header-menu-main {
@@ -826,14 +834,11 @@
 	}
 
 	.header-nav-grid {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 0.4rem;
 	}
 
 	.header-menu-contact,
-	.header-nav-links-thumb,
-	.header-nav-portrait,
-	.header-nav-brand {
+	.header-nav-links-thumb{
 		display: none;
 	}
 
@@ -845,17 +850,25 @@
 	.header-nav-social-behance,
 	.header-nav-social-instagram,
 	.header-nav-social-dribbble {
-		width: 3.2rem;
+		width: 2rem;
 	}
 
-	.header-nav-location {
-		flex-direction: row;
+	.header-nav-card-decor-item:nth-child(2) {
+		top: 0.6rem;
+		left: 0.6rem;
+		right: 0.6rem;
+	}
+
+	.header-nav-card-decor-item:nth-child(3) {
+		bottom: 0.6rem;
+		left: 0.6rem;
+		right: 0.6rem;
 	}
 
 	.header-nav-location-list {
 		width: calc(50% - 0.8rem);
 		display: flex;
-		flex-direction: column;
+		align-items: center;
 		gap: 2rem;
 		border: none;
 	}
@@ -864,6 +877,7 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
+		gap: 0.2rem;
 	}
 
 	.header.on-scroll .header-menu-main {

@@ -1211,7 +1211,6 @@
 
 @media only screen and (max-width: 767px) {
 	.home-hero {
-		height: 200svh;
 		margin-top: -100svh;
 	}
 
@@ -1251,6 +1250,7 @@
 
 	.home-hero-desc {
 		width: 12.5rem;
+		padding-top: 0;
 		margin-top: 0;
 	}
 
@@ -1270,8 +1270,9 @@
 	}
 
 	.home-hero-top-title {
-		margin-top: min(36.3rem, 45.375dvh);
+		margin-top: 0;
 		transform: translateY(0);
+		pointer-events: none;
 	}
 
 	.home-hero-top-sub-group {
@@ -1282,6 +1283,11 @@
 	.home-hero-bottom-desc {
 		width: 100%;
 		text-align: center;
+	}
+	.home-hero-bottom-inner{
+		gap: min(11.2rem, 12.0950323974svh);
+		align-items: center;
+		margin-bottom: min(18rem, 19.4384449244svh);
 	}
 
 	.home-hero-bottom-desc svg {
@@ -1296,18 +1302,31 @@
 		height: 100svh;
 	}
 
-	.home-works-svg {
-		margin-top: 7.2rem;
+	.home-works-main{
+		width: 100%;
 	}
 
-	.home-works-item {
-		margin-inline: auto !important;
-		z-index: 5 !important;
+	.home-works--decor{
+		top: 5.8rem;
+	}
+
+	.home-works-svg {
+		margin-top: 1.2rem;
 	}
 
 	.home-works-item .home-works-item-img {
 		width: 28rem !important;
 		height: auto !important;
+	}
+
+	.home-works-item:nth-child(4n + 3){
+		margin-left: var(--container--padding);
+		margin-right: auto;
+	}
+
+	.home-works-item:nth-child(4n){
+		margin-right: var(--container--padding);
+		margin-left: auto;
 	}
 
 	.home-works-list-inner {
@@ -1319,18 +1338,30 @@
 	}
 
 	.home-works-item-label {
-		padding-block: 1.2rem;
-		border-radius: 0.8rem;
+		border-radius: 1.2rem;
+	}
+
+	.home-works-item-categories {
+		margin-top: 0.4rem;
 	}
 
 	.home-works-main-desc {
 		padding-top: 0.8rem;
-		width: 20.3rem;
+		width: 100%;
 	}
 
 	.home-works--main {
 		height: 100svh;
 		top: 0;
+	}
+
+	.home-works-trans{
+		height: 100svh;
+	}
+
+
+	.home-how-intro {
+		grid-column: 2 / -2;
 	}
 
 	.home-hero-bg {
@@ -1342,8 +1373,16 @@
 		margin-top: -100svh;
 	}
 
-	.home-how-wrap,
-	.home-playground-wrap {
-		display: none;
+	.home-playground-content-left {
+		padding-top: 14rem;
 	}
+
+	.home-playground-content-right{
+		padding-bottom: 14rem;
+	}
+
+	.home-playground-trans-inner {
+		width: calc(var(--container--one-column) * 4 + var(--container--column-gap) * 3);
+	}
+
 }

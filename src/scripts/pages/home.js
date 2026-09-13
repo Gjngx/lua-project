@@ -644,7 +644,7 @@ export const HomePage = {
 			const worksSvg = $(this.el).find('.home-works-svg')[0];
 			const worksTitle = $(this.el).find('.home-works-main-title')[0];
 			const worksDesc = $(this.el).find('.home-works-main-desc')[0];
-			const worksSvgPadding = viewport.w > 767 ? cvUnit(60, 'rem') : cvUnit(-20, 'rem');
+			const worksSvgPadding = viewport.w > 767 ? cvUnit(60, 'rem') : cvUnit(-25, 'rem');
 
 			const worksTitleTop =
 				worksTitle.getBoundingClientRect().top -
@@ -698,20 +698,20 @@ export const HomePage = {
 
 			this.tlWorksList = gsap.timeline({
 				scrollTrigger: {
-					trigger: $(this.el).find('.home-works--main')[0],
-					start: 'top top+=50%',
-					end: 'top top',
+					trigger: $(this.el).find('.home-works-main-desc')[0],
+					start: 'top bottom',
+					end: 'top center',
 					scrub: true
 				},
 			});
 
 			this.tlWorksList
 			.to($(this.el).find('.home-works-main-ic')[0], {
-				x: cvUnit(120, 'rem'),
+				x: viewport.w <= 767 ? cvUnit(40, 'rem') : cvUnit(120, 'rem'),
 				ease: 'none',
 			})
 			.to($(this.el).find('.home-works-main-ic')[1], {
-				x: cvUnit(-120, 'rem'),
+				x: viewport.w <= 767 ? cvUnit(-40, 'rem') : cvUnit(-120, 'rem'),
 				ease: 'none',
 			},'<');
 
@@ -1488,9 +1488,6 @@ export const HomePage = {
 			const getShapeWidth = () => shapeWraps[0].getBoundingClientRect().width;
 			const getDecorDistance = () => decor.getBoundingClientRect().width / 2 - getShapeWidth() / 2;
 
-			// const gapLastItem = lastItem.querySelector('.home-how-content-item-right').getBoundingClientRect().bottom
-			// 	- lastItem.querySelector('.home-how-content-item-left').getBoundingClientRect().top;
-
 			this.tlDecor = gsap.timeline({
 				scrollTrigger: {
 					trigger: decor,
@@ -1504,13 +1501,13 @@ export const HomePage = {
 
 			this.tlDecor
 				.to(shapeWraps[0], {
-					x: () => viewport.w > 991 ? -getDecorDistance() : -getDecorDistance() * 1.5,
+					x: () => viewport.w > 991 ? -getDecorDistance() : (viewport.w > 767 ? -getDecorDistance() * 1.5 : -getDecorDistance() * 1.1),
 					ease: 'none',
 				})
 				.to(
 					shapeWraps[1],
 					{
-						x: () => viewport.w > 991 ? getDecorDistance() : getDecorDistance() * 1.5,
+						x: () => viewport.w > 991 ? getDecorDistance() : (viewport.w > 767 ? getDecorDistance() * 1.5 : getDecorDistance() * 1.1),
 						ease: 'none',
 					},
 					'<',
@@ -1544,7 +1541,7 @@ export const HomePage = {
 					lastItemLeft,
 					{
 						x: () => viewport.w > 991 ? (lastItem.getBoundingClientRect().width / 2 - lastItemTitle.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
-						y: () => viewport.w > 991 ? 0 : cvUnit(400, 'rem'),
+						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(400, 'rem') : cvUnit(140, 'rem')),
 						ease: 'none',
 						duration: 0.7,
 					},
@@ -1554,7 +1551,7 @@ export const HomePage = {
 					lastItemRight,
 					{
 						x: () => viewport.w > 991 ? -(lastItem.getBoundingClientRect().width / 2 - lastItemText.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
-						y: () => viewport.w > 991 ? 0 : cvUnit(-400, 'rem'),
+						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(-400, 'rem') : cvUnit(-140, 'rem')),
 						ease: 'none',
 						duration: 0.7,
 					},
@@ -1913,7 +1910,7 @@ export const HomePage = {
 			this.tlTrans
 				.to(titleLeft, {
 					x: () => viewport.w > 991 ?`-${widthTransLeft}` : 0,
-					y: () => viewport.w > 991 ? 0 : cvUnit(-400, 'rem'),
+					y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(-400, 'rem') : cvUnit(-140, 'rem')),
 					ease: 'power3.inOut',
 					duration: 1,
 				})
@@ -1921,7 +1918,7 @@ export const HomePage = {
 					titleRight,
 					{
 						x: () => viewport.w > 991 ? `${widthTransRight}` : 0,
-						y: () => viewport.w > 991 ? 0 : cvUnit(400, 'rem'),
+						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(400, 'rem') : cvUnit(140, 'rem')),
 						ease: 'power3.inOut',
 						duration: 1,
 					},

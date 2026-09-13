@@ -26,6 +26,7 @@ export class Header {
 		this.portraitLayers = [];
 		this.portraitMarker = null;
 		this.portraitResetCall = null;
+		this.portraitAutoPlayCall = null;
 		this.prefersReducedMotion = false;
 		this.navTransition = null;
 		this.locationClockTimer = null;
@@ -39,9 +40,9 @@ export class Header {
 		this.elLogoAnimated = $('.header-logo-amin')[0];
 
 		this.setupHeaderMetrics();
+		this.setupNavCardReels();
+		this.setupPortraitAnimation();
 		if (viewport.w > 767) {
-			this.setupNavCardReels();
-			this.setupPortraitAnimation();
 			this.setupSocialHovers();
 		}
 		this.setupLocationClocks();
@@ -172,8 +173,14 @@ export class Header {
 		this.portraitMarker = $(portrait).find('[data-portrait-marker]')[0];
 		if (this.portraitLayers.length !== 3 || !this.portraitMarker) return;
 
-		$(portrait).on('pointerenter', () => this.playPortraitAnimation());
-		$(portrait).on('pointerleave', () => this.reversePortraitAnimation());
+		$(portrait).on('pointerenter', (event) => {
+			if (window.innerWidth <= 991 || event.originalEvent?.pointerType === 'touch' || !this.isOpen) return;
+			this.playPortraitAnimation();
+		});
+		$(portrait).on('pointerleave', (event) => {
+			if (window.innerWidth <= 991 || event.originalEvent?.pointerType === 'touch') return;
+			this.reversePortraitAnimation();
+		});
 
 		this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		const markerCircle = $(this.portraitMarker).find('circle')[0];
@@ -311,8 +318,22 @@ export class Header {
 
 		const reelGroup = $(this.el).find('[data-header-reel-group]')[0];
 		if (reelGroup && !reelGroup.hasAttribute('data-header-reel-group-ready')) {
-			$(reelGroup).on('pointerenter', () => this.stopNavCardReelsRandomly());
-			$(reelGroup).on('pointerleave', () => this.resumeNavCardReels());
+			$(reelGroup).on('pointerenter', (event) => {
+				if (window.innerWidth <= 991 || event.originalEvent?.pointerType === 'touch') return;
+				this.stopNavCardReelsRandomly();
+			});
+			$(reelGroup).on('pointerleave', (event) => {
+				if (window.innerWidth <= 991 || event.originalEvent?.pointerType === 'touch') return;
+				this.resumeNavCardReels();
+			});
+			$(reelGroup).on('click', () => {
+				if (window.innerWidth > 991) return;
+				if (this.isNavCardReelHovered) {
+					this.resumeNavCardReels();
+				} else {
+					this.stopNavCardReelsRandomly();
+				}
+			});
 			$(reelGroup).attr('data-header-reel-group-ready', '');
 		}
 	}
@@ -1072,6 +1093,15 @@ export class Header {
 		});
 		this.isOpen = true;
 		this.startNavCardReels();
+		this.portraitAutoPlayCall?.kill();
+		this.portraitAutoPlayCall = null;
+		if (window.innerWidth <= 991 && !this.prefersReducedMotion) {
+			this.portraitTimeline?.pause(0);
+			this.portraitAutoPlayCall = gsap.delayedCall(2, () => {
+				this.portraitAutoPlayCall = null;
+				if (this.isOpen && window.innerWidth <= 991) this.playPortraitAnimation();
+			});
+		}
 		if (!this.prefersReducedMotion) {
 			this.playNavOpenAnimation();
 		}
@@ -1087,6 +1117,8 @@ export class Header {
 	close() {
 		if (!this.isOpen || !this.el) return;
 		this.isOpen = false;
+		this.portraitAutoPlayCall?.kill();
+		this.portraitAutoPlayCall = null;
 		this.navTransition?.kill();
 		this.navTransition = null;
 		this.clearNavAnimationStyles();

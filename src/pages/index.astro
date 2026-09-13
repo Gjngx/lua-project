@@ -138,6 +138,11 @@ const capabilities = homePage?.capabilities;
 const playground = homePage?.playground;
 const heroHeadline =
 	hero?.headline || 'Creating websites and digital products for great experiences';
+const heroHeadlineLines = isDraftMode ? [] : heroHeadline.split(/\r?\n/);
+const heroRole = hero?.role || 'Digital designer based in Vietnam';
+const heroRoleLines = isDraftMode ? [] : heroRole.split(/\r?\n/);
+const heroAvailability = hero?.availabilityMessage || 'Open for any collaborations & offers';
+const heroAvailabilityLines = isDraftMode ? [] : heroAvailability.split(/\r?\n/);
 const closingStatement = featuredWork?.closingStatement || 'Ready to help\nwith your needs';
 const closingStatementLines = isDraftMode ? [] : closingStatement.split(/\r?\n/);
 const capabilitiesIntroduction =
@@ -279,21 +284,34 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 			<div class="container grid">
 				<div class="home-hero-top top-left">
 					<div class="home-hero-desc" data-init-hidden>
-						<p class="label">
-							{hero?.availabilityMessage || 'Open for any collaborations & offers'}
+						<p class:list={['label', { 'preserve-line-breaks': isDraftMode }]}>
+							{isDraftMode ? heroAvailability : heroAvailabilityLines.map((line, index) => (
+								<>{line}{index < heroAvailabilityLines.length - 1 && <br />}</>
+							))}
 						</p>
 					</div>
 					<div class="home-hero-ic-mb hidden-dsk">
 						<IconSun />
 					</div>
 					<div class="home-hero-sub-mb hidden-dsk">
-						<p class="desc">{hero?.role || 'Digital designer based in Vietnam'}</p>
+						<p class:list={['desc', { 'preserve-line-breaks': isDraftMode }]}>
+							{isDraftMode ? heroRole : heroRoleLines.map((line, index) => (
+								<>{line}{index < heroRoleLines.length - 1 && <br />}</>
+							))}
+						</p>
 					</div>
 				</div>
 				<div class="home-hero-top top-right">
 					<div class="home-hero-top-title">
-						<h1 class="h4">
-							{heroHeadline}
+						<h1 class:list={['h4', { 'preserve-line-breaks': isDraftMode }]}>
+							{
+								isDraftMode ? heroHeadline : heroHeadlineLines.map((line, index) => (
+									<>
+										{line}
+										{index < heroHeadlineLines.length - 1 && <br />}
+									</>
+								))
+							}
 						</h1>
 					</div>
 					<div class="home-hero-top-sub-group">
@@ -301,8 +319,10 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 							<div class="home-hero-top-ic">
 								<IconSun />
 							</div>
-							<h2 class="desc">
-								{hero?.role || 'Digital designer based in Vietnam'}
+							<h2 class:list={['desc', { 'preserve-line-breaks': isDraftMode }]}>
+								{isDraftMode ? heroRole : heroRoleLines.map((line, index) => (
+									<>{line}{index < heroRoleLines.length - 1 && <br />}</>
+								))}
 							</h2>
 						</div>
 						<div class="home-hero-top-info" data-init-hidden>

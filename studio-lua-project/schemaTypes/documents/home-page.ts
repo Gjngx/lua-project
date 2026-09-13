@@ -50,7 +50,8 @@ export default defineType({
         defineField({
           name: 'availabilityMessage',
           title: 'Availability message',
-          type: 'string',
+          type: 'text',
+          rows: 2,
           validation: (rule) => rule.required(),
         }),
         defineField({
@@ -63,7 +64,8 @@ export default defineType({
         defineField({
           name: 'role',
           title: 'Role',
-          type: 'string',
+          type: 'text',
+          rows: 2,
           validation: (rule) => rule.required(),
         }),
         defineField({

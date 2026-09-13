@@ -1,4 +1,4 @@
-import { gsap } from './gsap';
+import { gsap, ScrollTrigger } from './gsap';
 import { header } from './components/header';
 import { audioManager } from './components/audio';
 import { buttonText } from './components/button-text';
@@ -6,6 +6,8 @@ import { buttonText } from './components/button-text';
 export class GlobalChange {
 	constructor() {
 		this.namespace = null;
+		this.pageHeightObserver = null;
+		this.pageHeightRefreshTimer = null;
 	}
 	
 	init(data) {
@@ -20,6 +22,7 @@ export class GlobalChange {
 		buttonText.mount(document);
 		
 		this.refreshOnBreakpoint();
+		this.watchPageHeight();
 	}
 	
 	update(data) {
@@ -31,7 +34,34 @@ export class GlobalChange {
 	}
 
 	beforeLeave() {
+		this.stopWatchingPageHeight();
 		header.closeForNavigation();
+	}
+
+	watchPageHeight() {
+		this.stopWatchingPageHeight();
+		const content = document.querySelector('.body-inner');
+		if (!content) return;
+		let measuredHeight = content.offsetHeight;
+		this.pageHeightObserver = new ResizeObserver(() => {
+			if (content.offsetHeight === measuredHeight) return;
+			window.clearTimeout(this.pageHeightRefreshTimer);
+			this.pageHeightRefreshTimer = window.setTimeout(() => {
+				this.pageHeightRefreshTimer = null;
+				if (!content.isConnected || content.offsetHeight === measuredHeight) return;
+				ScrollTrigger.refresh();
+				// Record the final height, including pin spacers created by refresh.
+				measuredHeight = content.offsetHeight;
+			}, 100);
+		});
+		this.pageHeightObserver.observe(content);
+	}
+
+	stopWatchingPageHeight() {
+		this.pageHeightObserver?.disconnect();
+		this.pageHeightObserver = null;
+		window.clearTimeout(this.pageHeightRefreshTimer);
+		this.pageHeightRefreshTimer = null;
 	}
 	
 	refreshOnBreakpoint() {

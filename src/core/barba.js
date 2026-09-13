@@ -219,6 +219,7 @@ export function initBarba() {
 						ScrollTrigger.refresh();
 						// Kích hoạt resize để WebGL/Canvas đo lại đúng kích thước
 						window.dispatchEvent(new Event('resize'));
+						globalChange.watchPageHeight();
 					});
 				},
 			},
