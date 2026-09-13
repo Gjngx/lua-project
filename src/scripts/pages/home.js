@@ -2317,12 +2317,6 @@ export const HomePage = {
 			};
 			this.tlTrans?.eventCallback('onComplete', finishFocus);
 
-			if (!smoothScroll.lenis) {
-				window.scrollTo({ top: transition.end, behavior: 'smooth' });
-				gsap.delayedCall(0.8, finishFocus);
-				return;
-			}
-
 			const scrollDistance = Math.abs(smoothScroll.getScroll() - transition.end);
 			const scrollDuration = Math.min(
 				2.8,

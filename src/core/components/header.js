@@ -622,14 +622,12 @@ export class Header {
 	setupScrollListener(data) {
 		if (data) this.currentData = data;
 		if (!this.onScroll) {
-			this.onScroll = (inst) => {
-				this.updateOnScroll(inst, this.currentData);
+			this.onScroll = (event) => {
+				this.updateOnScroll(event.detail, this.currentData);
 			};
 		}
-		if (smoothScroll.lenis) {
-			smoothScroll.lenis.off('scroll', this.onScroll);
-			smoothScroll.lenis.on('scroll', this.onScroll);
-		}
+		window.removeEventListener('smooth-scroll:update', this.onScroll);
+		window.addEventListener('smooth-scroll:update', this.onScroll);
 	}
 
 	// ─── Update (gọi mỗi khi chuyển trang qua Barba) ─────────────────
@@ -637,7 +635,7 @@ export class Header {
 		if (!this.el) return;
 		this.togglePageClass(data);
 		this.setupScrollListener(data);
-		this.updateOnScroll(smoothScroll.lenis, data);
+		this.updateOnScroll(smoothScroll.lenis || { scroll: window.scrollY, direction: 0 }, data);
 		this.toggleMode();
 	}
 

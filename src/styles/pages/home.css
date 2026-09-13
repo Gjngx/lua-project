@@ -1337,7 +1337,7 @@
 	}
 
 	.home-playground-trans-inner {
-		width: calc(var(--container--one-column) * 4 + var(--container--column-gap) * 3);
+		width: calc(var(--container--one-column) * 4 + var(--container--column-gap) * 3 - 2rem);
 	}
 
 	.home-how-thumb-item-img {
