@@ -174,6 +174,8 @@ export const HomePage = {
 
 		setupHeroVideo() {
 			if (!this.video) return;
+			this.video.autoplay = false;
+			this.video.pause();
 			this.video.muted = true;
 			this.video.defaultMuted = true;
 			this.video.playsInline = true;
@@ -245,6 +247,13 @@ export const HomePage = {
 		primeVideoPlayback() {
 			if (!this.video || this.videoPrimeStarted) return;
 			this.videoPrimeStarted = true;
+			// On mobile, play() can advance visible frames before its promise settles.
+			// Keep the preloaded video paused and drive currentTime only from scroll.
+			if (window.matchMedia('(max-width: 767px)').matches) {
+				this.video.pause();
+				this.queueVideoSeek(this.videoTargetTime);
+				return;
+			}
 
 			const video = this.video;
 			const removeUnlockListeners = () => {
@@ -317,6 +326,7 @@ export const HomePage = {
 
 		flushVideoSeek() {
 			if (!this.video || !this.videoReady || document.hidden) return;
+			if (!this.video.paused) this.video.pause();
 
 			if (Math.abs(this.video.currentTime - this.videoTargetTime) < HERO_VIDEO_SEEK_THRESHOLD) {
 				return;
