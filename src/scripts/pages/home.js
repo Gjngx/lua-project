@@ -1540,7 +1540,7 @@ export const HomePage = {
 					lastItemLeft,
 					{
 						x: () => viewport.w > 991 ? (lastItem.getBoundingClientRect().width / 2 - lastItemTitle.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
-						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(400, 'rem') : cvUnit(100, 'rem')),
+						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(400, 'rem') : cvUnit(140, 'rem')),
 						ease: 'none',
 						duration: 0.7,
 					},
@@ -1550,7 +1550,7 @@ export const HomePage = {
 					lastItemRight,
 					{
 						x: () => viewport.w > 991 ? -(lastItem.getBoundingClientRect().width / 2 - lastItemText.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
-						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(-400, 'rem') : cvUnit(-100, 'rem')),
+						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(-400, 'rem') : cvUnit(-140, 'rem')),
 						ease: 'none',
 						duration: 0.7,
 					},
@@ -1909,7 +1909,7 @@ export const HomePage = {
 			this.tlTrans
 				.to(titleLeft, {
 					x: () => viewport.w > 991 ?`-${widthTransLeft}` : 0,
-					y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(-400, 'rem') : cvUnit(-100, 'rem')),
+					y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(-400, 'rem') : cvUnit(-140, 'rem')),
 					ease: 'power3.inOut',
 					duration: 1,
 				})
@@ -1917,7 +1917,7 @@ export const HomePage = {
 					titleRight,
 					{
 						x: () => viewport.w > 991 ? `${widthTransRight}` : 0,
-						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(400, 'rem') : cvUnit(100, 'rem')),
+						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(400, 'rem') : cvUnit(140, 'rem')),
 						ease: 'power3.inOut',
 						duration: 1,
 					},
