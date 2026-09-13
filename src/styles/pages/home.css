@@ -1130,14 +1130,14 @@
 	}
 
 	.home-playground-content-left {
-		margin-top: 15.3rem;
+		margin-top: 14rem;
 		padding-top: 40rem;
 		grid-column: 1 / -1;
 		align-self: self-start;
 	}
 
 	.home-playground-content-right {
-		margin-bottom: 15.3rem;
+		margin-bottom: 14rem;
 		padding-bottom: 40rem;
 		grid-column: 1 / -1;
 		align-self: end;
@@ -1178,7 +1178,7 @@
 
 	.home-how-content-item {
 		height: auto;
-		padding-block: min(15.3rem, 19.125svh);
+		padding-block: 14rem;
 	}
 
 	.home-how-content-item-title,
