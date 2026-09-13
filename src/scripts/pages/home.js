@@ -76,7 +76,6 @@ export const HomePage = {
 		setupOnce(data) {
 			this.tlOnce = gsap.timeline({
 				paused: true,
-				delay: 0.2,
 				onStart: () => {
 					$(this.el).find('[data-init-hidden]').removeAttr('data-init-hidden');
 				},

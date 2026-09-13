@@ -31,6 +31,14 @@ export const SITE_CONFIG_QUERY = defineQuery(`
   }
 `);
 
+export const SITE_EMAIL_QUERY = defineQuery(`
+  {"email": coalesce(
+    *[_id == "siteSettings"][0].email,
+    *[_id == "footer"][0].email,
+    "hi@minhhieu.design"
+  )}
+`);
+
 export const FOOTER_QUERY = defineQuery(`
   *[_id == "footer"][0]{
     _id,
@@ -38,9 +46,9 @@ export const FOOTER_QUERY = defineQuery(`
     headline,
     primaryActionLabel,
     conversationLabel,
-    email,
+    "email": coalesce(*[_id == "siteSettings"][0].email, email, "hi@minhhieu.design"),
     phoneLabel,
-    phoneNumber
+    "phoneNumber": coalesce(*[_id == "siteSettings"][0].phoneNumber, phoneNumber, "(+84) 343 313 383")
   }
 `);
 

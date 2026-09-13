@@ -38,7 +38,9 @@ export default defineType({
       title: 'Email address',
       type: 'string',
       group: 'contact',
-      validation: (rule) => rule.required().email(),
+      readOnly: true,
+      hidden: true,
+      deprecated: {reason: 'Manage the shared contact email in Site settings.'},
     }),
     defineField({
       name: 'phoneLabel',
@@ -52,8 +54,9 @@ export default defineType({
       title: 'Phone number',
       type: 'string',
       group: 'contact',
-      description: 'Enter the number exactly as it should appear on the website.',
-      validation: (rule) => rule.required(),
+      readOnly: true,
+      hidden: true,
+      deprecated: {reason: 'Manage the shared contact number in Site settings.'},
     }),
 
   ],
@@ -61,9 +64,7 @@ export default defineType({
     headline: "Let's make\nsomething people\nremember.",
     primaryActionLabel: 'Say Hello',
     conversationLabel: 'Start a conversation',
-    email: 'hi@minhhieu.design',
     phoneLabel: 'Call anytime',
-    phoneNumber: '(+84) 343 313 383',
   },
   preview: {
     prepare() {

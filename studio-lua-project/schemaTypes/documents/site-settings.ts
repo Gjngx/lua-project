@@ -16,6 +16,19 @@ export default defineType({
   icon: CogIcon,
   fields: [
     defineField({
+      name: 'email',
+      title: 'Email address',
+      description: 'Shared contact email for the header, footer, and contact page. Until set, the previous Footer email is used.',
+      type: 'string',
+      validation: (rule) => rule.email(),
+    }),
+    defineField({
+      name: 'phoneNumber',
+      title: 'Phone number',
+      description: 'Shared contact number for the footer and contact page. Enter it as it should appear on the website. Until set, the previous Footer number is used.',
+      type: 'string',
+    }),
+    defineField({
       name: 'socialProfiles',
       title: 'Social links',
       description: 'Shared profile links used by both the footer and navigation menu.',

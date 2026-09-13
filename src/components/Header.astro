@@ -12,8 +12,17 @@ import vietNam from '../assets/images/vn.png';
 
 import { getDraftModeProps } from '../sanity/lib/draft-mode';
 import { loadSocialLinks } from '../sanity/lib/social-links';
+import { stegaClean } from '@sanity/client/stega';
+import { loadQuery } from '../sanity/lib/load-query';
+import { SITE_EMAIL_QUERY } from '../sanity/lib/queries';
 
-const socialHref = await loadSocialLinks(getDraftModeProps(Astro.cookies));
+const draftModeProps = getDraftModeProps(Astro.cookies);
+const [socialHref, { data: contact }] = await Promise.all([
+	loadSocialLinks(draftModeProps),
+	loadQuery<{ email?: string } | null>({ query: SITE_EMAIL_QUERY, ...draftModeProps }),
+]);
+const email = contact?.email || 'hi@minhhieu.design';
+const emailHref = `mailto:${stegaClean(email).trim()}`;
 const pathname = Astro.url.pathname;
 ---
 
@@ -305,6 +314,12 @@ const pathname = Astro.url.pathname;
 			</div>
 		</nav>
 		<div class="header-nav-btn-mb hidden-dsk">
+			<div class="header-nav-info-wrap-mb">
+				<p class="label">Start a conversation</p>
+				<a class="header-nav-info-email-mb" href={emailHref}>
+					<p class="h3">{email}</p>
+				</a>
+			</div>
 			<Button href="/let-talk" class="header-menu-contact-mb">Let's talk</Button>
 		</div>
 	</div>

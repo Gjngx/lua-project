@@ -510,4 +510,9 @@ a {
 	.hidden-dsk {
 		display: block;
 	}
+
+	[data-init-hidden] {
+		opacity: 1;
+		visibility: visible;
+	}
 }
