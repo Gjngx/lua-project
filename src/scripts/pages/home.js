@@ -1500,13 +1500,13 @@ export const HomePage = {
 
 			this.tlDecor
 				.to(shapeWraps[0], {
-					x: () => viewport.w > 991 ? -getDecorDistance() : (viewport.w > 767 ? -getDecorDistance() * 1.5 : -getDecorDistance() * 1.1),
+					x: () => viewport.w > 991 ? -getDecorDistance() : (viewport.w > 767 ? -getDecorDistance() * 1.5 : -getDecorDistance()),
 					ease: 'none',
 				})
 				.to(
 					shapeWraps[1],
 					{
-						x: () => viewport.w > 991 ? getDecorDistance() : (viewport.w > 767 ? getDecorDistance() * 1.5 : getDecorDistance() * 1.1),
+						x: () => viewport.w > 991 ? getDecorDistance() : (viewport.w > 767 ? getDecorDistance() * 1.5 : getDecorDistance()),
 						ease: 'none',
 					},
 					'<',
