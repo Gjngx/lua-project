@@ -65,6 +65,7 @@ class ButtonText {
 	}
 
 	playSound(type) {
+		if (type === 'close' && window.matchMedia('(max-width: 991px)').matches) return;
 		const sound = this.sounds[type];
 		if (!sound) return;
 		let audio = this.soundAudios.get(sound);
