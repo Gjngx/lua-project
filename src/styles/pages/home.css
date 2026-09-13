@@ -1021,6 +1021,15 @@
 	height: 200vh;
 }
 
+.home-scroll-label{
+	position: fixed;
+	left: 50%;
+	bottom: 1.6rem;
+	transform: translateX(-50%);
+	pointer-events: none;
+	display: none;
+}
+
 @media (hover: hover) and (min-width: 991px) {
 	.home-hero-bottom-link:hover .home-hero-bottom-link-ic-inner.ic-top {
 		transform: translate(100%, -100%);
@@ -1188,6 +1197,14 @@
 
 	.home-how-thumb-block {
 		display: block;
+	}
+	.home-scroll-label{
+		display: block;
+		overflow: hidden;
+		color: var(--cln-content-label);
+	}
+	.home-scroll-label-inner{
+		transform: translateY(100%);
 	}
 
 }

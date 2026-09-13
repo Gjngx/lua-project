@@ -666,7 +666,7 @@ export const HomePage = {
 			});
 			this.tlWorksTop
 				.to(worksTitle, { y: worksDescHeight, ease: 'power3.inOut' })
-				.to(worksDesc, { y: worksDescHeight, ease: 'power3.inOut' }, '<=')
+				.to(worksDesc, { y: worksDescHeight, ease: 'power3.inOut' }, '<')
 				.to(
 					worksSvg,
 					{
@@ -675,7 +675,16 @@ export const HomePage = {
 						color: 'var(--cln-content-strong)',
 						ease: 'power3.inOut',
 					},
-					'<=',
+					'<',
+				)
+				.to(
+					$(document).find('.home-scroll-label-inner'),
+					{
+						yPercent: -100,
+						duration: 0.35,
+						ease: 'power3.inOut',
+					},
+					'<',
 				);
 
 			this.tlWorksScroll = gsap.timeline({
@@ -1968,6 +1977,15 @@ export const HomePage = {
 						duration: 0.85,
 					},
 					'<=0.15',
+				)
+				.to(
+					$(document).find('.home-scroll-label-inner'),
+					{
+						yPercent: 0,
+						duration: 0.35,
+						ease: 'power3.inOut',
+					},
+					'<=0.5',
 				);
 		}
 
