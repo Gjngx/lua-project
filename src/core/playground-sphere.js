@@ -165,10 +165,13 @@ export class PlaygroundSphere {
 		this.updateCards();
 	}
 
-	updateCards() {
+	updateCards(changedIds) {
 		const { T, object } = this;
 		for (const mesh of this.meshes) {
+			let changed = false;
 			mesh.userData.cardIds.forEach((id, index) => {
+				if (changedIds && !changedIds.has(id)) return;
+				changed = true;
 				const card = this.cards[id];
 				object.rotation.set(-card.rotationX * Math.PI / 180,
 					card.rotationY * Math.PI / 180, 0, 'YXZ');
@@ -178,8 +181,10 @@ export class PlaygroundSphere {
 				object.updateMatrix();
 				mesh.setMatrixAt(index, object.matrix);
 			});
-			mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
-			mesh.instanceMatrix.needsUpdate = true;
+			if (changed) {
+				mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
+				mesh.instanceMatrix.needsUpdate = true;
+			}
 		}
 	}
 
@@ -214,7 +219,7 @@ export class PlaygroundSphere {
 		this.group.rotation.set(-(rotation.x + hover.x) * Math.PI / 180,
 			(rotation.y + hover.y) * Math.PI / 180, 0, 'XYZ');
 		this.group.scale.setScalar(rotation.scale);
-		let changed = false;
+		const changedIds = new Set();
 		this.hoverTransitions.forEach(({ from, to, start }, id) => {
 			const progress = Math.min(1, (performance.now() - start) / 400);
 			// Match CSS cubic-bezier(0.16, 1, 0.3, 1), including the 400ms duration.
@@ -227,9 +232,9 @@ export class PlaygroundSphere {
 			const eased = 1 - (1 - (low + high) / 2) ** 3;
 			this.hover[id] = progress === 1 ? to : from + (to - from) * eased;
 			if (progress === 1) this.hoverTransitions.delete(id);
-			changed = true;
+			changedIds.add(id);
 		});
-		if (changed) this.updateCards();
+		if (changedIds.size) this.updateCards(changedIds);
 		this.renderer.render(this.scene, this.camera);
 	}
 

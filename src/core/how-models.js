@@ -269,17 +269,12 @@ export class HowModels {
 			this.schedule();
 			return;
 		}
-		this.lastRenderTime = now;
-		const visibleItems = this.items.filter((item) => item.visible);
-		const unreadyItems = visibleItems.filter((item) => !item.canvas.classList.contains('is-ready'));
-		const visible =
-			this.desktop.matches || unreadyItems.length
-				? visibleItems
-				: [
-						visibleItems.find((item) =>
-							item.canvas.closest('.home-how-thumb-item')?.classList.contains('active'),
-						) || visibleItems[0],
-					].filter(Boolean);
+		// Preserve the fractional interval instead of drifting with RAF jitter.
+		this.lastRenderTime = !this.desktop.matches && this.lastRenderTime !== null
+			? now - ((now - this.lastRenderTime) % MOBILE_FRAME_INTERVAL)
+			: now;
+		// Adjacent models must keep moving throughout the horizontal transition.
+		const visible = this.items.filter((item) => item.visible);
 		if (!visible.length) {
 			this.lastTime = null;
 			this.lastScrollY = null;

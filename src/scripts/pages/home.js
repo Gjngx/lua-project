@@ -1118,6 +1118,7 @@ export const HomePage = {
 		}
 
 		updateTransitionMetrics() {
+			this.lastTransitionDraw = null;
 			const canvas = this.transitionCanvas;
 			const cutCanvas = this.transitionCutCanvas;
 			const componentCanvas = this.transitionComponentCanvas;
@@ -1278,6 +1279,10 @@ export const HomePage = {
 			) {
 				return;
 			}
+
+			const drawState = [state.progress, state.scale, state.rotate];
+			if (this.lastTransitionDraw?.every((value, index) => value === drawState[index])) return;
+			this.lastTransitionDraw = drawState;
 
 			const { width, height, pixelRatio, innerSize, innerLeft, innerTop, shapeSize, color } =
 				metrics;
@@ -1779,6 +1784,7 @@ export const HomePage = {
 				});
 			} else {
 				// Derive one current item from geometry, even when scrolling skips items.
+				let previousContentState = '';
 				const syncHorizontalContent = () => {
 					const bounds = thumbItems.map((thumb) => thumb.getBoundingClientRect());
 					const lastIndex = bounds.length - 1;
@@ -1788,6 +1794,9 @@ export const HomePage = {
 						if (rect.left <= window.innerWidth / 2) activeIndex = index;
 					});
 					if (hasExited) activeIndex = -1;
+					const contentState = `${activeIndex}:${hasExited}`;
+					if (contentState === previousContentState) return;
+					previousContentState = contentState;
 
 					thumbItems.forEach((thumb, index) => {
 						thumb.classList.toggle('active', index === activeIndex);
