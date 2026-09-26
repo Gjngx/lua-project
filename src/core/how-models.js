@@ -8,6 +8,7 @@ const SCROLL_ROTATION_FACTOR = 0.0076; // Radians per pixel scrolled (1.9×).
 const MAX_ROTATION_SPEED = 9.5;
 const SUPERSAMPLE_FACTOR = 1.5;
 const MAX_RENDER_SIZE = 2048;
+const MOBILE_FRAME_INTERVAL = 1000 / 30;
 const DESKTOP_INTERACTION = '(min-width: 992px) and (hover: hover) and (pointer: fine)';
 const DRAG_SENSITIVITY = 0.008; // Radians per pixel dragged.
 const DRAG_MOMENTUM_DECAY = 0.88; // Velocity multiplier per frame (~60fps).
@@ -23,6 +24,7 @@ export class HowModels {
 		this.rotationSpeed = IDLE_ROTATION_SPEED;
 		this.lastScrollY = null;
 		this.lastTime = null;
+		this.lastRenderTime = null;
 		this.motion = window.matchMedia('(prefers-reduced-motion: reduce)');
 		this.desktop = window.matchMedia(DESKTOP_INTERACTION);
 		this.updateViewport = this.updateViewport.bind(this);
@@ -38,7 +40,11 @@ export class HowModels {
 			]);
 			const gltfLoader = new GLTFLoader();
 			if (this.disposed) return;
-			this.renderer = new T.WebGLRenderer({ alpha: true, antialias: this.desktop.matches });
+			this.renderer = new T.WebGLRenderer({
+				alpha: true,
+				antialias: this.desktop.matches,
+				powerPreference: 'high-performance',
+			});
 			this.renderer.setClearColor(0x000000, 0);
 			this.renderer.toneMapping = T.ACESFilmicToneMapping;
 			this.renderer.toneMappingExposure = 1.25;
@@ -115,21 +121,36 @@ export class HowModels {
 				model.scale.multiplyScalar(MODEL_SCALE);
 				model.visible = false;
 				this.scene.add(model);
-				const item = { canvas, context, model, index, visible: false, width: 1, height: 1,
+				const item = {
+					canvas,
+					context,
+					model,
+					index,
+					visible: false,
+					width: 1,
+					height: 1,
 					// Per-item drag state
-					dragOffsetX: 0, dragOffsetY: 0,
-					dragVelX: 0, dragVelY: 0,
-					pointerActive: false, lastPointerX: 0, lastPointerY: 0,
+					dragOffsetX: 0,
+					dragOffsetY: 0,
+					dragVelX: 0,
+					dragVelY: 0,
+					pointerActive: false,
+					lastPointerX: 0,
+					lastPointerY: 0,
 				};
 				this.items.push(item);
 			}
 
 			// Compile materials before the first visible scroll frame. The async path
 			// uses parallel shader compilation where the GPU supports it.
-			this.items.forEach(({ model }) => { model.visible = true; });
+			this.items.forEach(({ model }) => {
+				model.visible = true;
+			});
 			await this.renderer.compileAsync(this.scene, this.camera);
 			if (this.disposed) return;
-			this.items.forEach(({ model }) => { model.visible = false; });
+			this.items.forEach(({ model }) => {
+				model.visible = false;
+			});
 			this.resizeObserver = new ResizeObserver(this.updateViewport);
 			this.observer = new IntersectionObserver((entries) => {
 				entries.forEach((entry) => {
@@ -155,7 +176,7 @@ export class HowModels {
 	updateViewport() {
 		if (this.disposed) return;
 		const desktop = this.desktop.matches;
-		const dpr = Math.min(window.devicePixelRatio || 1, desktop ? 2 : 1.5);
+		const dpr = Math.min(window.devicePixelRatio || 1, desktop ? 2 : 1.25);
 		this.items.forEach((item) => {
 			item.width = Math.max(1, Math.round(item.canvas.clientWidth * dpr));
 			item.height = Math.max(1, Math.round(item.canvas.clientHeight * dpr));
@@ -194,7 +215,8 @@ export class HowModels {
 		};
 		const onPointerUp = () => {
 			item.pointerActive = false;
-			if (item.pointerId != null && canvas.hasPointerCapture(item.pointerId)) canvas.releasePointerCapture(item.pointerId);
+			if (item.pointerId != null && canvas.hasPointerCapture(item.pointerId))
+				canvas.releasePointerCapture(item.pointerId);
 			item.pointerId = null;
 			canvas.classList.remove('is-dragging');
 		};
@@ -224,6 +246,7 @@ export class HowModels {
 			this.raf = null;
 			this.lastTime = null;
 			this.lastScrollY = null;
+			this.lastRenderTime = null;
 			return;
 		}
 		if (this.raf !== null) return;
@@ -235,12 +258,30 @@ export class HowModels {
 		if (this.disposed || document.hidden) {
 			this.lastTime = null;
 			this.lastScrollY = null;
+			this.lastRenderTime = null;
 			return;
 		}
-		const visible = this.items.filter((item) => item.visible);
+		if (
+			!this.desktop.matches &&
+			this.lastRenderTime !== null &&
+			now - this.lastRenderTime < MOBILE_FRAME_INTERVAL
+		) {
+			this.schedule();
+			return;
+		}
+		this.lastRenderTime = now;
+		const visibleItems = this.items.filter((item) => item.visible);
+		const visible = this.desktop.matches
+			? visibleItems
+			: [
+					visibleItems.find((item) =>
+						item.canvas.closest('.home-how-thumb-item')?.classList.contains('active'),
+					) || visibleItems[0],
+				].filter(Boolean);
 		if (!visible.length) {
 			this.lastTime = null;
 			this.lastScrollY = null;
+			this.lastRenderTime = null;
 			return;
 		}
 		if (!this.motion.matches && this.lastTime !== null) {
@@ -249,12 +290,14 @@ export class HowModels {
 			// Measure actual scrolling so wheel, touch and keyboard behave alike.
 			const scrollDelta = window.scrollY - (this.lastScrollY ?? window.scrollY);
 			const scrollSpeed = scrollDelta / elapsed;
-			const targetSpeed = scrollDelta !== 0
-				? Math.sign(scrollDelta) * Math.min(
-					MAX_ROTATION_SPEED,
-					IDLE_ROTATION_SPEED + Math.abs(scrollSpeed) * SCROLL_ROTATION_FACTOR,
-				)
-				: IDLE_ROTATION_SPEED;
+			const targetSpeed =
+				scrollDelta !== 0
+					? Math.sign(scrollDelta) *
+						Math.min(
+							MAX_ROTATION_SPEED,
+							IDLE_ROTATION_SPEED + Math.abs(scrollSpeed) * SCROLL_ROTATION_FACTOR,
+						)
+					: IDLE_ROTATION_SPEED;
 			// Follow direction changes immediately, then ease back to idle on release.
 			if (scrollDelta !== 0 && this.rotationSpeed * targetSpeed < 0) this.rotationSpeed = 0;
 			this.rotationSpeed += (targetSpeed - this.rotationSpeed) * (1 - Math.exp(-10 * deltaTime));
@@ -271,11 +314,16 @@ export class HowModels {
 				canvas.height = height;
 			}
 			// Render above the output resolution, then filter down to soften silhouettes.
-			const sampleScale = Math.min(this.desktop.matches ? SUPERSAMPLE_FACTOR : 1,
-				(this.desktop.matches ? MAX_RENDER_SIZE : 1536) / Math.max(width, height));
+			const sampleScale = Math.min(
+				this.desktop.matches ? SUPERSAMPLE_FACTOR : 1,
+				(this.desktop.matches ? MAX_RENDER_SIZE : 1536) / Math.max(width, height),
+			);
 			const renderWidth = Math.max(1, Math.round(width * sampleScale));
 			const renderHeight = Math.max(1, Math.round(height * sampleScale));
-			if (this.renderer.domElement.width !== renderWidth || this.renderer.domElement.height !== renderHeight) {
+			if (
+				this.renderer.domElement.width !== renderWidth ||
+				this.renderer.domElement.height !== renderHeight
+			) {
 				this.renderer.setSize(renderWidth, renderHeight, false);
 			}
 			if (this.camera.aspect !== width / height) {
@@ -288,7 +336,10 @@ export class HowModels {
 			if (!item.pointerActive) {
 				item.dragVelX *= DRAG_MOMENTUM_DECAY;
 				item.dragVelY *= DRAG_MOMENTUM_DECAY;
-				if (Math.abs(item.dragVelX) > DRAG_MOMENTUM_STOP || Math.abs(item.dragVelY) > DRAG_MOMENTUM_STOP) {
+				if (
+					Math.abs(item.dragVelX) > DRAG_MOMENTUM_STOP ||
+					Math.abs(item.dragVelY) > DRAG_MOMENTUM_STOP
+				) {
 					item.dragOffsetX += item.dragVelX;
 					item.dragOffsetY += item.dragVelY;
 				} else {

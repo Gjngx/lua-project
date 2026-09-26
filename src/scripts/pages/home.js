@@ -1825,7 +1825,8 @@ export const HomePage = {
 							containerAnimation: this.tlHowThumb,
 							start: 'left right',
 							end: 'right left',
-							scrub: true
+							scrub: true,
+							markers: true,
 						},
 					});
 					scaleTimeline
