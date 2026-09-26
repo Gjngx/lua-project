@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Analytics from '@vercel/analytics/astro';
 import Header from '../components/Header.astro';
 import SEO from '../components/SEO.astro';
 import LayoutGrid from '../components/LayoutGrid.astro';
@@ -105,5 +106,6 @@ const serializedSoundEffects = JSON.stringify({
 		<script>
 			import '../core/bootstrap.js';
 		</script>
+		<Analytics />
 	</body>
 </html>
