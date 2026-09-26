@@ -33,3 +33,30 @@ controller.render(10001);
 assert.equal(draws, beforeHidden, 'Hidden tab must not render');
 assert.equal(controller.lastRenderTime, null);
 console.log('HowModels visibility and frame pacing checks passed');
+
+document.hidden = false;
+window.innerHeight = 800;
+controller.direct = true;
+controller.surfaceDpr = 1.25;
+controller.surface = {
+	getBoundingClientRect: () => ({ left: 0, right: 390, top: 0, bottom: 800 }),
+};
+const viewports = [];
+controller.renderer.setScissorTest = () => {};
+controller.renderer.clear = () => {};
+controller.renderer.clearDepth = () => {};
+controller.renderer.setViewport = (...rect) => viewports.push(rect);
+controller.renderer.setScissor = () => {};
+controller.items.forEach((entry, index) => {
+	entry.canvas.getBoundingClientRect = () => ({
+		left: index * 300, right: index * 300 + 100,
+		top: 300, bottom: 400, width: 100, height: 100,
+	});
+	entry.context.drawImage = () => assert.fail('Direct WebGL must not copy to Canvas 2D');
+});
+controller.render(10020);
+assert.deepEqual(viewports, [[0, 500, 125, 125], [375, 500, 125, 125]]);
+const directDraws = draws;
+controller.render(10036);
+assert.equal(draws - directDraws, 2, 'Direct rendering must follow each refresh, not the old 30fps cap');
+console.log('Direct rendering DPR, visibility and zero-copy checks passed');

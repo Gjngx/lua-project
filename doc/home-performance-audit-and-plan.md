@@ -4,6 +4,12 @@ Ngày: 26/09/2026. Trạng thái: **đánh giá code và lập kế hoạch; ch�
 
 ### Cập nhật triển khai lần 1
 
+### Cập nhật triển khai lần 2 — How mobile vẽ WebGL trực tiếp
+
+Viewport ≤991px dùng một canvas WebGL sticky trong vùng How, viewport/scissor theo khung model đã transform. Bỏ copy WebGL → Canvas 2D mỗi frame và bỏ cap 30fps trên nhánh trực tiếp để theo refresh; giữ DPR 1.25, ánh sáng, texture, công thức góc xoay, bật antialias cho viền. Desktop giữ pipeline cũ. Canvas dùng chung được dọn khi destroy và xóa khi không còn model nhìn thấy. Resize quan sát cả surface.
+
+Đã kiểm tra hiển thị trên Safari macOS Responsive Design Mode ở width 390px, cuộn tới vùng How và cuộn ngược. Test bằng Node kiểm tra nhánh trực tiếp không gọi drawImage, đúng tọa độ viewport/DPR, culling và render mỗi refresh. Chưa có trace FPS trước/sau hay test iPhone vật lý; không coi đây là chứng nhận đã hết lag. Các hạng mục transition, asset loading và context restoration vẫn theo kế hoạch dưới.
+
 Đã áp dụng các thay đổi nhỏ theo ponytail: How vẽ tất cả model nhìn thấy thay vì chỉ active; giữ phần thời gian dư của giới hạn 30fps; chỉ cập nhật class nội dung khi trạng thái đổi; transition bỏ draw trùng state (invalidate khi cập nhật metrics); Playground chỉ tính lại ma trận card thay đổi hover. DPR, texture, material, easing và các mốc timeline được giữ nguyên.
 
 Kiểm tra: `node src/core/how-models.test.mjs` kiểm chứng hai model nhìn thấy cùng render, model ngoài màn hình không render, nhịp 30fps với RAF jitter và tab ẩn; syntax check và production build thành công. Chưa có benchmark/visual QA trên Safari thật nên chưa xác nhận mức giảm lag. Render đủ model nhìn thấy có thể tăng tải trong đoạn giao nhau nhưng sửa việc đứng hình do active-only.

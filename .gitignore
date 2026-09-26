@@ -23,3 +23,10 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+doc/
+
+*.test.mjs
+*.test.js
+*.test.ts
+*.test.tsx

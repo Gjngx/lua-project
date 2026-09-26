@@ -42,7 +42,7 @@ export class HowModels {
 			if (this.disposed) return;
 			this.renderer = new T.WebGLRenderer({
 				alpha: true,
-				antialias: this.desktop.matches,
+				antialias: true,
 				powerPreference: 'high-performance',
 			});
 			this.renderer.setClearColor(0x000000, 0);
@@ -151,7 +151,16 @@ export class HowModels {
 			this.items.forEach(({ model }) => {
 				model.visible = false;
 			});
+			// A single visible WebGL surface avoids copying GPU frames into 2D canvases.
+			this.surface = document.createElement('div');
+			this.surface.className = 'home-how-model-surface';
+			this.surface.setAttribute('aria-hidden', 'true');
+			this.surface.appendChild(this.renderer.domElement);
+			this.root.querySelector('.home-how-thumb').prepend(this.surface);
+			this.onScroll = () => { if (this.direct) this.schedule(); };
+			window.addEventListener('scroll', this.onScroll, { passive: true });
 			this.resizeObserver = new ResizeObserver(this.updateViewport);
+			this.resizeObserver.observe(this.surface);
 			this.observer = new IntersectionObserver((entries) => {
 				entries.forEach((entry) => {
 					const item = this.items.find((item) => item.canvas === entry.target);
@@ -177,6 +186,19 @@ export class HowModels {
 		if (this.disposed) return;
 		const desktop = this.desktop.matches;
 		const dpr = Math.min(window.devicePixelRatio || 1, desktop ? 2 : 1.25);
+		this.direct = window.innerWidth <= 991;
+		if (this.surface) {
+			this.surface.hidden = !this.direct;
+			this.renderer.autoClear = !this.direct;
+			this.renderer.setScissorTest(false);
+			if (this.direct) {
+				this.surfaceDpr = dpr;
+				this.renderer.setSize(
+					Math.max(1, Math.round(this.surface.clientWidth * dpr)),
+					Math.max(1, Math.round(this.surface.clientHeight * dpr)), false,
+				);
+			}
+		}
 		this.items.forEach((item) => {
 			item.width = Math.max(1, Math.round(item.canvas.clientWidth * dpr));
 			item.height = Math.max(1, Math.round(item.canvas.clientHeight * dpr));
@@ -242,6 +264,10 @@ export class HowModels {
 
 	schedule() {
 		if (this.disposed || document.hidden || !this.items.some((item) => item.visible)) {
+			if (this.direct && !this.disposed && !document.hidden) {
+				this.renderer.setScissorTest(false);
+				this.renderer.clear();
+			}
 			if (this.raf !== null) cancelAnimationFrame(this.raf);
 			this.raf = null;
 			this.lastTime = null;
@@ -262,7 +288,7 @@ export class HowModels {
 			return;
 		}
 		if (
-			!this.desktop.matches &&
+			!this.direct && !this.desktop.matches &&
 			this.lastRenderTime !== null &&
 			now - this.lastRenderTime < MOBILE_FRAME_INTERVAL
 		) {
@@ -274,7 +300,22 @@ export class HowModels {
 			? now - ((now - this.lastRenderTime) % MOBILE_FRAME_INTERVAL)
 			: now;
 		// Adjacent models must keep moving throughout the horizontal transition.
-		const visible = this.items.filter((item) => item.visible);
+		let visible = this.items.filter((item) => item.visible);
+		let surfaceRect;
+		if (this.direct) {
+			surfaceRect = this.surface.getBoundingClientRect();
+			// Read every rectangle before rendering/writing; includes incoming models.
+			visible = this.items.filter((item) => {
+				item.rect = item.canvas.getBoundingClientRect();
+				return item.rect.width > 0 && item.rect.height > 0 &&
+					item.rect.right > surfaceRect.left && item.rect.left < surfaceRect.right &&
+					item.rect.bottom > Math.max(0, surfaceRect.top) &&
+					item.rect.top < Math.min(window.innerHeight, surfaceRect.bottom);
+			});
+			this.renderer.setScissorTest(false);
+			this.renderer.clear();
+			this.renderer.setScissorTest(true);
+		}
 		if (!visible.length) {
 			this.lastTime = null;
 			this.lastScrollY = null;
@@ -306,7 +347,7 @@ export class HowModels {
 		this.lastScrollY = window.scrollY;
 		visible.forEach((item) => {
 			const { canvas, context, model, index, width, height } = item;
-			if (canvas.width !== width || canvas.height !== height) {
+			if (!this.direct && (canvas.width !== width || canvas.height !== height)) {
 				canvas.width = width;
 				canvas.height = height;
 			}
@@ -317,10 +358,10 @@ export class HowModels {
 			);
 			const renderWidth = Math.max(1, Math.round(width * sampleScale));
 			const renderHeight = Math.max(1, Math.round(height * sampleScale));
-			if (
+			if (!this.direct && (
 				this.renderer.domElement.width !== renderWidth ||
 				this.renderer.domElement.height !== renderHeight
-			) {
+			)) {
 				this.renderer.setSize(renderWidth, renderHeight, false);
 			}
 			if (this.camera.aspect !== width / height) {
@@ -352,11 +393,22 @@ export class HowModels {
 				-0.2,
 			);
 			model.visible = true;
+			if (this.direct) {
+				const { rect } = item;
+				const dpr = this.surfaceDpr;
+				const x = (rect.left - surfaceRect.left) * dpr;
+				const y = (surfaceRect.bottom - rect.bottom) * dpr;
+				this.renderer.setViewport(x, y, rect.width * dpr, rect.height * dpr);
+				this.renderer.setScissor(x, y, rect.width * dpr, rect.height * dpr);
+				this.renderer.clearDepth();
+			}
 			this.renderer.render(this.scene, this.camera);
-			context.clearRect(0, 0, width, height);
-			context.imageSmoothingEnabled = true;
-			context.imageSmoothingQuality = 'high';
-			context.drawImage(this.renderer.domElement, 0, 0, width, height);
+			if (!this.direct) {
+				context.clearRect(0, 0, width, height);
+				context.imageSmoothingEnabled = true;
+				context.imageSmoothingQuality = 'high';
+				context.drawImage(this.renderer.domElement, 0, 0, width, height);
+			}
 			model.visible = false;
 			canvas.classList.add('is-ready');
 		});
@@ -369,6 +421,8 @@ export class HowModels {
 		this.raf = null;
 		this.observer?.disconnect();
 		this.resizeObserver?.disconnect();
+		window.removeEventListener('scroll', this.onScroll);
+		this.surface?.remove();
 		this.motion.removeEventListener('change', this.schedule);
 		this.desktop.removeEventListener('change', this.updateViewport);
 		document.removeEventListener('visibilitychange', this.schedule);

@@ -738,6 +738,30 @@
 	touch-action: auto;
 }
 
+.home-how-model-surface {
+	position: sticky;
+	top: 0;
+	width: 100%;
+	height: 100svh;
+	margin-bottom: -100svh;
+	z-index: 1;
+	pointer-events: none;
+}
+
+.home-how-model-surface[hidden] {
+	display: none;
+}
+
+.home-how-model-surface > canvas {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.home-how-model-surface:not([hidden]) ~ .home-how-thumb-inner .home-how-model {
+	opacity: 0;
+}
+
 @media (min-width: 992px) and (hover: hover) and (pointer: fine) {
 	.home-how-model {
 		touch-action: none;
