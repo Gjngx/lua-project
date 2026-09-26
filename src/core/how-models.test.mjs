@@ -38,9 +38,8 @@ document.hidden = false;
 window.innerHeight = 800;
 controller.direct = true;
 controller.surfaceDpr = 1.25;
-controller.surface = {
-	getBoundingClientRect: () => ({ left: 0, right: 390, top: 0, bottom: 800 }),
-};
+controller.renderer.domElement.getBoundingClientRect =
+	() => ({ left: 0, right: 390, top: 200, bottom: 600 });
 const viewports = [];
 controller.renderer.setScissorTest = () => {};
 controller.renderer.clear = () => {};
@@ -55,8 +54,18 @@ controller.items.forEach((entry, index) => {
 	entry.context.drawImage = () => assert.fail('Direct WebGL must not copy to Canvas 2D');
 });
 controller.render(10020);
-assert.deepEqual(viewports, [[0, 500, 125, 125], [375, 500, 125, 125]]);
+assert.deepEqual(viewports, [[0, 250, 125, 125], [375, 250, 125, 125]]);
 const directDraws = draws;
 controller.render(10036);
 assert.equal(draws - directDraws, 2, 'Direct rendering must follow each refresh, not the old 30fps cap');
 console.log('Direct rendering DPR, visibility and zero-copy checks passed');
+
+let clears = 0;
+controller.renderer.clear = () => clears++;
+controller.items.forEach((entry) => { entry.visible = false; });
+controller.raf = null;
+controller.surfaceHasContent = true;
+HowModels.prototype.schedule.call(controller);
+HowModels.prototype.schedule.call(controller);
+assert.equal(clears, 1, 'Offscreen surface must clear once, not on every scroll/schedule');
+console.log('Offscreen GPU work check passed');

@@ -2022,6 +2022,7 @@ export const HomePage = {
 						pointerEvents: 'auto',
 						ease: 'power1.inOut',
 						duration: 0.85,
+						onUpdate: () => this.scheduleSphere?.(),
 					},
 					'<=0.15',
 				)
@@ -2218,7 +2219,8 @@ export const HomePage = {
 				schedule();
 			};
 			const schedule = () => {
-				if (!this.sphereVisible || document.hidden) {
+				if (!this.sphereVisible || document.hidden ||
+					Number(gsap.getProperty(this.cardLayer.parentElement, 'scaleX')) === 0) {
 					if (this.sphereRaf) cancelAnimationFrame(this.sphereRaf);
 					this.sphereRaf = null;
 					this.sphereLastTime = 0;
@@ -2226,6 +2228,7 @@ export const HomePage = {
 				}
 				if (!this.sphereRaf) this.sphereRaf = requestAnimationFrame(tick);
 			};
+			this.scheduleSphere = schedule;
 			document.addEventListener('visibilitychange', schedule);
 			this.sphereCleanups.push(() => document.removeEventListener('visibilitychange', schedule));
 			schedule();
@@ -2464,6 +2467,7 @@ export const HomePage = {
 			if (this.sphereRaf) cancelAnimationFrame(this.sphereRaf);
 			this.sphereRaf = null;
 			this.sphereObserver?.disconnect();
+			this.scheduleSphere = null;
 			this.sphereResizeObserver?.disconnect();
 			this.sphereObserver = null;
 			this.sphereResizeObserver = null;

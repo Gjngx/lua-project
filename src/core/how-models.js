@@ -157,7 +157,9 @@ export class HowModels {
 			this.surface.setAttribute('aria-hidden', 'true');
 			this.surface.appendChild(this.renderer.domElement);
 			this.root.querySelector('.home-how-thumb').prepend(this.surface);
-			this.onScroll = () => { if (this.direct) this.schedule(); };
+			this.onScroll = () => {
+				if (this.direct && this.items.some((item) => item.visible)) this.schedule();
+			};
 			window.addEventListener('scroll', this.onScroll, { passive: true });
 			this.resizeObserver = new ResizeObserver(this.updateViewport);
 			this.resizeObserver.observe(this.surface);
@@ -187,24 +189,30 @@ export class HowModels {
 		const desktop = this.desktop.matches;
 		const dpr = Math.min(window.devicePixelRatio || 1, desktop ? 2 : 1.25);
 		this.direct = window.innerWidth <= 991;
-		if (this.surface) {
-			this.surface.hidden = !this.direct;
-			this.renderer.autoClear = !this.direct;
-			this.renderer.setScissorTest(false);
-			if (this.direct) {
-				this.surfaceDpr = dpr;
-				this.renderer.setSize(
-					Math.max(1, Math.round(this.surface.clientWidth * dpr)),
-					Math.max(1, Math.round(this.surface.clientHeight * dpr)), false,
-				);
-			}
-		}
 		this.items.forEach((item) => {
 			item.width = Math.max(1, Math.round(item.canvas.clientWidth * dpr));
 			item.height = Math.max(1, Math.round(item.canvas.clientHeight * dpr));
 			if (desktop && !item._cleanupDrag) this._attachDragListeners(item);
 			if (!desktop) item._cleanupDrag?.();
 		});
+		if (this.surface) {
+			this.surface.hidden = !this.direct;
+			this.renderer.autoClear = !this.direct;
+			this.renderer.setScissorTest(false);
+			if (this.direct) {
+				this.surfaceDpr = dpr;
+				// Models are vertically centered and never scale above 1. Keep the
+				// same pixel density, but allocate only the band they can occupy.
+				const height = Math.min(this.surface.clientHeight,
+					Math.max(1, ...this.items.map((item) => item.canvas.clientHeight)));
+				this.renderer.domElement.style.height = `${height}px`;
+				const widthPx = Math.max(1, Math.round(this.surface.clientWidth * dpr));
+				const heightPx = Math.max(1, Math.round(height * dpr));
+				if (this.renderer.domElement.width !== widthPx || this.renderer.domElement.height !== heightPx) {
+					this.renderer.setSize(widthPx, heightPx, false);
+				}
+			}
+		}
 		this.schedule();
 	}
 
@@ -264,9 +272,10 @@ export class HowModels {
 
 	schedule() {
 		if (this.disposed || document.hidden || !this.items.some((item) => item.visible)) {
-			if (this.direct && !this.disposed && !document.hidden) {
+			if (this.direct && this.surfaceHasContent && !this.disposed && !document.hidden) {
 				this.renderer.setScissorTest(false);
 				this.renderer.clear();
+				this.surfaceHasContent = false;
 			}
 			if (this.raf !== null) cancelAnimationFrame(this.raf);
 			this.raf = null;
@@ -303,7 +312,7 @@ export class HowModels {
 		let visible = this.items.filter((item) => item.visible);
 		let surfaceRect;
 		if (this.direct) {
-			surfaceRect = this.surface.getBoundingClientRect();
+			surfaceRect = this.renderer.domElement.getBoundingClientRect();
 			// Read every rectangle before rendering/writing; includes incoming models.
 			visible = this.items.filter((item) => {
 				item.rect = item.canvas.getBoundingClientRect();
@@ -314,6 +323,7 @@ export class HowModels {
 			});
 			this.renderer.setScissorTest(false);
 			this.renderer.clear();
+			this.surfaceHasContent = visible.length > 0;
 			this.renderer.setScissorTest(true);
 		}
 		if (!visible.length) {

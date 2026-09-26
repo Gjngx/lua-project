@@ -158,6 +158,9 @@ export class PlaygroundSphere {
 		this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1,
 			window.matchMedia('(max-width: 991px)').matches ? 1.5 : 2));
 		this.renderer.setSize(width, height, false);
+		this.renderWidth = width;
+		this.renderHeight = height;
+		this.lastScissor = null;
 		const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
 		this.cardWidth = 16 * rem;
 		this.cardHeight = 10 * rem;
@@ -235,6 +238,27 @@ export class PlaygroundSphere {
 			changedIds.add(id);
 		});
 		if (changedIds.size) this.updateCards(changedIds);
+		// Every card lies inside this sphere, including hover enlargement.
+		// Keep the original resolution; skip transparent pixels outside its projection.
+		const radius = Math.hypot(this.radius, this.cardWidth * 0.525, this.cardHeight * 0.525) * rotation.scale;
+		const distance = this.camera.position.z;
+		const extent = radius < distance
+			? Math.ceil(distance * radius * zoom / Math.sqrt(distance * distance - radius * radius)) + 2
+			: Math.max(this.renderWidth, this.renderHeight);
+		const nextScissor = {
+			left: Math.max(0, Math.floor(this.renderWidth / 2 - extent)),
+			bottom: Math.max(0, Math.floor(this.renderHeight / 2 - extent)),
+			right: Math.min(this.renderWidth, Math.ceil(this.renderWidth / 2 + extent)),
+			top: Math.min(this.renderHeight, Math.ceil(this.renderHeight / 2 + extent)),
+		};
+		const previous = this.lastScissor || nextScissor;
+		const left = Math.min(previous.left, nextScissor.left);
+		const bottom = Math.min(previous.bottom, nextScissor.bottom);
+		this.renderer.setScissor(left, bottom,
+			Math.max(previous.right, nextScissor.right) - left,
+			Math.max(previous.top, nextScissor.top) - bottom);
+		this.renderer.setScissorTest(true);
+		this.lastScissor = nextScissor;
 		this.renderer.render(this.scene, this.camera);
 	}
 

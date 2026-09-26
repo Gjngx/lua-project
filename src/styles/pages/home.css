@@ -753,6 +753,10 @@
 }
 
 .home-how-model-surface > canvas {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
 	display: block;
 	width: 100%;
 	height: 100%;
