@@ -1826,7 +1826,6 @@ export const HomePage = {
 							start: 'left right',
 							end: 'right left',
 							scrub: true,
-							markers: true,
 						},
 					});
 					scaleTimeline

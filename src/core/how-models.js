@@ -271,13 +271,15 @@ export class HowModels {
 		}
 		this.lastRenderTime = now;
 		const visibleItems = this.items.filter((item) => item.visible);
-		const visible = this.desktop.matches
-			? visibleItems
-			: [
-					visibleItems.find((item) =>
-						item.canvas.closest('.home-how-thumb-item')?.classList.contains('active'),
-					) || visibleItems[0],
-				].filter(Boolean);
+		const unreadyItems = visibleItems.filter((item) => !item.canvas.classList.contains('is-ready'));
+		const visible =
+			this.desktop.matches || unreadyItems.length
+				? visibleItems
+				: [
+						visibleItems.find((item) =>
+							item.canvas.closest('.home-how-thumb-item')?.classList.contains('active'),
+						) || visibleItems[0],
+					].filter(Boolean);
 		if (!visible.length) {
 			this.lastTime = null;
 			this.lastScrollY = null;
