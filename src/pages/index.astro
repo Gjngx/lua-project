@@ -272,11 +272,14 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 				<img
 					class="home-hero-poster"
 					src={heroPosterUrl}
+					data-fallback-src={heroPoster.src}
 					style={heroPosterPosition ? `object-position: ${heroPosterPosition}` : undefined}
 					alt=""
 					aria-hidden="true"
+					crossorigin="anonymous"
 					fetchpriority="high"
 				/>
+				<div class="home-hero-bg-overlay-main"></div>
 			</div>
 		</div>
 		<section class="home-hero" data-cursor="video" data-cursor-video={cursorVideoUrl}>
@@ -380,7 +383,6 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 				</div>
 			</div>
 		</div>
-		<div class="home-hero-bg-overlay-main"></div>
 	</div>
 	<div class="home-works-wrap" id="works" data-section="light">
 		<canvas id="works-gl-canvas" class="home-works-gl-canvas" aria-hidden="true"></canvas>

@@ -1,4 +1,5 @@
 import { HowModels } from '../../core/how-models.js';
+import { HeroLiquid } from '../../core/hero-liquid.js';
 import { PlaygroundSphere } from '../../core/playground-sphere.js';
 import { TriggerSetup } from '../../core/trigger-setup.js';
 import { gsap, ScrollTrigger } from '../../core/gsap.js';
@@ -23,6 +24,9 @@ export const HomePage = {
 		constructor() {
 			this.el = null;
 			this.heroIconScrollTrigger = null;
+			this.heroLiquid = null;
+			this.heroPoster = null;
+			this.onHeroPosterError = null;
 			this.heroTopIcon = null;
 			this.worksEl = null;
 			this.timeEl = null;
@@ -49,6 +53,8 @@ export const HomePage = {
 			this.worksEl = $(data.next.container).find('.home-works-wrap')[0];
 			this.setupHeroTime();
 			this.setupHeroIconScroll();
+			this.setupHeroPosterFallback();
+			this.setupHeroLiquid();
 			this.interact();
 
 			if (mode === 'once') {
@@ -171,6 +177,37 @@ export const HomePage = {
 				onRefresh: syncScroll,
 			});
 			syncScroll(this.heroIconScrollTrigger);
+		}
+
+		setupHeroPosterFallback() {
+			this.heroPoster = $(this.el).find('.home-hero-poster')[0];
+			if (!this.heroPoster) return;
+			this.onHeroPosterError = () => {
+				const fallbackSrc = this.heroPoster?.dataset.fallbackSrc;
+				if (!fallbackSrc || this.heroPoster.src === new URL(fallbackSrc, document.baseURI).href) return;
+				this.heroLiquid?.destroy();
+				this.heroLiquid = null;
+				this.heroPoster.style.objectPosition = 'center';
+				this.heroPoster.src = fallbackSrc;
+			};
+			this.heroPoster.addEventListener('error', this.onHeroPosterError, { once: true });
+			if (this.heroPoster.complete && !this.heroPoster.naturalWidth) this.onHeroPosterError();
+		}
+
+		setupHeroLiquid() {
+			if (!window.matchMedia(
+				'(min-width: 992px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)',
+			).matches) return;
+			const root = $(this.el).find('.home-hero-bg-inner')[0];
+			const image = $(root).find('.home-hero-poster')[0];
+			if (!root || !image) return;
+			const init = () => {
+				if (!this.el?.isConnected || this.heroLiquid) return;
+				this.heroLiquid = new HeroLiquid(root, image, this.el);
+				this.heroLiquid.init();
+			};
+			if (image.complete) init();
+			else image.addEventListener('load', init, { once: true });
 		}
 
 		animationScrub() {
@@ -334,6 +371,11 @@ export const HomePage = {
 		}
 
 		destroy() {
+			this.heroLiquid?.destroy();
+			this.heroLiquid = null;
+			this.heroPoster?.removeEventListener('error', this.onHeroPosterError);
+			this.heroPoster = null;
+			this.onHeroPosterError = null;
 			if (this.timeTimer !== null) {
 				window.clearInterval(this.timeTimer);
 				this.timeTimer = null;
