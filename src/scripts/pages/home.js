@@ -38,6 +38,7 @@ export const HomePage = {
 			this.tlHeroBot = null;
 			this.tlHeroBotEnd = null;
 			this.tlHeroOverlay = null;
+			this.tlHeroOverlap = null;
 			this.tlHeroTextColor = null;
 			this.heroTextOriginalHTML = null;
 			this.masterReveal = null;
@@ -101,7 +102,7 @@ export const HomePage = {
 			await this.revealReady;
 			if (!this.el?.isConnected || !this.tlOnce?.duration()) return;
 			// Scroll effects are installed by this timeline's onComplete callback.
-			await this.tlOnce.play(0).then(() => {});
+			await this.tlOnce.play(0).then(() => { });
 		}
 
 		async playEnter() {
@@ -259,19 +260,19 @@ export const HomePage = {
 			});
 			if (headerLogoAnimated && headerLogoTarget) {
 				this.tlHeroTop
-				.to(headerLogoAnimated, {
-					x: () => getHeaderLogoTransform().x,
-					y: () => getHeaderLogoTransform().y,
-					scale: () => getHeaderLogoTransform().scale,
-					ease: 'none',
-					force3D: true,
-					// onComplete: () => {
-					// 	gsap.set(headerLogoAnimated, { pointerEvents: 'auto' });
-					// },
-					// onReverseComplete: () => {
-					// 	gsap.set(headerLogoAnimated, { pointerEvents: 'none' });
-					// },
-				})
+					.to(headerLogoAnimated, {
+						x: () => getHeaderLogoTransform().x,
+						y: () => getHeaderLogoTransform().y,
+						scale: () => getHeaderLogoTransform().scale,
+						ease: 'none',
+						force3D: true,
+						// onComplete: () => {
+						// 	gsap.set(headerLogoAnimated, { pointerEvents: 'auto' });
+						// },
+						// onReverseComplete: () => {
+						// 	gsap.set(headerLogoAnimated, { pointerEvents: 'none' });
+						// },
+					})
 			}
 
 			this.tlHeroTop.to($(this.el).find('.home-hero-desc')[0], {
@@ -364,6 +365,19 @@ export const HomePage = {
 					ease: 'none',
 				});
 			}
+
+			this.tlHeroOverlap = gsap.timeline({
+				scrollTrigger: {
+					trigger: document.querySelector('.home-works-wrap'),
+					start: 'top bottom',
+					end: 'top top',
+					scrub: true,
+				},
+			});
+			gsap.set($(this.el).find('.home-hero-bg-inner, .home-hero-bottom-inner'), { force3D: true, transformStyle: 'preserve-3d', willChange: 'transform' });
+			this.tlHeroOverlap
+				.to($(this.el).find('.home-hero-bg-inner'), { yPercent: -15, ease: 'none', scale: 1.05, force3D: true })
+				.to($(this.el).find('.home-hero-bottom-inner'), { y: cvUnit(10, 'vh'), ease: 'none', scale: 1.05, force3D: true }, "<=0")
 		}
 
 		interact() {
@@ -390,6 +404,7 @@ export const HomePage = {
 			if (this.tlHeroBot) this.tlHeroBot.kill();
 			if (this.tlHeroTextColor) this.tlHeroTextColor.kill();
 			if (this.tlHeroOverlay) this.tlHeroOverlay.kill();
+			if (this.tlHeroOverlap) this.tlHeroOverlap.kill();
 			this.masterReveal?.destroy();
 			this.bottomDescReveal?.destroy();
 			const heroDescription = $(this.el).find('.home-hero-bottom-desc .h2')[0];
@@ -567,14 +582,14 @@ export const HomePage = {
 			});
 
 			this.tlWorksList
-			.to($(this.el).find('.home-works-main-ic')[0], {
-				x: viewport.w <= 767 ? cvUnit(40, 'rem') : cvUnit(120, 'rem'),
-				ease: 'none',
-			})
-			.to($(this.el).find('.home-works-main-ic')[1], {
-				x: viewport.w <= 767 ? cvUnit(-40, 'rem') : cvUnit(-120, 'rem'),
-				ease: 'none',
-			},'<');
+				.to($(this.el).find('.home-works-main-ic')[0], {
+					x: viewport.w <= 767 ? cvUnit(40, 'rem') : cvUnit(120, 'rem'),
+					ease: 'none',
+				})
+				.to($(this.el).find('.home-works-main-ic')[1], {
+					x: viewport.w <= 767 ? cvUnit(-40, 'rem') : cvUnit(-120, 'rem'),
+					ease: 'none',
+				}, '<');
 
 			const transition = $(this.el).find('.home-works-trans')[0];
 			const transitionInner = $(this.el).find('.home-works-trans-inner')[0];
@@ -1054,7 +1069,7 @@ export const HomePage = {
 				0,
 				1,
 				(this.transitionState.progress - this.transitionSwapProgress) /
-					WORKS_TRANSITION_BACKGROUND_SPAN,
+				WORKS_TRANSITION_BACKGROUND_SPAN,
 			);
 
 			this.transitionBackgroundTween?.progress(backgroundProgress);
@@ -1194,7 +1209,7 @@ export const HomePage = {
 			context.restore();
 		}
 
-		interact() {}
+		interact() { }
 
 		destroy() {
 			super.cleanTrigger();
@@ -1569,21 +1584,21 @@ export const HomePage = {
 							ease: 'none',
 						},
 					)
-					.to(frame, {
-						scale: 1,
-						duration: 0.25,
-						ease: 'none',
-					})
-					.to(frame, {
-						scale: 0.75,
-						duration: 0.25,
-						ease: 'none',
-					})
-					.to(frame, {
-						scale: 0.5,
-						duration: 0.25,
-						ease: 'none',
-					});
+						.to(frame, {
+							scale: 1,
+							duration: 0.25,
+							ease: 'none',
+						})
+						.to(frame, {
+							scale: 0.75,
+							duration: 0.25,
+							ease: 'none',
+						})
+						.to(frame, {
+							scale: 0.5,
+							duration: 0.25,
+							ease: 'none',
+						});
 
 					this.tlItemScrolls.push(tl);
 
@@ -1790,7 +1805,7 @@ export const HomePage = {
 			});
 			this.tlTrans
 				.to(titleLeft, {
-					x: () => viewport.w > 991 ?`-${widthTransLeft}` : 0,
+					x: () => viewport.w > 991 ? `-${widthTransLeft}` : 0,
 					y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(-400, 'rem') : cvUnit(-100, 'rem')),
 					ease: 'power3.inOut',
 					duration: 1,
