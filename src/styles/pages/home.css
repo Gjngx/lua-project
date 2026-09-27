@@ -23,18 +23,8 @@
 	will-change: transform;
 }
 
-.home-hero-video {
+.home-hero-poster {
 	display: block;
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	background-color: #000;
-	pointer-events: none;
-	user-select: none;
-}
-
-.home-hero-poster-mobile {
-	display: none;
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
@@ -1200,14 +1190,6 @@
 }
 
 @media only screen and (max-width: 767px) {
-	.home-hero-video {
-		display: none;
-	}
-
-	.home-hero-poster-mobile {
-		display: block;
-	}
-
 	.home-hero {
 		margin-top: -100svh;
 	}

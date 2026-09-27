@@ -48,6 +48,13 @@ export default defineType({
       group: 'hero',
       fields: [
         defineField({
+          name: 'backgroundImage',
+          title: 'Background image',
+          type: 'image',
+          description: 'Displayed behind the Home hero on desktop and mobile.',
+          options: {hotspot: true},
+        }),
+        defineField({
           name: 'availabilityMessage',
           title: 'Availability message',
           type: 'text',

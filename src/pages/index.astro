@@ -2,8 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import '../styles/pages/home.css';
 import { Image } from 'astro:assets';
-import heroPoster from '../assets/images/home-bg-poster.webp';
-import heroVideoDesktop from '../assets/video/home-bg-desktop.mp4';
+import heroPoster from '../assets/images/home-hero.avif';
 import tesla from '../assets/images/tesla.jpg';
 import airofit from '../assets/images/airofit.jpg';
 import vietson from '../assets/images/vietson.jpg';
@@ -50,8 +49,8 @@ type SanityImage = {
 		};
 	};
 	alt?: string;
-	crop?: unknown;
-	hotspot?: unknown;
+	crop?: { top?: number; right?: number; bottom?: number; left?: number };
+	hotspot?: { x?: number; y?: number; height?: number; width?: number };
 };
 
 type SanityFile = {
@@ -68,6 +67,7 @@ type HomePageData = {
 		shareImage?: SanityImage;
 	};
 	hero?: {
+		backgroundImage?: SanityImage;
 		availabilityMessage?: string;
 		headline?: string;
 		role?: string;
@@ -131,6 +131,12 @@ const { data: homePage } = await loadQuery<HomePageData | null>({
 });
 
 const hero = homePage?.hero;
+const heroPosterUrl = hero?.backgroundImage?.asset
+	? urlFor(hero.backgroundImage).width(2400).auto('format').url()
+	: heroPoster.src;
+const heroPosterPosition = hero?.backgroundImage?.hotspot
+	? `${(hero.backgroundImage.hotspot.x ?? 0.5) * 100}% ${(hero.backgroundImage.hotspot.y ?? 0.5) * 100}%`
+	: undefined;
 const cursorVideoUrl = hero?.cursorVideo?.asset?.url;
 const featuredWork = homePage?.featuredWork;
 const capabilities = homePage?.capabilities;
@@ -264,25 +270,13 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 		<div class="home-hero-bg">
 			<div class="home-hero-bg-inner">
 				<img
-					class="home-hero-poster-mobile"
-					src={heroPoster.src}
+					class="home-hero-poster"
+					src={heroPosterUrl}
+					style={heroPosterPosition ? `object-position: ${heroPosterPosition}` : undefined}
 					alt=""
 					aria-hidden="true"
 					fetchpriority="high"
 				/>
-				<video
-					class="home-hero-video"
-					poster={heroPoster.src}
-					preload="auto"
-					muted
-					playsinline
-					disablepictureinpicture
-					disableremoteplayback
-					aria-hidden="true"
-					tabindex="-1"
-				>
-					<source src={heroVideoDesktop} type="video/mp4" media="(min-width: 768px)" />
-				</video>
 			</div>
 		</div>
 		<section class="home-hero" data-cursor="video" data-cursor-video={cursorVideoUrl}>

@@ -9,8 +9,6 @@ import { footer } from '../../core/components/footer.js';
 
 import { MasterTimeline, FadeIn, FadeSplitText } from '../../core/animation.js';
 
-const HERO_VIDEO_FPS = 24;
-const HERO_VIDEO_SEEK_THRESHOLD = 1 / (HERO_VIDEO_FPS * 2);
 const HERO_ICON_DEGREES_PER_PIXEL = 2;
 const WORKS_TRANSITION_ROTATION = 125;
 const WORKS_TRANSITION_MAX_SCALE = 16;
@@ -24,22 +22,9 @@ export const HomePage = {
 	Hero: class {
 		constructor() {
 			this.el = null;
-			this.video = null;
-			this.videoDuration = 0;
-			this.videoTargetTime = 0;
-			this.videoRaf = null;
-			this.videoReady = false;
-			this.videoPrimeStarted = false;
-			this.videoNeedsSeek = false;
-			this.videoScrollTrigger = null;
+			this.heroIconScrollTrigger = null;
 			this.heroTopIcon = null;
 			this.worksEl = null;
-			this.onVideoMetadata = null;
-			this.onVideoReady = null;
-			this.onVideoSeeked = null;
-			this.onVideoError = null;
-			this.onVisibilityChange = null;
-			this.onVideoUnlock = null;
 			this.timeEl = null;
 			this.timeTimer = null;
 			this.updateHeroTime = null;
@@ -60,11 +45,10 @@ export const HomePage = {
 			this.el = $(data.next.container).find('.home-hero-wrap')[0];
 			if (!this.el) return;
 
-			this.video = $(this.el).find('.home-hero-video')[0];
 			this.heroTopIcon = $(this.el).find('.home-hero-top-ic')[0];
 			this.worksEl = $(data.next.container).find('.home-works-wrap')[0];
 			this.setupHeroTime();
-			this.setupHeroVideo();
+			this.setupHeroIconScroll();
 			this.interact();
 
 			if (mode === 'once') {
@@ -172,163 +156,13 @@ export const HomePage = {
 			this.timeTimer = window.setInterval(this.updateHeroTime, 1000);
 		}
 
-		setupHeroVideo() {
-			if (!this.video) return;
-			if (window.matchMedia('(max-width: 767px)').matches) {
-				this.video.preload = 'none';
-				this.video.dataset.scrollVideoDisabled = '';
-				return;
-			}
-			this.video.autoplay = false;
-			this.video.pause();
-			this.video.muted = true;
-			this.video.defaultMuted = true;
-			this.video.playsInline = true;
-
-			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-			const prefersReducedData = Boolean(navigator.connection?.saveData);
-
-			if (prefersReducedMotion || prefersReducedData) {
-				this.video.preload = 'none';
-				this.video.dataset.scrollVideoDisabled = '';
-				return;
-			}
-
-			this.onVideoMetadata = () => {
-				if (!this.video || !Number.isFinite(this.video.duration)) return;
-
-				this.videoDuration = Math.max(0, this.video.duration - 1 / HERO_VIDEO_FPS);
-				this.video.pause();
-				this.setupVideoScrollTrigger();
-				this.primeVideoPlayback();
-			};
-
-			this.onVideoReady = () => {
-				if (!this.video || this.video.readyState < 2) return;
-
-				this.videoReady = true;
-				$(this.video).addClass(['is-video-ready']);
-				this.queueVideoSeek(this.videoTargetTime);
-			};
-
-			this.onVideoSeeked = () => {
-				this.videoNeedsSeek = false;
-				if (!this.videoReady) this.onVideoReady();
-
-				if (
-					this.video &&
-					Math.abs(this.video.currentTime - this.videoTargetTime) >= HERO_VIDEO_SEEK_THRESHOLD
-				) {
-					this.queueVideoSeek(this.videoTargetTime);
-				}
-			};
-
-			this.onVideoError = () => {
-				this.videoReady = false;
-				$(this.video).addClass(['is-video-error']);
-				this.videoScrollTrigger?.kill();
-				this.videoScrollTrigger = null;
-			};
-
-			this.onVisibilityChange = () => {
-				if (!document.hidden) {
-					this.queueVideoSeek(this.videoTargetTime);
-				}
-			};
-
-			$(this.video).on('loadedmetadata', this.onVideoMetadata);
-			$(this.video).on('loadeddata', this.onVideoReady);
-			$(this.video).on('canplay', this.onVideoReady);
-			$(this.video).on('seeked', this.onVideoSeeked);
-			$(this.video).on('error', this.onVideoError);
-			$(document).on('visibilitychange', this.onVisibilityChange);
-
-			if (this.video.readyState >= 1) {
-				this.onVideoMetadata();
-			}
-			if (this.video.readyState >= 2) {
-				this.onVideoReady();
-			}
-			this.primeVideoPlayback();
-		}
-
-		primeVideoPlayback() {
-			if (!this.video || this.videoPrimeStarted) return;
-			this.videoPrimeStarted = true;
-			// WebKit may need a gesture to unlock decoding. Pause in the SAME task,
-			// rather than after play() resolves, so priming cannot visibly autoplay.
-			if (window.matchMedia('(max-width: 767px)').matches) {
-				const video = this.video;
-				const unlock = () => {
-					if (this.video !== video) return;
-					try {
-						const pendingPlay = video.play();
-						video.pause();
-						// An immediate pause can reject play() with AbortError; that is expected.
-						pendingPlay?.catch(() => {});
-					} catch {
-						video.pause();
-					}
-					this.queueVideoSeek(this.videoTargetTime);
-					if (video.readyState >= 2) {
-						for (const type of ['touchstart', 'touchend', 'pointerdown', 'keydown']) {
-							document.removeEventListener(type, unlock);
-						}
-						this.onVideoUnlock = null;
-					}
-				};
-				this.onVideoUnlock = unlock;
-				for (const type of ['touchstart', 'touchend', 'pointerdown', 'keydown']) {
-					document.addEventListener(type, unlock, { passive: true });
-				}
-				return;
-			}
-
-			const video = this.video;
-			const removeUnlockListeners = () => {
-				if (!this.onVideoUnlock) return;
-				document.removeEventListener('touchstart', this.onVideoUnlock);
-				document.removeEventListener('pointerdown', this.onVideoUnlock);
-				this.onVideoUnlock = null;
-			};
-			const syncScrollFrame = () => {
-				if (this.video !== video) return;
-				video.pause();
-				removeUnlockListeners();
-				this.queueVideoSeek(this.videoTargetTime);
-			};
-			const tryPlayback = () => {
-				const playPromise = video.play();
-				if (!playPromise) {
-					syncScrollFrame();
-					return;
-				}
-
-				playPromise.then(syncScrollFrame).catch(() => {
-					if (this.onVideoUnlock || this.video !== video) return;
-					this.onVideoUnlock = tryPlayback;
-					document.addEventListener('touchstart', this.onVideoUnlock, { passive: true });
-					document.addEventListener('pointerdown', this.onVideoUnlock, { passive: true });
-				});
-			};
-
-			tryPlayback();
-		}
-
-		setupVideoScrollTrigger() {
-			if (!this.video || !this.videoDuration || this.videoScrollTrigger) return;
-
+		setupHeroIconScroll() {
+			if (!this.heroTopIcon) return;
 			const syncScroll = (self) => {
-				this.queueVideoSeek(self.progress * this.videoDuration);
-				if (this.heroTopIcon) {
-					// Linear scroll mapping preserves both direction and scroll speed.
-					// Use rotate separately from the reveal animation's transform.
-					const scrollDistance = self.progress * (self.end - self.start);
-					this.heroTopIcon.style.rotate = `${scrollDistance * HERO_ICON_DEGREES_PER_PIXEL}deg`;
-				}
+				const scrollDistance = self.progress * (self.end - self.start);
+				this.heroTopIcon.style.rotate = `${scrollDistance * HERO_ICON_DEGREES_PER_PIXEL}deg`;
 			};
-
-			this.videoScrollTrigger = ScrollTrigger.create({
+			this.heroIconScrollTrigger = ScrollTrigger.create({
 				trigger: $(this.el).find('.home-hero-top.top-left')[0],
 				start: 'top top',
 				end: 'bottom top',
@@ -336,47 +170,7 @@ export const HomePage = {
 				onUpdate: syncScroll,
 				onRefresh: syncScroll,
 			});
-
-			syncScroll(this.videoScrollTrigger);
-		}
-
-		queueVideoSeek(time) {
-			if (!this.video || !this.videoDuration) return;
-
-			// Both source videos are scrubbed at 24fps. Avoid decoding the same
-			// frame repeatedly for sub-frame scroll changes on high-refresh screens.
-			this.videoTargetTime = Math.min(this.videoDuration,
-				Math.max(0, Math.round(time * HERO_VIDEO_FPS) / HERO_VIDEO_FPS));
-
-			// Seeking is allowed after metadata, even if Safari has not fired loadeddata.
-			if (this.video.readyState < 1 || document.hidden || this.videoRaf !== null) return;
-
-			this.videoRaf = window.requestAnimationFrame(() => {
-				this.videoRaf = null;
-				this.flushVideoSeek();
-			});
-		}
-
-		flushVideoSeek() {
-			if (!this.video || this.video.readyState < 1 || document.hidden) return;
-			if (!this.video.paused) this.video.pause();
-
-			if (Math.abs(this.video.currentTime - this.videoTargetTime) < HERO_VIDEO_SEEK_THRESHOLD) {
-				return;
-			}
-
-			if (this.video.seeking) {
-				this.videoNeedsSeek = true;
-				return;
-			}
-
-			this.videoNeedsSeek = false;
-
-			try {
-				this.video.currentTime = this.videoTargetTime;
-			} catch (error) {
-				console.warn('[Home Hero] Không thể seek video:', error);
-			}
+			syncScroll(this.heroIconScrollTrigger);
 		}
 
 		animationScrub() {
@@ -544,32 +338,10 @@ export const HomePage = {
 				window.clearInterval(this.timeTimer);
 				this.timeTimer = null;
 			}
-			if (this.videoRaf !== null) {
-				window.cancelAnimationFrame(this.videoRaf);
-				this.videoRaf = null;
-			}
-			if (this.videoScrollTrigger) this.videoScrollTrigger.kill();
-			this.videoScrollTrigger = null;
+			this.heroIconScrollTrigger?.kill();
+			this.heroIconScrollTrigger = null;
 			this.heroTopIcon?.style.removeProperty('rotate');
 			this.heroTopIcon = null;
-			if (this.video) {
-				this.video.pause();
-				if (this.onVideoMetadata) $(this.video).off('loadedmetadata', this.onVideoMetadata);
-				if (this.onVideoReady) $(this.video).off('loadeddata', this.onVideoReady);
-				if (this.onVideoReady) $(this.video).off('canplay', this.onVideoReady);
-				if (this.onVideoSeeked) $(this.video).off('seeked', this.onVideoSeeked);
-				if (this.onVideoError) $(this.video).off('error', this.onVideoError);
-			}
-			if (this.onVisibilityChange) {
-				$(document).off('visibilitychange', this.onVisibilityChange);
-			}
-			if (this.onVideoUnlock) {
-				document.removeEventListener('touchstart', this.onVideoUnlock);
-				document.removeEventListener('touchend', this.onVideoUnlock);
-				document.removeEventListener('keydown', this.onVideoUnlock);
-				document.removeEventListener('pointerdown', this.onVideoUnlock);
-				this.onVideoUnlock = null;
-			}
 			if (this.tlOnce) this.tlOnce.kill();
 			if (this.tlEnter) this.tlEnter.kill();
 			if (this.tlHeroTop) this.tlHeroTop.kill();
@@ -583,8 +355,6 @@ export const HomePage = {
 				$(heroDescription).html(this.heroTextOriginalHTML);
 			}
 
-			this.video = null;
-			this.videoPrimeStarted = false;
 			this.timeEl = null;
 			this.updateHeroTime = null;
 			this.worksEl = null;
