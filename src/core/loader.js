@@ -258,6 +258,7 @@ class Loader {
 		this.restorePage();
 
 		this.isLoaded = true;
+		window.dispatchEvent(new Event('loader:complete'));
 	}
 
 	playPageOnce() {

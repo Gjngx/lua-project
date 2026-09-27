@@ -119,9 +119,14 @@ export class AudioManager {
 
 		$(document.body).append(popup);
 
-		requestAnimationFrame(() => {
+		const showPopup = () => requestAnimationFrame(() => {
 			$(popup).addClass(['show']);
 		});
+		if (document.documentElement.classList.contains('is-loading')) {
+			window.addEventListener('loader:complete', showPopup, { once: true });
+		} else {
+			showPopup();
+		}
 
 		const closePopup = () => {
 			$(popup).removeClass(['show']);
