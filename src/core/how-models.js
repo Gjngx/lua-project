@@ -127,6 +127,7 @@ export class HowModels {
 					model,
 					index,
 					visible: false,
+					ready: false,
 					width: 1,
 					height: 1,
 					// Per-item drag state
@@ -313,8 +314,8 @@ export class HowModels {
 		let surfaceRect;
 		if (this.direct) {
 			surfaceRect = this.renderer.domElement.getBoundingClientRect();
-			// Read every rectangle before rendering/writing; includes incoming models.
-			visible = this.items.filter((item) => {
+			// Read candidate rectangles before rendering/writing; includes incoming models.
+			visible = visible.filter((item) => {
 				item.rect = item.canvas.getBoundingClientRect();
 				return item.rect.width > 0 && item.rect.height > 0 &&
 					item.rect.right > surfaceRect.left && item.rect.left < surfaceRect.right &&
@@ -420,7 +421,10 @@ export class HowModels {
 				context.drawImage(this.renderer.domElement, 0, 0, width, height);
 			}
 			model.visible = false;
-			canvas.classList.add('is-ready');
+			if (!item.ready) {
+				item.ready = true;
+				canvas.classList.add('is-ready');
+			}
 		});
 		if (!this.motion.matches) this.schedule();
 	}

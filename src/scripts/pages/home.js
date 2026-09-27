@@ -615,6 +615,7 @@ export const HomePage = {
 			this.transitionBackgroundTween = null;
 			this.onTransitionResize = null;
 			this.transitionMetrics = null;
+			this.transitionRaf = null;
 			this.rafId = null;
 			this.isVisible = false;
 			this.renderWorksFrame = null;
@@ -790,7 +791,7 @@ export const HomePage = {
 					ease: 'none',
 					onUpdate: () => {
 						if (usesCanvasMask) {
-							this.drawTransitionCanvas();
+							this.scheduleTransitionDraw();
 						} else {
 							gsap.set(transitionInner, { rotate: this.transitionState.rotate });
 							gsap.set(transitionItems, {
@@ -1108,7 +1109,7 @@ export const HomePage = {
 			$(transition).addClass(['is-canvas-active']);
 			this.onTransitionResize = () => {
 				this.updateTransitionMetrics();
-				this.drawTransitionCanvas();
+				this.scheduleTransitionDraw();
 				this.transitionSwapProgress = this.calculateTransitionSwapProgress();
 				this.updateTransitionContent(true);
 			};
@@ -1152,6 +1153,14 @@ export const HomePage = {
 				shapeSize: firstItem.offsetWidth,
 				color: getComputedStyle(canvas).color,
 			};
+		}
+
+		scheduleTransitionDraw() {
+			if (this.transitionRaf !== null) return;
+			this.transitionRaf = requestAnimationFrame(() => {
+				this.transitionRaf = null;
+				this.drawTransitionCanvas();
+			});
 		}
 
 		calculateTransitionSwapProgress() {
@@ -1388,6 +1397,8 @@ export const HomePage = {
 			if (this.onTransitionResize) {
 				$(window).off('resize', this.onTransitionResize);
 			}
+			if (this.transitionRaf !== null) cancelAnimationFrame(this.transitionRaf);
+			this.transitionRaf = null;
 
 			if (this.itemTriggers) {
 				this.itemTriggers.forEach((tl) => tl.kill());

@@ -16,6 +16,45 @@ export class PlaygroundSphere {
 		this.hovered = -1;
 		this.ready = false;
 		this.disposed = false;
+		this.pendingImageCancels = new Set();
+	}
+
+	loadImage(url) {
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+			const finish = (callback, value) => {
+				this.pendingImageCancels.delete(cancel);
+				img.onload = null;
+				img.onerror = null;
+				callback(value);
+			};
+			const cancel = () => {
+				img.src = '';
+				finish(reject, new Error('Gallery texture load cancelled'));
+			};
+			this.pendingImageCancels.add(cancel);
+			img.crossOrigin = 'anonymous';
+			img.onload = () => finish(resolve, img);
+			img.onerror = () => finish(reject, new Error('Gallery texture unavailable'));
+			img.src = url;
+		});
+	}
+
+	async loadImages(urls, concurrency) {
+		const images = new Array(urls.length);
+		let next = 0;
+		const worker = async () => {
+			while (!this.disposed) {
+				const index = next++;
+				if (index >= urls.length) return;
+				images[index] = await this.loadImage(urls[index]);
+			}
+		};
+		await Promise.all(Array.from(
+			{ length: Math.min(concurrency, urls.length) },
+			worker,
+		));
+		return images;
 	}
 
 	async init() {
@@ -46,17 +85,13 @@ export class PlaygroundSphere {
 			const urls = this.cards.map((card) => card.src);
 			if (urls.some((url) => !url)) throw new Error('Missing gallery image');
 			const unique = [...new Set(urls)];
-			// Load once per unique image, including all repeated cards.
-			const images = await Promise.all(unique.map((url) => new Promise((resolve, reject) => {
-				const img = new Image();
-				img.crossOrigin = 'anonymous';
-				img.onload = () => resolve(img);
-				img.onerror = () => reject(new Error('Gallery texture unavailable'));
-				img.src = url;
-			})));
+			const compact = window.matchMedia('(max-width: 991px)').matches;
+			// Limit concurrent decode/network work so entering the section does not
+			// compete with scroll and the How renderer on mobile Safari.
+			const images = await this.loadImages(unique, compact ? 2 : 4);
 			if (this.disposed) return;
 			const limit = Math.min(4096, this.renderer.capabilities.maxTextureSize);
-			const compact = window.matchMedia('(max-width: 991px)').matches;
+			const uniqueIndex = new Map(unique.map((url, index) => [url, index]));
 			const cellWidth = Math.min(compact ? 512 : 1024, limit);
 			const cellHeight = Math.round(cellWidth * 0.625);
 			const columns = Math.floor(limit / cellWidth);
@@ -86,13 +121,13 @@ export class PlaygroundSphere {
 				texture.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
 				this.textures.push(texture);
 				const ids = urls.flatMap((url, id) => {
-					const index = unique.indexOf(url);
+					const index = uniqueIndex.get(url);
 					return index >= start && index < start + page.length ? [id] : [];
 				});
 				const geometry = new T.PlaneGeometry(1, 1);
 				const rects = new Float32Array(ids.length * 4);
 				ids.forEach((id, index) => {
-					const tile = unique.indexOf(urls[id]) - start;
+					const tile = uniqueIndex.get(urls[id]) - start;
 					rects.set([
 						((tile % columns) * cellWidth + 2) / atlas.width,
 						1 - (Math.floor(tile / columns) * cellHeight + cellHeight - 2) / atlas.height,
@@ -136,7 +171,7 @@ export class PlaygroundSphere {
 			this.ready = true;
 			this.onReady();
 		} catch (error) {
-			console.warn('[Playground] WebGL globe unavailable:', error);
+			if (!this.disposed) console.warn('[Playground] WebGL globe unavailable:', error);
 			this.destroy();
 		}
 	}
@@ -277,13 +312,17 @@ export class PlaygroundSphere {
 	}
 
 	destroy() {
+		if (this.disposed) return;
 		this.disposed = true;
 		this.ready = false;
+		this.pendingImageCancels.forEach((cancel) => cancel());
+		this.pendingImageCancels.clear();
 		this.canvas?.removeEventListener('webglcontextlost', this.onContextLost);
 		this.canvas?.remove();
 		this.meshes.forEach((mesh) => { mesh.geometry.dispose(); mesh.material.dispose(); });
 		this.textures.forEach((texture) => texture.dispose());
 		this.renderer?.dispose();
+		this.renderer?.forceContextLoss();
 		this.meshes = [];
 		this.textures = [];
 	}
