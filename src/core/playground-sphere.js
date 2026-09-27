@@ -184,6 +184,12 @@ export class PlaygroundSphere {
 			this.ready = false;
 			await this.renderer.compileAsync(this.scene, this.camera);
 			if (this.disposed) return;
+			// Upload atlases before the first visible animation frame.
+			for (const texture of this.textures) {
+				await new Promise((resolve) => setTimeout(resolve, 0));
+				if (this.disposed) return;
+				this.renderer.initTexture(texture);
+			}
 			this.ready = true;
 			this.onReady();
 		} catch (error) {
@@ -206,8 +212,11 @@ export class PlaygroundSphere {
 		this.camera.position.z = perspective;
 		this.camera.updateProjectionMatrix();
 		// The drawing surface covers the section even when a focused card overflows.
-		this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-		this.renderer.setSize(width, height, false);
+		const dpr = Math.min(window.devicePixelRatio || 1, 2);
+		if (this.renderer.getPixelRatio() !== dpr) this.renderer.setPixelRatio(dpr);
+		if (this.renderWidth !== width || this.renderHeight !== height) {
+			this.renderer.setSize(width, height, false);
+		}
 		this.renderWidth = width;
 		this.renderHeight = height;
 		this.lastScissor = null;

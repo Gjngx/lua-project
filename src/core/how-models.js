@@ -161,6 +161,16 @@ export class HowModels {
 			this.items.forEach(({ model }) => {
 				model.visible = false;
 			});
+			// Shader compilation alone does not upload geometry or textures. Warm
+			// each preview offscreen, yielding between models so input can run.
+			for (const { model } of this.items) {
+				await new Promise((resolve) => setTimeout(resolve, 0));
+				if (this.disposed) return;
+				model.visible = true;
+				this.renderer.render(this.scene, this.camera);
+				model.visible = false;
+			}
+			this.renderer.clear();
 			// A single visible WebGL surface avoids copying GPU frames into 2D canvases.
 			this.surface = document.createElement('div');
 			this.surface.className = 'home-how-model-surface';
@@ -341,8 +351,10 @@ export class HowModels {
 					item.rect.bottom > Math.max(0, surfaceRect.top) &&
 					item.rect.top < Math.min(window.innerHeight, surfaceRect.bottom);
 			});
-			this.renderer.setScissorTest(false);
-			this.renderer.clear();
+			if (visible.length || this.surfaceHasContent) {
+				this.renderer.setScissorTest(false);
+				this.renderer.clear();
+			}
 			this.surfaceHasContent = visible.length > 0;
 			this.renderer.setScissorTest(true);
 		}

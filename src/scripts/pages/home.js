@@ -2244,7 +2244,7 @@ export const HomePage = {
 				schedule();
 			};
 			const schedule = () => {
-				if (!this.sphereVisible || document.hidden ||
+				if (!this.sphereRenderer?.ready || !this.sphereVisible || document.hidden ||
 					Number(gsap.getProperty(this.cardLayer.parentElement, 'scaleX')) === 0) {
 					if (this.sphereRaf) cancelAnimationFrame(this.sphereRaf);
 					this.sphereRaf = null;
