@@ -178,7 +178,7 @@ export class HowModels {
 				}
 				this.pendingScrollDelta += scrollY - this.observedScrollY;
 				this.observedScrollY = scrollY;
-				if (this.direct) this.schedule();
+				this.schedule();
 			};
 			window.addEventListener('scroll', this.onScroll, { passive: true });
 			this.resizeObserver = new ResizeObserver(this.updateViewport);
@@ -350,6 +350,9 @@ export class HowModels {
 			this.lastTime = null;
 			this.lastScrollY = null;
 			this.lastRenderTime = null;
+			// A model can enter the shared surface without crossing an observer
+			// threshold. Keep checking while its placeholder remains onscreen.
+			if (!this.motion.matches) this.schedule();
 			return;
 		}
 		if (!this.motion.matches && this.lastTime !== null) {

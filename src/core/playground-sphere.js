@@ -147,7 +147,9 @@ export class PlaygroundSphere {
 				});
 				geometry.setAttribute('atlasRect', new T.InstancedBufferAttribute(rects, 4));
 				geometry.setAttribute('cardId', new T.InstancedBufferAttribute(new Float32Array(ids), 1));
-				const material = new T.MeshBasicMaterial({ map: texture, side: T.DoubleSide });
+				const material = new T.MeshBasicMaterial({
+					map: texture, side: T.DoubleSide, alphaToCoverage: true,
+				});
 				material.onBeforeCompile = (shader) => {
 					shader.uniforms.keyboardCard = this.keyboardCard;
 					shader.uniforms.focusColor = { value: new T.Color(getComputedStyle(this.stage).getPropertyValue('--cln-brand').trim() || '#E4F372') };
@@ -157,8 +159,11 @@ export class PlaygroundSphere {
 					shader.fragmentShader = 'uniform float keyboardCard; uniform vec3 focusColor; varying float vCardId; varying vec4 vAtlasRect; varying vec2 vCardUv;\n' + shader.fragmentShader;
 					shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `
 						vec2 corner = abs((vCardUv - 0.5) * vec2(1.6, 1.0)) - vec2(0.72, 0.42);
-						if (length(max(corner, 0.0)) > 0.08) discard;
+						float edge = length(max(corner, 0.0)) - 0.08;
+						float coverage = 1.0 - smoothstep(-fwidth(edge), fwidth(edge), edge);
+						if (coverage <= 0.0) discard;
 						diffuseColor *= texture2D(map, vAtlasRect.xy + vCardUv * vAtlasRect.zw);
+						diffuseColor.a *= coverage;
 						if (abs(vCardId - keyboardCard) < 0.1 &&
 							(length(max(corner, 0.0)) > 0.06 || max(corner.x, corner.y) > 0.06)) {
 							diffuseColor.rgb = focusColor;
