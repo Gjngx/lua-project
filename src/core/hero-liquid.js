@@ -1,5 +1,19 @@
-const SIM_HEIGHT = 256;
-const OVERSCAN = 1.2;
+export const HERO_LIQUID_DEFAULTS = Object.freeze({
+  simHeight: 256,
+  overscan: 1.2,
+  pointerForce: 6,
+  maxVelocity: 180,
+  activeMs: 2400,
+  splatRadius: .0025,
+  splatStrength: .6,
+  dyeAmount: .05,
+  pressureIterations: 16,
+  velocityDt: 1 / 60,
+  velocityDissipation: .97,
+  dyeDt: 8 / 60,
+  dyeDissipation: .98,
+  displacement: 1.6,
+});
 
 const VERTEX = `
 precision highp float;
@@ -18,9 +32,9 @@ void main() {
 const FRAGMENTS = {
   splat: `precision highp float;
     varying vec2 v_uv; uniform sampler2D u_input; uniform float u_aspect;
-    uniform vec2 u_point; uniform vec3 u_value; uniform float u_radius;
+    uniform vec2 u_point; uniform vec3 u_value; uniform float u_radius,u_strength;
     void main(){ vec2 p=v_uv-u_point; p.x*=u_aspect;
-      vec3 impulse=.6*exp2(-dot(p,p)/u_radius)*u_value;
+      vec3 impulse=u_strength*exp2(-dot(p,p)/u_radius)*u_value;
       gl_FragColor=vec4(texture2D(u_input,v_uv).xyz+impulse,1.); }`,
   divergence: `precision highp float;
     varying vec2 v_l,v_r,v_t,v_b; uniform sampler2D u_velocity;
@@ -49,20 +63,20 @@ const FRAGMENTS = {
       gl_FragColor=u_dissipation*bilerp(u_input,p,u_output_texel); }`,
   display: `precision highp float;
     varying vec2 v_uv; uniform sampler2D u_image,u_velocity,u_dye;
-    uniform float u_aspect,u_image_aspect; uniform vec2 u_focus;
+    uniform float u_aspect,u_image_aspect,u_visible_scale,u_displacement; uniform vec2 u_focus;
     vec2 cover(vec2 uv){ vec2 visible=vec2(1.);
       if(u_aspect>u_image_aspect) visible.y=u_image_aspect/u_aspect;
       else visible.x=u_aspect/u_image_aspect;
       vec2 center=clamp(u_focus,visible*.5,1.-visible*.5);
       return (uv-.5)*visible+center; }
-    void main(){ vec2 frame=(v_uv-.5)/.8333333333+.5;
+    void main(){ vec2 frame=(v_uv-.5)/u_visible_scale+.5;
       float dye=texture2D(u_dye,v_uv).r;
       vec2 velocity=texture2D(u_velocity,v_uv).xy+vec2(.001);
       vec2 base=cover(frame);
       // Fade displacement at the image boundary instead of stretching its last pixel row.
       vec2 edge=min(base,1.-base);
       float boundary=smoothstep(0.,.08,min(edge.x,edge.y));
-      vec2 offset=1.6*normalize(velocity)*dye*boundary;
+      vec2 offset=u_displacement*normalize(velocity)*dye*boundary;
       vec2 room=mix(1.-base,base,step(vec2(0.),offset));
       vec2 limits=room/max(abs(offset),vec2(.00001));
       offset*=clamp(min(limits.x,limits.y),0.,1.);
@@ -101,10 +115,11 @@ function makeProgram(gl, fragmentSource) {
 }
 
 export class HeroLiquid {
-  constructor(root, image, pointerTarget = root) {
+  constructor(root, image, pointerTarget = root, options = {}) {
     this.root = root;
     this.image = image;
     this.pointerTarget = pointerTarget;
+    this.options = { ...HERO_LIQUID_DEFAULTS, ...options };
     this.pointer = { x: 0, y: 0, dx: 0, dy: 0, active: false, moved: false };
     this.visible = true;
     this.raf = null;
@@ -141,10 +156,11 @@ export class HeroLiquid {
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
         if (this.pointer.active) {
-          this.pointer.dx = Math.max(-180, Math.min(180, 6 * (x - this.pointer.x)));
-          this.pointer.dy = Math.max(-180, Math.min(180, 6 * (y - this.pointer.y)));
+          const { maxVelocity, pointerForce } = this.options;
+          this.pointer.dx = Math.max(-maxVelocity, Math.min(maxVelocity, pointerForce * (x - this.pointer.x)));
+          this.pointer.dy = Math.max(-maxVelocity, Math.min(maxVelocity, pointerForce * (y - this.pointer.y)));
           this.pointer.moved = true;
-          this.activeUntil = performance.now() + 2400;
+          this.activeUntil = performance.now() + this.options.activeMs;
         }
         Object.assign(this.pointer, { x, y, active: true });
         this.schedule();
@@ -209,22 +225,30 @@ export class HeroLiquid {
     const width = Math.max(1, this.root.clientWidth);
     const height = Math.max(1, this.root.clientHeight);
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    this.canvas.width = Math.round(width * OVERSCAN * dpr);
-    this.canvas.height = Math.round(height * OVERSCAN * dpr);
-    const simWidth = Math.max(2, Math.round(SIM_HEIGHT * width / height));
+    const { overscan, simHeight } = this.options;
+    const offset = (overscan - 1) * -50;
+    Object.assign(this.canvas.style, { width: `${overscan * 100}%`, height: `${overscan * 100}%`, left: `${offset}%`, top: `${offset}%` });
+    this.canvas.width = Math.round(width * overscan * dpr);
+    this.canvas.height = Math.round(height * overscan * dpr);
+    const simWidth = Math.max(2, Math.round(simHeight * width / height));
     if (!this.targets || this.targets.velocity.width !== simWidth) {
       this.deleteTargets();
       this.targets = {
-        velocity: this.createDoubleTarget(simWidth, SIM_HEIGHT),
-        dye: this.createDoubleTarget(simWidth, SIM_HEIGHT),
-        pressure: this.createDoubleTarget(simWidth, SIM_HEIGHT),
-        divergence: this.createTarget(simWidth, SIM_HEIGHT),
+        velocity: this.createDoubleTarget(simWidth, simHeight),
+        dye: this.createDoubleTarget(simWidth, simHeight),
+        pressure: this.createDoubleTarget(simWidth, simHeight),
+        divergence: this.createTarget(simWidth, simHeight),
       };
     }
     this.aspect = width / height;
     Object.assign(this.pointer, { x: width * .65, y: height * .5 });
     this.activeUntil = performance.now();
     this.schedule();
+  }
+
+  setOptions(options) {
+    Object.assign(this.options, options);
+    this.resize();
   }
 
   use(name, values = {}) {
@@ -255,10 +279,12 @@ export class HeroLiquid {
   splat(target, value) {
     const width = this.root.clientWidth;
     const height = this.root.clientHeight;
-    const point = [(this.pointer.x + width * .1) / (width * OVERSCAN), 1 - (this.pointer.y + height * .1) / (height * OVERSCAN)];
+    const { overscan, splatRadius, splatStrength } = this.options;
+    const inset = (overscan - 1) / 2;
+    const point = [(this.pointer.x + width * inset) / (width * overscan), 1 - (this.pointer.y + height * inset) / (height * overscan)];
     const program = this.use('splat', {
       u_texel: [1 / target.width, 1 / target.height], u_aspect: this.aspect,
-      u_point: point, u_value: value, u_radius: .0025,
+      u_point: point, u_value: value, u_radius: splatRadius, u_strength: splatStrength,
     });
     this.bind(target.read().texture, 0, program.uniforms.u_input);
     this.draw(target.write());
@@ -272,7 +298,7 @@ export class HeroLiquid {
     const texel = [1 / velocity.width, 1 / velocity.height];
     if (this.pointer.moved) {
       this.splat(velocity, [this.pointer.dx, -this.pointer.dy, 0]);
-      this.splat(dye, [.05, 0, 0]);
+      this.splat(dye, [this.options.dyeAmount, 0, 0]);
       this.pointer.moved = false;
     }
 
@@ -281,7 +307,7 @@ export class HeroLiquid {
     this.draw(divergence);
     program = this.use('pressure', { u_texel: texel });
     this.bind(divergence.texture, 0, program.uniforms.u_divergence);
-    for (let i = 0; i < 16; i += 1) {
+    for (let i = 0; i < this.options.pressureIterations; i += 1) {
       this.bind(pressure.read().texture, 1, program.uniforms.u_pressure);
       this.draw(pressure.write()); pressure.swap();
     }
@@ -290,11 +316,11 @@ export class HeroLiquid {
     this.bind(velocity.read().texture, 1, program.uniforms.u_velocity);
     this.draw(velocity.write()); velocity.swap();
 
-    program = this.use('advection', { u_texel: texel, u_output_texel: texel, u_dt: 1 / 60, u_dissipation: .97 });
+    program = this.use('advection', { u_texel: texel, u_output_texel: texel, u_dt: this.options.velocityDt, u_dissipation: this.options.velocityDissipation });
     this.bind(velocity.read().texture, 0, program.uniforms.u_velocity);
     this.bind(velocity.read().texture, 1, program.uniforms.u_input);
     this.draw(velocity.write()); velocity.swap();
-    program = this.use('advection', { u_texel: texel, u_output_texel: texel, u_dt: 8 / 60, u_dissipation: .98 });
+    program = this.use('advection', { u_texel: texel, u_output_texel: texel, u_dt: this.options.dyeDt, u_dissipation: this.options.dyeDissipation });
     this.bind(velocity.read().texture, 0, program.uniforms.u_velocity);
     this.bind(dye.read().texture, 1, program.uniforms.u_input);
     this.draw(dye.write()); dye.swap();
@@ -304,6 +330,8 @@ export class HeroLiquid {
       u_texel: texel, u_aspect: this.aspect,
       u_image_aspect: this.image.naturalWidth / this.image.naturalHeight,
       u_focus: [(position[0] || 50) / 100, 1 - (position[1] || 50) / 100],
+      u_visible_scale: 1 / this.options.overscan,
+      u_displacement: this.options.displacement,
     });
     this.bind(this.imageTexture, 0, program.uniforms.u_image);
     this.bind(velocity.read().texture, 1, program.uniforms.u_velocity);

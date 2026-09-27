@@ -1,0 +1,121 @@
+---
+import heroPoster from '../../assets/images/home-hero.avif';
+
+const controls = [
+	['simHeight', 'Simulation height', 64, 512, 32],
+	['overscan', 'Overscan', 1, 1.5, 0.01],
+	['pointerForce', 'Pointer force', 1, 15, 0.5],
+	['maxVelocity', 'Max velocity', 20, 400, 10],
+	['activeMs', 'Active time (ms)', 200, 5000, 100],
+	['splatRadius', 'Splat radius', 0.0005, 0.02, 0.0005],
+	['splatStrength', 'Splat strength', 0.1, 2, 0.05],
+	['dyeAmount', 'Dye amount', 0.01, 0.2, 0.01],
+	['pressureIterations', 'Pressure iterations', 1, 40, 1],
+	['velocityDt', 'Velocity speed', 0.001, 0.08, 0.001],
+	['velocityDissipation', 'Velocity dissipation', 0.8, 1, 0.005],
+	['dyeDt', 'Dye speed', 0.01, 0.3, 0.005],
+	['dyeDissipation', 'Dye dissipation', 0.8, 1, 0.005],
+	['displacement', 'Displacement', 0, 4, 0.1],
+] as const;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Hero Liquid Debug</title>
+	</head>
+	<body>
+		<main>
+			<section class="preview" id="preview">
+				<img id="poster" src={heroPoster.src} alt="Liquid effect preview" />
+				<p>Move your pointer over the image</p>
+			</section>
+			<aside>
+				<header>
+					<div><small>DEBUG</small><h1>Hero liquid</h1></div>
+					<a href="/">Home</a>
+				</header>
+				<form id="controls">
+					{controls.map(([key, label, min, max, step]) => (
+						<label>
+							<span>{label}<output data-output={key}></output></span>
+							<input type="range" name={key} min={min} max={max} step={step} />
+						</label>
+					))}
+				</form>
+				<div class="actions">
+					<button id="reset" type="button">Reset</button>
+					<button id="copy" type="button">Copy JSON</button>
+				</div>
+				<pre id="json"></pre>
+			</aside>
+		</main>
+		<script>
+			import { HeroLiquid, HERO_LIQUID_DEFAULTS } from '../../core/hero-liquid.js';
+
+			const preview = document.querySelector('#preview');
+			const poster = document.querySelector('#poster');
+			const form = document.querySelector('#controls');
+			const json = document.querySelector('#json');
+			const copy = document.querySelector('#copy');
+			const inputs = [...form.elements].filter((element) => element instanceof HTMLInputElement);
+			let liquid;
+
+			const read = () => Object.fromEntries(inputs.map((input) => [input.name, Number(input.value)]));
+			const renderValues = () => {
+				const values = read();
+				inputs.forEach((input) => {
+					document.querySelector(`[data-output="${input.name}"]`).textContent = input.value;
+				});
+				json.textContent = JSON.stringify(values, null, 2);
+				liquid?.setOptions(values);
+			};
+			const reset = () => {
+				inputs.forEach((input) => { input.value = HERO_LIQUID_DEFAULTS[input.name]; });
+				renderValues();
+			};
+
+			form.addEventListener('input', renderValues);
+			document.querySelector('#reset').addEventListener('click', reset);
+			copy.addEventListener('click', async () => {
+				await navigator.clipboard.writeText(json.textContent);
+				copy.textContent = 'Copied';
+				setTimeout(() => { copy.textContent = 'Copy JSON'; }, 1000);
+			});
+			const init = () => {
+				liquid = new HeroLiquid(preview, poster, preview, read());
+				liquid.init();
+			};
+			reset();
+			poster.complete ? init() : poster.addEventListener('load', init, { once: true });
+		</script>
+	</body>
+</html>
+
+<style>
+	:global(*) { box-sizing: border-box; }
+	:global(body) { margin: 0; background: #111; color: #eee; font: 14px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+	main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; min-height: 100vh; }
+	.preview { position: sticky; top: 0; overflow: hidden; height: 100vh; cursor: crosshair; }
+	.preview > img { width: 100%; height: 100%; object-fit: cover; }
+	.preview > p { position: absolute; z-index: 2; bottom: 20px; left: 20px; margin: 0; padding: 7px 10px; border-radius: 4px; background: #111b; pointer-events: none; }
+	:global(.home-hero-liquid) { position: absolute; z-index: 1; opacity: 0; pointer-events: none; transition: opacity .2s; }
+	:global(.home-hero-liquid.is-ready) { opacity: 1; }
+	aside { padding: 24px; border-left: 1px solid #333; background: #181818; }
+	header, header div, label span, .actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+	header div { align-items: baseline; }
+	h1 { margin: 0; font: inherit; font-size: 18px; }
+	small { color: #79ff9a; }
+	a { color: #aaa; }
+	form { display: grid; gap: 18px; margin-top: 32px; }
+	label { display: grid; gap: 7px; color: #bbb; }
+	output { color: #fff; font-variant-numeric: tabular-nums; }
+	input { width: 100%; accent-color: #79ff9a; }
+	.actions { margin-top: 28px; }
+	button { padding: 9px 12px; border: 1px solid #444; border-radius: 4px; background: #222; color: #fff; font: inherit; cursor: pointer; }
+	button:hover { border-color: #79ff9a; }
+	pre { overflow: auto; padding: 14px; border: 1px solid #333; border-radius: 4px; color: #aaa; font-size: 11px; }
+	@media (max-width: 760px) { main { display: block; } .preview { position: relative; height: 55vh; } aside { border: 0; } }
+</style>
