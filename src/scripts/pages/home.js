@@ -174,6 +174,11 @@ export const HomePage = {
 
 		setupHeroVideo() {
 			if (!this.video) return;
+			if (window.matchMedia('(max-width: 767px)').matches) {
+				this.video.preload = 'none';
+				this.video.dataset.scrollVideoDisabled = '';
+				return;
+			}
 			this.video.autoplay = false;
 			this.video.pause();
 			this.video.muted = true;
@@ -673,7 +678,9 @@ export const HomePage = {
 				};
 
 				this.worksDecorAssemblyTrigger = ScrollTrigger.create({
-					trigger: $(this.el).find('.home-works--decor')[0],
+					// The decor itself is sticky, so its measured top can jump straight to
+					// the end state on mobile Safari. Drive progress from the stable wrapper.
+					trigger: this.el,
 					start: 'top bottom',
 					end: 'top top',
 					invalidateOnRefresh: true,
@@ -2055,7 +2062,8 @@ export const HomePage = {
 			this.sphereStage = $(this.el).find('.home-playground-webgl-stage')[0];
 			if (!this.cardLayer || !this.sphereScale || !this.sphereStage) return;
 
-			const sourceCards = JSON.parse(this.cardLayer.dataset.gallery || '[]');
+			const sourceCards = JSON.parse(this.cardLayer.dataset.gallery || '[]')
+				.filter((card) => card?.src);
 			if (!sourceCards.length) return;
 
 			const targetCount = Math.max(56, sourceCards.length);
@@ -2067,7 +2075,10 @@ export const HomePage = {
 			this.applySphereTransform();
 
 			this.sphereRenderer = new PlaygroundSphere(
-				this.sphereStage, this.sphereCards, () => this.applySphereTransform(),
+				this.sphereStage, this.sphereCards, () => {
+					this.applySphereTransform();
+					this.scheduleSphere?.();
+				},
 			);
 			void this.sphereRenderer.init();
 
@@ -2205,7 +2216,9 @@ export const HomePage = {
 				this.sphereVisible = entry.isIntersecting;
 				schedule();
 			});
-			this.sphereObserver.observe(this.cardLayer);
+			// Observe the sticky viewport section. The outer wrapper has a negative
+			// margin and may be reported outside the viewport while this panel is shown.
+			this.sphereObserver.observe(this.el.querySelector('.home-playground'));
 
 			this.sphereResizeObserver = new ResizeObserver(() => {
 				this.layoutSphereCards();

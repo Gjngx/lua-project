@@ -4,7 +4,6 @@ import '../styles/pages/home.css';
 import { Image } from 'astro:assets';
 import heroPoster from '../assets/images/home-bg-poster.webp';
 import heroVideoDesktop from '../assets/video/home-bg-desktop.mp4';
-import heroVideoMobile from '../assets/video/home-bg-mobile.mp4';
 import tesla from '../assets/images/tesla.jpg';
 import airofit from '../assets/images/airofit.jpg';
 import vietson from '../assets/images/vietson.jpg';
@@ -264,6 +263,13 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 	<div class="home-hero-wrap" data-section="transparent">
 		<div class="home-hero-bg">
 			<div class="home-hero-bg-inner">
+				<img
+					class="home-hero-poster-mobile"
+					src={heroPoster.src}
+					alt=""
+					aria-hidden="true"
+					fetchpriority="high"
+				/>
 				<video
 					class="home-hero-video"
 					poster={heroPoster.src}
@@ -275,8 +281,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 					aria-hidden="true"
 					tabindex="-1"
 				>
-					<source src={heroVideoMobile} type="video/mp4" media="(max-width: 767px)" />
-					<source src={heroVideoDesktop} type="video/mp4" />
+					<source src={heroVideoDesktop} type="video/mp4" media="(min-width: 768px)" />
 				</video>
 			</div>
 		</div>

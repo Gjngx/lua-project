@@ -47,7 +47,13 @@ export class PlaygroundSphere {
 			while (!this.disposed) {
 				const index = next++;
 				if (index >= urls.length) return;
-				images[index] = await this.loadImage(urls[index]);
+				try {
+					images[index] = await this.loadImage(urls[index]);
+				} catch (error) {
+					if (this.disposed) return;
+					console.warn('[Playground] Gallery image unavailable:', urls[index], error);
+					images[index] = null;
+				}
 			}
 		};
 		await Promise.all(Array.from(
@@ -88,7 +94,7 @@ export class PlaygroundSphere {
 			const compact = window.matchMedia('(max-width: 991px)').matches;
 			// Limit concurrent decode/network work so entering the section does not
 			// compete with scroll and the How renderer on mobile Safari.
-			const images = await this.loadImages(unique, compact ? 2 : 4);
+			const images = await this.loadImages(unique, compact ? 2 : unique.length);
 			if (this.disposed) return;
 			const limit = Math.min(4096, this.renderer.capabilities.maxTextureSize);
 			const uniqueIndex = new Map(unique.map((url, index) => [url, index]));
@@ -105,11 +111,16 @@ export class PlaygroundSphere {
 				for (const [index, img] of page.entries()) {
 					const x = (index % columns) * cellWidth;
 					const y = Math.floor(index / columns) * cellHeight;
-					const ratio = Math.max(cellWidth / img.naturalWidth, cellHeight / img.naturalHeight);
-					const sw = cellWidth / ratio;
-					const sh = cellHeight / ratio;
-					ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2,
-						sw, sh, x, y, cellWidth, cellHeight);
+					if (img) {
+						const ratio = Math.max(cellWidth / img.naturalWidth, cellHeight / img.naturalHeight);
+						const sw = cellWidth / ratio;
+						const sh = cellHeight / ratio;
+						ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2,
+							sw, sh, x, y, cellWidth, cellHeight);
+					} else {
+						ctx.fillStyle = getComputedStyle(this.stage).getPropertyValue('--cln-brand').trim() || '#E4F372';
+						ctx.fillRect(x, y, cellWidth, cellHeight);
+					}
 					// Let input/scroll run between image resampling operations.
 					if (compact) await new Promise((resolve) => setTimeout(resolve, 0));
 					if (this.disposed) return;
@@ -190,8 +201,7 @@ export class PlaygroundSphere {
 		this.camera.position.z = perspective;
 		this.camera.updateProjectionMatrix();
 		// The drawing surface covers the section even when a focused card overflows.
-		this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1,
-			window.matchMedia('(max-width: 991px)').matches ? 1.5 : 2));
+		this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 		this.renderer.setSize(width, height, false);
 		this.renderWidth = width;
 		this.renderHeight = height;

@@ -8,6 +8,7 @@ const SCROLL_ROTATION_FACTOR = 0.0076; // Radians per pixel scrolled (1.9×).
 const MAX_ROTATION_SPEED = 9.5;
 const SUPERSAMPLE_FACTOR = 1.5;
 const MAX_RENDER_SIZE = 2048;
+const CAMERA_DISTANCE = 8.5;
 const MOBILE_FRAME_INTERVAL = 1000 / 30;
 const DESKTOP_INTERACTION = '(min-width: 992px) and (hover: hover) and (pointer: fine)';
 const DRAG_SENSITIVITY = 0.008; // Radians per pixel dragged.
@@ -23,6 +24,8 @@ export class HowModels {
 		this.angle = 0;
 		this.rotationSpeed = IDLE_ROTATION_SPEED;
 		this.lastScrollY = null;
+		this.observedScrollY = window.scrollY;
+		this.pendingScrollDelta = 0;
 		this.lastTime = null;
 		this.lastRenderTime = null;
 		this.motion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -60,7 +63,7 @@ export class HowModels {
 				pmrem.dispose();
 			}
 			this.camera = new T.PerspectiveCamera(36, 1, 0.1, 30);
-			this.camera.position.z = 7.5;
+			this.camera.position.z = CAMERA_DISTANCE;
 			this.fillLight = new T.HemisphereLight(0xffffff, 0x53632a, 2.5);
 			this.scene.add(this.fillLight);
 			const key = new T.DirectionalLight(0xfff7dd, 4);
@@ -84,6 +87,12 @@ export class HowModels {
 				if (!gltfCache.has(url)) gltfCache.set(url, gltfLoader.loadAsync(url));
 				return gltfCache.get(url);
 			};
+			// Start distinct requests together so one slow CMS model does not block
+			// every model after it. The loop below still assembles items in DOM order.
+			canvases.forEach((canvas) => {
+				const url = canvas.dataset.modelUrl?.trim() || DEFAULT_MODEL_URL;
+				void loadModel(url).catch(() => {});
+			});
 			for (let index = 0; index < canvases.length; index++) {
 				const canvas = canvases[index];
 				const context = canvas.getContext('2d');
@@ -158,8 +167,18 @@ export class HowModels {
 			this.surface.setAttribute('aria-hidden', 'true');
 			this.surface.appendChild(this.renderer.domElement);
 			this.root.querySelector('.home-how-thumb').prepend(this.surface);
+			this.observedScrollY = window.scrollY;
+			this.pendingScrollDelta = 0;
 			this.onScroll = () => {
-				if (this.direct && this.items.some((item) => item.visible)) this.schedule();
+				const scrollY = window.scrollY;
+				if (!this.items.some((item) => item.visible)) {
+					this.observedScrollY = scrollY;
+					this.pendingScrollDelta = 0;
+					return;
+				}
+				this.pendingScrollDelta += scrollY - this.observedScrollY;
+				this.observedScrollY = scrollY;
+				if (this.direct) this.schedule();
 			};
 			window.addEventListener('scroll', this.onScroll, { passive: true });
 			this.resizeObserver = new ResizeObserver(this.updateViewport);
@@ -337,7 +356,8 @@ export class HowModels {
 			const elapsed = Math.max((now - this.lastTime) / 1000, 0.001);
 			const deltaTime = Math.min(elapsed, 0.05);
 			// Measure actual scrolling so wheel, touch and keyboard behave alike.
-			const scrollDelta = window.scrollY - (this.lastScrollY ?? window.scrollY);
+			const scrollDelta = this.pendingScrollDelta;
+			this.pendingScrollDelta = 0;
 			const scrollSpeed = scrollDelta / elapsed;
 			const targetSpeed =
 				scrollDelta !== 0
@@ -378,7 +398,7 @@ export class HowModels {
 			if (this.camera.aspect !== width / height) {
 				this.camera.aspect = width / height;
 				// Keep the entire model in frame even in short, wide viewports.
-				this.camera.position.z = 7.5 / Math.min(1, this.camera.aspect);
+				this.camera.position.z = CAMERA_DISTANCE / Math.min(1, this.camera.aspect);
 				this.camera.updateProjectionMatrix();
 			}
 			// Apply momentum decay when not dragging
@@ -460,5 +480,6 @@ export class HowModels {
 		this.renderer?.dispose();
 		this.renderer?.forceContextLoss();
 		this.items = [];
+		this.pendingScrollDelta = 0;
 	}
 }
