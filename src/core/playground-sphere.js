@@ -29,8 +29,8 @@ export class PlaygroundSphere {
 				callback(value);
 			};
 			const cancel = () => {
-				img.src = '';
 				finish(reject, new Error('Gallery texture load cancelled'));
+				img.src = '';
 			};
 			this.pendingImageCancels.add(cancel);
 			img.crossOrigin = 'anonymous';

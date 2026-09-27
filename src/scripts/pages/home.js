@@ -1794,16 +1794,16 @@ export const HomePage = {
 					this.tlItemScrolls.push(contentTrigger);
 				});
 			} else {
-				// Derive one current item from geometry, even when scrolling skips items.
+				// Every mobile item is exactly 100vw; derive the current item from the
+				// timeline instead of forcing layout reads for every item on every frame.
 				let previousContentState = '';
-				const syncHorizontalContent = () => {
-					const bounds = thumbItems.map((thumb) => thumb.getBoundingClientRect());
-					const lastIndex = bounds.length - 1;
-					const hasExited = lastIndex >= 0 && bounds[lastIndex].right <= 0;
-					let activeIndex = -1;
-					bounds.forEach((rect, index) => {
-						if (rect.left <= window.innerWidth / 2) activeIndex = index;
-					});
+				const syncHorizontalContent = (progress = 0) => {
+					const lastIndex = thumbItems.length - 1;
+					const hasExited = lastIndex >= 0 && progress >= 1;
+					let activeIndex = Math.min(
+						lastIndex,
+						Math.max(-1, Math.floor(progress * (thumbItems.length + 1) - 0.5)),
+					);
 					if (hasExited) activeIndex = -1;
 					const contentState = `${activeIndex}:${hasExited}`;
 					if (contentState === previousContentState) return;
@@ -1827,14 +1827,14 @@ export const HomePage = {
 						endTrigger: $(this.el).find('.home-how-thumb-block')[0],
 						end: 'bottom bottom',
 						scrub: true,
-						onRefresh: syncHorizontalContent,
+						onRefresh: () => syncHorizontalContent(this.tlHowThumb?.progress() ?? 0),
 					},
 				});
 				this.tlHowThumb.to($(this.el).find('.home-how-thumb-inner')[0], {
 					xPercent: -100,
 					duration: 1,
 					ease: 'none',
-					onUpdate: syncHorizontalContent,
+					onUpdate: () => syncHorizontalContent(this.tlHowThumb?.progress() ?? 0),
 				});
 
 				thumbItems.forEach((thumb, index) => {
@@ -1854,7 +1854,7 @@ export const HomePage = {
 					this.tlItemScrolls.push(scaleTimeline);
 
 				});
-				syncHorizontalContent();
+				syncHorizontalContent(this.tlHowThumb.progress());
 
 			}
 		}
@@ -1916,6 +1916,7 @@ export const HomePage = {
 			this.sphereResizeObserver = null;
 			this.sphereCleanups = [];
 			this.sphereRenderer = null;
+			this.sphereMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 		}
 
 		trigger(data) {
@@ -2101,7 +2102,7 @@ export const HomePage = {
 				if (!this.sphereDragging) {
 					if (
 						event.pointerType !== 'mouse' || this.sphereFocused ||
-						window.matchMedia('(prefers-reduced-motion: reduce)').matches
+						this.sphereMotion.matches
 					) return;
 					const bounds = this.cardLayer.getBoundingClientRect();
 					if (!bounds.width || !bounds.height) return;
@@ -2222,7 +2223,7 @@ export const HomePage = {
 					this.sphereVisible &&
 					!this.sphereDragging &&
 					!this.sphereFocused &&
-					!window.matchMedia('(prefers-reduced-motion: reduce)').matches
+					!this.sphereMotion.matches
 				) {
 					this.sphereRotation.y += (delta / 16.667) * 0.08;
 				}
@@ -2240,7 +2241,9 @@ export const HomePage = {
 				if (!this.sphereRaf) this.sphereRaf = requestAnimationFrame(tick);
 			};
 			this.scheduleSphere = schedule;
+			this.sphereMotion.addEventListener('change', schedule);
 			document.addEventListener('visibilitychange', schedule);
+			this.sphereCleanups.push(() => this.sphereMotion.removeEventListener('change', schedule));
 			this.sphereCleanups.push(() => document.removeEventListener('visibilitychange', schedule));
 			schedule();
 		}
@@ -2324,7 +2327,7 @@ export const HomePage = {
 			gsap.to(this.sphereHover, {
 				x: 0,
 				y: 0,
-				duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.8,
+				duration: this.sphereMotion.matches ? 0 : 0.8,
 				ease: 'power2.out',
 				overwrite: true,
 				onUpdate: () => this.applySphereTransform(),
