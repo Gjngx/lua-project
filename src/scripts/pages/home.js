@@ -377,7 +377,7 @@ export const HomePage = {
 			gsap.set($(this.el).find('.home-hero-bg-inner, .home-hero-bottom-inner'), { force3D: true, transformStyle: 'preserve-3d', willChange: 'transform' });
 			this.tlHeroOverlap
 				.to($(this.el).find('.home-hero-bg-inner'), { yPercent: -15, ease: 'none', scale: 1.05, force3D: true })
-				.to($(this.el).find('.home-hero-bottom-inner'), { y: cvUnit(10, 'vh'), ease: 'none', scale: 1.05, force3D: true }, "<=0")
+				.to($(this.el).find('.home-hero-bottom'), { y: cvUnit(-100, 'svh'), ease: 'none', scale: 1.05, force3D: true }, "<=0")
 		}
 
 		interact() {
