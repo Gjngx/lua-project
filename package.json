@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "auth:generate": "node scripts/generate-auth.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {
