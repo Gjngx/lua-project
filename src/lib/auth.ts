@@ -3,7 +3,7 @@ const PASSWORD_ALGORITHM = 'pbkdf2_sha256';
 const SESSION_VERSION = 'v1';
 
 export const AUTH_COOKIE = 'site_auth';
-export const SESSION_DURATION_SECONDS = 60 * 60 * 12;
+export const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7;
 
 function decode(value = '') {
 	const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
