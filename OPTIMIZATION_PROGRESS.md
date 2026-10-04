@@ -272,6 +272,16 @@ Chưa thực hiện.
   GSAP timing.
 - `Chưa rõ`: FPS runtime cần record lại trên cùng thiết bị.
 
+### Trì hoãn Works transition scratch buffers
+
+- `Chưa đạt` trước thay đổi: hai canvas mask nội bộ có backing store bằng transition canvas ngay
+  khi Works được khởi tạo, dù transition cuối section vẫn chưa chạy.
+- `Đạt` sau tối ưu code: hai scratch canvas giữ kích thước 1×1 khi progress bằng 0, chỉ cấp phát
+  đúng kích thước ở frame đầu transition và giải phóng khi scroll ngược về 0.
+- `Đạt` về bảo toàn giao diện: canvas hiển thị chính, SVG decor, layout, progress và toàn bộ phép
+  compositing khi transition chạy không thay đổi.
+- `Chưa rõ`: mức giảm GPU memory thực tế cần đo lại bằng cùng overlay.
+
 ## Nhật ký thay đổi
 
 | Thời điểm  | Giai đoạn  | Thay đổi                                                                          | Kết quả                                      |
@@ -300,3 +310,4 @@ Chưa thực hiện.
 | 2026-10-04 | Loader     | Đợi font/hero poster trước khi bắt đầu initial loader animation                   | Static đạt; runtime chưa rõ                  |
 | 2026-10-04 | Loader     | Sửa DPR cap Retina 4K và tách GPU allocation khỏi frame animation đầu             | Static đạt; runtime chưa rõ                  |
 | 2026-10-04 | Works      | Giảm DPR decor và mật độ curl/clip trên Retina 4K                                 | Static đạt; runtime chưa rõ                  |
+| 2026-10-04 | Works      | Lazy allocate hai scratch canvas của transition cuối section                      | Static đạt; memory mới chưa rõ               |

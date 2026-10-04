@@ -163,6 +163,7 @@ Mục tiêu của checklist này là cải thiện độ mượt khi scroll, chu
 - [x] Canvas DPR cap dùng độ phân giải vật lý để hoạt động đúng trên màn hình Retina 4K.
 - [x] Giảm DPR decor Works và mật độ sampling curl riêng trên màn hình Retina 4K.
 - [x] Không khởi động lại idle decor ngay giữa các nhịp scroll ngắn.
+- [x] Chỉ cấp phát hai scratch canvas của Works transition khi transition thực sự bắt đầu.
 
 ## Giai đoạn 6 — Chuẩn hóa cấu trúc code theo section
 

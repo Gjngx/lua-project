@@ -1000,12 +1000,16 @@ export const HomePage = {
 			const renderWidth = Math.round(width * pixelRatio);
 			const renderHeight = Math.round(height * pixelRatio);
 
-			[canvas, cutCanvas, componentCanvas].forEach((targetCanvas) => {
-				if (targetCanvas.width !== renderWidth || targetCanvas.height !== renderHeight) {
-					targetCanvas.width = renderWidth;
-					targetCanvas.height = renderHeight;
-				}
-			});
+			if (canvas.width !== renderWidth || canvas.height !== renderHeight) {
+				canvas.width = renderWidth;
+				canvas.height = renderHeight;
+			}
+			// Scratch masks are only needed once the transition moves. Keeping them
+			// at 1×1 avoids two extra GPU-sized backing stores while browsing Works.
+			if (!this.transitionState?.progress) {
+				cutCanvas.width = cutCanvas.height = 1;
+				componentCanvas.width = componentCanvas.height = 1;
+			}
 
 			const innerSize = Math.min(width, height);
 			this.transitionMetrics = {
@@ -1201,6 +1205,21 @@ export const HomePage = {
 			this.transitionPaths.forEach((_, index) => {
 				drawShape(context, index, 'source-over');
 			});
+
+			if (state.progress <= 0) {
+				cutCanvas.width = cutCanvas.height = 1;
+				componentCanvas.width = componentCanvas.height = 1;
+				return;
+			}
+
+			const renderWidth = Math.round(width * pixelRatio);
+			const renderHeight = Math.round(height * pixelRatio);
+			for (const scratchCanvas of [cutCanvas, componentCanvas]) {
+				if (scratchCanvas.width !== renderWidth || scratchCanvas.height !== renderHeight) {
+					scratchCanvas.width = renderWidth;
+					scratchCanvas.height = renderHeight;
+				}
+			}
 
 			const mergeComponentIntoCut = () => {
 				cutContext.save();
