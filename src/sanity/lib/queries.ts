@@ -89,10 +89,14 @@ export const HOME_PAGE_QUERY = defineQuery(`
       }
     },
     hero{
+	  backgroundType,
 	  backgroundImage{
 		...,
-		asset->{_id, url, metadata{dimensions}}
+		asset->{_id, url, mimeType, metadata{dimensions}}
 	  },
+      backgroundVideo{
+        asset->{_id, url, mimeType}
+      },
       availabilityMessage,
       headline,
       role,

@@ -1,5 +1,18 @@
 import {HomeIcon} from '@sanity/icons/Home'
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import {defineArrayMember, defineField, defineType, type ValidationContext} from 'sanity'
+
+const MB = 1_000_000
+
+const assetSizeValidation =
+  (maxMb: number) =>
+  async (value: {asset?: {_ref?: string}} | undefined, context: ValidationContext) => {
+    const assetId = value?.asset?._ref
+    if (!assetId) return true
+    const asset = await context
+      .getClient({apiVersion: '2026-10-04'})
+      .fetch('*[_id == $assetId][0]{size}', {assetId})
+    return !asset?.size || asset.size <= maxMb * MB || `File must not exceed ${maxMb} MB.`
+  }
 
 export default defineType({
   name: 'homePage',
@@ -48,11 +61,36 @@ export default defineType({
       group: 'hero',
       fields: [
         defineField({
+          name: 'backgroundType',
+          title: 'Background type',
+          type: 'string',
+          initialValue: 'image',
+          options: {
+            layout: 'radio',
+            list: [
+              {title: 'Image / GIF', value: 'image'},
+              {title: 'Video', value: 'video'},
+            ],
+          },
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
           name: 'backgroundImage',
-          title: 'Background image',
+          title: 'Background image / GIF',
           type: 'image',
-          description: 'Displayed behind the Home hero on desktop and mobile.',
+          description: 'JPG, PNG, WebP, AVIF or GIF. Maximum 2 MB.',
           options: {hotspot: true},
+          hidden: ({parent}) => parent?.backgroundType === 'video',
+          validation: (rule) => rule.custom(assetSizeValidation(2)),
+        }),
+        defineField({
+          name: 'backgroundVideo',
+          title: 'Background video',
+          type: 'file',
+          description: 'MP4 or WebM, maximum 10 MB. Autoplays silently and loops.',
+          options: {accept: 'video/mp4,video/webm,.mp4,.webm'},
+          hidden: ({parent}) => parent?.backgroundType !== 'video',
+          validation: (rule) => rule.custom(assetSizeValidation(10)),
         }),
         defineField({
           name: 'availabilityMessage',

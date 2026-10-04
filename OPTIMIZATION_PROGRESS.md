@@ -282,6 +282,17 @@ Chưa thực hiện.
   compositing khi transition chạy không thay đổi.
 - `Chưa rõ`: mức giảm GPU memory thực tế cần đo lại bằng cùng overlay.
 
+### Home Hero media qua Sanity
+
+- `Chưa đạt` trước thay đổi: Home Hero chỉ hỗ trợ ảnh tĩnh và giới hạn upload video toàn Studio
+  vẫn là 10 MB.
+- `Đạt` sau thay đổi: editor chọn được Image/GIF hoặc MP4/WebM ngay trong Home Hero; ảnh/GIF
+  tối đa 2 MB, video tối đa 10 MB.
+- `Đạt`: video tự phát, lặp, không âm thanh, không có controls và phát inline trên thiết bị di động.
+- `Đạt` về bảo toàn giao diện: media mới dùng nguyên container, `object-fit`, hotspot và overlay hiện
+  tại; nhánh ảnh tiếp tục dùng Hero Liquid như trước.
+- `Chưa rõ`: autoplay và mức sử dụng GPU của video cần kiểm tra trên Safari/iPhone với asset thực tế.
+
 ## Nhật ký thay đổi
 
 | Thời điểm  | Giai đoạn  | Thay đổi                                                                          | Kết quả                                      |
@@ -311,3 +322,4 @@ Chưa thực hiện.
 | 2026-10-04 | Loader     | Sửa DPR cap Retina 4K và tách GPU allocation khỏi frame animation đầu             | Static đạt; runtime chưa rõ                  |
 | 2026-10-04 | Works      | Giảm DPR decor và mật độ curl/clip trên Retina 4K                                 | Static đạt; runtime chưa rõ                  |
 | 2026-10-04 | Works      | Lazy allocate hai scratch canvas của transition cuối section                      | Static đạt; memory mới chưa rõ               |
+| 2026-10-04 | Hero media | Thêm upload Image/GIF/Video qua Sanity với giới hạn 2 MB/10 MB                    | Build và type-check đạt                      |

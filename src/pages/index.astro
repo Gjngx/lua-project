@@ -41,6 +41,7 @@ import { HOME_PAGE_QUERY } from '../sanity/lib/queries';
 type SanityImage = {
 	asset?: {
 		url?: string;
+		mimeType?: string;
 		metadata?: {
 			dimensions?: {
 				width?: number;
@@ -67,7 +68,9 @@ type HomePageData = {
 		shareImage?: SanityImage;
 	};
 	hero?: {
+		backgroundType?: 'image' | 'video';
 		backgroundImage?: SanityImage;
+		backgroundVideo?: SanityFile;
 		availabilityMessage?: string;
 		headline?: string;
 		role?: string;
@@ -119,9 +122,15 @@ const { data: homePage } = await loadQuery<HomePageData | null>({
 });
 
 const hero = homePage?.hero;
+const heroImageIsGif = hero?.backgroundImage?.asset?.mimeType === 'image/gif';
 const heroPosterUrl = hero?.backgroundImage?.asset
-	? urlFor(hero.backgroundImage).width(2400).auto('format').url()
+	? heroImageIsGif
+		? hero.backgroundImage.asset.url
+		: urlFor(hero.backgroundImage).width(2400).auto('format').url()
 	: heroPoster.src;
+const heroVideoUrl =
+	hero?.backgroundType === 'video' ? hero.backgroundVideo?.asset?.url : undefined;
+const heroVideoMimeType = hero?.backgroundVideo?.asset?.mimeType;
 const heroPosterPosition = hero?.backgroundImage?.hotspot
 	? `${(hero.backgroundImage.hotspot.x ?? 0.5) * 100}% ${(hero.backgroundImage.hotspot.y ?? 0.5) * 100}%`
 	: undefined;
@@ -253,16 +262,33 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 	<div class="home-hero-wrap" data-section="transparent">
 		<div class="home-hero-bg">
 			<div class="home-hero-bg-inner">
-				<img
-					class="home-hero-poster"
-					src={heroPosterUrl}
-					data-fallback-src={heroPoster.src}
-					style={heroPosterPosition ? `object-position: ${heroPosterPosition}` : undefined}
-					alt=""
-					aria-hidden="true"
-					crossorigin="anonymous"
-					fetchpriority="high"
-				/>
+				{
+					heroVideoUrl ? (
+						<video
+							class="home-hero-media home-hero-video"
+							style={heroPosterPosition ? `object-position: ${heroPosterPosition}` : undefined}
+							poster={heroPosterUrl}
+							muted
+							loop
+							playsinline
+							preload="auto"
+							aria-hidden="true"
+						>
+							<source src={heroVideoUrl} type={heroVideoMimeType} />
+						</video>
+					) : (
+						<img
+							class="home-hero-media home-hero-poster"
+							src={heroPosterUrl}
+							data-fallback-src={heroPoster.src}
+							style={heroPosterPosition ? `object-position: ${heroPosterPosition}` : undefined}
+							alt=""
+							aria-hidden="true"
+							crossorigin="anonymous"
+							fetchpriority="high"
+						/>
+					)
+				}
 				<div class="home-hero-bg-overlay-main"></div>
 			</div>
 		</div>

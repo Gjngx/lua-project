@@ -15,13 +15,10 @@ export function getUploadLimit(file: UploadFile) {
   if (mime === 'model/gltf-binary' || extension === 'glb') limits.push(5)
   if (
     mime.startsWith('video/') ||
-    mime === 'audio/mpeg' ||
-    mime === 'audio/mp3' ||
-    /^(mp3|mp4|m4v|mov|webm|avi|mkv|mpeg|mpg|ogv|3gp|3g2|wmv|flv|ts|mts|m2ts)$/.test(
-      extension || '',
-    )
+    /^(mp4|m4v|mov|webm|avi|mkv|mpeg|mpg|ogv|3gp|3g2|wmv|flv|ts|mts|m2ts)$/.test(extension || '')
   )
     limits.push(10)
+  if (mime === 'audio/mpeg' || mime === 'audio/mp3' || extension === 'mp3') limits.push(10)
   return limits.length ? Math.min(...limits) * MB : undefined
 }
 

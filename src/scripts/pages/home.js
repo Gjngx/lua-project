@@ -27,6 +27,8 @@ export const HomePage = {
 			this.heroLiquid = null;
 			this.heroPoster = null;
 			this.onHeroPosterError = null;
+			this.heroVideo = null;
+			this.playHeroVideo = null;
 			this.heroTopIcon = null;
 			this.worksEl = null;
 			this.timeEl = null;
@@ -55,6 +57,7 @@ export const HomePage = {
 			this.setupHeroTime();
 			this.setupHeroIconScroll();
 			this.setupHeroPosterFallback();
+			this.setupHeroVideo();
 			this.setupHeroLiquid();
 			this.interact();
 
@@ -194,6 +197,18 @@ export const HomePage = {
 			};
 			this.heroPoster.addEventListener('error', this.onHeroPosterError, { once: true });
 			if (this.heroPoster.complete && !this.heroPoster.naturalWidth) this.onHeroPosterError();
+		}
+
+		setupHeroVideo() {
+			this.heroVideo = $(this.el).find('.home-hero-video')[0];
+			if (!this.heroVideo) return;
+			this.heroVideo.pause();
+			this.playHeroVideo = () => this.heroVideo?.play().catch(() => {});
+			if (document.documentElement.classList.contains('is-loading')) {
+				window.addEventListener('loader:complete', this.playHeroVideo, { once: true });
+			} else {
+				this.playHeroVideo();
+			}
 		}
 
 		setupHeroLiquid() {
@@ -410,6 +425,10 @@ export const HomePage = {
 		}
 
 		destroy() {
+			if (this.playHeroVideo) window.removeEventListener('loader:complete', this.playHeroVideo);
+			this.heroVideo?.pause();
+			this.heroVideo = null;
+			this.playHeroVideo = null;
 			this.heroLiquid?.destroy();
 			this.heroLiquid = null;
 			this.heroPoster?.removeEventListener('error', this.onHeroPosterError);
