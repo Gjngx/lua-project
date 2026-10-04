@@ -203,8 +203,13 @@ export const HomePage = {
 			this.heroVideo = $(this.el).find('.home-hero-video')[0];
 			if (!this.heroVideo) return;
 			this.heroVideo.pause();
-			this.playHeroVideo = () => this.heroVideo?.play().catch(() => {});
+			this.playHeroVideo = () => {
+				window.removeEventListener('loader:finishing', this.playHeroVideo);
+				window.removeEventListener('loader:complete', this.playHeroVideo);
+				this.heroVideo?.play().catch(() => {});
+			};
 			if (document.documentElement.classList.contains('is-loading')) {
+				window.addEventListener('loader:finishing', this.playHeroVideo, { once: true });
 				window.addEventListener('loader:complete', this.playHeroVideo, { once: true });
 			} else {
 				this.playHeroVideo();
@@ -219,15 +224,18 @@ export const HomePage = {
 			)
 				return;
 			const root = $(this.el).find('.home-hero-bg-inner')[0];
-			const image = $(root).find('.home-hero-poster')[0];
-			if (!root || !image) return;
+			const media = $(root).find('.home-hero-media')[0];
+			if (!root || !media) return;
 			const init = () => {
 				if (!this.el?.isConnected || this.heroLiquid) return;
-				this.heroLiquid = new HeroLiquid(root, image, this.el);
+				this.heroLiquid = new HeroLiquid(root, media, this.el);
 				this.heroLiquid.init();
 			};
-			if (image.complete) init();
-			else image.addEventListener('load', init, { once: true });
+			if (media instanceof HTMLVideoElement) {
+				if (media.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) init();
+				else media.addEventListener('loadeddata', init, { once: true });
+			} else if (media.complete) init();
+			else media.addEventListener('load', init, { once: true });
 		}
 
 		animationScrub() {
@@ -425,7 +433,10 @@ export const HomePage = {
 		}
 
 		destroy() {
-			if (this.playHeroVideo) window.removeEventListener('loader:complete', this.playHeroVideo);
+			if (this.playHeroVideo) {
+				window.removeEventListener('loader:finishing', this.playHeroVideo);
+				window.removeEventListener('loader:complete', this.playHeroVideo);
+			}
 			this.heroVideo?.pause();
 			this.heroVideo = null;
 			this.playHeroVideo = null;

@@ -119,17 +119,24 @@ export class HeroLiquid {
 	constructor(root, image, pointerTarget = root, options = {}) {
 		this.root = root;
 		this.image = image;
+		this.isVideo = image instanceof HTMLVideoElement;
 		this.pointerTarget = pointerTarget;
 		this.options = { ...HERO_LIQUID_DEFAULTS, ...options };
 		this.pointer = { x: 0, y: 0, dx: 0, dy: 0, active: false, moved: false };
 		this.visible = true;
 		this.raf = null;
+		this.videoFrameId = null;
 		this.render = this.render.bind(this);
 		this.resize = this.resize.bind(this);
 	}
 
 	init() {
-		if (!this.image.complete || !this.image.naturalWidth) return;
+		if (
+			(this.isVideo &&
+				(this.image.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || !this.image.videoWidth)) ||
+			(!this.isVideo && (!this.image.complete || !this.image.naturalWidth))
+		)
+			return;
 		this.canvas = document.createElement('canvas');
 		this.canvas.className = 'home-hero-liquid';
 		this.root.appendChild(this.canvas);
@@ -166,6 +173,11 @@ export class HeroLiquid {
 			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 			this.configureTexture();
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
+			this.onVideoPlay = () => {
+				if (typeof this.image.requestVideoFrameCallback === 'function') this.scheduleVideoFrame();
+				else this.schedule();
+			};
+			if (this.isVideo) this.image.addEventListener('play', this.onVideoPlay);
 
 			this.onPointerMove = (event) => {
 				const rect = this.root.getBoundingClientRect();
@@ -194,7 +206,10 @@ export class HeroLiquid {
 			this.resizeObserver.observe(this.root);
 			this.observer = new IntersectionObserver(([entry]) => {
 				this.visible = entry.isIntersecting;
-				if (this.visible) this.schedule();
+				if (this.visible) {
+					this.schedule();
+					this.scheduleVideoFrame();
+				}
 			});
 			this.observer.observe(this.root);
 			this.resize();
@@ -389,11 +404,25 @@ export class HeroLiquid {
 		this.draw(dye.write());
 		dye.swap();
 
+		if (this.isVideo && this.image.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+			this.gl.bindTexture(this.gl.TEXTURE_2D, this.imageTexture);
+			this.gl.texSubImage2D(
+				this.gl.TEXTURE_2D,
+				0,
+				0,
+				0,
+				this.gl.RGBA,
+				this.gl.UNSIGNED_BYTE,
+				this.image,
+			);
+		}
 		const position = getComputedStyle(this.image).objectPosition.split(' ').map(parseFloat);
+		const mediaWidth = this.isVideo ? this.image.videoWidth : this.image.naturalWidth;
+		const mediaHeight = this.isVideo ? this.image.videoHeight : this.image.naturalHeight;
 		program = this.use('display', {
 			u_texel: texel,
 			u_aspect: this.aspect,
-			u_image_aspect: this.image.naturalWidth / this.image.naturalHeight,
+			u_image_aspect: mediaWidth / mediaHeight,
 			u_focus: [(position[0] || 50) / 100, 1 - (position[1] || 50) / 100],
 			u_visible_scale: 1 / this.options.overscan,
 			u_displacement: this.options.displacement,
@@ -403,7 +432,31 @@ export class HeroLiquid {
 		this.bind(dye.read().texture, 2, program.uniforms.u_dye);
 		this.draw();
 		this.canvas.classList.add('is-ready');
-		if (now < this.activeUntil) this.schedule();
+		if (
+			now < this.activeUntil ||
+			(this.isVideo &&
+				typeof this.image.requestVideoFrameCallback !== 'function' &&
+				!this.image.paused &&
+				!this.image.ended)
+		)
+			this.schedule();
+	}
+
+	scheduleVideoFrame() {
+		if (
+			!this.isVideo ||
+			!this.visible ||
+			this.image.paused ||
+			this.image.ended ||
+			this.videoFrameId !== null ||
+			typeof this.image.requestVideoFrameCallback !== 'function'
+		)
+			return;
+		this.videoFrameId = this.image.requestVideoFrameCallback(() => {
+			this.videoFrameId = null;
+			this.schedule();
+			this.scheduleVideoFrame();
+		});
 	}
 
 	schedule() {
@@ -412,8 +465,10 @@ export class HeroLiquid {
 
 	destroy() {
 		if (this.raf !== null) cancelAnimationFrame(this.raf);
+		if (this.videoFrameId !== null) this.image?.cancelVideoFrameCallback?.(this.videoFrameId);
 		this.pointerTarget?.removeEventListener('pointermove', this.onPointerMove);
 		this.pointerTarget?.removeEventListener('pointerleave', this.onPointerLeave);
+		if (this.isVideo) this.image?.removeEventListener('play', this.onVideoPlay);
 		this.resizeObserver?.disconnect();
 		this.observer?.disconnect();
 		this.deleteTargets();

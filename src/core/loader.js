@@ -23,6 +23,7 @@ const LOADER_TIMING = {
 
 const FIRST_LOAD_MIN_WAIT_MS = 250;
 const FIRST_LOAD_MAX_WAIT_MS = 2500;
+const HERO_VIDEO_LEAD_SECONDS = 0.6;
 
 class Loader {
 	constructor() {
@@ -305,6 +306,11 @@ class Loader {
 					ease: 'none',
 				},
 				0,
+			);
+			this.tlLoadMaster.call(
+				() => window.dispatchEvent(new Event('loader:finishing')),
+				[],
+				Math.max(0, loadingDuration - HERO_VIDEO_LEAD_SECONDS),
 			);
 		}
 	}
