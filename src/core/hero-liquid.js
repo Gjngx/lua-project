@@ -126,6 +126,8 @@ export class HeroLiquid {
 		this.visible = true;
 		this.raf = null;
 		this.videoFrameId = null;
+		this.videoFrameReady = true;
+		this.needsWarmup = this.isVideo;
 		this.render = this.render.bind(this);
 		this.resize = this.resize.bind(this);
 	}
@@ -138,7 +140,7 @@ export class HeroLiquid {
 		)
 			return;
 		this.canvas = document.createElement('canvas');
-		this.canvas.className = 'home-hero-liquid';
+		this.canvas.className = `home-hero-liquid${this.isVideo ? ' is-video' : ''}`;
 		this.root.appendChild(this.canvas);
 		const gl = this.canvas.getContext('webgl', {
 			alpha: false,
@@ -174,8 +176,8 @@ export class HeroLiquid {
 			this.configureTexture();
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
 			this.onVideoPlay = () => {
-				if (typeof this.image.requestVideoFrameCallback === 'function') this.scheduleVideoFrame();
-				else this.schedule();
+				this.videoFrameReady = false;
+				if (performance.now() < this.activeUntil) this.schedule();
 			};
 			if (this.isVideo) this.image.addEventListener('play', this.onVideoPlay);
 
@@ -359,6 +361,26 @@ export class HeroLiquid {
 	render(now) {
 		this.raf = null;
 		if (!this.gl || !this.visible || !this.targets) return;
+		const isActive = this.pointer.moved || now < this.activeUntil || this.needsWarmup;
+		if (this.isVideo && !isActive) {
+			this.canvas.classList.remove('is-ready');
+			if (this.videoFrameId !== null) {
+				this.image.cancelVideoFrameCallback?.(this.videoFrameId);
+				this.videoFrameId = null;
+			}
+			return;
+		}
+		const supportsVideoFrames =
+			this.isVideo && typeof this.image.requestVideoFrameCallback === 'function';
+		if (
+			supportsVideoFrames &&
+			!this.videoFrameReady &&
+			!this.needsWarmup &&
+			!this.canvas.classList.contains('is-ready')
+		) {
+			this.scheduleVideoFrame();
+			return;
+		}
 		const { velocity, dye, pressure, divergence } = this.targets;
 		const texel = [1 / velocity.width, 1 / velocity.height];
 		if (this.pointer.moved) {
@@ -404,7 +426,11 @@ export class HeroLiquid {
 		this.draw(dye.write());
 		dye.swap();
 
-		if (this.isVideo && this.image.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+		if (
+			this.isVideo &&
+			(this.videoFrameReady || typeof this.image.requestVideoFrameCallback !== 'function') &&
+			this.image.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+		) {
 			this.gl.bindTexture(this.gl.TEXTURE_2D, this.imageTexture);
 			this.gl.texSubImage2D(
 				this.gl.TEXTURE_2D,
@@ -415,6 +441,7 @@ export class HeroLiquid {
 				this.gl.UNSIGNED_BYTE,
 				this.image,
 			);
+			this.videoFrameReady = false;
 		}
 		const position = getComputedStyle(this.image).objectPosition.split(' ').map(parseFloat);
 		const mediaWidth = this.isVideo ? this.image.videoWidth : this.image.naturalWidth;
@@ -431,15 +458,16 @@ export class HeroLiquid {
 		this.bind(velocity.read().texture, 1, program.uniforms.u_velocity);
 		this.bind(dye.read().texture, 2, program.uniforms.u_dye);
 		this.draw();
+		if (this.needsWarmup) {
+			this.needsWarmup = false;
+			this.canvas.classList.remove('is-ready');
+			return;
+		}
 		this.canvas.classList.add('is-ready');
-		if (
-			now < this.activeUntil ||
-			(this.isVideo &&
-				typeof this.image.requestVideoFrameCallback !== 'function' &&
-				!this.image.paused &&
-				!this.image.ended)
-		)
-			this.schedule();
+		if (now < this.activeUntil) {
+			if (supportsVideoFrames) this.scheduleVideoFrame();
+			else this.schedule();
+		}
 	}
 
 	scheduleVideoFrame() {
@@ -449,13 +477,14 @@ export class HeroLiquid {
 			this.image.paused ||
 			this.image.ended ||
 			this.videoFrameId !== null ||
+			performance.now() >= this.activeUntil ||
 			typeof this.image.requestVideoFrameCallback !== 'function'
 		)
 			return;
 		this.videoFrameId = this.image.requestVideoFrameCallback(() => {
 			this.videoFrameId = null;
+			this.videoFrameReady = true;
 			this.schedule();
-			this.scheduleVideoFrame();
 		});
 	}
 

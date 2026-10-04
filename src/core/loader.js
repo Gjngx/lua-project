@@ -69,6 +69,15 @@ class Loader {
 				image.addEventListener('error', resolve, { once: true });
 			});
 		});
+		const videos = Array.from(container.querySelectorAll('video[data-loader-critical]'));
+		const videoReady = videos.map((video) => {
+			if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) return Promise.resolve();
+			return new Promise((resolve) => {
+				video.addEventListener('loadeddata', resolve, { once: true });
+				video.addEventListener('error', resolve, { once: true });
+				video.load();
+			});
+		});
 		const fontReady = document.fonts?.ready || Promise.resolve();
 		let timeoutId;
 		const deadline = new Promise((resolve) => {
@@ -77,7 +86,7 @@ class Loader {
 
 		await Promise.all([
 			new Promise((resolve) => window.setTimeout(resolve, FIRST_LOAD_MIN_WAIT_MS)),
-			Promise.race([Promise.allSettled([fontReady, ...imageReady]), deadline]),
+			Promise.race([Promise.allSettled([fontReady, ...imageReady, ...videoReady]), deadline]),
 		]);
 		window.clearTimeout(timeoutId);
 		await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));

@@ -55,6 +55,10 @@
 	.home-hero-liquid.is-ready {
 		opacity: 1;
 	}
+
+	.home-hero-liquid.is-video {
+		transition: none;
+	}
 }
 
 .home-hero-bg-overlay-main {

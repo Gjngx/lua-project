@@ -126,7 +126,7 @@ const heroImageIsGif = hero?.backgroundImage?.asset?.mimeType === 'image/gif';
 const heroPosterUrl = hero?.backgroundImage?.asset
 	? heroImageIsGif
 		? hero.backgroundImage.asset.url
-		: urlFor(hero.backgroundImage).width(2400).auto('format').url()
+		: urlFor(hero.backgroundImage).width(2048).quality(82).auto('format').url()
 	: heroPoster.src;
 const heroVideoUrl =
 	hero?.backgroundType === 'video' ? hero.backgroundVideo?.asset?.url : undefined;
@@ -272,6 +272,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 							loop
 							playsinline
 							preload="auto"
+							data-loader-critical
 							aria-hidden="true"
 							crossorigin="anonymous"
 						>
