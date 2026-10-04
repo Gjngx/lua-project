@@ -68,7 +68,11 @@ export class PlaygroundSphere {
 			const T = await import('three');
 			if (this.disposed) return;
 			this.T = T;
-			this.renderer = new T.WebGLRenderer({ alpha: true, antialias: true });
+			this.renderer = new T.WebGLRenderer({
+				alpha: true,
+				antialias: true,
+				powerPreference: 'high-performance',
+			});
 			this.renderer.debug.onShaderError = () => { throw new Error('Globe shader compilation failed'); };
 			this.renderer.setClearColor(0x000000, 0);
 			this.renderer.outputColorSpace = T.SRGBColorSpace;
@@ -94,7 +98,7 @@ export class PlaygroundSphere {
 			const compact = window.matchMedia('(max-width: 991px)').matches;
 			// Limit concurrent decode/network work so entering the section does not
 			// compete with scroll and the How renderer on mobile Safari.
-			const images = await this.loadImages(unique, compact ? 2 : unique.length);
+			const images = await this.loadImages(unique, compact ? 2 : 4);
 			if (this.disposed) return;
 			const limit = Math.min(4096, this.renderer.capabilities.maxTextureSize);
 			const uniqueIndex = new Map(unique.map((url, index) => [url, index]));
@@ -121,8 +125,9 @@ export class PlaygroundSphere {
 						ctx.fillStyle = getComputedStyle(this.stage).getPropertyValue('--cln-brand').trim() || '#E4F372';
 						ctx.fillRect(x, y, cellWidth, cellHeight);
 					}
-					// Let input/scroll run between image resampling operations.
-					if (compact) await new Promise((resolve) => setTimeout(resolve, 0));
+					// Atlas resampling is synchronous. Yield on desktop too so entering
+					// Playground cannot monopolize the main thread during scroll.
+					await new Promise((resolve) => setTimeout(resolve, 0));
 					if (this.disposed) return;
 				}
 				// Reject cross-origin images that cannot be uploaded to WebGL.
@@ -212,7 +217,10 @@ export class PlaygroundSphere {
 		this.camera.position.z = perspective;
 		this.camera.updateProjectionMatrix();
 		// The drawing surface covers the section even when a focused card overflows.
-		const dpr = Math.min(window.devicePixelRatio || 1, 2);
+		// A fullscreen DPR 2 surface at 4K is ~34M pixels per frame. Keep the
+		// CSS size and antialiasing, but avoid four times the GPU fill work.
+		const dprCap = width >= 2560 ? 1 : 2;
+		const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
 		if (this.renderer.getPixelRatio() !== dpr) this.renderer.setPixelRatio(dpr);
 		if (this.renderWidth !== width || this.renderHeight !== height) {
 			this.renderer.setSize(width, height, false);

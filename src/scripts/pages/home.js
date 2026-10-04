@@ -702,7 +702,10 @@ export const HomePage = {
 			this.onResize = () => {
 				const w = window.innerWidth;
 				const h = window.innerHeight;
-				const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+					// One backing pixel per CSS pixel is already sharp on 4K screens and
+					// avoids clearing/drawing a ~19 MP canvas on every scroll frame.
+					const dprCap = w >= 2560 ? 1 : 1.5;
+					const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
 				canvas.width = Math.round(w * dpr);
 				canvas.height = Math.round(h * dpr);
 				this.worksContext.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -745,7 +748,7 @@ export const HomePage = {
 				this.rafId = null;
 				if (!this.isVisible || document.hidden || !this.viewSize || !this.worksContext) return;
 
-				const { w, h, dpr } = this.viewSize;
+					const { w, h } = this.viewSize;
 				const context = this.worksContext;
 				const scrollY = window.scrollY;
 				const now = performance.now();
@@ -809,7 +812,9 @@ export const HomePage = {
 						};
 					};
 
-					const bandHeight = 2;
+					// Four-pixel strips preserve the curl silhouette while halving the
+					// drawImage calls compared with the previous two-pixel sampling.
+					const bandHeight = 4;
 					const firstY = Math.max(0, Math.floor(rect.top));
 					const lastY = Math.min(h, Math.ceil(rect.bottom));
 					const edgeStep = 3;

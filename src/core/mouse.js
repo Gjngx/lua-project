@@ -30,6 +30,7 @@ class Mouse {
 		this.scaleVideoX = null;
 		this.scaleVideoY = null;
 		this.videoResetCall = null;
+		this.targetSyncFrame = null;
 	}
 
 	init() {
@@ -80,7 +81,7 @@ class Mouse {
 
 		$(window).on('pointermove', this.handlePointerMove);
 		$(window).on('resize', this.handleResize);
-		$(window).on('scroll', this.syncTargetUnderPointer);
+		window.addEventListener('scroll', this.scheduleTargetSync, { passive: true });
 		document.addEventListener('pointerover', this.handlePointerOver, true);
 		document.addEventListener('pointerout', this.handlePointerOut, true);
 		document.addEventListener('pointerdown', this.handlePointerDown, true);
@@ -146,6 +147,14 @@ class Mouse {
 		$(this.cursor).removeClass(['is-pressed']);
 	};
 
+	scheduleTargetSync = () => {
+		if (this.targetSyncFrame !== null) return;
+		this.targetSyncFrame = requestAnimationFrame(() => {
+			this.targetSyncFrame = null;
+			this.syncTargetUnderPointer();
+		});
+	};
+
 	syncTargetUnderPointer = () => {
 		if (!this.hasMoved) return;
 		const target = $(document
@@ -206,7 +215,9 @@ class Mouse {
 		this.videoResetCall = null;
 		$(window).off('pointermove', this.handlePointerMove);
 		$(window).off('resize', this.handleResize);
-		$(window).off('scroll', this.syncTargetUnderPointer);
+		window.removeEventListener('scroll', this.scheduleTargetSync);
+		if (this.targetSyncFrame !== null) cancelAnimationFrame(this.targetSyncFrame);
+		this.targetSyncFrame = null;
 		document.removeEventListener('pointerover', this.handlePointerOver, true);
 		document.removeEventListener('pointerout', this.handlePointerOut, true);
 		document.removeEventListener('pointerdown', this.handlePointerDown, true);

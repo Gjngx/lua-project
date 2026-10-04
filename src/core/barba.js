@@ -6,7 +6,6 @@ import { scrollIndicator } from './components/scroll-indicator.js';
 import { buttonText } from './components/button-text.js';
 import { loader } from './loader.js';
 import { ScrollTrigger } from './gsap.js';
-import { smoothScroll } from './lenis.js';
 
 let staleHeadElements = [];
 
@@ -30,12 +29,55 @@ function syncHead(data) {
 	const previousSyncedElements = new Set(
 		$(currentHead).find('[data-barba-head]').toArray(),
 	);
+	const metadataSelectors = [
+		'meta[name="description"]',
+		'link[rel="canonical"]',
+		'meta[property^="og:"]',
+		'meta[name^="twitter:"]',
+		'meta[property^="twitter:"]',
+	];
+	const metadataKey = (element) =>
+		`${element.tagName}:${element.getAttribute('name') || element.getAttribute('property') || element.getAttribute('rel')}`;
+	const currentMetadata = new Map(
+		$(currentHead)
+			.find(metadataSelectors.join(','))
+			.toArray()
+			.map((element) => [metadataKey(element), element]),
+	);
+
+	$(nextHead)
+		.find(metadataSelectors.join(','))
+		.toArray()
+		.forEach((nextElement) => {
+			const key = metadataKey(nextElement);
+			const currentElement = currentMetadata.get(key);
+			const target = currentElement || nextElement.cloneNode(true);
+
+			if (currentElement) {
+				currentElement.getAttributeNames().forEach((attribute) => {
+					if (attribute !== 'data-barba-head') currentElement.removeAttribute(attribute);
+				});
+				nextElement.getAttributeNames().forEach((attribute) => {
+					currentElement.setAttribute(attribute, nextElement.getAttribute(attribute));
+				});
+			} else {
+				currentHead.append(target);
+			}
+
+			target.setAttribute('data-barba-head', '');
+			previousSyncedElements.delete(target);
+			currentMetadata.delete(key);
+		});
+
+	currentMetadata.forEach((element) => {
+		previousSyncedElements.delete(element);
+		element.remove();
+	});
 
 	// Các selector cần sync
 	const syncSelectors = [
 		'style:not([data-barba-head])',
 		'link[rel="stylesheet"]:not([data-barba-head])',
-		'meta[name="description"]',
 	];
 
 	const loadPromises = [];

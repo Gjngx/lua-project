@@ -1,4 +1,4 @@
-import { gsap, ScrollTrigger } from '../../core/gsap.js';
+import { gsap } from '../../core/gsap.js';
 import { MasterTimeline, FadeIn, FadeSplitText } from '../../core/animation.js';
 
 export const LetTalkPage = {

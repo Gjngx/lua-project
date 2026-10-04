@@ -25,6 +25,7 @@ export class SvgPathParticles {
 		this.idleFrame = null;
 		this.idleStartedAt = 0;
 		this.lastIdleFrame = 0;
+		this.canBatchPaths = typeof Path2D.prototype.addPath === 'function' && typeof DOMMatrix === 'function';
 		this.animateIdle = this.animateIdle.bind(this);
 		this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
 
@@ -66,6 +67,7 @@ export class SvgPathParticles {
 
 			return {
 				shape: new Path2D($(path).attr('d')),
+				matrix: this.canBatchPaths ? new DOMMatrix() : null,
 				offsetX: randomX - bounds.x,
 				offsetY: randomY - bounds.y,
 				idleAmplitude: 1 + seededUnit(index, 3) * 1.25,
@@ -136,6 +138,7 @@ export class SvgPathParticles {
 		this.color = getComputedStyle(this.root).color;
 		ctx.fillStyle = this.color;
 
+		const framePath = this.canBatchPaths ? new Path2D() : null;
 		for (let index = 0; index < this.particles.length; index++) {
 			const particle = this.particles[index];
 			const wobbleX = idleStrength
@@ -149,20 +152,25 @@ export class SvgPathParticles {
 					idleStrength
 				: 0;
 
-			ctx.setTransform(
-				scaleX,
-				0,
-				0,
-				scaleY,
-				originX +
-					(particle.offsetX * remaining + wobbleX) * scaleX,
-				originY +
-					(particle.offsetY * remaining + wobbleY) * scaleY
-			);
-			ctx.fill(particle.shape);
+			const x = originX + (particle.offsetX * remaining + wobbleX) * scaleX;
+			const y = originY + (particle.offsetY * remaining + wobbleY) * scaleY;
+
+			if (framePath && particle.matrix) {
+				particle.matrix.a = scaleX;
+				particle.matrix.b = 0;
+				particle.matrix.c = 0;
+				particle.matrix.d = scaleY;
+				particle.matrix.e = x;
+				particle.matrix.f = y;
+				framePath.addPath(particle.shape, particle.matrix);
+			} else {
+				ctx.setTransform(scaleX, 0, 0, scaleY, x, y);
+				ctx.fill(particle.shape);
+			}
 		}
 
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		if (framePath) ctx.fill(framePath);
 	}
 
 	scheduleIdleMotion() {

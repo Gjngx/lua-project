@@ -8,10 +8,12 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "auth:generate": "node scripts/generate-auth.mjs",
-    "format": "prettier --write ."
+		"preview": "astro preview",
+		"astro": "astro",
+		"check": "astro check",
+		"auth:generate": "node scripts/generate-auth.mjs",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
   },
   "dependencies": {
     "@astrojs/react": "^6.0.4",
@@ -37,6 +39,7 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
     "@astrojs/sitemap": "^3.7.3",
     "@gltf-transform/core": "^4.5.0",
     "@gltf-transform/extensions": "^4.5.0",
@@ -44,6 +47,7 @@
     "canvas": "^3.2.3",
     "meshoptimizer": "^1.2.0",
     "prettier": "^3.9.5",
-    "prettier-plugin-astro": "^0.14.1"
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript": "^6.0.3"
   }
 }

@@ -1,0 +1,10 @@
+dist/
+.astro/
+.vercel/
+node_modules/
+studio-lua-project/dist/
+studio-lua-project/node_modules/
+
+# Generated inline SVG is intentionally kept in the DOM for its current animation.
+# Parsing this file exhausts the Astro formatter's WASM memory.
+src/components/icons/IconWorksDecor.astro

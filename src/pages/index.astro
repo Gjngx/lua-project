@@ -111,18 +111,6 @@ type HomePageData = {
 	};
 };
 
-const getResizedImageDimensions = (image: SanityImage | undefined, targetWidth: number) => {
-	const dimensions = image?.asset?.metadata?.dimensions;
-	if (!dimensions?.width || !dimensions.height) {
-		return { imageWidth: undefined, imageHeight: undefined };
-	}
-
-	return {
-		imageWidth: targetWidth,
-		imageHeight: Math.round((targetWidth * dimensions.height) / dimensions.width),
-	};
-};
-
 const draftModeProps = getDraftModeProps(Astro.cookies);
 const isDraftMode = Boolean(draftModeProps.perspectiveCookie);
 const { data: homePage } = await loadQuery<HomePageData | null>({
