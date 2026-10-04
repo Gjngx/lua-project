@@ -1,14 +1,11 @@
 import { gsap } from './gsap.js';
 import { isTouchDevice } from './helpers.js';
 
-const CURSOR_STATE_CLASSES = [
-	'has-ic-external',
-	'has-video',
-];
+const CURSOR_STATE_CLASSES = ['has-ic-external', 'has-video'];
 
 const VIDEO_MAX_TILT = 170;
 // Giữ độ nhạy khi rê chậm, giảm dần biên độ khi tiến đến góc nghiêng tối đa.
-const videoTilt = (delta) => VIDEO_MAX_TILT * Math.tanh(delta * 2 / VIDEO_MAX_TILT);
+const videoTilt = (delta) => VIDEO_MAX_TILT * Math.tanh((delta * 2) / VIDEO_MAX_TILT);
 
 class Mouse {
 	constructor() {
@@ -157,8 +154,9 @@ class Mouse {
 
 	syncTargetUnderPointer = () => {
 		if (!this.hasMoved) return;
-		const target = $(document
-			.elementFromPoint(this.mousePos.x, this.mousePos.y)).closest('[data-cursor]')[0] || null;
+		const target =
+			$(document.elementFromPoint(this.mousePos.x, this.mousePos.y)).closest('[data-cursor]')[0] ||
+			null;
 		this.setActiveTarget(target);
 	};
 
@@ -222,9 +220,20 @@ class Mouse {
 		document.removeEventListener('pointerout', this.handlePointerOut, true);
 		document.removeEventListener('pointerdown', this.handlePointerDown, true);
 		document.removeEventListener('pointerup', this.handlePointerUp, true);
-		$(this.cursor).removeClass(['active', 'is-visible', 'is-pressed', 'hidden', ...CURSOR_STATE_CLASSES]);
+		$(this.cursor).removeClass([
+			'active',
+			'is-visible',
+			'is-pressed',
+			'hidden',
+			...CURSOR_STATE_CLASSES,
+		]);
 		$(this.cursor).removeAttr('data-bg');
-		gsap.killTweensOf([this.cursorMain, this.cursorVideo, this.cursorVideoInner, this.cursorVideoMedia]);
+		gsap.killTweensOf([
+			this.cursorMain,
+			this.cursorVideo,
+			this.cursorVideoInner,
+			this.cursorVideoMedia,
+		]);
 		if (this.cursorVideo) gsap.set(this.cursorVideo, { rotationX: 0, rotationY: 0 });
 		if (this.cursorVideoInner) gsap.set(this.cursorVideoInner, { scale: 1.2 });
 		this.hasMoved = false;

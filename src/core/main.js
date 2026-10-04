@@ -19,8 +19,6 @@ const initApp = () => {
 
 	// Khởi tạo Barba.js
 	initBarba();
-
-	console.log('🚀 App scripts initialized with GSAP, Barba, and Lenis');
 };
 
 $(initApp);

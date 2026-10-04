@@ -102,7 +102,7 @@ export const HomePage = {
 			await this.revealReady;
 			if (!this.el?.isConnected || !this.tlOnce?.duration()) return;
 			// Scroll effects are installed by this timeline's onComplete callback.
-			await this.tlOnce.play(0).then(() => { });
+			await this.tlOnce.play(0).then(() => {});
 		}
 
 		async playEnter() {
@@ -133,7 +133,8 @@ export const HomePage = {
 			this.timeEl = $(this.el).find('[data-time]')[0];
 			if (!this.timeEl) return;
 
-			const statusDot = this.timeEl.closest('.home-hero-top-info-inner')
+			const statusDot = this.timeEl
+				.closest('.home-hero-top-info-inner')
 				?.querySelector('.home-hero-top-info-dot');
 			const formatter = new Intl.DateTimeFormat('en-GB', {
 				timeZone: 'Asia/Ho_Chi_Minh',
@@ -148,9 +149,8 @@ export const HomePage = {
 				$(this.timeEl).text(time);
 				const hour = Number(time.split(':')[0]);
 				if (statusDot) {
-					statusDot.style.backgroundColor = hour >= 10 && hour < 18
-						? 'var(--cln-status-green)'
-						: 'var(--cln-status-red)';
+					statusDot.style.backgroundColor =
+						hour >= 10 && hour < 18 ? 'var(--cln-status-green)' : 'var(--cln-status-red)';
 				}
 			};
 
@@ -185,7 +185,8 @@ export const HomePage = {
 			if (!this.heroPoster) return;
 			this.onHeroPosterError = () => {
 				const fallbackSrc = this.heroPoster?.dataset.fallbackSrc;
-				if (!fallbackSrc || this.heroPoster.src === new URL(fallbackSrc, document.baseURI).href) return;
+				if (!fallbackSrc || this.heroPoster.src === new URL(fallbackSrc, document.baseURI).href)
+					return;
 				this.heroLiquid?.destroy();
 				this.heroLiquid = null;
 				this.heroPoster.style.objectPosition = 'center';
@@ -196,9 +197,12 @@ export const HomePage = {
 		}
 
 		setupHeroLiquid() {
-			if (!window.matchMedia(
-				'(min-width: 992px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)',
-			).matches) return;
+			if (
+				!window.matchMedia(
+					'(min-width: 992px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)',
+				).matches
+			)
+				return;
 			const root = $(this.el).find('.home-hero-bg-inner')[0];
 			const image = $(root).find('.home-hero-poster')[0];
 			if (!root || !image) return;
@@ -259,27 +263,30 @@ export const HomePage = {
 				},
 			});
 			if (headerLogoAnimated && headerLogoTarget) {
-				this.tlHeroTop
-					.to(headerLogoAnimated, {
-						x: () => getHeaderLogoTransform().x,
-						y: () => getHeaderLogoTransform().y,
-						scale: () => getHeaderLogoTransform().scale,
-						ease: 'none',
-						force3D: true,
-						// onComplete: () => {
-						// 	gsap.set(headerLogoAnimated, { pointerEvents: 'auto' });
-						// },
-						// onReverseComplete: () => {
-						// 	gsap.set(headerLogoAnimated, { pointerEvents: 'none' });
-						// },
-					})
+				this.tlHeroTop.to(headerLogoAnimated, {
+					x: () => getHeaderLogoTransform().x,
+					y: () => getHeaderLogoTransform().y,
+					scale: () => getHeaderLogoTransform().scale,
+					ease: 'none',
+					force3D: true,
+					// onComplete: () => {
+					// 	gsap.set(headerLogoAnimated, { pointerEvents: 'auto' });
+					// },
+					// onReverseComplete: () => {
+					// 	gsap.set(headerLogoAnimated, { pointerEvents: 'none' });
+					// },
+				});
 			}
 
-			this.tlHeroTop.to($(this.el).find('.home-hero-desc')[0], {
-				yPercent: -100,
-				duration: 0.3,
-				ease: 'power3.inOut'
-			}, 0.3);
+			this.tlHeroTop.to(
+				$(this.el).find('.home-hero-desc')[0],
+				{
+					yPercent: -100,
+					duration: 0.3,
+					ease: 'power3.inOut',
+				},
+				0.3,
+			);
 
 			this.tlHeroOverlay = gsap.timeline({
 				scrollTrigger: {
@@ -289,10 +296,14 @@ export const HomePage = {
 					scrub: true,
 				},
 			});
-			this.tlHeroOverlay.to($(this.el).find('.home-hero-bg-overlay-main')[0], {
-				opacity: 0.5,
-				ease: 'power2.out',
-			}, 0);
+			this.tlHeroOverlay.to(
+				$(this.el).find('.home-hero-bg-overlay-main')[0],
+				{
+					opacity: 0.5,
+					ease: 'power2.out',
+				},
+				0,
+			);
 
 			this.tlHeroBot = gsap.timeline({
 				scrollTrigger: {
@@ -360,7 +371,8 @@ export const HomePage = {
 					},
 				});
 				this.tlHeroTextColor.to(revealItems, {
-					color: (index, element) => ($(element).is('svg') ? 'var(--cln-brand)' : 'var(--cln-white)'),
+					color: (index, element) =>
+						$(element).is('svg') ? 'var(--cln-brand)' : 'var(--cln-white)',
 					stagger: 0.06,
 					ease: 'none',
 				});
@@ -374,10 +386,23 @@ export const HomePage = {
 					scrub: true,
 				},
 			});
-			gsap.set($(this.el).find('.home-hero-bg-inner, .home-hero-bottom-inner'), { force3D: true, transformStyle: 'preserve-3d', willChange: 'transform' });
+			gsap.set($(this.el).find('.home-hero-bg-inner, .home-hero-bottom-inner'), {
+				force3D: true,
+				transformStyle: 'preserve-3d',
+				willChange: 'transform',
+			});
 			this.tlHeroOverlap
-				.to($(this.el).find('.home-hero-bg-inner'), { yPercent: -15, ease: 'none', scale: 1.05, force3D: true })
-				.to($(this.el).find('.home-hero-bottom'), { y: cvUnit(-100, 'svh'), ease: 'none', scale: 1.05, force3D: true }, "<=0")
+				.to($(this.el).find('.home-hero-bg-inner'), {
+					yPercent: -15,
+					ease: 'none',
+					scale: 1.05,
+					force3D: true,
+				})
+				.to(
+					$(this.el).find('.home-hero-bottom'),
+					{ y: cvUnit(-100, 'svh'), ease: 'none', scale: 1.05, force3D: true },
+					'<=0',
+				);
 		}
 
 		interact() {
@@ -427,7 +452,7 @@ export const HomePage = {
 			this.el = null;
 			this.tlWorksTop = null;
 			this.tlWorksScroll = null;
-			this.tlWorkslist = null
+			this.tlWorkslist = null;
 			this.worksDecorAssemblyTrigger = null;
 			this.worksPathParticles = null;
 			this.transitionCanvas = null;
@@ -472,14 +497,9 @@ export const HomePage = {
 
 		onTrigger() {
 			if (!this.el) return;
-			this.setup();
 			this.animationReveal();
 			this.animationScrub();
 			this.interact();
-		}
-
-		setup() {
-			console.log('Works Setup');
 		}
 
 		animationReveal() {
@@ -577,7 +597,7 @@ export const HomePage = {
 					trigger: $(this.el).find('.home-works-main-desc')[0],
 					start: 'top bottom',
 					end: 'top center',
-					scrub: true
+					scrub: true,
 				},
 			});
 
@@ -586,10 +606,14 @@ export const HomePage = {
 					x: viewport.w <= 767 ? cvUnit(40, 'rem') : cvUnit(120, 'rem'),
 					ease: 'none',
 				})
-				.to($(this.el).find('.home-works-main-ic')[1], {
-					x: viewport.w <= 767 ? cvUnit(-40, 'rem') : cvUnit(-120, 'rem'),
-					ease: 'none',
-				}, '<');
+				.to(
+					$(this.el).find('.home-works-main-ic')[1],
+					{
+						x: viewport.w <= 767 ? cvUnit(-40, 'rem') : cvUnit(-120, 'rem'),
+						ease: 'none',
+					},
+					'<',
+				);
 
 			const transition = $(this.el).find('.home-works-trans')[0];
 			const transitionInner = $(this.el).find('.home-works-trans-inner')[0];
@@ -656,7 +680,7 @@ export const HomePage = {
 			this.worksCanvasNextSibling = canvas.nextSibling;
 			$(document.body).append(canvas);
 
-			this.worksContext = canvas.getContext('2d', { alpha: true });
+			this.worksContext = canvas.getContext('2d', { alpha: true, desynchronized: true });
 			if (!this.worksContext) {
 				$(this.worksCanvasParent).append(canvas);
 				this.worksCanvas = null;
@@ -702,10 +726,11 @@ export const HomePage = {
 			this.onResize = () => {
 				const w = window.innerWidth;
 				const h = window.innerHeight;
-					// One backing pixel per CSS pixel is already sharp on 4K screens and
-					// avoids clearing/drawing a ~19 MP canvas on every scroll frame.
-					const dprCap = w >= 2560 ? 1 : 1.5;
-					const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+				// One backing pixel per CSS pixel is already sharp on 4K screens and
+				// avoids clearing/drawing a ~19 MP canvas on every scroll frame.
+				const nativeDpr = window.devicePixelRatio || 1;
+				const dprCap = w * nativeDpr >= 2560 ? 1 : 1.5;
+				const dpr = Math.min(nativeDpr, dprCap);
 				canvas.width = Math.round(w * dpr);
 				canvas.height = Math.round(h * dpr);
 				this.worksContext.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -714,7 +739,7 @@ export const HomePage = {
 				this.meshes.forEach((layer) => {
 					layer.borderRadius = parseFloat(getComputedStyle(layer.container).borderRadius) || 0;
 				});
-				this.viewSize = { w, h, dpr };
+				this.viewSize = { w, h, dpr, isLargePhysical: w * nativeDpr >= 2560 };
 				if (this.isVisible) this.startWorksRender?.();
 			};
 
@@ -748,7 +773,7 @@ export const HomePage = {
 				this.rafId = null;
 				if (!this.isVisible || document.hidden || !this.viewSize || !this.worksContext) return;
 
-					const { w, h } = this.viewSize;
+				const { w, h, isLargePhysical } = this.viewSize;
 				const context = this.worksContext;
 				const scrollY = window.scrollY;
 				const now = performance.now();
@@ -814,10 +839,10 @@ export const HomePage = {
 
 					// Four-pixel strips preserve the curl silhouette while halving the
 					// drawImage calls compared with the previous two-pixel sampling.
-					const bandHeight = 4;
+					const bandHeight = isLargePhysical ? 8 : 4;
 					const firstY = Math.max(0, Math.floor(rect.top));
 					const lastY = Math.min(h, Math.ceil(rect.bottom));
-					const edgeStep = 3;
+					const edgeStep = isLargePhysical ? 6 : 3;
 					context.save();
 					context.beginPath();
 					let edge = getWarpedEdges(firstY);
@@ -926,7 +951,7 @@ export const HomePage = {
 			}
 
 			this.transitionCanvas = canvas;
-			this.transitionContext = canvas.getContext('2d');
+			this.transitionContext = canvas.getContext('2d', { desynchronized: true });
 			this.transitionCutCanvas = document.createElement('canvas');
 			this.transitionCutContext = this.transitionCutCanvas.getContext('2d');
 			this.transitionComponentCanvas = document.createElement('canvas');
@@ -970,7 +995,8 @@ export const HomePage = {
 
 			const width = canvas.clientWidth;
 			const height = canvas.clientHeight;
-			const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+			const nativeDpr = window.devicePixelRatio || 1;
+			const pixelRatio = Math.min(nativeDpr, width * nativeDpr >= 2560 ? 1 : 2);
 			const renderWidth = Math.round(width * pixelRatio);
 			const renderHeight = Math.round(height * pixelRatio);
 
@@ -1074,7 +1100,7 @@ export const HomePage = {
 				0,
 				1,
 				(this.transitionState.progress - this.transitionSwapProgress) /
-				WORKS_TRANSITION_BACKGROUND_SPAN,
+					WORKS_TRANSITION_BACKGROUND_SPAN,
 			);
 
 			this.transitionBackgroundTween?.progress(backgroundProgress);
@@ -1214,7 +1240,7 @@ export const HomePage = {
 			context.restore();
 		}
 
-		interact() { }
+		interact() {}
 
 		destroy() {
 			super.cleanTrigger();
@@ -1397,13 +1423,23 @@ export const HomePage = {
 
 			this.tlDecor
 				.to(shapeWraps[0], {
-					x: () => viewport.w > 991 ? -getDecorDistance() : (viewport.w > 767 ? -getDecorDistance() * 1.5 : -getDecorDistance()),
+					x: () =>
+						viewport.w > 991
+							? -getDecorDistance()
+							: viewport.w > 767
+								? -getDecorDistance() * 1.5
+								: -getDecorDistance(),
 					ease: 'none',
 				})
 				.to(
 					shapeWraps[1],
 					{
-						x: () => viewport.w > 991 ? getDecorDistance() : (viewport.w > 767 ? getDecorDistance() * 1.5 : getDecorDistance()),
+						x: () =>
+							viewport.w > 991
+								? getDecorDistance()
+								: viewport.w > 767
+									? getDecorDistance() * 1.5
+									: getDecorDistance(),
 						ease: 'none',
 					},
 					'<',
@@ -1420,14 +1456,20 @@ export const HomePage = {
 			});
 			this.tlTrans
 				.to(shapeWraps[0], {
-					x: () => viewport.w > 991 ? getShapeWidth() : getShapeWidth() - shapeWraps[0].getBoundingClientRect().height,
+					x: () =>
+						viewport.w > 991
+							? getShapeWidth()
+							: getShapeWidth() - shapeWraps[0].getBoundingClientRect().height,
 					ease: 'none',
 					duration: 0.7,
 				})
 				.to(
 					shapeWraps[1],
 					{
-						x: () => viewport.w > 991 ? getShapeWidth() : getShapeWidth() - shapeWraps[0].getBoundingClientRect().height,
+						x: () =>
+							viewport.w > 991
+								? getShapeWidth()
+								: getShapeWidth() - shapeWraps[0].getBoundingClientRect().height,
 						ease: 'none',
 						duration: 0.7,
 					},
@@ -1436,8 +1478,14 @@ export const HomePage = {
 				.to(
 					lastItemLeft,
 					{
-						x: () => viewport.w > 991 ? (lastItem.getBoundingClientRect().width / 2 - lastItemTitle.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
-						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(400, 'rem') : cvUnit(100, 'rem')),
+						x: () =>
+							viewport.w > 991
+								? lastItem.getBoundingClientRect().width / 2 -
+									lastItemTitle.getBoundingClientRect().width -
+									cvUnit(100, 'rem')
+								: 0,
+						y: () =>
+							viewport.w > 991 ? 0 : viewport.w > 767 ? cvUnit(400, 'rem') : cvUnit(100, 'rem'),
 						ease: 'none',
 						duration: 0.7,
 					},
@@ -1446,8 +1494,16 @@ export const HomePage = {
 				.to(
 					lastItemRight,
 					{
-						x: () => viewport.w > 991 ? -(lastItem.getBoundingClientRect().width / 2 - lastItemText.getBoundingClientRect().width - cvUnit(100, 'rem')) : 0,
-						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(-400, 'rem') : cvUnit(-100, 'rem')),
+						x: () =>
+							viewport.w > 991
+								? -(
+										lastItem.getBoundingClientRect().width / 2 -
+										lastItemText.getBoundingClientRect().width -
+										cvUnit(100, 'rem')
+									)
+								: 0,
+						y: () =>
+							viewport.w > 991 ? 0 : viewport.w > 767 ? cvUnit(-400, 'rem') : cvUnit(-100, 'rem'),
 						ease: 'none',
 						duration: 0.7,
 					},
@@ -1494,7 +1550,10 @@ export const HomePage = {
 					'<',
 				)
 				.to(
-					[$(lastItemLeft).find('.home-how-content-item-title'), $(lastItemRight).find('.home-how-content-item-text')],
+					[
+						$(lastItemLeft).find('.home-how-content-item-title'),
+						$(lastItemRight).find('.home-how-content-item-text'),
+					],
 					{
 						y: -$(lastItemLeft).find('.home-how-content-item-title').innerHeight() * 1.8,
 						ease: 'power3.inOut',
@@ -1517,7 +1576,8 @@ export const HomePage = {
 						y: 0,
 						ease: 'power3.inOut',
 						duration: 0.3,
-					}, '>',
+					},
+					'>',
 				)
 				.to(
 					$('.home-playground-trans-decor').toArray(),
@@ -1536,7 +1596,7 @@ export const HomePage = {
 						duration: 0.01,
 					},
 					'<',
-				)
+				);
 
 			this.tlItemScrolls = [];
 			const thumbItems = $(this.el).find('.home-how-thumb-item').toArray();
@@ -1691,13 +1751,10 @@ export const HomePage = {
 						.fromTo(frame, { scale: 0.5 }, { scale: 1, duration: 0.4, ease: 'none' })
 						.to(frame, { scale: 0.5, duration: 0.6, ease: 'none' });
 					this.tlItemScrolls.push(scaleTimeline);
-
 				});
 				syncHorizontalContent(this.tlHowThumb.progress());
-
 			}
 		}
-
 
 		destroy() {
 			super.cleanTrigger();
@@ -1796,9 +1853,11 @@ export const HomePage = {
 			const playgroundMain = $(this.el).find('.home-playground-main')[0];
 
 			const widthTransLeft =
-				itemLeft.getBoundingClientRect().width - $(titleLeft).find('.home-playground-content-left-title')[0].getBoundingClientRect().width;
+				itemLeft.getBoundingClientRect().width -
+				$(titleLeft).find('.home-playground-content-left-title')[0].getBoundingClientRect().width;
 			const widthTransRight =
-				itemRight.getBoundingClientRect().width - $(titleRight).find('.home-playground-content-right-title')[0].getBoundingClientRect().width;
+				itemRight.getBoundingClientRect().width -
+				$(titleRight).find('.home-playground-content-right-title')[0].getBoundingClientRect().width;
 
 			this.tlTrans = gsap.timeline({
 				scrollTrigger: {
@@ -1810,16 +1869,18 @@ export const HomePage = {
 			});
 			this.tlTrans
 				.to(titleLeft, {
-					x: () => viewport.w > 991 ? `-${widthTransLeft}` : 0,
-					y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(-400, 'rem') : cvUnit(-100, 'rem')),
+					x: () => (viewport.w > 991 ? `-${widthTransLeft}` : 0),
+					y: () =>
+						viewport.w > 991 ? 0 : viewport.w > 767 ? cvUnit(-400, 'rem') : cvUnit(-100, 'rem'),
 					ease: 'power3.inOut',
 					duration: 1,
 				})
 				.to(
 					titleRight,
 					{
-						x: () => viewport.w > 991 ? `${widthTransRight}` : 0,
-						y: () => viewport.w > 991 ? 0 : (viewport.w > 767 ? cvUnit(400, 'rem') : cvUnit(100, 'rem')),
+						x: () => (viewport.w > 991 ? `${widthTransRight}` : 0),
+						y: () =>
+							viewport.w > 991 ? 0 : viewport.w > 767 ? cvUnit(400, 'rem') : cvUnit(100, 'rem'),
 						ease: 'power3.inOut',
 						duration: 1,
 					},
@@ -1894,24 +1955,26 @@ export const HomePage = {
 			this.sphereStage = $(this.el).find('.home-playground-webgl-stage')[0];
 			if (!this.cardLayer || !this.sphereScale || !this.sphereStage) return;
 
-			const sourceCards = JSON.parse(this.cardLayer.dataset.gallery || '[]')
-				.filter((card) => card?.src);
+			const sourceCards = JSON.parse(this.cardLayer.dataset.gallery || '[]').filter(
+				(card) => card?.src,
+			);
 			if (!sourceCards.length) return;
 
 			const targetCount = Math.max(56, sourceCards.length);
 			this.sphereCards = Array.from({ length: targetCount }, (_, index) => ({
-				...sourceCards[index % sourceCards.length], rotationX: 0, rotationY: 0, focused: false,
+				...sourceCards[index % sourceCards.length],
+				rotationX: 0,
+				rotationY: 0,
+				focused: false,
 			}));
 			this.layoutSphereCards();
 			this.updateSphereScale();
 			this.applySphereTransform();
 
-			this.sphereRenderer = new PlaygroundSphere(
-				this.sphereStage, this.sphereCards, () => {
-					this.applySphereTransform();
-					this.scheduleSphere?.();
-				},
-			);
+			this.sphereRenderer = new PlaygroundSphere(this.sphereStage, this.sphereCards, () => {
+				this.applySphereTransform();
+				this.scheduleSphere?.();
+			});
 			void this.sphereRenderer.init();
 
 			const onPointerDown = (event) => {
@@ -1943,14 +2006,20 @@ export const HomePage = {
 					this.sphereRenderer.setHover(this.sphereRenderer.pick(event));
 				}
 				if (!this.sphereDragging) {
-					if (
-						event.pointerType !== 'mouse' || this.sphereFocused ||
-						this.sphereMotion.matches
-					) return;
+					if (event.pointerType !== 'mouse' || this.sphereFocused || this.sphereMotion.matches)
+						return;
 					const bounds = this.cardLayer.getBoundingClientRect();
 					if (!bounds.width || !bounds.height) return;
-					const x = gsap.utils.clamp(-1, 1, ((event.clientX - bounds.left) / bounds.width - 0.5) * 2);
-					const y = gsap.utils.clamp(-1, 1, ((event.clientY - bounds.top) / bounds.height - 0.5) * 2);
+					const x = gsap.utils.clamp(
+						-1,
+						1,
+						((event.clientX - bounds.left) / bounds.width - 0.5) * 2,
+					);
+					const y = gsap.utils.clamp(
+						-1,
+						1,
+						((event.clientY - bounds.top) / bounds.height - 0.5) * 2,
+					);
 					gsap.to(this.sphereHover, {
 						x: -y * PLAYGROUND_SPHERE_HOVER_TILT,
 						y: x * PLAYGROUND_SPHERE_HOVER_TILT,
@@ -1977,9 +2046,7 @@ export const HomePage = {
 			const onPointerEnd = (event) => {
 				if (this.spherePointer?.id !== event.pointerId) return;
 				const selectedCard =
-					event.type === 'pointerup' && !this.sphereDragMoved
-						? this.spherePointer.card
-						: null;
+					event.type === 'pointerup' && !this.sphereDragMoved ? this.spherePointer.card : null;
 				this.sphereDragging = false;
 				this.spherePointer = null;
 				this.cardLayer.classList.remove('is-dragging');
@@ -2009,13 +2076,21 @@ export const HomePage = {
 			const onKeyDown = (event) => {
 				if (!['ArrowLeft', 'ArrowRight', 'Enter', ' ', 'Escape'].includes(event.key)) return;
 				event.preventDefault();
-				if (event.key === 'Escape') { this.resetSphereFocus(); return; }
+				if (event.key === 'Escape') {
+					this.resetSphereFocus();
+					return;
+				}
 				if (event.key.startsWith('Arrow')) {
-					keyboardIndex = (keyboardIndex + (event.key === 'ArrowRight' ? 1 : -1) + this.sphereCards.length) % this.sphereCards.length;
+					keyboardIndex =
+						(keyboardIndex + (event.key === 'ArrowRight' ? 1 : -1) + this.sphereCards.length) %
+						this.sphereCards.length;
 				}
 				const card = this.sphereCards[keyboardIndex];
 				this.sphereRenderer?.setHover(card, true);
-				this.cardLayer.setAttribute('aria-label', `Playground: ${card.alt || 'Image'} ${keyboardIndex + 1}/${this.sphereCards.length}. Use arrow keys to browse, Escape to close.`);
+				this.cardLayer.setAttribute(
+					'aria-label',
+					`Playground: ${card.alt || 'Image'} ${keyboardIndex + 1}/${this.sphereCards.length}. Use arrow keys to browse, Escape to close.`,
+				);
 				this.requestSphereCardFocus(card);
 			};
 			const onBlur = () => this.sphereRenderer?.setHover(null);
@@ -2074,8 +2149,12 @@ export const HomePage = {
 				schedule();
 			};
 			const schedule = () => {
-				if (!this.sphereRenderer?.ready || !this.sphereVisible || document.hidden ||
-					Number(gsap.getProperty(this.cardLayer.parentElement, 'scaleX')) === 0) {
+				if (
+					!this.sphereRenderer?.ready ||
+					!this.sphereVisible ||
+					document.hidden ||
+					Number(gsap.getProperty(this.cardLayer.parentElement, 'scaleX')) === 0
+				) {
 					if (this.sphereRaf) cancelAnimationFrame(this.sphereRaf);
 					this.sphereRaf = null;
 					this.sphereLastTime = 0;
@@ -2161,7 +2240,8 @@ export const HomePage = {
 		applySphereTransform(delta = 0) {
 			if (this.sphereRenderer?.ready) {
 				// GSAP/pointer callbacks update state; draw once in the animation frame.
-				if (this.sphereVisible && (delta || !this.sphereRaf)) this.sphereRenderer.render(this.sphereRotation, this.sphereHover, delta);
+				if (this.sphereVisible && (delta || !this.sphereRaf))
+					this.sphereRenderer.render(this.sphereRotation, this.sphereHover, delta);
 				return;
 			}
 		}
@@ -2192,13 +2272,11 @@ export const HomePage = {
 		}
 
 		requestSphereCardFocus(card) {
-			if (!this.el?.isConnected || !this.sphereCards.includes(card) || !this.sphereRenderer?.ready) return;
+			if (!this.el?.isConnected || !this.sphereCards.includes(card) || !this.sphereRenderer?.ready)
+				return;
 
 			const transition = this.tlTrans?.scrollTrigger;
-			if (
-				!transition ||
-				(transition.progress >= 0.999 && this.isSphereFocusAvailable())
-			) {
+			if (!transition || (transition.progress >= 0.999 && this.isSphereFocusAvailable())) {
 				this.pendingSphereCard = null;
 				this.focusSphereCard(card);
 				return;
@@ -2253,7 +2331,10 @@ export const HomePage = {
 			);
 			// Projected size = cardSize * outerScale * s * p / (p - radius * s).
 			// Solve for s instead of treating the 3D scale as a flat image zoom.
-			return Math.max(1, Math.min(3, (fit * perspective) / (outerScale * perspective + fit * radius)));
+			return Math.max(
+				1,
+				Math.min(3, (fit * perspective) / (outerScale * perspective + fit * radius)),
+			);
 		}
 
 		focusSphereCard(card) {
@@ -2266,7 +2347,10 @@ export const HomePage = {
 			});
 			this.sphereFocused = true;
 			window.addEventListener('wheel', this.sphereScrollIntent, { passive: false, capture: true });
-			window.addEventListener('touchmove', this.sphereScrollIntent, { passive: false, capture: true });
+			window.addEventListener('touchmove', this.sphereScrollIntent, {
+				passive: false,
+				capture: true,
+			});
 			this.el?.classList.remove('is-sphere-unfocusing');
 			this.el?.classList.add('is-sphere-focused');
 			this.sphereFocus?.kill();

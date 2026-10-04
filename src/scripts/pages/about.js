@@ -52,17 +52,11 @@ export const AboutPage = {
 			}
 		}
 
-		animationReveal(timeline) {
+		animationReveal(timeline) {}
 
-		}
+		animationScrub() {}
 
-		animationScrub() {
-
-		}
-
-		interact() {
-			
-		}
+		interact() {}
 
 		destroy() {
 			this.el = null;

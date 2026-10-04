@@ -40,7 +40,7 @@ export function createPillowFlower(T) {
 			angle: random() * Math.PI * 2,
 			width: 0.045 + random() * 0.085,
 			strength: 0.2 + random() * 0.8,
-			length: 0.10 + random() * 0.12,
+			length: 0.1 + random() * 0.12,
 			bend: (random() - 0.5) * 1.4,
 		}));
 		const geometry = new T.SphereGeometry(1, 128, 96);
@@ -67,7 +67,8 @@ export function createPillowFlower(T) {
 			const indentation = Math.tanh(folds) * (front ? 0.025 : 0.03);
 			const radius = 1 - seamPinch - indentation;
 			const taper = 0.92 + y * 0.12;
-			position.setXYZ(i,
+			position.setXYZ(
+				i,
 				puff(x) * 0.57 * taper * radius * (front ? 1 : 1.03),
 				puff(y) * 0.76 * radius * (front ? 1 : 1.02),
 				surfaceZ,
@@ -78,7 +79,7 @@ export function createPillowFlower(T) {
 		return geometry;
 	};
 	for (let petal = 0; petal < 6; petal++) {
-		const angle = petal * Math.PI / 3;
+		const angle = (petal * Math.PI) / 3;
 		const cushion = new T.Group();
 		cushion.name = `Petal ${petal + 1}`;
 		// Overlap the two cushions so the backing sits snugly against the front.

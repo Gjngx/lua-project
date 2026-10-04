@@ -6,9 +6,7 @@ export default defineType({
   title: 'Footer',
   type: 'document',
   icon: EarthGlobeIcon,
-  groups: [
-    {name: 'contact', title: 'Contact', default: true},
-  ],
+  groups: [{name: 'contact', title: 'Contact', default: true}],
   fields: [
     defineField({
       name: 'headline',
@@ -58,7 +56,6 @@ export default defineType({
       hidden: true,
       deprecated: {reason: 'Manage the shared contact number in Site settings.'},
     }),
-
   ],
   initialValue: {
     headline: "Let's make\nsomething people\nremember.",

@@ -8,10 +8,15 @@ import sanity from '@sanity/astro';
 import { loadEnv } from 'vite';
 
 const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
+const site = process.env.SITE_URL || env.SITE_URL || 'http://localhost:4321';
+
+if (process.env.VERCEL_ENV === 'production' && new URL(site).hostname === 'localhost') {
+	throw new Error('SITE_URL must be set to the public HTTPS URL for production deployments.');
+}
 
 // https://astro.build/config
 export default defineConfig({
-	site: process.env.SITE_URL || env.SITE_URL || 'http://localhost:4321',
+	site,
 	output: 'server',
 	adapter: vercel(),
 	devToolbar: {

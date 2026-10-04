@@ -435,12 +435,16 @@
 }
 
 .home-works-item:nth-child(4n + 3) {
-	margin-left: calc(var(--container--padding) + var(--container--one-column) + var(--container--column-gap));
+	margin-left: calc(
+		var(--container--padding) + var(--container--one-column) + var(--container--column-gap)
+	);
 	z-index: 5;
 }
 
 .home-works-item:nth-child(4n) {
-	margin-right: calc(var(--container--padding) + var(--container--one-column) + var(--container--column-gap));
+	margin-right: calc(
+		var(--container--padding) + var(--container--one-column) + var(--container--column-gap)
+	);
 	margin-left: auto;
 	z-index: 5;
 }
@@ -779,7 +783,7 @@
 	display: none;
 }
 
-.home-how-model-surface>canvas {
+.home-how-model-surface > canvas {
 	position: absolute;
 	top: 50%;
 	left: 0;
@@ -789,7 +793,7 @@
 	height: 100%;
 }
 
-.home-how-model-surface:not([hidden])~.home-how-thumb-inner .home-how-model {
+.home-how-model-surface:not([hidden]) ~ .home-how-thumb-inner .home-how-model {
 	opacity: 0;
 }
 
@@ -811,7 +815,7 @@
 	box-shadow: inset -1rem -1rem 2rem rgb(40 50 10 / 15%);
 }
 
-.home-how-model.is-ready+.home-how-model-fallback {
+.home-how-model.is-ready + .home-how-model-fallback {
 	display: none;
 }
 
@@ -1100,11 +1104,15 @@
 	}
 
 	.home-works-item:nth-child(4n + 3) {
-		margin-left: calc(var(--container--padding) + (var(--container--one-column) / 3) + var(--container--column-gap));
+		margin-left: calc(
+			var(--container--padding) + (var(--container--one-column) / 3) + var(--container--column-gap)
+		);
 	}
 
 	.home-works-item:nth-child(4n) {
-		margin-right: calc(var(--container--padding) + (var(--container--one-column) / 3) + var(--container--column-gap));
+		margin-right: calc(
+			var(--container--padding) + (var(--container--one-column) / 3) + var(--container--column-gap)
+		);
 	}
 
 	.home-hero-top-title {
@@ -1223,11 +1231,9 @@
 	.home-scroll-label-inner {
 		transform: translateY(100%);
 	}
-
 }
 
 @media only screen and (max-width: 767px) {
-
 	.home-works-wrap {
 		margin-top: -100svh;
 	}
@@ -1383,7 +1389,6 @@
 		height: 100svh;
 	}
 
-
 	.home-how-intro {
 		grid-column: 2 / -2;
 	}
@@ -1421,5 +1426,4 @@
 		width: 80%;
 		height: 80%;
 	}
-
 }

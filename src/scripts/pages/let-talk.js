@@ -33,7 +33,7 @@ export const LetTalkPage = {
 				$(this.el).find('.let-talk-footer-email-inner')[0],
 				$(this.el).find('.let-talk-footer-link-inner')[0],
 			];
-			gsap.set(footerItems, { yPercent: 100});
+			gsap.set(footerItems, { yPercent: 100 });
 		}
 
 		setupOnce(data) {
@@ -74,9 +74,7 @@ export const LetTalkPage = {
 			this.masterReveal = new MasterTimeline({
 				timeline,
 				tweenArr: [
-					...textItems.map((el, index) =>
-						new FadeSplitText({ el, delay: index * 0.08 }),
-					),
+					...textItems.map((el, index) => new FadeSplitText({ el, delay: index * 0.08 })),
 					new FadeIn({ el: $(this.el).find('.let-talk-img').get(0), delay: 0.08 }),
 				],
 			});
@@ -84,7 +82,7 @@ export const LetTalkPage = {
 			return this.masterReveal.ready;
 		}
 
-		animationScrub(){
+		animationScrub() {
 			const decorWraps = $(this.el).find('.let-talk-decor-wrap').toArray();
 			const scrollInner = $(this.el).find('.let-talk-scroll-inner')[0];
 			let isScrollInnerHidden = false;
@@ -98,10 +96,10 @@ export const LetTalkPage = {
 					overwrite: true,
 				});
 			};
-			const getWrapWidth = () => $(this.el).find('.let-talk-decor-inner')[0].getBoundingClientRect().width;
-			const getDecorTranslateX = () => (
-				getWrapWidth() / 2 - decorWraps[0].getBoundingClientRect().width
-			);
+			const getWrapWidth = () =>
+				$(this.el).find('.let-talk-decor-inner')[0].getBoundingClientRect().width;
+			const getDecorTranslateX = () =>
+				getWrapWidth() / 2 - decorWraps[0].getBoundingClientRect().width;
 
 			const itemServices = $(this.el).find('.let-talk-decor-service-inner').toArray();
 			const footerItems = [
@@ -139,53 +137,56 @@ export const LetTalkPage = {
 				.to($(this.el).find('.let-talk-decor')[0], { yPercent: -15, ease: 'none' }, '<')
 				.to(decorWraps[0], { x: () => getDecorTranslateX(), ease: 'none', duration: 1 }, '<')
 				.to(decorWraps[1], { x: () => -getDecorTranslateX(), ease: 'none', duration: 1 }, '<')
-				.to(itemServices, { yPercent: -100, ease: 'power4.inOut', duration: 0.3 },);
+				.to(itemServices, { yPercent: -100, ease: 'power4.inOut', duration: 0.3 });
 		}
-		
+
 		interact() {
 			this.footerLinkCleanups.forEach((cleanup) => cleanup());
 			this.footerLinkCleanups = [];
 
-			$(this.el).find('.let-talk-footer-link').toArray().forEach((link) => {
-				let hoverFrame = null;
-				const handleHoverPoint = (event) => {
-					const bounds = event.currentTarget.getBoundingClientRect();
-					const x = ((event.clientX - bounds.left) / bounds.width) * 100;
-					const y = ((event.clientY - bounds.top) / bounds.height) * 100;
-					$(event.currentTarget).css({
-						'--footer-icon-hover-x': `${x}%`,
-						'--footer-icon-hover-y': `${y}%`,
-					});
-				};
-				const handlePointerEnter = (event) => {
-					handleHoverPoint(event);
-					if (hoverFrame !== null) cancelAnimationFrame(hoverFrame);
-					$(link).removeClass(['is-hovered']);
-					getComputedStyle(link, '::before').clipPath;
-					hoverFrame = requestAnimationFrame(() => {
-						$(link).addClass(['is-hovered']);
-						hoverFrame = null;
-					});
-				};
-				const handlePointerLeave = (event) => {
-					handleHoverPoint(event);
-					if (hoverFrame !== null) cancelAnimationFrame(hoverFrame);
-					getComputedStyle(link, '::before').clipPath;
-					hoverFrame = requestAnimationFrame(() => {
+			$(this.el)
+				.find('.let-talk-footer-link')
+				.toArray()
+				.forEach((link) => {
+					let hoverFrame = null;
+					const handleHoverPoint = (event) => {
+						const bounds = event.currentTarget.getBoundingClientRect();
+						const x = ((event.clientX - bounds.left) / bounds.width) * 100;
+						const y = ((event.clientY - bounds.top) / bounds.height) * 100;
+						$(event.currentTarget).css({
+							'--footer-icon-hover-x': `${x}%`,
+							'--footer-icon-hover-y': `${y}%`,
+						});
+					};
+					const handlePointerEnter = (event) => {
+						handleHoverPoint(event);
+						if (hoverFrame !== null) cancelAnimationFrame(hoverFrame);
 						$(link).removeClass(['is-hovered']);
-						hoverFrame = null;
-					});
-				};
+						getComputedStyle(link, '::before').clipPath;
+						hoverFrame = requestAnimationFrame(() => {
+							$(link).addClass(['is-hovered']);
+							hoverFrame = null;
+						});
+					};
+					const handlePointerLeave = (event) => {
+						handleHoverPoint(event);
+						if (hoverFrame !== null) cancelAnimationFrame(hoverFrame);
+						getComputedStyle(link, '::before').clipPath;
+						hoverFrame = requestAnimationFrame(() => {
+							$(link).removeClass(['is-hovered']);
+							hoverFrame = null;
+						});
+					};
 
-				$(link).on('pointerenter', handlePointerEnter);
-				$(link).on('pointerleave', handlePointerLeave);
-				this.footerLinkCleanups.push(() => {
-					$(link).off('pointerenter', handlePointerEnter);
-					$(link).off('pointerleave', handlePointerLeave);
-					if (hoverFrame !== null) cancelAnimationFrame(hoverFrame);
-					$(link).removeClass(['is-hovered']);
+					$(link).on('pointerenter', handlePointerEnter);
+					$(link).on('pointerleave', handlePointerLeave);
+					this.footerLinkCleanups.push(() => {
+						$(link).off('pointerenter', handlePointerEnter);
+						$(link).off('pointerleave', handlePointerLeave);
+						if (hoverFrame !== null) cancelAnimationFrame(hoverFrame);
+						$(link).removeClass(['is-hovered']);
+					});
 				});
-			});
 		}
 
 		destroy() {

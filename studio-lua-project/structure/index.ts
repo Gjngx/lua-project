@@ -24,10 +24,7 @@ export const structure: StructureResolver = (S) =>
         .title("Let's Talk page")
         .icon(EnvelopeIcon)
         .child(
-          S.document()
-            .schemaType('letTalkPage')
-            .documentId('letTalkPage')
-            .title("Let's Talk page"),
+          S.document().schemaType('letTalkPage').documentId('letTalkPage').title("Let's Talk page"),
         ),
       S.listItem()
         .title('Footer')

@@ -8,15 +8,15 @@ export class TriggerSetup {
 		this.stInstance = null;
 		this.once = true;
 	}
-	
+
 	setTrigger(triggerEl, onTrigger) {
 		if (this.stInstance) {
 			this.stInstance.kill();
 		}
 		this.stInstance = ScrollTrigger.create({
 			trigger: triggerEl,
-			start: "top bottom+=100%",
-			end: "bottom top-=100%",
+			start: 'top bottom+=100%',
+			end: 'bottom top-=100%',
 			onEnter: () => {
 				if (this.once) {
 					this.once = false;
@@ -31,7 +31,7 @@ export class TriggerSetup {
 			},
 		});
 	}
-	
+
 	cleanTrigger() {
 		if (!this.once) {
 			this.once = true;

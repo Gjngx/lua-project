@@ -233,12 +233,17 @@ export class HowModels {
 				this.surfaceDpr = dpr;
 				// Models are vertically centered and never scale above 1. Keep the
 				// same pixel density, but allocate only the band they can occupy.
-				const height = Math.min(this.surface.clientHeight,
-					Math.max(1, ...this.items.map((item) => item.canvas.clientHeight)));
+				const height = Math.min(
+					this.surface.clientHeight,
+					Math.max(1, ...this.items.map((item) => item.canvas.clientHeight)),
+				);
 				this.renderer.domElement.style.height = `${height}px`;
 				const widthPx = Math.max(1, Math.round(this.surface.clientWidth * dpr));
 				const heightPx = Math.max(1, Math.round(height * dpr));
-				if (this.renderer.domElement.width !== widthPx || this.renderer.domElement.height !== heightPx) {
+				if (
+					this.renderer.domElement.width !== widthPx ||
+					this.renderer.domElement.height !== heightPx
+				) {
 					this.renderer.setSize(widthPx, heightPx, false);
 				}
 			}
@@ -327,7 +332,8 @@ export class HowModels {
 			return;
 		}
 		if (
-			!this.direct && !this.desktop.matches &&
+			!this.direct &&
+			!this.desktop.matches &&
 			this.lastRenderTime !== null &&
 			now - this.lastRenderTime < MOBILE_FRAME_INTERVAL
 		) {
@@ -335,9 +341,10 @@ export class HowModels {
 			return;
 		}
 		// Preserve the fractional interval instead of drifting with RAF jitter.
-		this.lastRenderTime = !this.desktop.matches && this.lastRenderTime !== null
-			? now - ((now - this.lastRenderTime) % MOBILE_FRAME_INTERVAL)
-			: now;
+		this.lastRenderTime =
+			!this.desktop.matches && this.lastRenderTime !== null
+				? now - ((now - this.lastRenderTime) % MOBILE_FRAME_INTERVAL)
+				: now;
 		// Adjacent models must keep moving throughout the horizontal transition.
 		let visible = this.items.filter((item) => item.visible);
 		let surfaceRect;
@@ -346,10 +353,14 @@ export class HowModels {
 			// Read candidate rectangles before rendering/writing; includes incoming models.
 			visible = visible.filter((item) => {
 				item.rect = item.canvas.getBoundingClientRect();
-				return item.rect.width > 0 && item.rect.height > 0 &&
-					item.rect.right > surfaceRect.left && item.rect.left < surfaceRect.right &&
+				return (
+					item.rect.width > 0 &&
+					item.rect.height > 0 &&
+					item.rect.right > surfaceRect.left &&
+					item.rect.left < surfaceRect.right &&
 					item.rect.bottom > Math.max(0, surfaceRect.top) &&
-					item.rect.top < Math.min(window.innerHeight, surfaceRect.bottom);
+					item.rect.top < Math.min(window.innerHeight, surfaceRect.bottom)
+				);
 			});
 			if (visible.length || this.surfaceHasContent) {
 				this.renderer.setScissorTest(false);
@@ -404,10 +415,11 @@ export class HowModels {
 			);
 			const renderWidth = Math.max(1, Math.round(width * sampleScale));
 			const renderHeight = Math.max(1, Math.round(height * sampleScale));
-			if (!this.direct && (
-				this.renderer.domElement.width !== renderWidth ||
-				this.renderer.domElement.height !== renderHeight
-			)) {
+			if (
+				!this.direct &&
+				(this.renderer.domElement.width !== renderWidth ||
+					this.renderer.domElement.height !== renderHeight)
+			) {
 				this.renderer.setSize(renderWidth, renderHeight, false);
 			}
 			if (this.camera.aspect !== width / height) {

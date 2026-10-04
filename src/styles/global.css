@@ -4,7 +4,9 @@
 
 html,
 body {
-	cursor: url('../assets/images/cursor-default.svg') 1 1, auto;
+	cursor:
+		url('../assets/images/cursor-default.svg') 1 1,
+		auto;
 }
 
 a,
@@ -20,15 +22,21 @@ input[type='submit'],
 input[type='reset'],
 input[type='checkbox'],
 input[type='radio'] {
-	cursor: url('../assets/images/cursor-pointer.svg') 12 2, pointer !important;
+	cursor:
+		url('../assets/images/cursor-pointer.svg') 12 2,
+		pointer !important;
 }
 
 [data-cursor='drag'] {
-	cursor: url('../assets/images/cursor-drag.svg') 23 14, grab !important;
+	cursor:
+		url('../assets/images/cursor-drag.svg') 23 14,
+		grab !important;
 }
 
 [data-cursor='drag'].is-dragging {
-	cursor: url('../assets/images/cursor-drag.svg') 23 14, grabbing !important;
+	cursor:
+		url('../assets/images/cursor-drag.svg') 23 14,
+		grabbing !important;
 }
 
 .custom-scroll {
@@ -154,11 +162,11 @@ a {
 	transition: color 0.3s ease;
 }
 
-.btn.btn-sc .btn-inner{
+.btn.btn-sc .btn-inner {
 	padding-inline: 2.4rem;
 }
-.btn.btn-sc .btn-ic{
- display: none;
+.btn.btn-sc .btn-ic {
+	display: none;
 }
 .btn-ic {
 	display: flex;
@@ -205,8 +213,9 @@ a {
 	background-color: var(--cln-white);
 	border-radius: 10vmin;
 	pointer-events: none;
-	transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-	background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+	transition:
+		width 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+		background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .hover-line {
@@ -216,7 +225,7 @@ a {
 
 .hover-line::before,
 .hover-line::after {
-	content: "";
+	content: '';
 	position: absolute;
 	left: 0;
 	bottom: -0.3em;
@@ -224,7 +233,6 @@ a {
 	height: 0.1em;
 	background: currentColor;
 }
-
 
 .hover-line::before {
 	transform: scaleX(1);
@@ -244,7 +252,7 @@ a {
 }
 
 .hover-un::after {
-	content: "";
+	content: '';
 	position: absolute;
 	left: 0;
 	bottom: 0em;
@@ -374,7 +382,7 @@ a {
 	align-items: center;
 	width: 0;
 	height: 0;
-	transition: opacity .35s;
+	transition: opacity 0.35s;
 	display: flex;
 	position: relative;
 	transform: translate(-50%, -50%);
@@ -391,12 +399,17 @@ a {
 	flex: none;
 	justify-content: center;
 	align-items: center;
-	transition: opacity .35s, border-color .35s, height .35s, background-color .35s, width .35s;
+	transition:
+		opacity 0.35s,
+		border-color 0.35s,
+		height 0.35s,
+		background-color 0.35s,
+		width 0.35s;
 	display: flex;
 	position: relative;
 }
 
-.cursor-ic-link{
+.cursor-ic-link {
 	width: 8rem;
 	height: 8rem;
 	display: flex;
@@ -407,23 +420,23 @@ a {
 	background-color: var(--cln-brand);
 	border-radius: 50%;
 }
-.cursor.has-ic-external .cursor-ic-link{
+.cursor.has-ic-external .cursor-ic-link {
 	transform: scale(1);
 }
 
-.cursor-ic-link-inner{
+.cursor-ic-link-inner {
 	width: 3.2rem;
 	height: 3.2rem;
 }
 
-.cursor-ic-wrap{
+.cursor-ic-wrap {
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
 }
 
-.cursor-video{
+.cursor-video {
 	position: absolute;
 	top: 1.6rem;
 	left: 1rem;

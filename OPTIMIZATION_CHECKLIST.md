@@ -149,7 +149,20 @@ Mục tiêu của checklist này là cải thiện độ mượt khi scroll, chu
 - [x] Xác nhận Sanity Visual Editing không hydrate ngoài draft mode.
 - [x] Không thêm `manualChunks` chỉ để xóa warning; chỉ làm khi trace network chứng minh có lợi.
 - [x] Không thêm dependency mới cho debounce, throttle, observer hoặc utility nhỏ.
-- [ ] Xóa log debug không cần thiết trong production sau khi hoàn thành profiling.
+- [x] Xóa log debug không cần thiết trong production sau khi hoàn thành profiling.
+
+## Giai đoạn 5.1 — Production quality gate
+
+- [x] `npm run format:check` kiểm tra toàn repository và bỏ qua generated source.
+- [x] `npm test` chạy các regression check WebGL hiện có.
+- [x] `npm run validate` chạy format, Astro diagnostics, test và production build.
+- [x] Canonical, Open Graph và Twitter metadata dùng URL tuyệt đối nhất quán.
+- [x] Production Vercel từ chối `SITE_URL` trỏ về localhost.
+- [x] Các page có SEO description mặc định phù hợp thay vì nội dung Astro starter.
+- [x] Initial loader đợi font và ảnh ưu tiên cao trước khi dựng/chạy timeline, có timeout an toàn.
+- [x] Canvas DPR cap dùng độ phân giải vật lý để hoạt động đúng trên màn hình Retina 4K.
+- [x] Giảm DPR decor Works và mật độ sampling curl riêng trên màn hình Retina 4K.
+- [x] Không khởi động lại idle decor ngay giữa các nhịp scroll ngắn.
 
 ## Giai đoạn 6 — Chuẩn hóa cấu trúc code theo section
 
@@ -171,18 +184,18 @@ Chỉ thực hiện sau khi các giai đoạn trên đã ổn định. Đây là
 
 ## Ma trận kiểm thử hồi quy
 
-| Luồng | Desktop | Mobile | Điều kiện đạt |
-| --- | --- | --- | --- |
-| Hard load Home | [ ] | [ ] | Loader và hero animation giống baseline |
-| Scroll toàn bộ Home | [ ] | [ ] | Không giật, không mất pin/scrub/reveal |
-| Mở/đóng menu | [ ] | [ ] | Layout, cursor, audio và timeline không đổi |
-| Home → About | [ ] | [ ] | Leave/enter transition và metadata đúng |
-| About → Home | [ ] | [ ] | Animation Home khởi tạo lại đúng một lần |
-| Home → Let's Talk | [ ] | [ ] | Ảnh và text animation giữ nguyên |
-| Let's Talk → Home | [ ] | [ ] | Không còn trigger/listener/canvas cũ |
-| Resize qua breakpoint | [ ] | [ ] | Không lệch layout hoặc duplicate handler |
-| Reduced motion | [ ] | [ ] | Không phát sinh lỗi; hành vi hiện tại được giữ nguyên |
-| Draft mode Sanity | [ ] | [ ] | Visual Editing hoạt động, production không hydrate thừa |
+| Luồng                 | Desktop | Mobile | Điều kiện đạt                                           |
+| --------------------- | ------- | ------ | ------------------------------------------------------- |
+| Hard load Home        | [ ]     | [ ]    | Loader và hero animation giống baseline                 |
+| Scroll toàn bộ Home   | [ ]     | [ ]    | Không giật, không mất pin/scrub/reveal                  |
+| Mở/đóng menu          | [ ]     | [ ]    | Layout, cursor, audio và timeline không đổi             |
+| Home → About          | [ ]     | [ ]    | Leave/enter transition và metadata đúng                 |
+| About → Home          | [ ]     | [ ]    | Animation Home khởi tạo lại đúng một lần                |
+| Home → Let's Talk     | [ ]     | [ ]    | Ảnh và text animation giữ nguyên                        |
+| Let's Talk → Home     | [ ]     | [ ]    | Không còn trigger/listener/canvas cũ                    |
+| Resize qua breakpoint | [ ]     | [ ]    | Không lệch layout hoặc duplicate handler                |
+| Reduced motion        | [ ]     | [ ]    | Không phát sinh lỗi; hành vi hiện tại được giữ nguyên   |
+| Draft mode Sanity     | [ ]     | [ ]    | Visual Editing hoạt động, production không hydrate thừa |
 
 ## Thứ tự triển khai đề xuất
 

@@ -16,7 +16,11 @@ export class SmoothScroll {
 			this._nativeFrame = requestAnimationFrame(() => {
 				this._nativeFrame = null;
 				const delta = window.scrollY - this.scroller.scrollY;
-				this.updateOnScroll({ scroll: window.scrollY, velocity: delta, direction: Math.sign(delta) });
+				this.updateOnScroll({
+					scroll: window.scrollY,
+					velocity: delta,
+					direction: Math.sign(delta),
+				});
 			});
 		};
 		this._tickerCallback = null;
@@ -114,9 +118,11 @@ export class SmoothScroll {
 		this.scroller.scrollY = scroll;
 		this.scroller.velocity = Number.isFinite(e?.velocity) ? e.velocity : 0;
 		this.scroller.direction = Number.isFinite(e?.direction) ? e.direction : 0;
-		window.dispatchEvent(new CustomEvent('smooth-scroll:update', {
-			detail: { ...this.scroller, scroll },
-		}));
+		window.dispatchEvent(
+			new CustomEvent('smooth-scroll:update', {
+				detail: { ...this.scroller, scroll },
+			}),
+		);
 	}
 
 	getScroll() {
@@ -135,7 +141,9 @@ export class SmoothScroll {
 	}
 
 	isRunning() {
-		return this.lenis ? !this.lenis.isStopped : !document.documentElement.classList.contains('is-scroll-locked');
+		return this.lenis
+			? !this.lenis.isStopped
+			: !document.documentElement.classList.contains('is-scroll-locked');
 	}
 
 	restoreNativeOverflow() {
@@ -176,12 +184,16 @@ export class SmoothScroll {
 		else if (target === 'bottom') top = this.getLimit();
 		else {
 			const element = typeof target === 'string' ? document.querySelector(target) : target;
-			if (element?.getBoundingClientRect) top = element.getBoundingClientRect().top + window.scrollY;
+			if (element?.getBoundingClientRect)
+				top = element.getBoundingClientRect().top + window.scrollY;
 		}
 		if (!Number.isFinite(top)) return;
 		top = Math.max(0, Math.min(this.getLimit(), top + (options.offset || 0)));
 		this._nativeTween?.kill();
-		const finish = () => { this._onNativeScroll(); options.onComplete?.(); };
+		const finish = () => {
+			this._onNativeScroll();
+			options.onComplete?.();
+		};
 		if (options.immediate || !options.duration) {
 			window.scrollTo({ top, behavior: 'instant' });
 			finish();
@@ -189,13 +201,22 @@ export class SmoothScroll {
 		}
 		const state = { y: window.scrollY };
 		this._nativeTween = gsap.to(state, {
-			y: top, duration: options.duration, ease: options.easing || 'power2.inOut',
-			onUpdate: () => window.scrollTo({ top: state.y, behavior: 'instant' }), onComplete: finish,
+			y: top,
+			duration: options.duration,
+			ease: options.easing || 'power2.inOut',
+			onUpdate: () => window.scrollTo({ top: state.y, behavior: 'instant' }),
+			onComplete: finish,
 		});
 	}
 
 	scrollToTop(options = {}) {
-		this.scrollTo('top', { duration: 0.0001, immediate: true, lock: true, force: true, ...options });
+		this.scrollTo('top', {
+			duration: 0.0001,
+			immediate: true,
+			lock: true,
+			force: true,
+			...options,
+		});
 	}
 
 	destroy() {

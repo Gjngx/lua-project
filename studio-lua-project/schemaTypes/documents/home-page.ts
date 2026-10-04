@@ -190,7 +190,11 @@ export default defineType({
           validation: (rule) => rule.required(),
         }),
         ...[
-          {name: 'digitalDesign', title: 'Digital Design', tags: ['UI/UX', 'Interactive', 'Website']},
+          {
+            name: 'digitalDesign',
+            title: 'Digital Design',
+            tags: ['UI/UX', 'Interactive', 'Website'],
+          },
           {name: 'development', title: 'Development', tags: ['Framer', 'Webflow']},
           {name: 'branding', title: 'Branding', tags: ['Identity', 'Visual Systems']},
         ].flatMap(({name, title, tags}) => [

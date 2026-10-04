@@ -35,7 +35,7 @@ export class Header {
 	}
 
 	init(data) {
-		this.el = $(".header")[0];
+		this.el = $('.header')[0];
 		if (!this.el) return;
 		this.elLogoAnimated = $('.header-logo-amin')[0];
 
@@ -59,9 +59,7 @@ export class Header {
 			$(button).on('pointerleave', this.handlePlayHoverPoint);
 		});
 
-		this.socialHoverButtons = Array.from(
-			$(this.el).find('.header-nav-social').toArray()
-		);
+		this.socialHoverButtons = Array.from($(this.el).find('.header-nav-social').toArray());
 		this.socialHoverButtons.forEach((button) => {
 			$(button).on('pointerenter', this.handleSocialHoverPoint);
 			$(button).on('pointerleave', this.handleSocialHoverPoint);
@@ -80,16 +78,8 @@ export class Header {
 
 	handlePlayHoverPoint = (event) => {
 		const bounds = event.currentTarget.getBoundingClientRect();
-		const x = gsap.utils.clamp(
-			0,
-			100,
-			((event.clientX - bounds.left) / bounds.width) * 100,
-		);
-		const y = gsap.utils.clamp(
-			0,
-			100,
-			((event.clientY - bounds.top) / bounds.height) * 100,
-		);
+		const x = gsap.utils.clamp(0, 100, ((event.clientX - bounds.left) / bounds.width) * 100);
+		const y = gsap.utils.clamp(0, 100, ((event.clientY - bounds.top) / bounds.height) * 100);
 		$(event.currentTarget).css({
 			'--header-play-hover-x': `${x}%`,
 			'--header-play-hover-y': `${y}%`,
@@ -99,8 +89,8 @@ export class Header {
 	togglePageClass(data) {
 		if (!this.el) return;
 
-		const namespace = data?.next?.namespace ||
-			$('[data-barba="container"]')[0]?.dataset.barbaNamespace;
+		const namespace =
+			data?.next?.namespace || $('[data-barba="container"]')[0]?.dataset.barbaNamespace;
 		const isHome = namespace === 'home';
 		$(this.el).toggleClass('header-home', isHome);
 		$(this.elLogoAnimated).toggleClass('header-home', isHome);
@@ -128,23 +118,23 @@ export class Header {
 		if (this.locationClockTimer) window.clearTimeout(this.locationClockTimer);
 		this.locationClockTimer = null;
 
-		const clocks = Array.from(
-			$(this.el).find('[data-header-location-clock]').toArray(),
-		).map((clock) => {
-			const timeZone = clock.dataset.timeZone;
-			if (!timeZone || timeZone === 'Europe/London') return null;
+		const clocks = Array.from($(this.el).find('[data-header-location-clock]').toArray())
+			.map((clock) => {
+				const timeZone = clock.dataset.timeZone;
+				if (!timeZone || timeZone === 'Europe/London') return null;
 
-			return {
-				clock,
-				timeFormatter: new Intl.DateTimeFormat('en-GB', {
-					timeZone,
-					hour: '2-digit',
-					minute: '2-digit',
-					second: '2-digit',
-					hourCycle: 'h23',
-				}),
-			};
-		}).filter(Boolean);
+				return {
+					clock,
+					timeFormatter: new Intl.DateTimeFormat('en-GB', {
+						timeZone,
+						hour: '2-digit',
+						minute: '2-digit',
+						second: '2-digit',
+						hourCycle: 'h23',
+					}),
+				};
+			})
+			.filter(Boolean);
 
 		if (!clocks.length) return;
 
@@ -174,7 +164,8 @@ export class Header {
 		if (this.portraitLayers.length !== 3 || !this.portraitMarker) return;
 
 		$(portrait).on('pointerenter', (event) => {
-			if (window.innerWidth <= 991 || event.originalEvent?.pointerType === 'touch' || !this.isOpen) return;
+			if (window.innerWidth <= 991 || event.originalEvent?.pointerType === 'touch' || !this.isOpen)
+				return;
 			this.playPortraitAnimation();
 		});
 		$(portrait).on('pointerleave', (event) => {
@@ -206,7 +197,7 @@ export class Header {
 			timeline.fromTo(
 				markerCircle,
 				{ strokeDashoffset: 0 },
-				{ strokeDashoffset: -28, duration: 1, ease: 'none' }
+				{ strokeDashoffset: -28, duration: 1, ease: 'none' },
 			);
 		} else {
 			timeline.to({}, { duration: 1 });
@@ -276,45 +267,48 @@ export class Header {
 	setupNavCardReels() {
 		if (this.navCardReels.length) return;
 
-		$(this.el).find('[data-header-reel]').toArray().forEach((reel, index) => {
-			if (reel.hasAttribute('data-header-reel-ready')) return;
+		$(this.el)
+			.find('[data-header-reel]')
+			.toArray()
+			.forEach((reel, index) => {
+				if (reel.hasAttribute('data-header-reel-ready')) return;
 
-			const icons = Array.from(reel.children).map((icon) => icon.cloneNode(true));
-			if (!icons.length) return;
+				const icons = Array.from(reel.children).map((icon) => icon.cloneNode(true));
+				if (!icons.length) return;
 
-			const track = document.createElement('div');
-			$(track).attr('data-header-reel-track', '');
-			$(track).attr('aria-hidden', 'true');
-			for (let cycle = 0; cycle < 2; cycle += 1) {
-				icons.forEach((icon) => track.append(icon.cloneNode(true)));
-			}
-			const ghostFar = track.cloneNode(true);
-			$(ghostFar).removeAttr('data-header-reel-track');
-			$(ghostFar).attr('data-header-reel-ghost', 'far');
-			const ghostNear = track.cloneNode(true);
-			$(ghostNear).removeAttr('data-header-reel-track');
-			$(ghostNear).attr('data-header-reel-ghost', 'near');
-			reel.replaceChildren(ghostFar, ghostNear, track);
+				const track = document.createElement('div');
+				$(track).attr('data-header-reel-track', '');
+				$(track).attr('aria-hidden', 'true');
+				for (let cycle = 0; cycle < 2; cycle += 1) {
+					icons.forEach((icon) => track.append(icon.cloneNode(true)));
+				}
+				const ghostFar = track.cloneNode(true);
+				$(ghostFar).removeAttr('data-header-reel-track');
+				$(ghostFar).attr('data-header-reel-ghost', 'far');
+				const ghostNear = track.cloneNode(true);
+				$(ghostNear).removeAttr('data-header-reel-track');
+				$(ghostNear).attr('data-header-reel-ghost', 'near');
+				reel.replaceChildren(ghostFar, ghostNear, track);
 
-			$(reel).attr('data-header-reel-ready', '');
-			this.navCardReels.push({
-				el: reel,
-				track,
-				ghosts: [ghostNear, ghostFar],
-				icons,
-				index,
-				stepSize: 0,
-				cycleSize: 0,
-				position: 0,
-				baseSpeed: 0,
-				maxSpeed: 0,
-				cruiseSpeed: 0,
-				acceleration: 0,
-				currentSpeed: 0,
-				state: 'idle',
-				motion: null,
+				$(reel).attr('data-header-reel-ready', '');
+				this.navCardReels.push({
+					el: reel,
+					track,
+					ghosts: [ghostNear, ghostFar],
+					icons,
+					index,
+					stepSize: 0,
+					cycleSize: 0,
+					position: 0,
+					baseSpeed: 0,
+					maxSpeed: 0,
+					cruiseSpeed: 0,
+					acceleration: 0,
+					currentSpeed: 0,
+					state: 'idle',
+					motion: null,
+				});
 			});
-		});
 
 		const reelGroup = $(this.el).find('[data-header-reel-group]')[0];
 		if (reelGroup && !reelGroup.hasAttribute('data-header-reel-group-ready')) {
@@ -379,11 +373,17 @@ export class Header {
 			if (!reel.cycleSize) return;
 
 			if (reel.state === 'running') {
-				reel.cruiseSpeed = Math.min(reel.maxSpeed, reel.cruiseSpeed + reel.acceleration * deltaTime);
+				reel.cruiseSpeed = Math.min(
+					reel.maxSpeed,
+					reel.cruiseSpeed + reel.acceleration * deltaTime,
+				);
 				reel.position = (reel.position + reel.cruiseSpeed * deltaTime) % reel.cycleSize;
 				reel.currentSpeed = reel.cruiseSpeed;
 			} else if (reel.state === 'pending-stop') {
-				reel.cruiseSpeed = Math.min(reel.maxSpeed, reel.cruiseSpeed + reel.acceleration * deltaTime);
+				reel.cruiseSpeed = Math.min(
+					reel.maxSpeed,
+					reel.cruiseSpeed + reel.acceleration * deltaTime,
+				);
 				reel.position = (reel.position + reel.cruiseSpeed * deltaTime) % reel.cycleSize;
 				reel.currentSpeed = reel.cruiseSpeed;
 				if (time >= reel.motion.startAt) this.beginNavCardReelStop(reel, time);
@@ -394,11 +394,13 @@ export class Header {
 					reel.motion.curveA * progress ** 2 +
 					reel.motion.curveB * progress ** 3;
 				reel.position = (reel.motion.from + distance) % reel.cycleSize;
-				reel.currentSpeed = Math.max(0, (
-					reel.motion.velocityDistance +
-					2 * reel.motion.curveA * progress +
-					3 * reel.motion.curveB * progress ** 2
-				) / reel.motion.duration);
+				reel.currentSpeed = Math.max(
+					0,
+					(reel.motion.velocityDistance +
+						2 * reel.motion.curveA * progress +
+						3 * reel.motion.curveB * progress ** 2) /
+						reel.motion.duration,
+				);
 
 				if (progress === 1) {
 					const { targetPosition, overshoot, rebound } = reel.motion;
@@ -416,9 +418,18 @@ export class Header {
 			} else if (reel.state === 'rebounding') {
 				const progress = Math.min((time - reel.motion.startTime) / reel.motion.duration, 1);
 				const eased = 0.5 - 0.5 * Math.cos(progress * Math.PI);
-				const offset = reel.motion.fromOffset + (reel.motion.toOffset - reel.motion.fromOffset) * eased;
-				reel.position = this.normalizeNavCardReelPosition(reel, reel.motion.targetPosition + offset);
-				reel.currentSpeed = (reel.motion.toOffset - reel.motion.fromOffset) * 0.5 * Math.PI * Math.sin(progress * Math.PI) / reel.motion.duration;
+				const offset =
+					reel.motion.fromOffset + (reel.motion.toOffset - reel.motion.fromOffset) * eased;
+				reel.position = this.normalizeNavCardReelPosition(
+					reel,
+					reel.motion.targetPosition + offset,
+				);
+				reel.currentSpeed =
+					((reel.motion.toOffset - reel.motion.fromOffset) *
+						0.5 *
+						Math.PI *
+						Math.sin(progress * Math.PI)) /
+					reel.motion.duration;
 
 				if (progress === 1) {
 					const { targetPosition, toOffset } = reel.motion;
@@ -435,8 +446,13 @@ export class Header {
 				const progress = Math.min((time - reel.motion.startTime) / reel.motion.duration, 1);
 				const eased = 0.5 - 0.5 * Math.cos(progress * Math.PI);
 				const offset = reel.motion.fromOffset * (1 - eased);
-				reel.position = this.normalizeNavCardReelPosition(reel, reel.motion.targetPosition + offset);
-				reel.currentSpeed = -reel.motion.fromOffset * 0.5 * Math.PI * Math.sin(progress * Math.PI) / reel.motion.duration;
+				reel.position = this.normalizeNavCardReelPosition(
+					reel,
+					reel.motion.targetPosition + offset,
+				);
+				reel.currentSpeed =
+					(-reel.motion.fromOffset * 0.5 * Math.PI * Math.sin(progress * Math.PI)) /
+					reel.motion.duration;
 
 				if (progress === 1) {
 					reel.position = reel.motion.targetPosition;
@@ -456,7 +472,8 @@ export class Header {
 			} else if (reel.state === 'accelerating') {
 				const progress = Math.min((time - reel.motion.startTime) / reel.motion.duration, 1);
 				const eased = 0.5 - 0.5 * Math.cos(progress * Math.PI);
-				reel.currentSpeed = reel.motion.fromSpeed + (reel.cruiseSpeed - reel.motion.fromSpeed) * eased;
+				reel.currentSpeed =
+					reel.motion.fromSpeed + (reel.cruiseSpeed - reel.motion.fromSpeed) * eased;
 				reel.position = (reel.position + reel.currentSpeed * deltaTime) % reel.cycleSize;
 
 				if (progress === 1) {
@@ -469,16 +486,16 @@ export class Header {
 			this.renderNavCardReel(reel);
 		});
 
-		this.navCardReelFrame = window.requestAnimationFrame((nextTime) => this.updateNavCardReels(nextTime));
+		this.navCardReelFrame = window.requestAnimationFrame((nextTime) =>
+			this.updateNavCardReels(nextTime),
+		);
 	}
 
 	renderNavCardReel(reel) {
 		const speedRatio = reel.baseSpeed
 			? Math.min(Math.abs(reel.currentSpeed) / reel.baseSpeed, 1.7)
 			: 0;
-		const trailStrength = speedRatio < 0.35
-			? 0
-			: Math.min((speedRatio - 0.35) / 1.35, 1);
+		const trailStrength = speedRatio < 0.35 ? 0 : Math.min((speedRatio - 0.35) / 1.35, 1);
 		const direction = Math.sign(reel.currentSpeed) || 1;
 		const trailOffsets = [0.07, 0.14];
 		const trailOpacities = [0.16, 0.06];
@@ -488,7 +505,7 @@ export class Header {
 			const lag = reel.stepSize * trailOffsets[index] * speedRatio;
 			const ghostPosition = this.normalizeNavCardReelPosition(
 				reel,
-				reel.position - direction * lag
+				reel.position - direction * lag,
 			);
 			ghost.style.transform = `translate3d(0, ${-ghostPosition}px, 0)`;
 			ghost.style.opacity = String(trailOpacities[index] * trailStrength);
@@ -518,8 +535,8 @@ export class Header {
 			this.lastNavCardReelResult &&
 			result.filter((target, index) => target !== this.lastNavCardReelResult[index]).length < 2
 		) {
-			result = this.lastNavCardReelResult.map((target, index) =>
-				(target + 1 + (index % 2)) % this.navCardReels[index].icons.length
+			result = this.lastNavCardReelResult.map(
+				(target, index) => (target + 1 + (index % 2)) % this.navCardReels[index].icons.length,
 			);
 		}
 		this.lastNavCardReelResult = [...result];
@@ -656,13 +673,13 @@ export class Header {
 		const headerHeight = this.headerMetrics.outerHeight;
 		const collapseAt = headerHeight * 2;
 		const expandAt = headerHeight * 1.5;
-		const isCollapsed = $(this.el).hasClass("on-scroll");
+		const isCollapsed = $(this.el).hasClass('on-scroll');
 
 		if (!isCollapsed && inst.scroll > collapseAt) {
-			$(this.el).addClass(["on-scroll"]);
+			$(this.el).addClass(['on-scroll']);
 			$(this.elLogoAnimated).addClass(['on-scroll']);
 		} else if (isCollapsed && inst.scroll < expandAt) {
-			$(this.el).removeClass(["on-scroll"]);
+			$(this.el).removeClass(['on-scroll']);
 			$(this.elLogoAnimated).removeClass(['on-scroll']);
 		}
 		$(this.elLogoAnimated).toggleClass('on-scroll', $(this.el).hasClass('on-scroll'));
@@ -676,15 +693,15 @@ export class Header {
 		const headerHeight = this.headerMetrics.outerHeight;
 
 		if (inst.scroll <= headerHeight * 3) {
-			$(this.el).removeClass(["on-hide"]);
+			$(this.el).removeClass(['on-hide']);
 			$(this.elLogoAnimated).removeClass(['on-hide']);
 		} else if (inst.direction == 1) {
 			// Scroll xuống → ẩn header
-			$(this.el).addClass(["on-hide"]);
+			$(this.el).addClass(['on-hide']);
 			$(this.elLogoAnimated).addClass(['on-hide']);
 		} else if (inst.direction == -1) {
 			// Scroll lên → hiện header
-			$(this.el).removeClass(["on-hide"]);
+			$(this.el).removeClass(['on-hide']);
 			$(this.elLogoAnimated).removeClass(['on-hide']);
 		}
 		$(this.elLogoAnimated).toggleClass('on-hide', $(this.el).hasClass('on-hide'));
@@ -708,22 +725,26 @@ export class Header {
 
 		// Xóa tất cả on-* class trừ on-scroll, on-hide, on-open-nav
 		const classes = ($(this.el).attr('class') || '').split(/\s+/).filter(Boolean);
-		const modeClasses = classes.filter(cls =>
-			cls.startsWith('on-') &&
-			cls !== 'on-scroll' &&
-			cls !== 'on-hide' &&
-			cls !== 'on-open-nav' &&
-			cls !== 'on-loader'
+		const modeClasses = classes.filter(
+			(cls) =>
+				cls.startsWith('on-') &&
+				cls !== 'on-scroll' &&
+				cls !== 'on-hide' &&
+				cls !== 'on-open-nav' &&
+				cls !== 'on-loader',
 		);
-		modeClasses.forEach(cls => $(this.el).removeClass([cls]));
+		modeClasses.forEach((cls) => $(this.el).removeClass([cls]));
 		if (this.elLogoAnimated) {
-			($(this.elLogoAnimated).attr('class') || '').split(/\s+/).filter(Boolean)
-				.filter((cls) =>
-					cls.startsWith('on-') &&
-					cls !== 'on-scroll' &&
-					cls !== 'on-hide' &&
-					cls !== 'on-open-nav' &&
-					cls !== 'on-loader'
+			($(this.elLogoAnimated).attr('class') || '')
+				.split(/\s+/)
+				.filter(Boolean)
+				.filter(
+					(cls) =>
+						cls.startsWith('on-') &&
+						cls !== 'on-scroll' &&
+						cls !== 'on-hide' &&
+						cls !== 'on-open-nav' &&
+						cls !== 'on-loader',
 				)
 				.forEach((cls) => $(this.elLogoAnimated).removeClass([cls]));
 		}
@@ -738,17 +759,14 @@ export class Header {
 	/**
 	 * Tìm section hiện đang nằm ở vùng header
 	 */
-	getCurrentSection(attribute, offset = cvUnit(25, "rem")) {
+	getCurrentSection(attribute, offset = cvUnit(25, 'rem')) {
 		const sections = $(attribute).toArray();
 		let matchedSection = null;
 		const headerHeight = this.headerMetrics.innerHeight;
 
 		for (let i = 0; i < sections.length; i++) {
 			const rect = sections[i].getBoundingClientRect();
-			if (
-				rect.top < headerHeight + offset &&
-				rect.bottom - headerHeight * 0.5 - offset > 0
-			) {
+			if (rect.top < headerHeight + offset && rect.bottom - headerHeight * 0.5 - offset > 0) {
 				matchedSection = sections[i];
 			}
 		}
@@ -817,12 +835,9 @@ export class Header {
 	}
 
 	clearNavAnimationStyles(elements = this.getNavAnimationElements()) {
-		const targets = [
-			elements.nav,
-			elements.lead,
-			...elements.cards,
-			elements.overlay,
-		].filter(Boolean);
+		const targets = [elements.nav, elements.lead, ...elements.cards, elements.overlay].filter(
+			Boolean,
+		);
 
 		if (!targets.length) return;
 		gsap.set(targets, {
@@ -993,15 +1008,18 @@ export class Header {
 	// ─── Nav Toggle ──────────────────────────────────────────────────
 	toggleNav() {
 		const toggles = $(this.el).find('[data-header-toggle]').toArray();
-		toggles.forEach(btn => {
-			$(btn).on("click", this.handleClick.bind(this));
+		toggles.forEach((btn) => {
+			$(btn).on('click', this.handleClick.bind(this));
 		});
 
-		$(this.el).find('[data-header-nav] a, .header-nav-btn-mb a').toArray().forEach(link => {
-			$(link).on('click', () => {
-				if (this.isOpen) this.close();
+		$(this.el)
+			.find('[data-header-nav] a, .header-nav-btn-mb a')
+			.toArray()
+			.forEach((link) => {
+				$(link).on('click', () => {
+					if (this.isOpen) this.close();
+				});
 			});
-		});
 
 		const audioToggle = $(this.el).find('[data-header-next]')[0];
 		if (audioToggle) {
@@ -1041,11 +1059,16 @@ export class Header {
 		$(document).on('click', (e) => {
 			if (!this.isOpen) return;
 			if (
-				$(e.target).closest('[data-header-toggle]')[0] || null ||
-				$(e.target).closest('.header-logo')[0] || null ||
-				$(e.target).closest('.header-inner')[0] || null ||
-				$(e.target).closest('[data-header-nav]')[0] || null
-			) return;
+				$(e.target).closest('[data-header-toggle]')[0] ||
+				null ||
+				$(e.target).closest('.header-logo')[0] ||
+				null ||
+				$(e.target).closest('.header-inner')[0] ||
+				null ||
+				$(e.target).closest('[data-header-nav]')[0] ||
+				null
+			)
+				return;
 			this.close();
 		});
 
@@ -1084,11 +1107,14 @@ export class Header {
 		$(this.el).removeClass(['is-nav-closing']);
 		$(this.el).addClass(['on-open-nav']);
 		$(this.el).find('[data-header-nav]').attr('aria-hidden', 'false');
-		$(this.el).find('[data-header-toggle]').toArray().forEach((el) => {
-			$(el).addClass(['active']);
-			$(el).attr('aria-expanded', 'true');
-			$(el).attr('aria-label', 'Close navigation');
-		});
+		$(this.el)
+			.find('[data-header-toggle]')
+			.toArray()
+			.forEach((el) => {
+				$(el).addClass(['active']);
+				$(el).attr('aria-expanded', 'true');
+				$(el).attr('aria-label', 'Close navigation');
+			});
 		this.isOpen = true;
 		this.startNavCardReels();
 		this.portraitAutoPlayCall?.kill();
@@ -1130,11 +1156,14 @@ export class Header {
 		if (smoothScroll) smoothScroll.start();
 		$(this.el).addClass(['is-nav-closing']);
 		$(this.el).find('[data-header-nav]').attr('aria-hidden', 'true');
-		$(this.el).find('[data-header-toggle]').toArray().forEach((el) => {
-			$(el).removeClass(['active']);
-			$(el).attr('aria-expanded', 'false');
-			$(el).attr('aria-label', 'Open navigation');
-		});
+		$(this.el)
+			.find('[data-header-toggle]')
+			.toArray()
+			.forEach((el) => {
+				$(el).removeClass(['active']);
+				$(el).attr('aria-expanded', 'false');
+				$(el).attr('aria-label', 'Open navigation');
+			});
 
 		if (this.prefersReducedMotion) {
 			this.finishNavClose();

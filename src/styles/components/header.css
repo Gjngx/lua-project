@@ -7,7 +7,7 @@
 	pointer-events: none;
 }
 .header-logo-amin.header-home,
-.header.header-home .header-logo{
+.header.header-home .header-logo {
 	pointer-events: none;
 }
 
@@ -248,7 +248,6 @@
 	height: 100%;
 	cursor: pointer;
 	transition: background-color 0.3s ease;
-
 }
 
 .header-menu-toggle {
@@ -492,7 +491,7 @@
 	grid-row: span 2;
 }
 
-.header-nav-card-decor-item{
+.header-nav-card-decor-item {
 	color: var(--cln-brand);
 }
 
@@ -520,7 +519,14 @@
 	position: absolute;
 	z-index: 2;
 	inset: 0;
-	background: linear-gradient(180deg, var(--cln-content-strong) 15.54%, #282c07a1 35.69%, transparent 50%, #282c07a1 64.46%, var(--cln-content-strong) 84.43%);
+	background: linear-gradient(
+		180deg,
+		var(--cln-content-strong) 15.54%,
+		#282c07a1 35.69%,
+		transparent 50%,
+		#282c07a1 64.46%,
+		var(--cln-content-strong) 84.43%
+	);
 	pointer-events: none;
 }
 
@@ -547,7 +553,7 @@
 }
 
 .header-nav-socials a::before {
-	content: "";
+	content: '';
 	position: absolute;
 	inset: 0;
 	background-color: var(--cln-brand);
@@ -807,7 +813,7 @@
 }
 
 @media only screen and (max-width: 767px) {
-	.header-nav-info-wrap-mb{
+	.header-nav-info-wrap-mb {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -816,16 +822,16 @@
 		margin-bottom: 2.4rem;
 		color: var(--cln-white);
 	}
-	.header-nav-location-item .header-nav-location-item-img{
+	.header-nav-location-item .header-nav-location-item-img {
 		width: 1.2rem;
 		height: 1.2rem;
 	}
-	.header-nav-location-item-dot{
+	.header-nav-location-item-dot {
 		width: 0.8rem;
 		height: 0.8rem;
 		margin: 0.4rem;
 	}
-	.header-nav-location-item{
+	.header-nav-location-item {
 		gap: 0.4rem;
 	}
 	.header-menu-main-inner .header-menu-dot,
@@ -833,7 +839,7 @@
 		display: flex;
 	}
 
-	.header-menu-name{
+	.header-menu-name {
 		text-align: right;
 	}
 
@@ -850,11 +856,11 @@
 		top: 6.2rem;
 		left: var(--container--padding);
 	}
-	.header-nav-card-item{
+	.header-nav-card-item {
 		width: 2.2rem;
 	}
 
-	.header-nav-card-item .item-ic{
+	.header-nav-card-item .item-ic {
 		width: 2.2rem;
 		height: 2.2rem;
 	}
@@ -868,7 +874,7 @@
 	}
 
 	.header-menu-contact,
-	.header-nav-links-thumb{
+	.header-nav-links-thumb {
 		display: none;
 	}
 

@@ -20,9 +20,7 @@ if (process.argv.includes('--fix-env')) {
 	process.exit(0);
 }
 
-const line = envSource
-	.split(/\r?\n/)
-	.find((entry) => entry.startsWith('APP_PASSWORD='));
+const line = envSource.split(/\r?\n/).find((entry) => entry.startsWith('APP_PASSWORD='));
 
 if (!line) throw new Error('Add APP_PASSWORD to .env before running this command');
 

@@ -22,10 +22,7 @@ const readSanitySoundEffects = () => {
 	}
 };
 
-CustomEase.create(
-	'buttonTextEase',
-	'M0,0 C0.12,0.88 0.24,1.08 0.4,1.02 0.62,0.98 0.78,1 1,1',
-);
+CustomEase.create('buttonTextEase', 'M0,0 C0.12,0.88 0.24,1.08 0.4,1.02 0.62,0.98 0.78,1 1,1');
 
 class ButtonText {
 	constructor() {
@@ -202,8 +199,7 @@ class ButtonText {
 
 	destroy(root = document) {
 		this.instances.forEach((instance, button) => {
-			const belongsToRoot =
-				root === document || root === button || root.contains(button);
+			const belongsToRoot = root === document || root === button || root.contains(button);
 			if (!belongsToRoot) return;
 
 			const {
@@ -211,12 +207,7 @@ class ButtonText {
 				splitResult,
 				label,
 				originalLabelStyles,
-				handlers: {
-					onPointerEnter,
-					onPointerLeave,
-					onFocus,
-					onBlur,
-				},
+				handlers: { onPointerEnter, onPointerLeave, onFocus, onBlur },
 			} = instance;
 
 			gsap.killTweensOf(chars);
@@ -230,8 +221,7 @@ class ButtonText {
 		});
 
 		this.soundInstances.forEach(({ onPointerEnter }, target) => {
-			const belongsToRoot =
-				root === document || root === target || root.contains(target);
+			const belongsToRoot = root === document || root === target || root.contains(target);
 			if (!belongsToRoot) return;
 
 			$(target).off('pointerenter', onPointerEnter);

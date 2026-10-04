@@ -18,15 +18,15 @@ html {
   } */
 
 @media only screen and (max-width: 991px) {
-  html {
-    --fs-global: 1.0090817356vw;
-  }
+	html {
+		--fs-global: 1.0090817356vw;
+	}
 }
 
 @media only screen and (max-width: 767px) {
-  html {
+	html {
 		--fs-global: 2.5641025641vw;
-  }
+	}
 }
 
 :root {
@@ -56,7 +56,7 @@ main,
 	flex-grow: 1;
 }
 
-.container{
+.container {
 	margin-left: auto;
 	margin-right: auto;
 	position: relative;
@@ -71,29 +71,42 @@ main,
 	padding: 0;
 	display: grid;
 	grid-template-columns:
-		[full-width-start] minmax(var(--padding-inline), 1fr) [content-start] repeat(var(--container--column), minmax(0, calc(min(100% - (var(--padding-inline) * 2) - (var(--container--column-gap) * (var(--container--column) - 1)),
-						var(--content-max-width) - (var(--container--column-gap) * (var(--container--column) - 1))) / var(--container--column)))) [content-end] minmax(var(--padding-inline), 1fr) [full-width-end];
+		[full-width-start] minmax(var(--padding-inline), 1fr) [content-start] repeat(
+			var(--container--column),
+			minmax(
+				0,
+				calc(
+					min(
+							100% - (var(--padding-inline) * 2) -
+								(var(--container--column-gap) * (var(--container--column) - 1)),
+							var(--content-max-width) -
+								(var(--container--column-gap) * (var(--container--column) - 1))
+						) /
+						var(--container--column)
+				)
+			)
+		)
+		[content-end] minmax(var(--padding-inline), 1fr) [full-width-end];
 	gap: 0 var(--container--column-gap);
 }
 
-.container.grid>.full-width,
-.container.grid>.full-width-wrap {
+.container.grid > .full-width,
+.container.grid > .full-width-wrap {
 	grid-column: full-width;
 	display: grid;
 	grid-template-columns: minmax(0px, 1fr);
 }
 
-.container.grid.full-h{
+.container.grid.full-h {
 	height: 100%;
 }
-
 
 .debug-area {
 	pointer-events: none;
 	-webkit-user-select: none;
 	user-select: none;
 	z-index: 100;
-	opacity: .53;
+	opacity: 0.53;
 	width: 100%;
 	position: fixed;
 	inset: 0%;
@@ -103,7 +116,7 @@ main,
 	height: 100%;
 }
 .container-column:first-child {
-	grid-column: 2 ;
+	grid-column: 2;
 }
 .container-column {
 	grid-column: span 1;

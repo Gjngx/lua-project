@@ -17,7 +17,6 @@ export async function loadSocialLinks(draftModeProps: { perspectiveCookie?: stri
 		...draftModeProps,
 	});
 
-	return (platform: keyof typeof defaultLinks) => stegaClean(
-		data?.[platform] ?? defaultLinks[platform],
-	) || '#';
+	return (platform: keyof typeof defaultLinks) =>
+		stegaClean(data?.[platform] ?? defaultLinks[platform]) || '#';
 }

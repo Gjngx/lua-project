@@ -7,12 +7,13 @@ export interface Props {
 }
 
 const {
-	href = "#",
-	class: className = "",
+	href = '#',
+	class: className = '',
 	'data-sound-hover': dataSoundHover = false,
 	'data-click-close': dataClickClose = false,
 } = Astro.props;
 ---
+
 <a
 	href={href}
 	class={`btn ${className}`.trim()}

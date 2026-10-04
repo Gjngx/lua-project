@@ -9,26 +9,26 @@ export class GlobalChange {
 		this.pageHeightObserver = null;
 		this.pageHeightRefreshTimer = null;
 	}
-	
+
 	init(data) {
 		// Gọi một lần duy nhất lúc web load
 		if (data && data.next) {
 			this.namespace = data.next.namespace;
 		}
-		
+
 		audioManager.init();
-		
+
 		header.init(data);
 		buttonText.mount(document);
-		
+
 		this.refreshOnBreakpoint();
 		this.watchPageHeight();
 	}
-	
+
 	update(data) {
 		// Gọi mỗi khi chuyển sang trang mới
 		this.namespace = data.next.namespace;
-		
+
 		header.update(data);
 		buttonText.mount(data.next.container);
 	}
@@ -63,17 +63,16 @@ export class GlobalChange {
 		window.clearTimeout(this.pageHeightRefreshTimer);
 		this.pageHeightRefreshTimer = null;
 	}
-	
+
 	refreshOnBreakpoint() {
 		// Tự động reload web khi user kéo màn hình qua điểm giao desktop/mobile
 		const breakpoints = [767, 991];
 		const initialViewportWidth = window.innerWidth;
 		const breakpoint =
-			breakpoints.find((bp) => initialViewportWidth < bp) ||
-			breakpoints[breakpoints.length - 1];
+			breakpoints.find((bp) => initialViewportWidth < bp) || breakpoints[breakpoints.length - 1];
 
 		let timeoutId = null;
-		$(window).on("resize", () => {
+		$(window).on('resize', () => {
 			clearTimeout(timeoutId);
 			timeoutId = setTimeout(() => {
 				const newViewportWidth = window.innerWidth;
@@ -95,32 +94,28 @@ export class PageTrans {
 		this.tlLeave = null;
 		this.tlEnter = null;
 	}
-	
+
 	leaveAnim(data) {
 		return new Promise((resolve) => {
 			// Khóa click chuột trong lúc chuyển trang
 			$(document.body).css('pointer-events', 'none');
 
 			this.tlLeave = gsap.timeline({
-				onComplete: resolve
+				onComplete: resolve,
 			});
 
 			this.tlLeave.fromTo(
 				data.current.container,
 				{ autoAlpha: 1 },
-				{ duration: 0.6, autoAlpha: 0 }
+				{ duration: 0.6, autoAlpha: 0 },
 			);
 
 			if (data.current.namespace === 'home') {
-				this.tlLeave.to(
-					$('.header-logo-ic-amin')[0],
-					{ duration: 0.6, autoAlpha: 0 },
-					0,
-				);
+				this.tlLeave.to($('.header-logo-ic-amin')[0], { duration: 0.6, autoAlpha: 0 }, 0);
 			}
 		});
 	}
-	
+
 	enterAnim(data) {
 		return new Promise((resolve) => {
 			this.tlEnter = gsap.timeline({
@@ -128,14 +123,14 @@ export class PageTrans {
 					// Mở khóa click chuột sau khi chuyển xong
 					$(document.body).css('pointer-events', '');
 					resolve();
-				}
+				},
 			});
 
 			this.tlEnter.fromTo(
 				data.next.container,
 				{ autoAlpha: 0 },
-				{ duration: 0.6, autoAlpha: 1, clearProps: "all" },
-				0
+				{ duration: 0.6, autoAlpha: 1, clearProps: 'all' },
+				0,
 			);
 
 			if (data.next.namespace === 'home') {
@@ -158,6 +153,6 @@ export const pageTrans = new PageTrans();
 
 // Hàm khởi tạo các sự kiện toàn cục (Ví dụ: Menu mobile toggle, custom cursor, ...)
 export function initGlobalInteractions() {
-	console.log("🌍 Global interactions initialized");
+	console.log('🌍 Global interactions initialized');
 	// Đặt addEventListener chung ở đây
 }

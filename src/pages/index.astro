@@ -241,19 +241,15 @@ const gallery = playground?.gallery?.length
 
 const seoTitle = stegaClean(homePage?.seo?.title || 'Home');
 const seoDescription = stegaClean(
-	homePage?.seo?.description || 'Astro website built for production',
+	homePage?.seo?.description ||
+		'Minh Hieu — independent designer creating websites, brands and digital products.',
 );
 const seoImage = homePage?.seo?.shareImage?.asset?.url
 	? urlFor(homePage.seo.shareImage).width(1200).height(630).fit('crop').auto('format').url()
 	: undefined;
 ---
 
-<Layout
-	title={seoTitle}
-	description={seoDescription}
-	image={seoImage}
-	namespace="home"
->
+<Layout title={seoTitle} description={seoDescription} image={seoImage} namespace="home">
 	<div class="home-hero-wrap" data-section="transparent">
 		<div class="home-hero-bg">
 			<div class="home-hero-bg-inner">
@@ -275,9 +271,16 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 				<div class="home-hero-top top-left">
 					<div class="home-hero-desc" data-init-hidden>
 						<p class:list={['label', { 'preserve-line-breaks': isDraftMode }]}>
-							{isDraftMode ? heroAvailability : heroAvailabilityLines.map((line, index) => (
-								<>{line}{index < heroAvailabilityLines.length - 1 && <br />}</>
-							))}
+							{
+								isDraftMode
+									? heroAvailability
+									: heroAvailabilityLines.map((line, index) => (
+											<>
+												{line}
+												{index < heroAvailabilityLines.length - 1 && <br />}
+											</>
+										))
+							}
 						</p>
 					</div>
 					<div class="home-hero-ic-mb hidden-dsk">
@@ -285,9 +288,16 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 					</div>
 					<div class="home-hero-sub-mb hidden-dsk">
 						<p class:list={['desc', { 'preserve-line-breaks': isDraftMode }]}>
-							{isDraftMode ? heroRole : heroRoleLines.map((line, index) => (
-								<>{line}{index < heroRoleLines.length - 1 && <br />}</>
-							))}
+							{
+								isDraftMode
+									? heroRole
+									: heroRoleLines.map((line, index) => (
+											<>
+												{line}
+												{index < heroRoleLines.length - 1 && <br />}
+											</>
+										))
+							}
 						</p>
 					</div>
 				</div>
@@ -295,12 +305,14 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 					<div class="home-hero-top-title">
 						<h1 class:list={['h4', { 'preserve-line-breaks': isDraftMode }]}>
 							{
-								isDraftMode ? heroHeadline : heroHeadlineLines.map((line, index) => (
-									<>
-										{line}
-										{index < heroHeadlineLines.length - 1 && <br />}
-									</>
-								))
+								isDraftMode
+									? heroHeadline
+									: heroHeadlineLines.map((line, index) => (
+											<>
+												{line}
+												{index < heroHeadlineLines.length - 1 && <br />}
+											</>
+										))
 							}
 						</h1>
 					</div>
@@ -310,9 +322,16 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 								<IconSun />
 							</div>
 							<h2 class:list={['desc', { 'preserve-line-breaks': isDraftMode }]}>
-								{isDraftMode ? heroRole : heroRoleLines.map((line, index) => (
-									<>{line}{index < heroRoleLines.length - 1 && <br />}</>
-								))}
+								{
+									isDraftMode
+										? heroRole
+										: heroRoleLines.map((line, index) => (
+												<>
+													{line}
+													{index < heroRoleLines.length - 1 && <br />}
+												</>
+											))
+								}
 							</h2>
 						</div>
 						<div class="home-hero-top-info" data-init-hidden>
@@ -411,12 +430,7 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 				</div>
 				<div class="home-works-bottom">
 					<div class="home-works-bottom-title">
-						<h2
-							class:list={[
-								'h1',
-								{ 'preserve-line-breaks': isDraftMode },
-							]}
-						>
+						<h2 class:list={['h1', { 'preserve-line-breaks': isDraftMode }]}>
 							{
 								isDraftMode
 									? closingStatement
@@ -465,8 +479,16 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 										<>
 											{index > 0 && (
 												<div class="home-works-item-category-dot" aria-hidden="true">
-													<svg width="100%" viewBox="0 0 12 4" fill="none" xmlns="http://www.w3.org/2000/svg">
-														<path d="M0 2C3.31371 4.66667 8.68629 4.66667 12 2C8.68629 -0.666667 3.31371 -0.666666 0 2Z" fill="currentColor"/>
+													<svg
+														width="100%"
+														viewBox="0 0 12 4"
+														fill="none"
+														xmlns="http://www.w3.org/2000/svg"
+													>
+														<path
+															d="M0 2C3.31371 4.66667 8.68629 4.66667 12 2C8.68629 -0.666667 3.31371 -0.666666 0 2Z"
+															fill="currentColor"
+														/>
 													</svg>
 												</div>
 											)}
@@ -580,8 +602,14 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 								<div class="home-how-thumb-item">
 									<div class="home-how-thumb-item-inner">
 										<div class="home-how-thumb-item-img">
-											<canvas class="home-how-model" data-model={service.key} data-model-url={service.modelUrl} role="img" aria-label={`3D sculpture — ${stegaClean(service.title)}`} />
-											<span class="home-how-model-fallback" aria-hidden="true"></span>
+											<canvas
+												class="home-how-model"
+												data-model={service.key}
+												data-model-url={service.modelUrl}
+												role="img"
+												aria-label={`3D sculpture — ${stegaClean(service.title)}`}
+											/>
+											<span class="home-how-model-fallback" aria-hidden="true" />
 										</div>
 									</div>
 								</div>
@@ -625,17 +653,13 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 						<div class="home-playground-content-right-inner">
 							<div class="home-playground-content-right-title">
 								<div class="home-playground-content-right-title-inner">
-									<p class="h2">
-										the
-									</p>
+									<p class="h2">the</p>
 									<a
 										href="#playground"
 										class="home-playground-content-right-link hover-line"
 										data-cursor="ic-external"
 									>
-										<p class="h2">
-											Playground
-										</p>
+										<p class="h2">Playground</p>
 									</a>
 								</div>
 							</div>
@@ -650,7 +674,9 @@ const seoImage = homePage?.seo?.shareImage?.asset?.url
 					role="region"
 					aria-label="Interactive playground image globe"
 					tabindex="0"
-					data-gallery={JSON.stringify(gallery.map((item) => ({ src: item.imageUrl || item.localImage?.src, alt: item.alt })))}
+					data-gallery={JSON.stringify(
+						gallery.map((item) => ({ src: item.imageUrl || item.localImage?.src, alt: item.alt })),
+					)}
 				>
 					<div class="home-playground-webgl-scale" aria-hidden="true">
 						<div class="home-playground-webgl-stage"></div>

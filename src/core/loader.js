@@ -21,6 +21,9 @@ const LOADER_TIMING = {
 	],
 };
 
+const FIRST_LOAD_MIN_WAIT_MS = 250;
+const FIRST_LOAD_MAX_WAIT_MS = 2500;
+
 class Loader {
 	constructor() {
 		this.isLoaded = false;
@@ -47,8 +50,36 @@ class Loader {
 		$(this.loaderEl).removeClass(['done']);
 		$(this.loaderEl).addClass(['is-loading']);
 		smoothScroll.stop();
-		this.setupTimelines();
+		await this.waitForCriticalAssets(data.next.container);
 		await this.manager?.prepareOnce(data);
+		// Let canvas/WebGL allocation and style calculation commit before the
+		// first animated frame instead of sharing that frame with the loader.
+		await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+		this.setupTimelines();
+	}
+
+	async waitForCriticalAssets(container) {
+		const images = Array.from(container.querySelectorAll('img[fetchpriority="high"]'));
+		const imageReady = images.map((image) => {
+			if (typeof image.decode === 'function') return image.decode().catch(() => {});
+			if (image.complete) return Promise.resolve();
+			return new Promise((resolve) => {
+				image.addEventListener('load', resolve, { once: true });
+				image.addEventListener('error', resolve, { once: true });
+			});
+		});
+		const fontReady = document.fonts?.ready || Promise.resolve();
+		let timeoutId;
+		const deadline = new Promise((resolve) => {
+			timeoutId = window.setTimeout(resolve, FIRST_LOAD_MAX_WAIT_MS);
+		});
+
+		await Promise.all([
+			new Promise((resolve) => window.setTimeout(resolve, FIRST_LOAD_MIN_WAIT_MS)),
+			Promise.race([Promise.allSettled([fontReady, ...imageReady]), deadline]),
+		]);
+		window.clearTimeout(timeoutId);
+		await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 	}
 
 	setupTimelines() {
@@ -78,10 +109,14 @@ class Loader {
 			const countStops = [36, 69, 99];
 			const digitDuration = LOADER_TIMING.countStepDuration;
 			const pauseDuration = LOADER_TIMING.countPauseDuration;
-			const countDuration = countStops.length * digitDuration + (countStops.length - 1) * pauseDuration;
+			const countDuration =
+				countStops.length * digitDuration + (countStops.length - 1) * pauseDuration;
 			const maskEase = (progress) => {
 				const time = progress * countDuration;
-				const index = Math.min(countStops.length - 1, Math.floor(time / (digitDuration + pauseDuration)));
+				const index = Math.min(
+					countStops.length - 1,
+					Math.floor(time / (digitDuration + pauseDuration)),
+				);
 				const local = Math.min(1, (time - index * (digitDuration + pauseDuration)) / digitDuration);
 				const previous = index > 0 ? countStops[index - 1] : 0;
 				const eased = (1 - Math.cos(Math.PI * local)) / 2;
@@ -93,14 +128,13 @@ class Loader {
 			let unitsIndex = 60;
 			const nextDigitIndex = (current, digit, direction) => {
 				const currentDigit = current % 10;
-				const distance = direction > 0
-					? (digit - currentDigit + 10) % 10
-					: (currentDigit - digit + 10) % 10;
+				const distance =
+					direction > 0 ? (digit - currentDigit + 10) % 10 : (currentDigit - digit + 10) % 10;
 				return current + direction * (distance || 10);
 			};
 
-			gsap.set(tens, { yPercent: -tensIndex * 100 / tens.children.length });
-			gsap.set(units, { yPercent: -unitsIndex * 100 / units.children.length });
+			gsap.set(tens, { yPercent: (-tensIndex * 100) / tens.children.length });
+			gsap.set(units, { yPercent: (-unitsIndex * 100) / units.children.length });
 			gsap.set([progress, maskLoading, textLoading], { yPercent: 100 });
 			gsap.set(progressMask, { clipPath: 'inset(0 0 0 0%)', opacity: 1 });
 
@@ -119,22 +153,34 @@ class Loader {
 				unitsIndex = nextDigitIndex(unitsIndex, value % 10, -direction);
 				const position = this.tlFirstLoad.duration() + (index > 0 ? pauseDuration : 0);
 				this.tlFirstLoad
-					.to(tens, {
-						yPercent: -tensIndex * 100 / tens.children.length,
-						duration: digitDuration,
-						ease: digitEase,
-					}, position)
-					.to(units, {
-						yPercent: -unitsIndex * 100 / units.children.length,
-						duration: digitDuration,
-						ease: digitEase,
-					}, position);
+					.to(
+						tens,
+						{
+							yPercent: (-tensIndex * 100) / tens.children.length,
+							duration: digitDuration,
+							ease: digitEase,
+						},
+						position,
+					)
+					.to(
+						units,
+						{
+							yPercent: (-unitsIndex * 100) / units.children.length,
+							duration: digitDuration,
+							ease: digitEase,
+						},
+						position,
+					);
 			});
-			this.tlFirstLoad.to(progressMask, {
-				clipPath: 'inset(0 0 0 100%)',
-				duration: countDuration,
-				ease: maskEase,
-			}, countStart);
+			this.tlFirstLoad.to(
+				progressMask,
+				{
+					clipPath: 'inset(0 0 0 100%)',
+					duration: countDuration,
+					ease: maskEase,
+				},
+				countStart,
+			);
 			this.tlFirstLoad.set(progressMask, { opacity: 0 }, countStart + countDuration);
 
 			const darkMask = $(this.loaderEl).find('.loader-home-logo-mask-dark');
@@ -142,7 +188,9 @@ class Loader {
 			const logos = $(this.loaderEl).find('.loader-home-logo');
 			const headerLogo = document.querySelector('.header-logo-ic-amin');
 			if (headerLogo) {
-				gsap.set(logos.find('.loader-home-logo-ic'), { height: getComputedStyle(headerLogo).height });
+				gsap.set(logos.find('.loader-home-logo-ic'), {
+					height: getComputedStyle(headerLogo).height,
+				});
 				gsap.set(headerLogo, { visibility: 'hidden' });
 			}
 			const logoParts = logos.find('.logo-part');
@@ -151,19 +199,31 @@ class Loader {
 			gsap.set(brandMask, { clipPath: 'inset(100% 0 0 0)' });
 
 			// Cho từng chữ đi ra ngoài khung logo; hai mask vẫn cắt theo mép panel.
-			this.tlMove.set([logos, logos.find('.loader-home-logo-ic'), logos.find('svg')], {
-				overflow: 'visible',
-			}, 0);
-			this.tlMove.to([$(this.loaderEl).find('.loader-home-panel'), darkMask], {
-				clipPath: 'inset(0 0 100% 0)',
-				duration: LOADER_TIMING.panelDuration,
-				ease: 'power3.inOut',
-			}, 0);
-			this.tlMove.to(brandMask, {
-				clipPath: 'inset(0% 0 0 0)',
-				duration: LOADER_TIMING.panelDuration,
-				ease: 'power3.inOut',
-			}, 0);
+			this.tlMove.set(
+				[logos, logos.find('.loader-home-logo-ic'), logos.find('svg')],
+				{
+					overflow: 'visible',
+				},
+				0,
+			);
+			this.tlMove.to(
+				[$(this.loaderEl).find('.loader-home-panel'), darkMask],
+				{
+					clipPath: 'inset(0 0 100% 0)',
+					duration: LOADER_TIMING.panelDuration,
+					ease: 'power3.inOut',
+				},
+				0,
+			);
+			this.tlMove.to(
+				brandMask,
+				{
+					clipPath: 'inset(0% 0 0 0)',
+					duration: LOADER_TIMING.panelDuration,
+					ease: 'power3.inOut',
+				},
+				0,
+			);
 
 			// SVG dùng đơn vị viewBox: đổi quãng đường xuống đáy từ px sang SVG.
 			const slideDistance = (_, part) => {
@@ -171,29 +231,45 @@ class Loader {
 				const logo = part.closest('.loader-home-logo');
 				const bottomGap = parseFloat(getComputedStyle(document.documentElement).fontSize) * 2.4;
 				// Khung cố định không chịu transform của animation cuộn trên logo header.
-				const landingBottom = headerLogo?.closest('.header-logo-amin')?.getBoundingClientRect().bottom
-					?? this.loaderEl.getBoundingClientRect().bottom - bottomGap;
-				const distance = Math.max(0, landingBottom - logo.getBoundingClientRect().top - svg.clientHeight);
-				return distance * svg.viewBox.baseVal.height / svg.clientHeight;
+				const landingBottom =
+					headerLogo?.closest('.header-logo-amin')?.getBoundingClientRect().bottom ??
+					this.loaderEl.getBoundingClientRect().bottom - bottomGap;
+				const distance = Math.max(
+					0,
+					landingBottom - logo.getBoundingClientRect().top - svg.clientHeight,
+				);
+				return (distance * svg.viewBox.baseVal.height) / svg.clientHeight;
 			};
 			LOADER_TIMING.letters.forEach(({ names, rotation, delay, duration }) => {
 				const parts = logos.find(names.map((name) => `.logo-part-${name}`).join(', '));
 				const slideStart = LOADER_TIMING.slideStart + delay;
 				const tiltDuration = Math.min(LOADER_TIMING.tiltDuration, duration / 2);
-				const straightenDuration = Math.min(LOADER_TIMING.straightenDuration, duration - tiltDuration);
+				const straightenDuration = Math.min(
+					LOADER_TIMING.straightenDuration,
+					duration - tiltDuration,
+				);
 				const straightenStart = slideStart + duration - straightenDuration;
 				this.tlMove.to(parts, { rotation, duration: tiltDuration, ease: 'power1.in' }, slideStart);
-				this.tlMove.fromTo(parts, { y: 0 }, {
-					y: slideDistance,
-					duration,
-					ease: 'power1.inOut',
-					immediateRender: false,
-				}, slideStart);
-				this.tlMove.to(parts, {
-					rotation: 0,
-					duration: straightenDuration,
-					ease: 'power2.inOut',
-				}, straightenStart);
+				this.tlMove.fromTo(
+					parts,
+					{ y: 0 },
+					{
+						y: slideDistance,
+						duration,
+						ease: 'power1.inOut',
+						immediateRender: false,
+					},
+					slideStart,
+				);
+				this.tlMove.to(
+					parts,
+					{
+						rotation: 0,
+						duration: straightenDuration,
+						ease: 'power2.inOut',
+					},
+					straightenStart,
+				);
 			});
 			if (headerLogo) {
 				// Chờ cả panel và tất cả chữ hoàn tất, kể cả khi tăng duration ở trên.
@@ -201,9 +277,7 @@ class Loader {
 				this.tlMove.set(headerLogo, { clearProps: 'visibility' }, moveEnd);
 				this.tlMove.set(this.loaderEl, { opacity: 0, pointerEvents: 'none' }, moveEnd);
 			}
-
 		}
-
 
 		this.tlLoading = gsap.timeline({ paused: true });
 		[this.tlFirstLoad, this.tlMove].forEach((timeline) => {

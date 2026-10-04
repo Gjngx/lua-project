@@ -2,8 +2,8 @@ import { viewport, getAllScrollTrigger } from './helpers.js';
 import { smoothScroll } from './lenis.js';
 
 export function scrollTop(onComplete) {
-	if ("scrollRestoration" in history) {
-		history.scrollRestoration = "manual";
+	if ('scrollRestoration' in history) {
+		history.scrollRestoration = 'manual';
 	}
 	window.scrollTo(0, 0);
 	if (viewport.w <= 767) {
@@ -13,7 +13,7 @@ export function scrollTop(onComplete) {
 	smoothScroll.scrollToTop({
 		onComplete: () => {
 			onComplete?.();
-			getAllScrollTrigger("refresh");
+			getAllScrollTrigger('refresh');
 		},
 	});
 }

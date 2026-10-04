@@ -25,7 +25,8 @@ export class SvgPathParticles {
 		this.idleFrame = null;
 		this.idleStartedAt = 0;
 		this.lastIdleFrame = 0;
-		this.canBatchPaths = typeof Path2D.prototype.addPath === 'function' && typeof DOMMatrix === 'function';
+		this.canBatchPaths =
+			typeof Path2D.prototype.addPath === 'function' && typeof DOMMatrix === 'function';
 		this.animateIdle = this.animateIdle.bind(this);
 		this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
 
@@ -81,14 +82,11 @@ export class SvgPathParticles {
 	resize() {
 		const svgRect = this.svg.getBoundingClientRect();
 		const canvasRect = this.canvas.getBoundingClientRect();
-		if (
-			!svgRect.width ||
-			!svgRect.height ||
-			!canvasRect.width ||
-			!canvasRect.height
-		) return;
+		if (!svgRect.width || !svgRect.height || !canvasRect.width || !canvasRect.height) return;
 
-		const dpr = Math.min(window.devicePixelRatio || 1, this.dprCap);
+		const nativeDpr = window.devicePixelRatio || 1;
+		const physicalWidth = window.innerWidth * nativeDpr;
+		const dpr = Math.min(nativeDpr, physicalWidth >= 2560 ? 1 : this.dprCap);
 		const width = Math.max(1, Math.round(canvasRect.width * dpr));
 		const height = Math.max(1, Math.round(canvasRect.height * dpr));
 
@@ -99,12 +97,8 @@ export class SvgPathParticles {
 
 		this.scaleX = (svgRect.width * dpr) / this.viewBox.width;
 		this.scaleY = (svgRect.height * dpr) / this.viewBox.height;
-		this.originX =
-			(svgRect.left - canvasRect.left) * dpr -
-			this.viewBox.x * this.scaleX;
-		this.originY =
-			(svgRect.top - canvasRect.top) * dpr -
-			this.viewBox.y * this.scaleY;
+		this.originX = (svgRect.left - canvasRect.left) * dpr - this.viewBox.x * this.scaleX;
+		this.originY = (svgRect.top - canvasRect.top) * dpr - this.viewBox.y * this.scaleY;
 		this.color = getComputedStyle(this.root).color;
 		this.render(this.progress);
 	}
@@ -128,10 +122,8 @@ export class SvgPathParticles {
 		const easedProgress = Math.sin(this.progress * Math.PI * 0.5);
 		const remaining = 1 - easedProgress;
 		const idleRampProgress = clamp(idleElapsed / 450);
-		const idleRamp =
-			idleRampProgress * idleRampProgress * (3 - 2 * idleRampProgress);
-		const idleStrength =
-			Math.min(1, (1 - this.progress) * 2) * idleRamp;
+		const idleRamp = idleRampProgress * idleRampProgress * (3 - 2 * idleRampProgress);
+		const idleStrength = Math.min(1, (1 - this.progress) * 2) * idleRamp;
 
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -180,14 +172,15 @@ export class SvgPathParticles {
 			this.progress >= 0.9995 ||
 			this.idleTimer ||
 			this.idleFrame
-		) return;
+		)
+			return;
 
 		this.idleTimer = window.setTimeout(() => {
 			this.idleTimer = null;
 			this.idleStartedAt = performance.now();
 			this.lastIdleFrame = 0;
 			this.idleFrame = requestAnimationFrame(this.animateIdle);
-		}, 100);
+		}, 250);
 	}
 
 	animateIdle(timestamp) {

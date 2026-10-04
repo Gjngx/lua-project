@@ -1,18 +1,18 @@
 export const HERO_LIQUID_DEFAULTS = Object.freeze({
-  simHeight: 192,
-  overscan: 1.17,
-  pointerForce: 3,
-  maxVelocity: 90,
-  activeMs: 2400,
-  splatRadius: .0045,
-  splatStrength: .7,
-  dyeAmount: .05,
-  pressureIterations: 16,
-  velocityDt: .032,
-  velocityDissipation: .935,
-  dyeDt: .135,
-  dyeDissipation: .885,
-  displacement: 2,
+	simHeight: 192,
+	overscan: 1.17,
+	pointerForce: 3,
+	maxVelocity: 90,
+	activeMs: 2400,
+	splatRadius: 0.0045,
+	splatStrength: 0.7,
+	dyeAmount: 0.05,
+	pressureIterations: 16,
+	velocityDt: 0.032,
+	velocityDissipation: 0.935,
+	dyeDt: 0.135,
+	dyeDissipation: 0.885,
+	displacement: 2,
 });
 
 const VERTEX = `
@@ -30,29 +30,29 @@ void main() {
 }`;
 
 const FRAGMENTS = {
-  splat: `precision highp float;
+	splat: `precision highp float;
     varying vec2 v_uv; uniform sampler2D u_input; uniform float u_aspect;
     uniform vec2 u_point; uniform vec3 u_value; uniform float u_radius,u_strength;
     void main(){ vec2 p=v_uv-u_point; p.x*=u_aspect;
       vec3 impulse=u_strength*exp2(-dot(p,p)/u_radius)*u_value;
       gl_FragColor=vec4(texture2D(u_input,v_uv).xyz+impulse,1.); }`,
-  divergence: `precision highp float;
+	divergence: `precision highp float;
     varying vec2 v_l,v_r,v_t,v_b; uniform sampler2D u_velocity;
     void main(){ float d=.25*(texture2D(u_velocity,v_r).x-texture2D(u_velocity,v_l).x
       +texture2D(u_velocity,v_t).y-texture2D(u_velocity,v_b).y);
       gl_FragColor=vec4(d,0.,0.,1.); }`,
-  pressure: `precision highp float;
+	pressure: `precision highp float;
     varying vec2 v_uv,v_l,v_r,v_t,v_b; uniform sampler2D u_pressure,u_divergence;
     void main(){ float n=texture2D(u_pressure,v_l).x+texture2D(u_pressure,v_r).x
       +texture2D(u_pressure,v_t).x+texture2D(u_pressure,v_b).x;
       gl_FragColor=vec4((n-texture2D(u_divergence,v_uv).x)*.25,0.,0.,1.); }`,
-  gradient: `precision highp float;
+	gradient: `precision highp float;
     varying vec2 v_uv,v_l,v_r,v_t,v_b; uniform sampler2D u_pressure,u_velocity;
     void main(){ vec2 v=texture2D(u_velocity,v_uv).xy;
       v-=vec2(texture2D(u_pressure,v_r).x-texture2D(u_pressure,v_l).x,
       texture2D(u_pressure,v_t).x-texture2D(u_pressure,v_b).x);
       gl_FragColor=vec4(v,0.,1.); }`,
-  advection: `precision highp float;
+	advection: `precision highp float;
     varying vec2 v_uv; uniform sampler2D u_velocity,u_input;
     uniform vec2 u_texel,u_output_texel; uniform float u_dt,u_dissipation;
     vec4 bilerp(sampler2D s,vec2 uv,vec2 size){ vec2 p=uv/size-.5,i=floor(p),f=fract(p);
@@ -61,7 +61,7 @@ const FRAGMENTS = {
       return mix(mix(a,b,f.x),mix(c,d,f.x),f.y); }
     void main(){ vec2 p=v_uv-u_dt*bilerp(u_velocity,v_uv,u_texel).xy*u_texel;
       gl_FragColor=u_dissipation*bilerp(u_input,p,u_output_texel); }`,
-  display: `precision highp float;
+	display: `precision highp float;
     varying vec2 v_uv; uniform sampler2D u_image,u_velocity,u_dye;
     uniform float u_aspect,u_image_aspect,u_visible_scale,u_displacement; uniform vec2 u_focus;
     vec2 cover(vec2 uv){ vec2 visible=vec2(1.);
@@ -85,276 +85,341 @@ const FRAGMENTS = {
 };
 
 function makeProgram(gl, fragmentSource) {
-  const compile = (type, source) => {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      const message = gl.getShaderInfoLog(shader);
-      gl.deleteShader(shader);
-      throw new Error(message || 'Hero liquid shader compilation failed');
-    }
-    return shader;
-  };
-  const program = gl.createProgram();
-  const vertex = compile(gl.VERTEX_SHADER, VERTEX);
-  const fragment = compile(gl.FRAGMENT_SHADER, fragmentSource);
-  gl.attachShader(program, vertex);
-  gl.attachShader(program, fragment);
-  gl.bindAttribLocation(program, 0, 'a_position');
-  gl.linkProgram(program);
-  gl.deleteShader(vertex);
-  gl.deleteShader(fragment);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
-  const uniforms = {};
-  for (let i = 0; i < gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS); i += 1) {
-    const uniform = gl.getActiveUniform(program, i);
-    uniforms[uniform.name] = gl.getUniformLocation(program, uniform.name);
-  }
-  return { program, uniforms };
+	const compile = (type, source) => {
+		const shader = gl.createShader(type);
+		gl.shaderSource(shader, source);
+		gl.compileShader(shader);
+		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+			const message = gl.getShaderInfoLog(shader);
+			gl.deleteShader(shader);
+			throw new Error(message || 'Hero liquid shader compilation failed');
+		}
+		return shader;
+	};
+	const program = gl.createProgram();
+	const vertex = compile(gl.VERTEX_SHADER, VERTEX);
+	const fragment = compile(gl.FRAGMENT_SHADER, fragmentSource);
+	gl.attachShader(program, vertex);
+	gl.attachShader(program, fragment);
+	gl.bindAttribLocation(program, 0, 'a_position');
+	gl.linkProgram(program);
+	gl.deleteShader(vertex);
+	gl.deleteShader(fragment);
+	if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+		throw new Error(gl.getProgramInfoLog(program));
+	const uniforms = {};
+	for (let i = 0; i < gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS); i += 1) {
+		const uniform = gl.getActiveUniform(program, i);
+		uniforms[uniform.name] = gl.getUniformLocation(program, uniform.name);
+	}
+	return { program, uniforms };
 }
 
 export class HeroLiquid {
-  constructor(root, image, pointerTarget = root, options = {}) {
-    this.root = root;
-    this.image = image;
-    this.pointerTarget = pointerTarget;
-    this.options = { ...HERO_LIQUID_DEFAULTS, ...options };
-    this.pointer = { x: 0, y: 0, dx: 0, dy: 0, active: false, moved: false };
-    this.visible = true;
-    this.raf = null;
-    this.render = this.render.bind(this);
-    this.resize = this.resize.bind(this);
-  }
+	constructor(root, image, pointerTarget = root, options = {}) {
+		this.root = root;
+		this.image = image;
+		this.pointerTarget = pointerTarget;
+		this.options = { ...HERO_LIQUID_DEFAULTS, ...options };
+		this.pointer = { x: 0, y: 0, dx: 0, dy: 0, active: false, moved: false };
+		this.visible = true;
+		this.raf = null;
+		this.render = this.render.bind(this);
+		this.resize = this.resize.bind(this);
+	}
 
-  init() {
-    if (!this.image.complete || !this.image.naturalWidth) return;
-    this.canvas = document.createElement('canvas');
-    this.canvas.className = 'home-hero-liquid';
-    this.root.appendChild(this.canvas);
-    const gl = this.canvas.getContext('webgl', { alpha: false, antialias: false, powerPreference: 'high-performance' });
-    if (!gl || !gl.getExtension('OES_texture_float') || !gl.getExtension('OES_texture_float_linear')) return this.destroy();
-    this.gl = gl;
-    try {
-      this.programs = Object.fromEntries(Object.entries(FRAGMENTS).map(([name, source]) => [name, makeProgram(gl, source)]));
-      this.quad = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.quad);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]), gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(0);
-      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-      this.indices = gl.createBuffer();
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indices);
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 0, 2, 3]), gl.STATIC_DRAW);
-      this.imageTexture = gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_2D, this.imageTexture);
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-      this.configureTexture();
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
+	init() {
+		if (!this.image.complete || !this.image.naturalWidth) return;
+		this.canvas = document.createElement('canvas');
+		this.canvas.className = 'home-hero-liquid';
+		this.root.appendChild(this.canvas);
+		const gl = this.canvas.getContext('webgl', {
+			alpha: false,
+			antialias: false,
+			powerPreference: 'high-performance',
+		});
+		if (
+			!gl ||
+			!gl.getExtension('OES_texture_float') ||
+			!gl.getExtension('OES_texture_float_linear')
+		)
+			return this.destroy();
+		this.gl = gl;
+		try {
+			this.programs = Object.fromEntries(
+				Object.entries(FRAGMENTS).map(([name, source]) => [name, makeProgram(gl, source)]),
+			);
+			this.quad = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.quad);
+			gl.bufferData(
+				gl.ARRAY_BUFFER,
+				new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]),
+				gl.STATIC_DRAW,
+			);
+			gl.enableVertexAttribArray(0);
+			gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+			this.indices = gl.createBuffer();
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indices);
+			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 0, 2, 3]), gl.STATIC_DRAW);
+			this.imageTexture = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, this.imageTexture);
+			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+			this.configureTexture();
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
 
-      this.onPointerMove = (event) => {
-        const rect = this.root.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        if (this.pointer.active) {
-          const { maxVelocity, pointerForce } = this.options;
-          this.pointer.dx = Math.max(-maxVelocity, Math.min(maxVelocity, pointerForce * (x - this.pointer.x)));
-          this.pointer.dy = Math.max(-maxVelocity, Math.min(maxVelocity, pointerForce * (y - this.pointer.y)));
-          this.pointer.moved = true;
-          this.activeUntil = performance.now() + this.options.activeMs;
-        }
-        Object.assign(this.pointer, { x, y, active: true });
-        this.schedule();
-      };
-      this.onPointerLeave = () => Object.assign(this.pointer, { active: false, moved: false });
-      this.pointerTarget.addEventListener('pointermove', this.onPointerMove, { passive: true });
-      this.pointerTarget.addEventListener('pointerleave', this.onPointerLeave);
-      this.resizeObserver = new ResizeObserver(this.resize);
-      this.resizeObserver.observe(this.root);
-      this.observer = new IntersectionObserver(([entry]) => {
-        this.visible = entry.isIntersecting;
-        if (this.visible) this.schedule();
-      });
-      this.observer.observe(this.root);
-      this.resize();
-    } catch (error) {
-      console.warn('[HeroLiquid] Canvas unavailable:', error);
-      this.destroy();
-    }
-  }
+			this.onPointerMove = (event) => {
+				const rect = this.root.getBoundingClientRect();
+				const x = event.clientX - rect.left;
+				const y = event.clientY - rect.top;
+				if (this.pointer.active) {
+					const { maxVelocity, pointerForce } = this.options;
+					this.pointer.dx = Math.max(
+						-maxVelocity,
+						Math.min(maxVelocity, pointerForce * (x - this.pointer.x)),
+					);
+					this.pointer.dy = Math.max(
+						-maxVelocity,
+						Math.min(maxVelocity, pointerForce * (y - this.pointer.y)),
+					);
+					this.pointer.moved = true;
+					this.activeUntil = performance.now() + this.options.activeMs;
+				}
+				Object.assign(this.pointer, { x, y, active: true });
+				this.schedule();
+			};
+			this.onPointerLeave = () => Object.assign(this.pointer, { active: false, moved: false });
+			this.pointerTarget.addEventListener('pointermove', this.onPointerMove, { passive: true });
+			this.pointerTarget.addEventListener('pointerleave', this.onPointerLeave);
+			this.resizeObserver = new ResizeObserver(this.resize);
+			this.resizeObserver.observe(this.root);
+			this.observer = new IntersectionObserver(([entry]) => {
+				this.visible = entry.isIntersecting;
+				if (this.visible) this.schedule();
+			});
+			this.observer.observe(this.root);
+			this.resize();
+		} catch (error) {
+			console.warn('[HeroLiquid] Canvas unavailable:', error);
+			this.destroy();
+		}
+	}
 
-  configureTexture() {
-    const gl = this.gl;
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  }
+	configureTexture() {
+		const gl = this.gl;
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	}
 
-  createTarget(width, height) {
-    const gl = this.gl;
-    const texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    this.configureTexture();
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.RGB, gl.FLOAT, null);
-    const framebuffer = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    return { texture, framebuffer, width, height };
-  }
+	createTarget(width, height) {
+		const gl = this.gl;
+		const texture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		this.configureTexture();
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.RGB, gl.FLOAT, null);
+		const framebuffer = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+		gl.clear(gl.COLOR_BUFFER_BIT);
+		return { texture, framebuffer, width, height };
+	}
 
-  createDoubleTarget(width, height) {
-    let read = this.createTarget(width, height);
-    let write = this.createTarget(width, height);
-    return { width, height, read: () => read, write: () => write, swap: () => { [read, write] = [write, read]; } };
-  }
+	createDoubleTarget(width, height) {
+		let read = this.createTarget(width, height);
+		let write = this.createTarget(width, height);
+		return {
+			width,
+			height,
+			read: () => read,
+			write: () => write,
+			swap: () => {
+				[read, write] = [write, read];
+			},
+		};
+	}
 
-  deleteTargets() {
-    if (!this.gl || !this.targets) return;
-    const targets = [this.targets.divergence];
-    for (const pair of [this.targets.velocity, this.targets.dye, this.targets.pressure]) targets.push(pair.read(), pair.write());
-    for (const target of targets) {
-      this.gl.deleteTexture(target.texture);
-      this.gl.deleteFramebuffer(target.framebuffer);
-    }
-    this.targets = null;
-  }
+	deleteTargets() {
+		if (!this.gl || !this.targets) return;
+		const targets = [this.targets.divergence];
+		for (const pair of [this.targets.velocity, this.targets.dye, this.targets.pressure])
+			targets.push(pair.read(), pair.write());
+		for (const target of targets) {
+			this.gl.deleteTexture(target.texture);
+			this.gl.deleteFramebuffer(target.framebuffer);
+		}
+		this.targets = null;
+	}
 
-  resize() {
-    if (!this.gl) return;
-    const width = Math.max(1, this.root.clientWidth);
-    const height = Math.max(1, this.root.clientHeight);
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const { overscan, simHeight } = this.options;
-    const offset = (overscan - 1) * -50;
-    Object.assign(this.canvas.style, { width: `${overscan * 100}%`, height: `${overscan * 100}%`, left: `${offset}%`, top: `${offset}%` });
-    this.canvas.width = Math.round(width * overscan * dpr);
-    this.canvas.height = Math.round(height * overscan * dpr);
-    const simWidth = Math.max(2, Math.round(simHeight * width / height));
-    if (!this.targets || this.targets.velocity.width !== simWidth) {
-      this.deleteTargets();
-      this.targets = {
-        velocity: this.createDoubleTarget(simWidth, simHeight),
-        dye: this.createDoubleTarget(simWidth, simHeight),
-        pressure: this.createDoubleTarget(simWidth, simHeight),
-        divergence: this.createTarget(simWidth, simHeight),
-      };
-    }
-    this.aspect = width / height;
-    Object.assign(this.pointer, { x: width * .65, y: height * .5 });
-    this.activeUntil = performance.now();
-    this.schedule();
-  }
+	resize() {
+		if (!this.gl) return;
+		const width = Math.max(1, this.root.clientWidth);
+		const height = Math.max(1, this.root.clientHeight);
+		const nativeDpr = window.devicePixelRatio || 1;
+		const dprCap = width * nativeDpr >= 2560 ? 1 : 2;
+		const dpr = Math.min(nativeDpr, dprCap);
+		const { overscan, simHeight } = this.options;
+		const offset = (overscan - 1) * -50;
+		Object.assign(this.canvas.style, {
+			width: `${overscan * 100}%`,
+			height: `${overscan * 100}%`,
+			left: `${offset}%`,
+			top: `${offset}%`,
+		});
+		this.canvas.width = Math.round(width * overscan * dpr);
+		this.canvas.height = Math.round(height * overscan * dpr);
+		const simWidth = Math.max(2, Math.round((simHeight * width) / height));
+		if (!this.targets || this.targets.velocity.width !== simWidth) {
+			this.deleteTargets();
+			this.targets = {
+				velocity: this.createDoubleTarget(simWidth, simHeight),
+				dye: this.createDoubleTarget(simWidth, simHeight),
+				pressure: this.createDoubleTarget(simWidth, simHeight),
+				divergence: this.createTarget(simWidth, simHeight),
+			};
+		}
+		this.aspect = width / height;
+		Object.assign(this.pointer, { x: width * 0.65, y: height * 0.5 });
+		this.activeUntil = performance.now();
+		this.schedule();
+	}
 
-  setOptions(options) {
-    Object.assign(this.options, options);
-    this.resize();
-  }
+	setOptions(options) {
+		Object.assign(this.options, options);
+		this.resize();
+	}
 
-  use(name, values = {}) {
-    const item = this.programs[name];
-    this.gl.useProgram(item.program);
-    for (const [key, value] of Object.entries(values)) {
-      const location = item.uniforms[key];
-      if (location == null) continue;
-      if (Array.isArray(value)) this.gl[`uniform${value.length}f`](location, ...value);
-      else this.gl.uniform1f(location, value);
-    }
-    return item;
-  }
+	use(name, values = {}) {
+		const item = this.programs[name];
+		this.gl.useProgram(item.program);
+		for (const [key, value] of Object.entries(values)) {
+			const location = item.uniforms[key];
+			if (location == null) continue;
+			if (Array.isArray(value)) this.gl[`uniform${value.length}f`](location, ...value);
+			else this.gl.uniform1f(location, value);
+		}
+		return item;
+	}
 
-  bind(texture, unit, location) {
-    this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-    this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-    this.gl.uniform1i(location, unit);
-  }
+	bind(texture, unit, location) {
+		this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+		this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+		this.gl.uniform1i(location, unit);
+	}
 
-  draw(target = null) {
-    const gl = this.gl;
-    gl.viewport(0, 0, target?.width || gl.drawingBufferWidth, target?.height || gl.drawingBufferHeight);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, target?.framebuffer || null);
-    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-  }
+	draw(target = null) {
+		const gl = this.gl;
+		gl.viewport(
+			0,
+			0,
+			target?.width || gl.drawingBufferWidth,
+			target?.height || gl.drawingBufferHeight,
+		);
+		gl.bindFramebuffer(gl.FRAMEBUFFER, target?.framebuffer || null);
+		gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+	}
 
-  splat(target, value) {
-    const width = this.root.clientWidth;
-    const height = this.root.clientHeight;
-    const { overscan, splatRadius, splatStrength } = this.options;
-    const inset = (overscan - 1) / 2;
-    const point = [(this.pointer.x + width * inset) / (width * overscan), 1 - (this.pointer.y + height * inset) / (height * overscan)];
-    const program = this.use('splat', {
-      u_texel: [1 / target.width, 1 / target.height], u_aspect: this.aspect,
-      u_point: point, u_value: value, u_radius: splatRadius, u_strength: splatStrength,
-    });
-    this.bind(target.read().texture, 0, program.uniforms.u_input);
-    this.draw(target.write());
-    target.swap();
-  }
+	splat(target, value) {
+		const width = this.root.clientWidth;
+		const height = this.root.clientHeight;
+		const { overscan, splatRadius, splatStrength } = this.options;
+		const inset = (overscan - 1) / 2;
+		const point = [
+			(this.pointer.x + width * inset) / (width * overscan),
+			1 - (this.pointer.y + height * inset) / (height * overscan),
+		];
+		const program = this.use('splat', {
+			u_texel: [1 / target.width, 1 / target.height],
+			u_aspect: this.aspect,
+			u_point: point,
+			u_value: value,
+			u_radius: splatRadius,
+			u_strength: splatStrength,
+		});
+		this.bind(target.read().texture, 0, program.uniforms.u_input);
+		this.draw(target.write());
+		target.swap();
+	}
 
-  render(now) {
-    this.raf = null;
-    if (!this.gl || !this.visible || !this.targets) return;
-    const { velocity, dye, pressure, divergence } = this.targets;
-    const texel = [1 / velocity.width, 1 / velocity.height];
-    if (this.pointer.moved) {
-      this.splat(velocity, [this.pointer.dx, -this.pointer.dy, 0]);
-      this.splat(dye, [this.options.dyeAmount, 0, 0]);
-      this.pointer.moved = false;
-    }
+	render(now) {
+		this.raf = null;
+		if (!this.gl || !this.visible || !this.targets) return;
+		const { velocity, dye, pressure, divergence } = this.targets;
+		const texel = [1 / velocity.width, 1 / velocity.height];
+		if (this.pointer.moved) {
+			this.splat(velocity, [this.pointer.dx, -this.pointer.dy, 0]);
+			this.splat(dye, [this.options.dyeAmount, 0, 0]);
+			this.pointer.moved = false;
+		}
 
-    let program = this.use('divergence', { u_texel: texel });
-    this.bind(velocity.read().texture, 0, program.uniforms.u_velocity);
-    this.draw(divergence);
-    program = this.use('pressure', { u_texel: texel });
-    this.bind(divergence.texture, 0, program.uniforms.u_divergence);
-    for (let i = 0; i < this.options.pressureIterations; i += 1) {
-      this.bind(pressure.read().texture, 1, program.uniforms.u_pressure);
-      this.draw(pressure.write()); pressure.swap();
-    }
-    program = this.use('gradient', { u_texel: texel });
-    this.bind(pressure.read().texture, 0, program.uniforms.u_pressure);
-    this.bind(velocity.read().texture, 1, program.uniforms.u_velocity);
-    this.draw(velocity.write()); velocity.swap();
+		let program = this.use('divergence', { u_texel: texel });
+		this.bind(velocity.read().texture, 0, program.uniforms.u_velocity);
+		this.draw(divergence);
+		program = this.use('pressure', { u_texel: texel });
+		this.bind(divergence.texture, 0, program.uniforms.u_divergence);
+		for (let i = 0; i < this.options.pressureIterations; i += 1) {
+			this.bind(pressure.read().texture, 1, program.uniforms.u_pressure);
+			this.draw(pressure.write());
+			pressure.swap();
+		}
+		program = this.use('gradient', { u_texel: texel });
+		this.bind(pressure.read().texture, 0, program.uniforms.u_pressure);
+		this.bind(velocity.read().texture, 1, program.uniforms.u_velocity);
+		this.draw(velocity.write());
+		velocity.swap();
 
-    program = this.use('advection', { u_texel: texel, u_output_texel: texel, u_dt: this.options.velocityDt, u_dissipation: this.options.velocityDissipation });
-    this.bind(velocity.read().texture, 0, program.uniforms.u_velocity);
-    this.bind(velocity.read().texture, 1, program.uniforms.u_input);
-    this.draw(velocity.write()); velocity.swap();
-    program = this.use('advection', { u_texel: texel, u_output_texel: texel, u_dt: this.options.dyeDt, u_dissipation: this.options.dyeDissipation });
-    this.bind(velocity.read().texture, 0, program.uniforms.u_velocity);
-    this.bind(dye.read().texture, 1, program.uniforms.u_input);
-    this.draw(dye.write()); dye.swap();
+		program = this.use('advection', {
+			u_texel: texel,
+			u_output_texel: texel,
+			u_dt: this.options.velocityDt,
+			u_dissipation: this.options.velocityDissipation,
+		});
+		this.bind(velocity.read().texture, 0, program.uniforms.u_velocity);
+		this.bind(velocity.read().texture, 1, program.uniforms.u_input);
+		this.draw(velocity.write());
+		velocity.swap();
+		program = this.use('advection', {
+			u_texel: texel,
+			u_output_texel: texel,
+			u_dt: this.options.dyeDt,
+			u_dissipation: this.options.dyeDissipation,
+		});
+		this.bind(velocity.read().texture, 0, program.uniforms.u_velocity);
+		this.bind(dye.read().texture, 1, program.uniforms.u_input);
+		this.draw(dye.write());
+		dye.swap();
 
-    const position = getComputedStyle(this.image).objectPosition.split(' ').map(parseFloat);
-    program = this.use('display', {
-      u_texel: texel, u_aspect: this.aspect,
-      u_image_aspect: this.image.naturalWidth / this.image.naturalHeight,
-      u_focus: [(position[0] || 50) / 100, 1 - (position[1] || 50) / 100],
-      u_visible_scale: 1 / this.options.overscan,
-      u_displacement: this.options.displacement,
-    });
-    this.bind(this.imageTexture, 0, program.uniforms.u_image);
-    this.bind(velocity.read().texture, 1, program.uniforms.u_velocity);
-    this.bind(dye.read().texture, 2, program.uniforms.u_dye);
-    this.draw();
-    this.canvas.classList.add('is-ready');
-    if (now < this.activeUntil) this.schedule();
-  }
+		const position = getComputedStyle(this.image).objectPosition.split(' ').map(parseFloat);
+		program = this.use('display', {
+			u_texel: texel,
+			u_aspect: this.aspect,
+			u_image_aspect: this.image.naturalWidth / this.image.naturalHeight,
+			u_focus: [(position[0] || 50) / 100, 1 - (position[1] || 50) / 100],
+			u_visible_scale: 1 / this.options.overscan,
+			u_displacement: this.options.displacement,
+		});
+		this.bind(this.imageTexture, 0, program.uniforms.u_image);
+		this.bind(velocity.read().texture, 1, program.uniforms.u_velocity);
+		this.bind(dye.read().texture, 2, program.uniforms.u_dye);
+		this.draw();
+		this.canvas.classList.add('is-ready');
+		if (now < this.activeUntil) this.schedule();
+	}
 
-  schedule() {
-    if (this.visible && this.raf === null) this.raf = requestAnimationFrame(this.render);
-  }
+	schedule() {
+		if (this.visible && this.raf === null) this.raf = requestAnimationFrame(this.render);
+	}
 
-  destroy() {
-    if (this.raf !== null) cancelAnimationFrame(this.raf);
-    this.pointerTarget?.removeEventListener('pointermove', this.onPointerMove);
-    this.pointerTarget?.removeEventListener('pointerleave', this.onPointerLeave);
-    this.resizeObserver?.disconnect();
-    this.observer?.disconnect();
-    this.deleteTargets();
-    this.gl?.getExtension('WEBGL_lose_context')?.loseContext();
-    this.canvas?.remove();
-    this.raf = null;
-    this.gl = null;
-  }
+	destroy() {
+		if (this.raf !== null) cancelAnimationFrame(this.raf);
+		this.pointerTarget?.removeEventListener('pointermove', this.onPointerMove);
+		this.pointerTarget?.removeEventListener('pointerleave', this.onPointerLeave);
+		this.resizeObserver?.disconnect();
+		this.observer?.disconnect();
+		this.deleteTargets();
+		this.gl?.getExtension('WEBGL_lose_context')?.loseContext();
+		this.canvas?.remove();
+		this.raf = null;
+		this.gl = null;
+	}
 }

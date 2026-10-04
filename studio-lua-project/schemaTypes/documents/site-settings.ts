@@ -18,14 +18,16 @@ export default defineType({
     defineField({
       name: 'email',
       title: 'Email address',
-      description: 'Shared contact email for the header, footer, and contact page. Until set, the previous Footer email is used.',
+      description:
+        'Shared contact email for the header, footer, and contact page. Until set, the previous Footer email is used.',
       type: 'string',
       validation: (rule) => rule.email(),
     }),
     defineField({
       name: 'phoneNumber',
       title: 'Phone number',
-      description: 'Shared contact number for the footer and contact page. Enter it as it should appear on the website. Until set, the previous Footer number is used.',
+      description:
+        'Shared contact number for the footer and contact page. Enter it as it should appear on the website. Until set, the previous Footer number is used.',
       type: 'string',
     }),
     defineField({
@@ -67,14 +69,16 @@ export default defineType({
       type: 'array',
       hidden: true,
       readOnly: true,
-      of: [defineArrayMember({
-        name: 'socialLink',
-        type: 'object',
-        fields: [
-          defineField({name: 'platform', type: 'string'}),
-          defineField({name: 'href', type: 'string'}),
-        ],
-      })],
+      of: [
+        defineArrayMember({
+          name: 'socialLink',
+          type: 'object',
+          fields: [
+            defineField({name: 'platform', type: 'string'}),
+            defineField({name: 'href', type: 'string'}),
+          ],
+        }),
+      ],
     }),
     defineField({
       name: 'favicon',

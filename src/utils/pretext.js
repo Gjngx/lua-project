@@ -1,4 +1,4 @@
-import { prepareWithSegments, layoutWithLines, layoutNextLine } from "@chenglou/pretext";
+import { prepareWithSegments, layoutWithLines, layoutNextLine } from '@chenglou/pretext';
 
 const _prepCache = new Map();
 const _wordSeg = new Intl.Segmenter(undefined, { granularity: 'word' });
@@ -9,7 +9,24 @@ const _spanStyleInline = 'display:inline-block;position:relative;text-indent:0';
 
 // Class-based size overrides (all rem via x/10 convention)
 // fs-16 → 1.6rem, fs-20 → 2rem, etc.
-const FS_MAP = { 'fs-12': '1.2rem', 'fs-14': '1.4rem', 'fs-16': '1.6rem', 'fs-18': '1.8rem', 'fs-20': '2rem', 'fs-22': '2.2rem', 'fs-24': '2.4rem', 'fs-28': '2.8rem', 'fs-32': '3.2rem', 'fs-36': '3.6rem', 'fs-40': '4rem', 'fs-48': '4.8rem', 'fs-56': '5.6rem', 'fs-64': '6.4rem', 'fs-72': '7.2rem', 'fs-80': '8rem' };
+const FS_MAP = {
+	'fs-12': '1.2rem',
+	'fs-14': '1.4rem',
+	'fs-16': '1.6rem',
+	'fs-18': '1.8rem',
+	'fs-20': '2rem',
+	'fs-22': '2.2rem',
+	'fs-24': '2.4rem',
+	'fs-28': '2.8rem',
+	'fs-32': '3.2rem',
+	'fs-36': '3.6rem',
+	'fs-40': '4rem',
+	'fs-48': '4.8rem',
+	'fs-56': '5.6rem',
+	'fs-64': '6.4rem',
+	'fs-72': '7.2rem',
+	'fs-80': '8rem',
+};
 // Class-based weight overrides (matches actual project classes: fw-reg, fw-med, fw-semi, fw-bold)
 const FW_MAP = { 'fw-reg': '400', 'fw-med': '500', 'fw-semi': '600', 'fw-bold': '700' };
 // Semantic tags that force bold
@@ -17,15 +34,15 @@ const HEADING_TAGS = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
 // Tag → style overrides (bold, italic, underline, etc.)
 const TAG_STYLE_MAP = {
 	STRONG: { fontWeight: '700' },
-	B:      { fontWeight: '700' },
-	EM:     { fontStyle: 'italic' },
-	I:      { fontStyle: 'italic' },
-	U:      { textDecorationLine: 'underline' },
-	S:      { textDecorationLine: 'line-through' },
-	DEL:    { textDecorationLine: 'line-through' },
-	INS:    { textDecorationLine: 'underline' },
-	SUB:    { verticalAlign: 'sub' },
-	SUP:    { verticalAlign: 'super' },
+	B: { fontWeight: '700' },
+	EM: { fontStyle: 'italic' },
+	I: { fontStyle: 'italic' },
+	U: { textDecorationLine: 'underline' },
+	S: { textDecorationLine: 'line-through' },
+	DEL: { textDecorationLine: 'line-through' },
+	INS: { textDecorationLine: 'underline' },
+	SUB: { verticalAlign: 'sub' },
+	SUP: { verticalAlign: 'super' },
 };
 
 // Build font CSS string for DOM — only weight + size, NO font-family.
@@ -58,10 +75,10 @@ function parseRichHTML(el, rootFontSize, rootFW = '400') {
 	const segments = [];
 	const styleStack = [];
 
-	let curFW = undefined;  // default to undefined to inherit from parent CSS
-	let curFS = undefined;  // default to undefined to inherit from parent CSS
-	let curExtra = '';  // font-style, text-decoration, etc.
-	let curClasses = [];  // non-style classes (e.g. txt-orange, txt-highlight)
+	let curFW = undefined; // default to undefined to inherit from parent CSS
+	let curFS = undefined; // default to undefined to inherit from parent CSS
+	let curExtra = ''; // font-style, text-decoration, etc.
+	let curClasses = []; // non-style classes (e.g. txt-orange, txt-highlight)
 
 	function currentCSS() {
 		return cssText(curFW, curFS, curExtra);
@@ -73,7 +90,13 @@ function parseRichHTML(el, rootFontSize, rootFW = '400') {
 
 	function pushText(text) {
 		if (!text) return;
-		segments.push({ text, cssText: currentCSS(), className: currentClassName(), domStyle: curExtra, isBreak: false });
+		segments.push({
+			text,
+			cssText: currentCSS(),
+			className: currentClassName(),
+			domStyle: curExtra,
+			isBreak: false,
+		});
 	}
 
 	function pushBreak() {
@@ -102,10 +125,22 @@ function parseRichHTML(el, rootFontSize, rootFW = '400') {
 		// Tag-based overrides (strong, em, etc.)
 		const tagOv = TAG_STYLE_MAP[tag];
 		if (tagOv) {
-			if (tagOv.fontWeight)  { curFW = tagOv.fontWeight;  changed = true; }
-			if (tagOv.fontStyle)   { curExtra += `font-style:${tagOv.fontStyle};`; changed = true; }
-			if (tagOv.textDecorationLine) { curExtra += `text-decoration:${tagOv.textDecorationLine};`; changed = true; }
-			if (tagOv.verticalAlign) { curExtra += `vertical-align:${tagOv.verticalAlign};`; changed = true; }
+			if (tagOv.fontWeight) {
+				curFW = tagOv.fontWeight;
+				changed = true;
+			}
+			if (tagOv.fontStyle) {
+				curExtra += `font-style:${tagOv.fontStyle};`;
+				changed = true;
+			}
+			if (tagOv.textDecorationLine) {
+				curExtra += `text-decoration:${tagOv.textDecorationLine};`;
+				changed = true;
+			}
+			if (tagOv.verticalAlign) {
+				curExtra += `vertical-align:${tagOv.verticalAlign};`;
+				changed = true;
+			}
 		}
 
 		// Heading tags → force bold
@@ -116,9 +151,10 @@ function parseRichHTML(el, rootFontSize, rootFW = '400') {
 
 		// Class-based overrides (fw-reg, fw-med, fw-semi, fw-bold, fs-*)
 		// Non-style classes (e.g. txt-orange) are preserved for output spans
-		const cls = node.getAttribute?.('class')
-			|| (typeof node.className === 'string' ? node.className : node.className?.baseVal)
-			|| '';
+		const cls =
+			node.getAttribute?.('class') ||
+			(typeof node.className === 'string' ? node.className : node.className?.baseVal) ||
+			'';
 		let standardFS = undefined;
 		let tabletFS = undefined;
 		let mobileFS = undefined;
@@ -229,7 +265,7 @@ function buildCharIndexMap(richSegments) {
 }
 
 function flattenRichText(richSegments) {
-	return richSegments.map(s => s.text).join('');
+	return richSegments.map((s) => s.text).join('');
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -242,10 +278,14 @@ function buildRichWords(lineText, globalOffset, charIndexMap, richSegments) {
 			continue;
 		}
 		const firstGlobal = globalOffset + seg.index;
-		const richSeg = (charIndexMap[firstGlobal] !== undefined)
-			? richSegments[charIndexMap[firstGlobal]]
-			: null;
-		words.push({ text: seg.segment, cssText: richSeg?.cssText || '', domStyle: richSeg?.domStyle || '', className: richSeg?.className || '' });
+		const richSeg =
+			charIndexMap[firstGlobal] !== undefined ? richSegments[charIndexMap[firstGlobal]] : null;
+		words.push({
+			text: seg.segment,
+			cssText: richSeg?.cssText || '',
+			domStyle: richSeg?.domStyle || '',
+			className: richSeg?.className || '',
+		});
 	}
 	return words;
 }
@@ -258,10 +298,14 @@ function buildRichChars(lineText, globalOffset, charIndexMap, richSegments) {
 			continue;
 		}
 		const firstGlobal = globalOffset + seg.index;
-		const richSeg = (charIndexMap[firstGlobal] !== undefined)
-			? richSegments[charIndexMap[firstGlobal]]
-			: null;
-		chars.push({ text: seg.segment, cssText: richSeg?.cssText || '', domStyle: richSeg?.domStyle || '', className: richSeg?.className || '' });
+		const richSeg =
+			charIndexMap[firstGlobal] !== undefined ? richSegments[charIndexMap[firstGlobal]] : null;
+		chars.push({
+			text: seg.segment,
+			cssText: richSeg?.cssText || '',
+			domStyle: richSeg?.domStyle || '',
+			className: richSeg?.className || '',
+		});
 	}
 	return chars;
 }
@@ -305,9 +349,7 @@ function buildRichLineFragments(lineText, globalOffset, charIndexMap, richSegmen
  * @returns {{ elements: HTMLElement[], lines: HTMLElement[], revert: () => void } | null}
  */
 export function useSplitPretext({ selector, type = 'lines', isMask = false }) {
-	const el = typeof selector === 'string'
-		? $(selector)[0]
-		: selector;
+	const el = typeof selector === 'string' ? $(selector)[0] : selector;
 	if (!el) return null;
 	// Sanity embeds source-map metadata as invisible characters. Splitting the
 	// text into DOM nodes corrupts that payload and breaks click-to-edit.
@@ -378,7 +420,10 @@ export function useSplitPretext({ selector, type = 'lines', isMask = false }) {
 			cursor = line.end;
 
 			// Failsafe to prevent infinite loops if pretext makes no progress
-			if (line.start.segmentIndex === line.end.segmentIndex && line.start.graphemeIndex === line.end.graphemeIndex) {
+			if (
+				line.start.segmentIndex === line.end.segmentIndex &&
+				line.start.graphemeIndex === line.end.graphemeIndex
+			) {
 				break;
 			}
 		}
@@ -402,8 +447,13 @@ export function useSplitPretext({ selector, type = 'lines', isMask = false }) {
 		lineElements.push(lineDiv);
 
 		if (type === 'lines') {
-			const fragments = buildRichLineFragments(line.text, globalCharOffset, charIndexMap, richSegments);
-			const hasClasses = fragments.some(f => f.className);
+			const fragments = buildRichLineFragments(
+				line.text,
+				globalCharOffset,
+				charIndexMap,
+				richSegments,
+			);
+			const hasClasses = fragments.some((f) => f.className);
 
 			if (!hasClasses) {
 				// Simple case — single span, no class fragments
@@ -415,11 +465,11 @@ export function useSplitPretext({ selector, type = 'lines', isMask = false }) {
 				allElements.push(span);
 			} else {
 				// Mixed classes — wrap each fragment in a div (className on div)
-				fragments.forEach(frag => {
+				fragments.forEach((frag) => {
 					const wrapDiv = document.createElement('div');
 					wrapDiv.style.cssText = 'display:inline;';
 					if (frag.className) {
-						frag.className.split(' ').forEach(c => $(wrapDiv).addClass([c]));
+						frag.className.split(' ').forEach((c) => $(wrapDiv).addClass([c]));
 					}
 					const span = document.createElement('span');
 					span.style.cssText = _spanStyleInline;
@@ -437,34 +487,38 @@ export function useSplitPretext({ selector, type = 'lines', isMask = false }) {
 				});
 			}
 			el.appendChild(lineDiv);
-
 		} else if (type === 'words') {
-			for (const { text, domStyle, className } of buildRichWords(line.text, globalCharOffset, charIndexMap, richSegments)) {
+			for (const { text, domStyle, className } of buildRichWords(
+				line.text,
+				globalCharOffset,
+				charIndexMap,
+				richSegments,
+			)) {
 				if (!text.trim()) {
 					lineDiv.appendChild(document.createTextNode(text));
 					continue;
 				}
 				const span = document.createElement('span');
-				span.style.cssText = domStyle
-					? `${_spanStyleInline};${domStyle}`
-					: _spanStyleInline;
+				span.style.cssText = domStyle ? `${_spanStyleInline};${domStyle}` : _spanStyleInline;
 				span.className = className ? `split-word ${className}` : 'split-word';
 				span.textContent = text;
 				lineDiv.appendChild(span);
 				allElements.push(span);
 			}
 			el.appendChild(lineDiv);
-
 		} else if (type === 'chars') {
-			for (const { text, domStyle, className } of buildRichChars(line.text, globalCharOffset, charIndexMap, richSegments)) {
+			for (const { text, domStyle, className } of buildRichChars(
+				line.text,
+				globalCharOffset,
+				charIndexMap,
+				richSegments,
+			)) {
 				if (text === ' ') {
 					lineDiv.appendChild(document.createTextNode(' '));
 					continue;
 				}
 				const span = document.createElement('span');
-				span.style.cssText = domStyle
-					? `${_spanStyleInline};${domStyle}`
-					: _spanStyleInline;
+				span.style.cssText = domStyle ? `${_spanStyleInline};${domStyle}` : _spanStyleInline;
 				span.className = className ? `split-char ${className}` : 'split-char';
 				span.textContent = text;
 				lineDiv.appendChild(span);
@@ -484,6 +538,8 @@ export function useSplitPretext({ selector, type = 'lines', isMask = false }) {
 	return {
 		elements: allElements,
 		lines: lineElements,
-		revert: () => { el.innerHTML = originalHTML; }
+		revert: () => {
+			el.innerHTML = originalHTML;
+		},
 	};
 }

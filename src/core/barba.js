@@ -19,128 +19,128 @@ function syncHead(data) {
 		const nextHtml = data.next.html;
 		if (!nextHtml) return resolve();
 
-	const parser = new DOMParser();
-	const nextDoc = parser.parseFromString(nextHtml, 'text/html');
-	const nextHead = nextDoc.head;
-	const currentHead = document.head;
+		const parser = new DOMParser();
+		const nextDoc = parser.parseFromString(nextHtml, 'text/html');
+		const nextHead = nextDoc.head;
+		const currentHead = document.head;
 
-	// Giữ CSS của trang cũ cho tới khi toàn bộ transition hoàn tất, sau đó
-	// cleanupStaleHead() sẽ dọn các style không còn dùng.
-	const previousSyncedElements = new Set(
-		$(currentHead).find('[data-barba-head]').toArray(),
-	);
-	const metadataSelectors = [
-		'meta[name="description"]',
-		'link[rel="canonical"]',
-		'meta[property^="og:"]',
-		'meta[name^="twitter:"]',
-		'meta[property^="twitter:"]',
-	];
-	const metadataKey = (element) =>
-		`${element.tagName}:${element.getAttribute('name') || element.getAttribute('property') || element.getAttribute('rel')}`;
-	const currentMetadata = new Map(
-		$(currentHead)
+		// Giữ CSS của trang cũ cho tới khi toàn bộ transition hoàn tất, sau đó
+		// cleanupStaleHead() sẽ dọn các style không còn dùng.
+		const previousSyncedElements = new Set($(currentHead).find('[data-barba-head]').toArray());
+		const metadataSelectors = [
+			'meta[name="description"]',
+			'link[rel="canonical"]',
+			'meta[property^="og:"]',
+			'meta[name^="twitter:"]',
+			'meta[property^="twitter:"]',
+		];
+		const metadataKey = (element) =>
+			`${element.tagName}:${element.getAttribute('name') || element.getAttribute('property') || element.getAttribute('rel')}`;
+		const currentMetadata = new Map(
+			$(currentHead)
+				.find(metadataSelectors.join(','))
+				.toArray()
+				.map((element) => [metadataKey(element), element]),
+		);
+
+		$(nextHead)
 			.find(metadataSelectors.join(','))
 			.toArray()
-			.map((element) => [metadataKey(element), element]),
-	);
+			.forEach((nextElement) => {
+				const key = metadataKey(nextElement);
+				const currentElement = currentMetadata.get(key);
+				const target = currentElement || nextElement.cloneNode(true);
 
-	$(nextHead)
-		.find(metadataSelectors.join(','))
-		.toArray()
-		.forEach((nextElement) => {
-			const key = metadataKey(nextElement);
-			const currentElement = currentMetadata.get(key);
-			const target = currentElement || nextElement.cloneNode(true);
+				if (currentElement) {
+					currentElement.getAttributeNames().forEach((attribute) => {
+						if (attribute !== 'data-barba-head') currentElement.removeAttribute(attribute);
+					});
+					nextElement.getAttributeNames().forEach((attribute) => {
+						currentElement.setAttribute(attribute, nextElement.getAttribute(attribute));
+					});
+				} else {
+					currentHead.append(target);
+				}
 
-			if (currentElement) {
-				currentElement.getAttributeNames().forEach((attribute) => {
-					if (attribute !== 'data-barba-head') currentElement.removeAttribute(attribute);
-				});
-				nextElement.getAttributeNames().forEach((attribute) => {
-					currentElement.setAttribute(attribute, nextElement.getAttribute(attribute));
-				});
-			} else {
-				currentHead.append(target);
-			}
+				target.setAttribute('data-barba-head', '');
+				previousSyncedElements.delete(target);
+				currentMetadata.delete(key);
+			});
 
-			target.setAttribute('data-barba-head', '');
-			previousSyncedElements.delete(target);
-			currentMetadata.delete(key);
+		currentMetadata.forEach((element) => {
+			previousSyncedElements.delete(element);
+			element.remove();
 		});
 
-	currentMetadata.forEach((element) => {
-		previousSyncedElements.delete(element);
-		element.remove();
-	});
+		// Các selector cần sync
+		const syncSelectors = [
+			'style:not([data-barba-head])',
+			'link[rel="stylesheet"]:not([data-barba-head])',
+		];
 
-	// Các selector cần sync
-	const syncSelectors = [
-		'style:not([data-barba-head])',
-		'link[rel="stylesheet"]:not([data-barba-head])',
-	];
+		const loadPromises = [];
 
-	const loadPromises = [];
+		syncSelectors.forEach((selector) => {
+			const nextEls = $(nextHead).find(selector).toArray();
 
-	syncSelectors.forEach((selector) => {
-		const nextEls = $(nextHead).find(selector).toArray();
+			nextEls.forEach((nextEl) => {
+				let alreadyExists = false;
 
-		nextEls.forEach((nextEl) => {
-			let alreadyExists = false;
-
-			if (nextEl.tagName === 'LINK') {
-				const href = $(nextEl).attr('href');
-				const existing = href && $(currentHead).find(`link[href="${href}"]`)[0];
-				if (existing) {
-					alreadyExists = true;
-					previousSyncedElements.delete(existing);
-				}
-			} else if (nextEl.tagName === 'STYLE') {
-				const content = $(nextEl).text().trim();
-				const existingStyles = $(currentHead).find('style').toArray();
-				for (const existing of existingStyles) {
-					if ($(existing).text().trim() === content) {
+				if (nextEl.tagName === 'LINK') {
+					const href = $(nextEl).attr('href');
+					const existing = href && $(currentHead).find(`link[href="${href}"]`)[0];
+					if (existing) {
 						alreadyExists = true;
 						previousSyncedElements.delete(existing);
-						break;
+					}
+				} else if (nextEl.tagName === 'STYLE') {
+					const content = $(nextEl).text().trim();
+					const existingStyles = $(currentHead).find('style').toArray();
+					for (const existing of existingStyles) {
+						if ($(existing).text().trim() === content) {
+							alreadyExists = true;
+							previousSyncedElements.delete(existing);
+							break;
+						}
+					}
+				} else if (nextEl.tagName === 'META') {
+					const name = $(nextEl).attr('name');
+					if (name && $(currentHead).find(`meta[name="${name}"]`)[0]) {
+						// Với thẻ meta, thay vì thêm mới thì cập nhật content của thẻ hiện tại
+						const existing = $(currentHead).find(`meta[name="${name}"]`)[0];
+						$(existing).attr('content', $(nextEl).attr('content'));
+						previousSyncedElements.delete(existing);
+						alreadyExists = true;
 					}
 				}
-			} else if (nextEl.tagName === 'META') {
-				const name = $(nextEl).attr('name');
-				if (name && $(currentHead).find(`meta[name="${name}"]`)[0]) {
-					// Với thẻ meta, thay vì thêm mới thì cập nhật content của thẻ hiện tại
-					const existing = $(currentHead).find(`meta[name="${name}"]`)[0];
-					$(existing).attr('content', $(nextEl).attr('content'));
-					previousSyncedElements.delete(existing);
-					alreadyExists = true;
-				}
-			}
 
-			if (!alreadyExists) {
-				const cloned = nextEl.cloneNode(true);
-				$(cloned).attr('data-barba-head', '');
-				
-				if (cloned.tagName === 'LINK') {
-					loadPromises.push(new Promise((res) => {
-						cloned.onload = res;
-						cloned.onerror = res; // Proceed even if it fails
-					}));
+				if (!alreadyExists) {
+					const cloned = nextEl.cloneNode(true);
+					$(cloned).attr('data-barba-head', '');
+
+					if (cloned.tagName === 'LINK') {
+						loadPromises.push(
+							new Promise((res) => {
+								cloned.onload = res;
+								cloned.onerror = res; // Proceed even if it fails
+							}),
+						);
+					}
+
+					$(currentHead).append(cloned);
 				}
-				
-				$(currentHead).append(cloned);
-			}
+			});
 		});
-	});
 
-	staleHeadElements = Array.from(previousSyncedElements);
+		staleHeadElements = Array.from(previousSyncedElements);
 
-	// Cập nhật title của document
-	const newTitle = nextDoc.title;
-	if (newTitle) {
-		document.title = newTitle;
-	}
+		// Cập nhật title của document
+		const newTitle = nextDoc.title;
+		if (newTitle) {
+			document.title = newTitle;
+		}
 
-	Promise.all(loadPromises).then(resolve);
+		Promise.all(loadPromises).then(resolve);
 	});
 }
 
@@ -189,7 +189,7 @@ export function initBarba() {
 					globalChange.beforeLeave();
 					scrollIndicator.pause();
 					buttonText.destroy(data.current.container);
-					
+
 					// Dùng transform thay vì absolute để tránh làm vỡ layout (flex/grid) của trang cũ
 					let scrollPos = window.scrollY || document.documentElement.scrollTop;
 					if (window.innerWidth <= 767) {

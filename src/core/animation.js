@@ -42,14 +42,8 @@ const getTextColors = (color) => {
 	const isDefault = color === 'white' || color === 'black';
 	return {
 		isDefault,
-		fromColor: !isDefault || color === 'white'
-			? 'rgba(255,255,255, 0)'
-			: 'rgba(29,29,29, 0)',
-		toColor: !isDefault
-			? color
-			: color === 'white'
-				? 'rgba(255,255,255, 1)'
-				: 'rgba(29,29,29, 1)',
+		fromColor: !isDefault || color === 'white' ? 'rgba(255,255,255, 0)' : 'rgba(29,29,29, 0)',
+		toColor: !isDefault ? color : color === 'white' ? 'rgba(255,255,255, 1)' : 'rgba(29,29,29, 1)',
 	};
 };
 
@@ -150,14 +144,18 @@ export class RevealText {
 			});
 			this.textSplit.words.forEach((word, index) => {
 				const toColor = $(word).closest('.txt-highlight').length ? '#FF6B30' : this.toColor;
-				this.animation.to(word, {
-					keyframes: {
-						color: [this.fromColor, '#FF6B30', toColor],
-						easeEach: 'power2.in',
-						ease: 'power1.out',
+				this.animation.to(
+					word,
+					{
+						keyframes: {
+							color: [this.fromColor, '#FF6B30', toColor],
+							easeEach: 'power2.in',
+							ease: 'power1.out',
+						},
+						duration,
 					},
-					duration,
-				}, index * stagger);
+					index * stagger,
+				);
 			});
 		} else {
 			this.animation = gsap.to(this.textSplit.words, {
@@ -189,14 +187,7 @@ export class RevealText {
 }
 
 export class RevealTextReset {
-	constructor({
-		el,
-		color = 'black',
-		delay,
-		isFast = false,
-		isHighlight = false,
-		...props
-	} = {}) {
+	constructor({ el, color = 'black', delay, isFast = false, isHighlight = false, ...props } = {}) {
 		this.DOM = { el };
 		this.delay = delay;
 		this.color = color;
@@ -242,23 +233,28 @@ export class RevealTextReset {
 		const stagger = this.isFast ? 0.03 : 0.08;
 		this.textSplit.words.forEach((word, index) => {
 			const toColor = $(word).closest('.txt-highlight').length ? '#FF6B30' : this.toColor;
-			timeline.to(word, {
-				keyframes: {
-					color: [this.fromColor, '#FF6B30', toColor],
-					easeEach: 'power2.in',
-					ease: 'power1.out',
+			timeline.to(
+				word,
+				{
+					keyframes: {
+						color: [this.fromColor, '#FF6B30', toColor],
+						easeEach: 'power2.in',
+						ease: 'power1.out',
+					},
+					duration,
 				},
-				duration,
-			}, index * stagger);
+				index * stagger,
+			);
 		});
 	}
 
 	init() {
 		if (!this.textSplit) return;
 		if (getScreenType().isMobile) {
-			this.fromColor = !this.isColorDefault || this.color === 'white'
-				? 'rgba(255,255,255, .1)'
-				: 'rgba(29,29,29, .1)';
+			this.fromColor =
+				!this.isColorDefault || this.color === 'white'
+					? 'rgba(255,255,255, .1)'
+					: 'rgba(29,29,29, .1)';
 			this.reset();
 		}
 		gsap.set(this.textSplit.words, { color: this.fromColor });
@@ -299,9 +295,10 @@ export class RevealTextReset {
 				end: 'bottom top',
 				onLeaveBack: () => {
 					if (!isInit) {
-						this.fromColor = !this.isColorDefault || this.color === 'white'
-							? 'rgba(255,255,255, .1)'
-							: 'rgba(29,29,29, .1)';
+						this.fromColor =
+							!this.isColorDefault || this.color === 'white'
+								? 'rgba(255,255,255, .1)'
+								: 'rgba(29,29,29, .1)';
 					}
 					isInit = true;
 					isReset = true;
@@ -330,9 +327,10 @@ export class FadeSplitText {
 		this.isDisableRevert = isDisableRevert;
 		this.textSplit = null;
 		this.animation = null;
-		this.ready = !el || !el.textContent.trim()
-			? Promise.resolve(this)
-			: fontsReady().then(() => this.setup(props));
+		this.ready =
+			!el || !el.textContent.trim()
+				? Promise.resolve(this)
+				: fontsReady().then(() => this.setup(props));
 	}
 
 	setup(props) {
@@ -362,7 +360,9 @@ export class FadeSplitText {
 			clearProps: 'overflow',
 			onStart: () => {
 				window.setTimeout(() => {
-					$(el).find('.txt-strike, .heading-decor').toArray()
+					$(el)
+						.find('.txt-strike, .heading-decor')
+						.toArray()
 						.forEach((item) => $(item).addClass(['active']));
 				}, 450);
 			},
@@ -419,13 +419,17 @@ export class FadeIn {
 
 		if (!el) return;
 		const option = this.options[type] || this.options.default;
-		this.animation = gsap.fromTo(el, { ...option.set }, {
-			...option.to,
-			duration: 1,
-			ease: 'power3',
-			clearProps: isDisableRevert ? '' : 'all',
-			...props,
-		});
+		this.animation = gsap.fromTo(
+			el,
+			{ ...option.set },
+			{
+				...option.to,
+				duration: 1,
+				ease: 'power3',
+				clearProps: isDisableRevert ? '' : 'all',
+				...props,
+			},
+		);
 	}
 
 	init() {
@@ -470,13 +474,17 @@ export class ScaleLine {
 
 		if (!el) return;
 		const option = this.options[type] || this.options.default;
-		this.animation = gsap.fromTo(el, { ...option.set }, {
-			...option.to,
-			duration: 1.2,
-			ease: 'power1.out',
-			clearProps: isDisableRevert ? '' : 'all',
-			...props,
-		});
+		this.animation = gsap.fromTo(
+			el,
+			{ ...option.set },
+			{
+				...option.to,
+				duration: 1.2,
+				ease: 'power1.out',
+				clearProps: isDisableRevert ? '' : 'all',
+				...props,
+			},
+		);
 	}
 
 	init() {
@@ -506,14 +514,18 @@ export class ScaleInset {
 			clearProps,
 		});
 		if (this.DOM.elInner) {
-			this.animation.to(this.DOM.elInner, {
-				scale: 1,
-				duration,
-				autoAlpha: 1,
-				ease: 'expo.out',
-				clearProps,
-				overwrite: true,
-			}, '<=0');
+			this.animation.to(
+				this.DOM.elInner,
+				{
+					scale: 1,
+					duration,
+					autoAlpha: 1,
+					ease: 'expo.out',
+					clearProps,
+					overwrite: true,
+				},
+				'<=0',
+			);
 		}
 	}
 

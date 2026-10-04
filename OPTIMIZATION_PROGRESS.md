@@ -11,35 +11,35 @@ File này ghi lại trạng thái trước/sau và bằng chứng đo được c
 
 ## Tổng quan
 
-| Giai đoạn | Trước | Sau | Trạng thái | Bằng chứng/Ghi chú |
-| --- | --- | --- | --- | --- |
-| 0. Baseline và profiling | Chưa có baseline thống nhất | Static baseline đã có; browser baseline bị chặn | Chưa rõ | Astro chạy background; Chrome chặn local/private URL |
-| 1. Công cụ kiểm tra | Thiếu `astro check`; Prettier lỗi với SVG lớn | Check đã chạy; format không còn OOM nhưng source chưa đồng nhất format | Chưa đạt | `astro check`: 0 lỗi, 26 hints; Prettier báo 72 file |
-| 2. Dọn source an toàn | Có import và asset không dùng; README còn starter | Đã bỏ code chết và cập nhật README; giữ asset chưa gây runtime cost | Đạt | Astro hints 26 → 20; build đạt |
-| 3. Metadata Barba | Chỉ đồng bộ title, description và CSS | Đã sync canonical, OG và Twitter | Chưa rõ | Check/build đạt; cần xác nhận client navigation trong browser |
-| 4. Scroll runtime | Scroll cursor query DOM theo mọi scroll event | Đã giới hạn tối đa một query mỗi animation frame | Chưa rõ | Check/build đạt; chưa có browser Performance trace |
-| 5. Tải JavaScript | Build cảnh báo chunk Three.js và Visual Editing lớn | Xác nhận route animation đã dynamic import | Đạt | Không thêm manual chunks khi chưa có bằng chứng critical-path |
-| 6. Cấu trúc theo section | `home.js`, `index.astro`, `home.css` lớn | Chưa thực hiện | Chưa đạt | Chỉ refactor sau khi runtime ổn định |
+| Giai đoạn                | Trước                                               | Sau                                                                    | Trạng thái | Bằng chứng/Ghi chú                                            |
+| ------------------------ | --------------------------------------------------- | ---------------------------------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| 0. Baseline và profiling | Chưa có baseline thống nhất                         | Static baseline đã có; browser baseline bị chặn                        | Chưa rõ    | Astro chạy background; Chrome chặn local/private URL          |
+| 1. Công cụ kiểm tra      | Thiếu `astro check`; Prettier lỗi với SVG lớn       | Check đã chạy; format không còn OOM nhưng source chưa đồng nhất format | Chưa đạt   | `astro check`: 0 lỗi, 26 hints; Prettier báo 72 file          |
+| 2. Dọn source an toàn    | Có import và asset không dùng; README còn starter   | Đã bỏ code chết và cập nhật README; giữ asset chưa gây runtime cost    | Đạt        | Astro hints 26 → 20; build đạt                                |
+| 3. Metadata Barba        | Chỉ đồng bộ title, description và CSS               | Đã sync canonical, OG và Twitter                                       | Chưa rõ    | Check/build đạt; cần xác nhận client navigation trong browser |
+| 4. Scroll runtime        | Scroll cursor query DOM theo mọi scroll event       | Đã giới hạn tối đa một query mỗi animation frame                       | Chưa rõ    | Check/build đạt; chưa có browser Performance trace            |
+| 5. Tải JavaScript        | Build cảnh báo chunk Three.js và Visual Editing lớn | Xác nhận route animation đã dynamic import                             | Đạt        | Không thêm manual chunks khi chưa có bằng chứng critical-path |
+| 6. Cấu trúc theo section | `home.js`, `index.astro`, `home.css` lớn            | Chưa thực hiện                                                         | Chưa đạt   | Chỉ refactor sau khi runtime ổn định                          |
 
 ## Giai đoạn 0 — Baseline và profiling
 
 ### Trước thay đổi
 
-| Hạng mục | Giá trị | Trạng thái |
-| --- | --- | --- |
-| Production build | Thành công | Đạt |
-| TypeScript `tsc --noEmit` | Thành công | Đạt |
-| Astro template check | Chưa có `@astrojs/check` | Chưa đạt |
-| Prettier toàn source | OOM tại `IconWorksDecor.astro` | Chưa đạt |
-| Bundle warning | Three.js ~712 KB; Visual Editing ~664 KB | Chưa đạt |
-| Runtime console | Chưa đo trong browser | Chưa rõ |
-| Scroll FPS/dropped frames | Chưa đo | Chưa rõ |
-| Long tasks khi scroll | Chưa đo | Chưa rõ |
-| Layout shift | Chưa đo | Chưa rõ |
-| Trigger/listener/canvas sau điều hướng | Chưa đo | Chưa rõ |
-| Visual desktop/mobile | Chưa lưu baseline | Chưa rõ |
-| Dev server background | Chạy tại `http://localhost:4321` | Đạt |
-| Browser truy cập dev server | Chrome trả `ERR_BLOCKED_BY_CLIENT` với local/private URL | Chưa rõ |
+| Hạng mục                               | Giá trị                                                  | Trạng thái |
+| -------------------------------------- | -------------------------------------------------------- | ---------- |
+| Production build                       | Thành công                                               | Đạt        |
+| TypeScript `tsc --noEmit`              | Thành công                                               | Đạt        |
+| Astro template check                   | Chưa có `@astrojs/check`                                 | Chưa đạt   |
+| Prettier toàn source                   | OOM tại `IconWorksDecor.astro`                           | Chưa đạt   |
+| Bundle warning                         | Three.js ~712 KB; Visual Editing ~664 KB                 | Chưa đạt   |
+| Runtime console                        | Chưa đo trong browser                                    | Chưa rõ    |
+| Scroll FPS/dropped frames              | Chưa đo                                                  | Chưa rõ    |
+| Long tasks khi scroll                  | Chưa đo                                                  | Chưa rõ    |
+| Layout shift                           | Chưa đo                                                  | Chưa rõ    |
+| Trigger/listener/canvas sau điều hướng | Chưa đo                                                  | Chưa rõ    |
+| Visual desktop/mobile                  | Chưa lưu baseline                                        | Chưa rõ    |
+| Dev server background                  | Chạy tại `http://localhost:4321`                         | Đạt        |
+| Browser truy cập dev server            | Chrome trả `ERR_BLOCKED_BY_CLIENT` với local/private URL | Chưa rõ    |
 
 ### Sau thay đổi
 
@@ -217,27 +217,86 @@ Chưa thực hiện.
 
 `Chưa đạt`; hoãn đến khi tối ưu runtime và regression test đã ổn định.
 
+## Production quality gate
+
+### Trước thay đổi
+
+- `Chưa đạt`: Prettier báo 73 file lệch chuẩn.
+- `Chưa đạt`: hai regression test WebGL chưa có npm script chung.
+- `Chưa đạt`: SEO fallback còn nội dung Astro starter; Twitter metadata dùng `property`.
+- `Chưa đạt`: production có thể tạo canonical/sitemap localhost nếu cấu hình sai.
+
+### Sau thay đổi
+
+- `Đạt`: Prettier toàn repository pass; generated SVG và Sanity runtime được ignore rõ ràng.
+- `Đạt`: `npm test` chạy hai regression test WebGL và đều pass.
+- `Đạt`: `npm run validate` nối format check, Astro check, test và production build.
+- `Đạt`: canonical, Open Graph, Twitter URL/image dùng URL tuyệt đối nhất quán.
+- `Đạt`: deploy Vercel production fail sớm nếu `SITE_URL` vẫn là localhost.
+- `Đạt`: bỏ log debug khởi tạo và thêm SEO description phù hợp cho các route.
+- `Chưa rõ`: visual regression trên browser/thiết bị thật chưa được tự động hóa.
+
+### Initial loader readiness gate
+
+- `Chưa đạt` trước thay đổi: loader timeline có thể bắt đầu trong lúc font và hero poster còn decode,
+  gây tranh chấp main thread và thay đổi phép đo layout ở frame đầu.
+- `Đạt` sau thay đổi: loader giữ trạng thái tĩnh tối thiểu 250 ms, đợi font và ảnh
+  `fetchpriority="high"`, sau đó mới prepare page và dựng timeline.
+- `Đạt` về khả năng phục hồi: readiness gate tự mở sau tối đa 2,5 giây nếu asset lỗi hoặc mạng chậm.
+- `Đạt` về bảo toàn giao diện: không đổi duration, easing, layout hay thứ tự tween của loader.
+- `Chưa rõ`: độ mượt thực tế cần kiểm tra lại bằng hard reload trên thiết bị mục tiêu.
+
+### Kiểm tra video `Screen Recording 2026-10-04 at 17.07.08.mov`
+
+- `Chưa đạt`: nhịp đầu có lúc giảm 0–21 FPS; nhịp bắt đầu bộ đếm giảm khoảng 6,7–33 FPS.
+- `Chưa đạt`: worst frame gap khoảng 66,7 ms tại 4,7 giây.
+- `Đạt` về chẩn đoán: DPR cap cũ dựa trên CSS width nên không kích hoạt ở viewport Retina
+  có CSS width nhỏ hơn 2560 nhưng output vật lý 4096 px.
+- `Đạt` sau tối ưu code: Hero Liquid, Works canvas, Works transition canvas và Playground WebGL
+  dùng physical width để giới hạn DPR trên màn hình lớn.
+- `Đạt` sau tối ưu code: loader đợi thêm hai animation frame sau page preparation để GPU allocation
+  và style calculation hoàn tất trước frame animation đầu tiên.
+- `Chưa rõ`: cần hard reload và record lại để xác nhận FPS runtime.
+
+### Tối ưu GPU khi vào `home-works`
+
+- `Chưa đạt` trước thay đổi: decor 2.408 path vẫn dùng DPR tối đa 1,5 trên Retina 4K và idle có
+  thể khởi động lại chỉ 100 ms sau một nhịp scroll.
+- `Chưa đạt` trước thay đổi: curl canvas dùng dải 4 px và clip edge 3 px trên mọi độ phân giải.
+- `Đạt` sau tối ưu code: decor canvas dùng DPR 1 trên màn hình vật lý từ 2560 px.
+- `Đạt` sau tối ưu code: Retina 4K dùng dải curl 8 px và clip edge 6 px, giảm khoảng một nửa số
+  `drawImage()` và điểm dựng clip so với cấu hình trước; màn hình nhỏ giữ nguyên 4/3 px.
+- `Đạt` sau tối ưu code: idle decor chỉ resume sau 250 ms và 2D canvas yêu cầu chế độ
+  `desynchronized` khi browser hỗ trợ.
+- `Đạt` về bảo toàn giao diện: không đổi progress, curl strength, vị trí ảnh, ScrollTrigger hoặc
+  GSAP timing.
+- `Chưa rõ`: FPS runtime cần record lại trên cùng thiết bị.
+
 ## Nhật ký thay đổi
 
-| Thời điểm | Giai đoạn | Thay đổi | Kết quả |
-| --- | --- | --- | --- |
-| 2026-09-30 | Khởi tạo | Tạo checklist và file theo dõi trước/sau | Đạt |
-| 2026-09-30 | 0 | Khởi động Astro bằng `astro dev --background --host 0.0.0.0` | Đạt |
-| 2026-09-30 | 0 | Mở dev server bằng browser automation | Chưa rõ — bị Chrome chặn local/private URL |
-| 2026-09-30 | 1 | Cài `@astrojs/check`, TypeScript và thêm scripts kiểm tra | Đạt — 0 errors |
-| 2026-09-30 | 1 | Bỏ qua SVG generated lớn khi format | Đạt — không còn OOM |
-| 2026-09-30 | 1 | Kiểm tra format toàn repository | Chưa đạt — 72 file lệch format |
-| 2026-09-30 | 2 | Bỏ 5 code/import chết do Astro check phát hiện | Đạt — hints 26 → 20 |
-| 2026-09-30 | 2 | Build lại sau cleanup | Đạt |
-| 2026-09-30 | Auth local | Escape dấu `$` trong `APP_PASSWORD_HASH` để Vite không mở rộng sai | Đạt — auth config hợp lệ |
-| 2026-09-30 | Auth local | Xóa `APP_PASSWORD` dạng rõ sau khi tạo hash | Đạt |
-| 2026-09-30 | Auth local | Kiểm tra `/login` và redirect route được bảo vệ | Đạt — HTTP 200 và 302 |
-| 2026-10-04 | 2 | Thay README starter bằng tài liệu dự án và quy trình dev background | Đạt |
-| 2026-10-04 | 3 | Đồng bộ canonical, Open Graph và Twitter metadata qua Barba | Static đạt; browser chưa rõ |
-| 2026-10-04 | 4 | Throttle cursor DOM hit-test theo animation frame và dùng passive scroll listener | Static đạt; runtime chưa rõ |
-| 2026-10-04 | 5 | Kiểm tra bundle và dynamic imports | Đạt — không chunk thủ công khi chưa có trace |
-| 2026-10-04 | 4 | Phân tích video FPS tại `home-works` | Chưa đạt — ~40,5 FPS, worst gap 83,3 ms |
-| 2026-10-04 | 4 | Batch 2.408 SVG particles thành một canvas fill mỗi frame | Static đạt; FPS mới chưa rõ |
-| 2026-10-04 | 4 | Giảm backing canvas 4K và một nửa số dải curl ảnh | Static đạt; FPS mới chưa rõ |
-| 2026-10-04 | 4 | Giảm WebGL 4K từ DPR 2 xuống DPR 1 và ưu tiên GPU hiệu năng cao | Static đạt; FPS mới chưa rõ |
-| 2026-10-04 | 4 | Chia nhỏ decode và atlas resize của Playground để không chặn scroll | Static đạt; FPS mới chưa rõ |
+| Thời điểm  | Giai đoạn  | Thay đổi                                                                          | Kết quả                                      |
+| ---------- | ---------- | --------------------------------------------------------------------------------- | -------------------------------------------- |
+| 2026-09-30 | Khởi tạo   | Tạo checklist và file theo dõi trước/sau                                          | Đạt                                          |
+| 2026-09-30 | 0          | Khởi động Astro bằng `astro dev --background --host 0.0.0.0`                      | Đạt                                          |
+| 2026-09-30 | 0          | Mở dev server bằng browser automation                                             | Chưa rõ — bị Chrome chặn local/private URL   |
+| 2026-09-30 | 1          | Cài `@astrojs/check`, TypeScript và thêm scripts kiểm tra                         | Đạt — 0 errors                               |
+| 2026-09-30 | 1          | Bỏ qua SVG generated lớn khi format                                               | Đạt — không còn OOM                          |
+| 2026-09-30 | 1          | Kiểm tra format toàn repository                                                   | Chưa đạt — 72 file lệch format               |
+| 2026-09-30 | 2          | Bỏ 5 code/import chết do Astro check phát hiện                                    | Đạt — hints 26 → 20                          |
+| 2026-09-30 | 2          | Build lại sau cleanup                                                             | Đạt                                          |
+| 2026-09-30 | Auth local | Escape dấu `$` trong `APP_PASSWORD_HASH` để Vite không mở rộng sai                | Đạt — auth config hợp lệ                     |
+| 2026-09-30 | Auth local | Xóa `APP_PASSWORD` dạng rõ sau khi tạo hash                                       | Đạt                                          |
+| 2026-09-30 | Auth local | Kiểm tra `/login` và redirect route được bảo vệ                                   | Đạt — HTTP 200 và 302                        |
+| 2026-10-04 | 2          | Thay README starter bằng tài liệu dự án và quy trình dev background               | Đạt                                          |
+| 2026-10-04 | 3          | Đồng bộ canonical, Open Graph và Twitter metadata qua Barba                       | Static đạt; browser chưa rõ                  |
+| 2026-10-04 | 4          | Throttle cursor DOM hit-test theo animation frame và dùng passive scroll listener | Static đạt; runtime chưa rõ                  |
+| 2026-10-04 | 5          | Kiểm tra bundle và dynamic imports                                                | Đạt — không chunk thủ công khi chưa có trace |
+| 2026-10-04 | 4          | Phân tích video FPS tại `home-works`                                              | Chưa đạt — ~40,5 FPS, worst gap 83,3 ms      |
+| 2026-10-04 | 4          | Batch 2.408 SVG particles thành một canvas fill mỗi frame                         | Static đạt; FPS mới chưa rõ                  |
+| 2026-10-04 | 4          | Giảm backing canvas 4K và một nửa số dải curl ảnh                                 | Static đạt; FPS mới chưa rõ                  |
+| 2026-10-04 | 4          | Giảm WebGL 4K từ DPR 2 xuống DPR 1 và ưu tiên GPU hiệu năng cao                   | Static đạt; FPS mới chưa rõ                  |
+| 2026-10-04 | 4          | Chia nhỏ decode và atlas resize của Playground để không chặn scroll               | Static đạt; FPS mới chưa rõ                  |
+| 2026-10-04 | Production | Chuẩn hóa format, SEO, config deploy và thêm `npm run validate`                   | Đạt — toàn bộ quality gate pass              |
+| 2026-10-04 | Loader     | Đợi font/hero poster trước khi bắt đầu initial loader animation                   | Static đạt; runtime chưa rõ                  |
+| 2026-10-04 | Loader     | Sửa DPR cap Retina 4K và tách GPU allocation khỏi frame animation đầu             | Static đạt; runtime chưa rõ                  |
+| 2026-10-04 | Works      | Giảm DPR decor và mật độ curl/clip trên Retina 4K                                 | Static đạt; runtime chưa rõ                  |

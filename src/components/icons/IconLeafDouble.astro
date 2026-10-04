@@ -5,7 +5,17 @@ export interface Props {
 }
 const { mirrored = false } = Astro.props;
 ---
-<svg width="100%" viewBox="0 0 10 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={mirrored ? 'transform: scaleX(-1)' : undefined}>
-	<path d="M0 0V0C5.52285 0 10 4.47715 10 10V10V10C4.47715 10 0 5.52285 0 0V0Z" fill="currentColor"/>
-	<path d="M0 20C0 14.4772 4.47715 10 10 10V10V10C10 15.5228 5.52285 20 0 20V20V20Z" fill="currentColor"/>
+
+<svg
+	width="100%"
+	viewBox="0 0 10 20"
+	fill="none"
+	xmlns="http://www.w3.org/2000/svg"
+	style={mirrored ? 'transform: scaleX(-1)' : undefined}
+>
+	<path d="M0 0V0C5.52285 0 10 4.47715 10 10V10V10C4.47715 10 0 5.52285 0 0V0Z" fill="currentColor"
+	></path>
+	<path
+		d="M0 20C0 14.4772 4.47715 10 10 10V10V10C10 15.5228 5.52285 20 0 20V20V20Z"
+		fill="currentColor"></path>
 </svg>

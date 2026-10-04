@@ -1,17 +1,21 @@
 import { gsap, ScrollTrigger } from './gsap.js';
 
 export const childSelect = (parent) => {
-	return (child) => child ? $(parent).find(child)[0] : parent;
-}
+	return (child) => (child ? $(parent).find(child)[0] : parent);
+};
 
-export const xSetter = (el) => gsap.quickSetter(el, "x", "px");
-export const ySetter = (el) => gsap.quickSetter(el, "y", "px");
-export const xGetter = (el) => gsap.getProperty(el, "x");
-export const yGetter = (el) => gsap.getProperty(el, "y");
+export const xSetter = (el) => gsap.quickSetter(el, 'x', 'px');
+export const ySetter = (el) => gsap.quickSetter(el, 'y', 'px');
+export const xGetter = (el) => gsap.getProperty(el, 'x');
+export const yGetter = (el) => gsap.getProperty(el, 'y');
 
 export const viewport = {
-	get w() { return window.innerWidth; },
-	get h() { return window.innerHeight; },
+	get w() {
+		return window.innerWidth;
+	},
+	get h() {
+		return window.innerHeight;
+	},
 };
 
 let cachedSvh100 = null;
@@ -32,22 +36,24 @@ export const getSvh100 = () => {
 	return cachedSvh100;
 };
 if (typeof window !== 'undefined') {
-	$(window).on("resize", () => { cachedSvh100 = null; });
+	$(window).on('resize', () => {
+		cachedSvh100 = null;
+	});
 }
 
 export const cvUnit = (val, unit) => {
 	let result;
 	switch (true) {
-		case unit === "vw":
+		case unit === 'vw':
 			result = window.innerWidth * (val / 100);
 			break;
-		case unit === "vh":
+		case unit === 'vh':
 			result = (window.innerWidth <= 767 ? getSvh100() : window.innerHeight) * (val / 100);
 			break;
-		case unit === "svh":
+		case unit === 'svh':
 			result = getSvh100() * (val / 100);
 			break;
-		case unit === "rem":
+		case unit === 'rem':
 			result = (val / 10) * parseFloat(getComputedStyle(document.documentElement).fontSize);
 			break;
 		default:
@@ -57,13 +63,13 @@ export const cvUnit = (val, unit) => {
 };
 
 export const isHoverableDevice = () => {
-	return window.matchMedia("(hover: hover) and (pointer: fine)").matches && viewport.w > 767;
+	return window.matchMedia('(hover: hover) and (pointer: fine)').matches && viewport.w > 767;
 };
 
-export const isInViewport = (el, orientation = "vertical") => {
+export const isInViewport = (el, orientation = 'vertical') => {
 	if (!el) return;
 	const rect = el.getBoundingClientRect();
-	if (orientation == "horizontal") {
+	if (orientation == 'horizontal') {
 		return rect.left <= window.innerWidth && rect.right >= 0;
 	} else {
 		return rect.top <= window.innerHeight && rect.bottom >= 0;
@@ -99,11 +105,11 @@ export const normalize = (mousePos, maxDis) => (mousePos / maxDis - 0.5) * 2;
 export const getAllScrollTrigger = (action) => {
 	let triggers = ScrollTrigger.getAll();
 	triggers.forEach((trigger) => {
-		if (action === "refresh") {
+		if (action === 'refresh') {
 			if (trigger.progress === 0) {
 				trigger.refresh();
 			}
-		} else if (action === "kill") {
+		} else if (action === 'kill') {
 			trigger.kill(false);
 		} else {
 			trigger[action]?.();
@@ -112,9 +118,7 @@ export const getAllScrollTrigger = (action) => {
 };
 
 export const isTouchDevice = () => {
-	return (('ontouchstart' in window) ||
-		(navigator.maxTouchPoints > 0) ||
-		(navigator.msMaxTouchPoints > 0));
+	return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
 };
 
 let _heightObserver = null;
@@ -131,7 +135,7 @@ export function documentHeightObserver(action, data, callback) {
 				import('./lenis.js').then(({ smoothScroll }) => {
 					if (smoothScroll.lenis) {
 						smoothScroll.lenis.resize();
-						ScrollTrigger.getAll().forEach(trigger => {
+						ScrollTrigger.getAll().forEach((trigger) => {
 							if (trigger.vars.scrub && trigger.progress === 1) {
 								return;
 							}
@@ -147,12 +151,12 @@ export function documentHeightObserver(action, data, callback) {
 		}, 200);
 	}
 
-	if (action === "init") {
+	if (action === 'init') {
 		if (!observerEl) return;
 		if (_heightObserver) _heightObserver.disconnect();
 		_heightObserver = new ResizeObserver(onRefresh);
 		_heightObserver.observe(observerEl);
-	} else if (action === "disconnect") {
+	} else if (action === 'disconnect') {
 		if (_heightObserver) {
 			_heightObserver.disconnect();
 			_heightObserver = null;
@@ -161,120 +165,116 @@ export function documentHeightObserver(action, data, callback) {
 }
 
 export const isObjectEmpty = (objectName) => {
-    return (
-        objectName &&
-        Object.keys(objectName).length === 0 &&
-        objectName.constructor === Object
-    );
+	return objectName && Object.keys(objectName).length === 0 && objectName.constructor === Object;
 };
 
 export class ParallaxImage {
-    constructor({ el, scaleOffset = 0.15 }) {
-        this.el = el;
-        this.elWrap = null;
-        this.scaleOffset = scaleOffset;
-        this.scrollCallback = null;
-        this.init();
-    }
-    
-    init() {
-        this.elWrap = this.el.parentElement;
-        this.setup();
-    }
-    
-    setup() {
-        const scalePercent = 100 + (this.scaleOffset * 100);
-        gsap.set(this.el, {
-            width: scalePercent + '%',
-            height: $(this.el).hasClass('img-fill') ? scalePercent + '%' : 'auto'
-        });
-        
-        // Đảm bảo phần tử cha có overflow hidden
-        if (getComputedStyle(this.elWrap).overflow !== 'hidden') {
-            gsap.set(this.elWrap, { overflow: 'hidden' });
-        }
-        
-        // Đảm bảo wrap có position relative
-        if (getComputedStyle(this.elWrap).position === 'static') {
-            gsap.set(this.elWrap, { position: 'relative' });
-        }
+	constructor({ el, scaleOffset = 0.15 }) {
+		this.el = el;
+		this.elWrap = null;
+		this.scaleOffset = scaleOffset;
+		this.scrollCallback = null;
+		this.init();
+	}
 
-        this.scrub();
-    }
-    
-    scrub() {
-        // Fix khoảng cách bằng công thức từ binderconsulting
-        let dist = this.el.offsetHeight - this.elWrap.offsetHeight;
-        let total = this.elWrap.getBoundingClientRect().height + window.innerHeight;
-        
-        this.updateOnScroll(dist, total);
-        
-        this.scrollCallback = () => {
-            this.updateOnScroll(dist, total);
-        };
-        
-        // Sử dụng dynamic import để tránh circular dependency với lenis.js
-        import('./lenis.js').then(({ smoothScroll }) => {
-            if (smoothScroll && smoothScroll.lenis) {
-                smoothScroll.lenis.on('scroll', this.scrollCallback);
-            } else {
-                $(window).on('scroll', this.scrollCallback);
-            }
-        });
-    }
-    
-    updateOnScroll(dist, total) {
-        if (this.el && isInViewport(this.elWrap)) {
-            let percent = this.elWrap.getBoundingClientRect().bottom / total;
-            gsap.quickSetter(this.el, 'y', 'px')(-dist * percent * 1.2);
-            gsap.set(this.el, { scale: 1 + (percent * this.scaleOffset) });
-        }
-    }
-    
-    destroy() {
-        if (this.scrollCallback) {
-            import('./lenis.js').then(({ smoothScroll }) => {
-                if (smoothScroll && smoothScroll.lenis) {
-                    smoothScroll.lenis.off('scroll', this.scrollCallback);
-                } else {
-                    $(window).off('scroll', this.scrollCallback);
-                }
-            });
-        }
-    }
+	init() {
+		this.elWrap = this.el.parentElement;
+		this.setup();
+	}
+
+	setup() {
+		const scalePercent = 100 + this.scaleOffset * 100;
+		gsap.set(this.el, {
+			width: scalePercent + '%',
+			height: $(this.el).hasClass('img-fill') ? scalePercent + '%' : 'auto',
+		});
+
+		// Đảm bảo phần tử cha có overflow hidden
+		if (getComputedStyle(this.elWrap).overflow !== 'hidden') {
+			gsap.set(this.elWrap, { overflow: 'hidden' });
+		}
+
+		// Đảm bảo wrap có position relative
+		if (getComputedStyle(this.elWrap).position === 'static') {
+			gsap.set(this.elWrap, { position: 'relative' });
+		}
+
+		this.scrub();
+	}
+
+	scrub() {
+		// Fix khoảng cách bằng công thức từ binderconsulting
+		let dist = this.el.offsetHeight - this.elWrap.offsetHeight;
+		let total = this.elWrap.getBoundingClientRect().height + window.innerHeight;
+
+		this.updateOnScroll(dist, total);
+
+		this.scrollCallback = () => {
+			this.updateOnScroll(dist, total);
+		};
+
+		// Sử dụng dynamic import để tránh circular dependency với lenis.js
+		import('./lenis.js').then(({ smoothScroll }) => {
+			if (smoothScroll && smoothScroll.lenis) {
+				smoothScroll.lenis.on('scroll', this.scrollCallback);
+			} else {
+				$(window).on('scroll', this.scrollCallback);
+			}
+		});
+	}
+
+	updateOnScroll(dist, total) {
+		if (this.el && isInViewport(this.elWrap)) {
+			let percent = this.elWrap.getBoundingClientRect().bottom / total;
+			gsap.quickSetter(this.el, 'y', 'px')(-dist * percent * 1.2);
+			gsap.set(this.el, { scale: 1 + percent * this.scaleOffset });
+		}
+	}
+
+	destroy() {
+		if (this.scrollCallback) {
+			import('./lenis.js').then(({ smoothScroll }) => {
+				if (smoothScroll && smoothScroll.lenis) {
+					smoothScroll.lenis.off('scroll', this.scrollCallback);
+				} else {
+					$(window).off('scroll', this.scrollCallback);
+				}
+			});
+		}
+	}
 }
 
 export class Marquee {
-    constructor(list, duration = 40) {
-        this.list = typeof list === 'string' ? $(list)[0] : list;
-        this.duration = duration;
-    }
-    
-    setup(isReverse) {
-        if (!this.list) return;
+	constructor(list, duration = 40) {
+		this.list = typeof list === 'string' ? $(list)[0] : list;
+		this.duration = duration;
+	}
 
-        let originalItem = $(this.list).find('[data-marquee="item"]')[0];
-        if (!originalItem) {
-            originalItem = this.list.firstElementChild;
-            if (!originalItem) return;
-        }
+	setup(isReverse) {
+		if (!this.list) return;
 
-        let itemClone = originalItem.cloneNode(true);
-        let itemWidth = originalItem.getBoundingClientRect().width || 1;
-        
-        // Tính toán số lượng clone dựa trên chiều rộng item để đảm bảo lấp đầy màn hình
-        const cloneAmount = Math.ceil(window.innerWidth / itemWidth) + 1;
+		let originalItem = $(this.list).find('[data-marquee="item"]')[0];
+		if (!originalItem) {
+			originalItem = this.list.firstElementChild;
+			if (!originalItem) return;
+		}
+
+		let itemClone = originalItem.cloneNode(true);
+		let itemWidth = originalItem.getBoundingClientRect().width || 1;
+
+		// Tính toán số lượng clone dựa trên chiều rộng item để đảm bảo lấp đầy màn hình
+		const cloneAmount = Math.ceil(window.innerWidth / itemWidth) + 1;
 
 		$(this.list).empty();
-        
-        new Array(cloneAmount).fill().forEach(() => {
-            let html = itemClone.cloneNode(true);
+
+		new Array(cloneAmount).fill().forEach(() => {
+			let html = itemClone.cloneNode(true);
 			$(html).css('animation-duration', `${Math.ceil(itemWidth / this.duration)}s`);
 			if (isReverse) {
 				$(html).css('animation-direction', 'reverse');
-            }
-            $(html).addClass(['anim-marquee']);
+			}
+			$(html).addClass(['anim-marquee']);
 			$(this.list).append(html);
-        });
-    }
+		});
+	}
 }
